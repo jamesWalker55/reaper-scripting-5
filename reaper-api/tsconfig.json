@@ -6,6 +6,7 @@
     "moduleResolution": "Node",
     "types": ["lua-types/5.4"],
     // output settings
+    "declaration": true,
     "rootDir": "src",
     "outDir": "build",
     // === google gts config ===
@@ -22,10 +23,7 @@
   "tstl": {
     "luaPlugins": [{ "name": "./plugins/importFixPlugin.js" }],
     "luaTarget": "5.4",
-    // "noHeader": true,
     "luaLibImport": "require-minimal",
-    // "luaBundleEntry": "src/index.ts",
-    // "luaBundle": "build/index.lua",
     "noImplicitGlobalVariables": true
   }
 }
