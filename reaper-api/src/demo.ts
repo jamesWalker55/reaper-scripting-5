@@ -1,8 +1,7 @@
 AddCwdToImportPaths();
 
-import { OSType } from "./ffi";
-
 import { encode } from "json";
+import { OSType } from "./ffi";
 
 function log(msg: string) {
   reaper.ShowConsoleMsg(msg);

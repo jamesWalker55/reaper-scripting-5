@@ -1,0 +1,13 @@
+{
+  "name": "reaper-replacefx",
+  "module": "src/index.ts",
+  "type": "module",
+  "dependencies": { "rpts-microui": "^0.3.0" },
+  "devDependencies": {
+    "json": "link:json",
+    "lua-types": "^2.13.1",
+    "reaper-api": "link:reaper-api",
+    "typescript": "^5.5.3",
+    "typescript-to-lua": "^1.26.0"
+  }
+}

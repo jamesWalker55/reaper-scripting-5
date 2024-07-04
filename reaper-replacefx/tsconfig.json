@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/TypeScriptToLua/TypeScriptToLua/master/tsconfig-schema.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["ESNext"],
+    "moduleResolution": "Node",
+    "types": [
+      "lua-types/5.4",
+      "reaper-api/ffi/reaper",
+      "reaper-api/plugins/importFixPlugin"
+    ],
+    // output settings
+    // "declaration": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    // === google gts config ===
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "forceConsistentCasingInFileNames": true,
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "pretty": true,
+    // === google gts config ===
+    "strict": true
+  },
+  "tstl": {
+    "luaPlugins": [{ "name": "reaper-api/plugins/importFixPlugin.js" }],
+    "luaTarget": "5.4",
+    "luaLibImport": "require-minimal",
+    "noImplicitGlobalVariables": true
+  }
+}
