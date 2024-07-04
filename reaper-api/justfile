@@ -1,0 +1,5 @@
+watch:
+    bunx tstl --watch
+
+build:
+    bunx tstl

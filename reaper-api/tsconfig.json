@@ -1,0 +1,31 @@
+{
+  "$schema": "https://raw.githubusercontent.com/TypeScriptToLua/TypeScriptToLua/master/tsconfig-schema.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["ESNext"],
+    "moduleResolution": "Node",
+    "types": ["lua-types/5.4"],
+    // output settings
+    "rootDir": "src",
+    "outDir": "build",
+    // === google gts config ===
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "forceConsistentCasingInFileNames": true,
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "pretty": true,
+    // === google gts config ===
+    "strict": true
+  },
+  "tstl": {
+    "luaPlugins": [{ "name": "./plugins/importFixPlugin.js" }],
+    "luaTarget": "5.4",
+    // "noHeader": true,
+    "luaLibImport": "require-minimal",
+    // "luaBundleEntry": "src/index.ts",
+    // "luaBundle": "build/index.lua",
+    "noImplicitGlobalVariables": true
+  }
+}
