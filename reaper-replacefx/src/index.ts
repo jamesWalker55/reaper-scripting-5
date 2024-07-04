@@ -10,8 +10,6 @@ function main() {
 
   const ctx = createContext();
 
-  const openParams: Record<number, boolean | undefined> = {};
-
   microUILoop(ctx, () => {
     const fx = getLastTouchedFx();
 
@@ -46,25 +44,6 @@ function main() {
           ctx.label(parm);
           ctx.label(fx.GetNamedConfigParm(parm) ?? "<FAILED>");
         }
-
-        // const GetNumParams =
-        //   fx.type === "track"
-        //     ? (idx: number) => reaper.TrackFX_GetNumParams(fx.track, idx)
-        //     : (idx: number) => reaper.TakeFX_GetNumParams(fx.take, idx);
-        // const paramsCount = GetNumParams(fx.fxidx);
-
-        // const GetParamIdent =
-        //   fx.type === "track"
-        //     ? (idx: number, param: number) =>
-        //         reaper.TrackFX_GetParamIdent(fx.track, idx, param)
-        //     : (idx: number, param: number) =>
-        //         reaper.TakeFX_GetParamIdent(fx.take, idx, param);
-        // const GetParamName =
-        //   fx.type === "track"
-        //     ? (idx: number, param: number) =>
-        //         reaper.TrackFX_GetParamName(fx.track, idx, param)
-        //     : (idx: number, param: number) =>
-        //         reaper.TakeFX_GetParamName(fx.take, idx, param);
 
         fx.getParameters().forEach((param, i) => {
           const title = `${i}. ${param.getName()} (${param.getIdentifier()})`;
