@@ -1,6 +1,6 @@
 AddCwdToImportPaths();
 
-import { OSType } from "./reaperEnums";
+import { OSType } from "./ffi";
 
 import { encode } from "./json";
 

@@ -27,7 +27,7 @@ declare namespace reaper {
   >;
 
   /** Returns "Win32", "Win64", "OSX32", "OSX64", "macOS-arm64", or "Other". */
-  function GetOS(): import("./reaperEnums").OSType;
+  function GetOS(): import("./enums").OSType;
 
   /**
    * Show a message to the user (also useful for debugging). Send "\n" for newline, "" to clear the console. Prefix string with "!SHOW:" and text will be added to console without opening the window. See ClearConsole
