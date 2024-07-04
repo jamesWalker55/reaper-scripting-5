@@ -1,0 +1,16 @@
+{
+  "name": "rpts-microui",
+  "version": "0.3.0",
+  "files": [
+    "build/**/*.lua",
+    "build/**/*.d.ts"
+  ],
+  "types": "./build/index.d.ts",
+  "main": "./build/index",
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "typescript-to-lua": "^1.25.1",
+    "lua-types": "^2.13.1"
+  }
+}
