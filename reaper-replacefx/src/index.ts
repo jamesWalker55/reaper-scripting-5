@@ -66,12 +66,12 @@ function main() {
         //     : (idx: number, param: number) =>
         //         reaper.TakeFX_GetParamName(fx.take, idx, param);
 
-        fx.getParameters().forEach(({ ident, name }, i) => {
-          const title = `${i}. ${name} (${ident})`;
+        fx.getParameters().forEach((param, i) => {
+          const title = `${i}. ${param.getName()} (${param.getIdentifier()})`;
 
           if (ctx.header(title)) {
-            const modInfo = fx.getModInfo(i);
-            if (!modInfo) {
+            const info = param.getModulationInfo();
+            if (!info) {
               ctx.layoutRow([-1], 0);
               ctx.label("null");
               return;
@@ -79,7 +79,7 @@ function main() {
 
             ctx.layoutRow([60, -1], 0);
 
-            Object.entries(modInfo).forEach(([k, v]) => {
+            Object.entries(info).forEach(([k, v]) => {
               ctx.label(k);
               ctx.text(encode(v));
             });

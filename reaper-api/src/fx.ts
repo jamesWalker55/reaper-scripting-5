@@ -1,4 +1,5 @@
 abstract class BaseFX {
+  abstract readonly type: "track" | "take";
   abstract GetNamedConfigParm(name: string): string | null;
   abstract SetNamedConfigParm(name: string, value: string): boolean;
   abstract GetNumParams(): number;
@@ -12,20 +13,18 @@ abstract class BaseFX {
     return guid;
   }
 
+  abstract getParameter(param: number): FXParam;
+
   getParameters() {
     const totalCount = this.GetNumParams();
     const result = [];
     for (let i = 0; i < totalCount; i++) {
-      const ident = this.GetParamIdent(i);
-      const name = this.GetParamName(i);
-      if (!ident) error("failed to get parameters");
-      if (!name) error("failed to get parameters");
-      result.push({ ident, name });
+      result.push(this.getParameter(i));
     }
     return result;
   }
 
-  private GetNamedConfigParmAsNumber(name: string, fallback: number) {
+  GetNamedConfigParmAsNumber(name: string, fallback: number) {
     const text = this.GetNamedConfigParm(name);
     if (!text) return fallback;
 
@@ -34,113 +33,6 @@ abstract class BaseFX {
       error("failed to parse named config parm as number");
 
     return result;
-  }
-
-  getModInfo(param: number): ModInfo | null {
-    const modActive =
-      this.GetNamedConfigParmAsNumber(`param.${param}.mod.active`, 0) === 1;
-    if (!modActive) return null;
-
-    const modInfo: ModInfo = {
-      baseline: this.GetNamedConfigParmAsNumber(
-        `param.${param}.mod.baseline`,
-        0,
-      ),
-      acs: null,
-      lfo: null,
-      plink: null,
-    };
-
-    const lfoActive =
-      this.GetNamedConfigParmAsNumber(`param.${param}.lfo.active`, 0) === 1;
-    if (lfoActive) {
-      modInfo.lfo = {
-        dir: this.GetNamedConfigParmAsNumber(`param.${param}.lfo.dir`, 1) as
-          | -1
-          | 0
-          | 1,
-        phase: this.GetNamedConfigParmAsNumber(`param.${param}.lfo.phase`, 0),
-        speed: this.GetNamedConfigParmAsNumber(`param.${param}.lfo.speed`, 1),
-        strength: this.GetNamedConfigParmAsNumber(
-          `param.${param}.lfo.strength`,
-          1,
-        ),
-        tempoSync:
-          this.GetNamedConfigParmAsNumber(`param.${param}.lfo.temposync`, 0) ===
-          1,
-        free:
-          this.GetNamedConfigParmAsNumber(`param.${param}.lfo.free`, 0) === 1,
-        shape: this.GetNamedConfigParmAsNumber(`param.${param}.lfo.shape`, 0),
-      };
-    }
-
-    const acsActive =
-      this.GetNamedConfigParmAsNumber(`param.${param}.acs.active`, 0) === 1;
-    if (acsActive) {
-      modInfo.acs = {
-        dir: this.GetNamedConfigParmAsNumber(`param.${param}.acs.dir`, 1) as
-          | -1
-          | 0
-          | 1,
-        strength: this.GetNamedConfigParmAsNumber(
-          `param.${param}.acs.strength`,
-          1,
-        ),
-        attack: this.GetNamedConfigParmAsNumber(
-          `param.${param}.acs.attack`,
-          300,
-        ),
-        release: this.GetNamedConfigParmAsNumber(
-          `param.${param}.acs.release`,
-          300,
-        ),
-        minVol: this.GetNamedConfigParmAsNumber(`param.${param}.acs.dblo`, -24),
-        maxVol: this.GetNamedConfigParmAsNumber(`param.${param}.acs.dbhi`, 0),
-        chan: this.GetNamedConfigParmAsNumber(`param.${param}.acs.chan`, -1),
-        stereo:
-          this.GetNamedConfigParmAsNumber(`param.${param}.acs.stereo`, 0) === 1,
-        x2: this.GetNamedConfigParmAsNumber(`param.${param}.acs.x2`, 0.5),
-        y2: this.GetNamedConfigParmAsNumber(`param.${param}.acs.y2`, 0.5),
-      };
-    }
-
-    const plinkActive =
-      this.GetNamedConfigParmAsNumber(`param.${param}.plink.active`, 0) === 1;
-    if (plinkActive) {
-      modInfo.plink = {
-        scale: this.GetNamedConfigParmAsNumber(`param.${param}.plink.scale`, 1),
-        offset: this.GetNamedConfigParmAsNumber(
-          `param.${param}.plink.offset`,
-          0,
-        ),
-        fxidx: this.GetNamedConfigParmAsNumber(
-          `param.${param}.plink.effect`,
-          -1,
-        ),
-        param: this.GetNamedConfigParmAsNumber(
-          `param.${param}.plink.param`,
-          -1,
-        ),
-        midi_bus: this.GetNamedConfigParmAsNumber(
-          `param.${param}.plink.midi_bus`,
-          0,
-        ),
-        midi_chan: this.GetNamedConfigParmAsNumber(
-          `param.${param}.plink.midi_chan`,
-          0,
-        ),
-        midi_msg: this.GetNamedConfigParmAsNumber(
-          `param.${param}.plink.midi_msg`,
-          0,
-        ),
-        midi_msg2: this.GetNamedConfigParmAsNumber(
-          `param.${param}.plink.midi_msg2`,
-          0,
-        ),
-      };
-    }
-
-    return modInfo;
   }
 }
 
@@ -198,6 +90,10 @@ export class TrackFX extends BaseFX {
   GetFXGUID() {
     return reaper.TrackFX_GetFXGUID(this.track, this.fxidx);
   }
+
+  getParameter(param: number): FXParam {
+    return new FXParam({ track: this.track }, this.fxidx, param);
+  }
 }
 
 export class TakeFX extends BaseFX {
@@ -249,9 +145,186 @@ export class TakeFX extends BaseFX {
   GetFXGUID() {
     return reaper.TakeFX_GetFXGUID(this.take, this.fxidx);
   }
+
+  getParameter(param: number): FXParam {
+    return new FXParam({ take: this.take }, this.fxidx, param);
+  }
 }
 
-export type ModInfo = {
+export type FX = TrackFX | TakeFX;
+
+export class FXParam {
+  fx: FX;
+  param: number;
+
+  constructor(
+    target: { track: MediaTrack } | { take: MediaItem_Take },
+    fxidx: number,
+    param: number,
+  ) {
+    if ("track" in target) {
+      this.fx = new TrackFX(target.track, fxidx);
+    } else {
+      this.fx = new TakeFX(target.take, fxidx);
+    }
+    this.param = param;
+  }
+
+  getIdentifier() {
+    const rv = this.fx.GetParamIdent(this.param);
+    if (!rv) error("param object is no longer valid");
+    return rv;
+  }
+
+  getName() {
+    const rv = this.fx.GetParamName(this.param);
+    if (!rv) error("param object is no longer valid");
+    return rv;
+  }
+
+  modulationActive(): boolean {
+    return (
+      this.fx.GetNamedConfigParmAsNumber(
+        `param.${this.param}.mod.active`,
+        0,
+      ) === 1
+    );
+  }
+
+  getModulationInfo(): ModulationInfo | null {
+    const param = this.param;
+
+    const modActive =
+      this.fx.GetNamedConfigParmAsNumber(`param.${param}.mod.active`, 0) === 1;
+    if (!modActive) return null;
+
+    const modInfo: ModulationInfo = {
+      baseline: this.fx.GetNamedConfigParmAsNumber(
+        `param.${param}.mod.baseline`,
+        0,
+      ),
+      acs: null,
+      lfo: null,
+      plink: null,
+    };
+
+    const lfoActive =
+      this.fx.GetNamedConfigParmAsNumber(`param.${param}.lfo.active`, 0) === 1;
+    if (lfoActive) {
+      modInfo.lfo = {
+        dir: this.fx.GetNamedConfigParmAsNumber(`param.${param}.lfo.dir`, 1) as
+          | -1
+          | 0
+          | 1,
+        phase: this.fx.GetNamedConfigParmAsNumber(
+          `param.${param}.lfo.phase`,
+          0,
+        ),
+        speed: this.fx.GetNamedConfigParmAsNumber(
+          `param.${param}.lfo.speed`,
+          1,
+        ),
+        strength: this.fx.GetNamedConfigParmAsNumber(
+          `param.${param}.lfo.strength`,
+          1,
+        ),
+        tempoSync:
+          this.fx.GetNamedConfigParmAsNumber(
+            `param.${param}.lfo.temposync`,
+            0,
+          ) === 1,
+        free:
+          this.fx.GetNamedConfigParmAsNumber(`param.${param}.lfo.free`, 0) ===
+          1,
+        shape: this.fx.GetNamedConfigParmAsNumber(
+          `param.${param}.lfo.shape`,
+          0,
+        ),
+      };
+    }
+
+    const acsActive =
+      this.fx.GetNamedConfigParmAsNumber(`param.${param}.acs.active`, 0) === 1;
+    if (acsActive) {
+      modInfo.acs = {
+        dir: this.fx.GetNamedConfigParmAsNumber(`param.${param}.acs.dir`, 1) as
+          | -1
+          | 0
+          | 1,
+        strength: this.fx.GetNamedConfigParmAsNumber(
+          `param.${param}.acs.strength`,
+          1,
+        ),
+        attack: this.fx.GetNamedConfigParmAsNumber(
+          `param.${param}.acs.attack`,
+          300,
+        ),
+        release: this.fx.GetNamedConfigParmAsNumber(
+          `param.${param}.acs.release`,
+          300,
+        ),
+        minVol: this.fx.GetNamedConfigParmAsNumber(
+          `param.${param}.acs.dblo`,
+          -24,
+        ),
+        maxVol: this.fx.GetNamedConfigParmAsNumber(
+          `param.${param}.acs.dbhi`,
+          0,
+        ),
+        chan: this.fx.GetNamedConfigParmAsNumber(`param.${param}.acs.chan`, -1),
+        stereo:
+          this.fx.GetNamedConfigParmAsNumber(`param.${param}.acs.stereo`, 0) ===
+          1,
+        x2: this.fx.GetNamedConfigParmAsNumber(`param.${param}.acs.x2`, 0.5),
+        y2: this.fx.GetNamedConfigParmAsNumber(`param.${param}.acs.y2`, 0.5),
+      };
+    }
+
+    const plinkActive =
+      this.fx.GetNamedConfigParmAsNumber(`param.${param}.plink.active`, 0) ===
+      1;
+    if (plinkActive) {
+      modInfo.plink = {
+        scale: this.fx.GetNamedConfigParmAsNumber(
+          `param.${param}.plink.scale`,
+          1,
+        ),
+        offset: this.fx.GetNamedConfigParmAsNumber(
+          `param.${param}.plink.offset`,
+          0,
+        ),
+        fxidx: this.fx.GetNamedConfigParmAsNumber(
+          `param.${param}.plink.effect`,
+          -1,
+        ),
+        param: this.fx.GetNamedConfigParmAsNumber(
+          `param.${param}.plink.param`,
+          -1,
+        ),
+        midi_bus: this.fx.GetNamedConfigParmAsNumber(
+          `param.${param}.plink.midi_bus`,
+          0,
+        ),
+        midi_chan: this.fx.GetNamedConfigParmAsNumber(
+          `param.${param}.plink.midi_chan`,
+          0,
+        ),
+        midi_msg: this.fx.GetNamedConfigParmAsNumber(
+          `param.${param}.plink.midi_msg`,
+          0,
+        ),
+        midi_msg2: this.fx.GetNamedConfigParmAsNumber(
+          `param.${param}.plink.midi_msg2`,
+          0,
+        ),
+      };
+    }
+
+    return modInfo;
+  }
+}
+
+export type ModulationInfo = {
   // active: boolean; // let presence of hash indicate active/inactive
   // visible: boolean, // whether the modulation window is shown, i don't care
   baseline: number;
@@ -301,5 +374,3 @@ export type ModInfo = {
   //   flags: number;
   // };
 };
-
-export type FX = TrackFX | TakeFX;
