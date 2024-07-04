@@ -2,7 +2,7 @@ AddCwdToImportPaths();
 
 import { encode } from "json";
 import { createContext, microUILoop, Option } from "rpts-microui";
-import { getLastTouchedFx } from "./lastFocusedFx";
+import { getLastTouchedFx } from "reaper-api/fx";
 
 function main() {
   gfx.init("My window", 260, 450);

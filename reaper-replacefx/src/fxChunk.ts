@@ -1,4 +1,4 @@
-import { getLastTouchedFx } from "./lastFocusedFx";
+import { getLastTouchedFx } from "reaper-api/fx";
 import { Ok, newErr } from "./result";
 
 export const NoFocusedFX = newErr("NoFocusedFX");
