@@ -1,4 +1,4 @@
-import * as json from "./json";
+import * as json from "json";
 
 // 32bit fnv-1a hash
 export const HASH_INITIAL = 2166136261;

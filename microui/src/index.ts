@@ -1,5 +1,5 @@
 import * as log from "./log";
-import { DrawStrFlags, MouseCap } from "./reaperEnums";
+import { DrawStrFlags, MouseCap } from "reaper-api/ffi";
 import {
   ColorId,
   CommandType,

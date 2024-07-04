@@ -7,7 +7,10 @@
   ],
   "types": "./build/index.d.ts",
   "main": "./build/index",
-  "dependencies": {},
+  "dependencies": {
+    "json": "link:json",
+    "reaper-api": "link:reaper-api"
+  },
   "devDependencies": {
     "typescript": "^5.4.5",
     "typescript-to-lua": "^1.25.1",
