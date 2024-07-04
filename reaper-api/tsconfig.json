@@ -8,7 +8,7 @@
     // output settings
     "declaration": true,
     "rootDir": "src",
-    "outDir": "build",
+    "outDir": "dist",
     // === google gts config ===
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

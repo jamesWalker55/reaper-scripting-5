@@ -1,9 +1,16 @@
 {
-  "dependencies": {
-    "typescript": "^5.5.3",
-    "typescript-to-lua": "^1.26.0"
+  "name": "reaper-api",
+  "version": "0.0.1",
+  "types": "./index.d.ts",
+  "main": "./index",
+  "scripts": {
+    "prepack": "just copy-files"
   },
+  "dependencies": {},
   "devDependencies": {
-    "lua-types": "^2.13.1"
+    "typescript-to-lua": "^1.26.0",
+    "typescript": "5.5.2",
+    "lua-types": "^2.13.1",
+    "json": "link:json"
   }
 }
