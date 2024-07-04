@@ -1,5 +1,8 @@
 {
-  "dependencies": { "typescript": "^5.4.5", "typescript-to-lua": "^1.25.1" },
+  "dependencies": {
+    "typescript": "^5.5.3",
+    "typescript-to-lua": "^1.26.0"
+  },
   "devDependencies": {
     "lua-types": "^2.13.1"
   }
