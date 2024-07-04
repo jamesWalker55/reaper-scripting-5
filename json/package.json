@@ -1,11 +1,6 @@
 {
   "name": "json",
-  "module": "index.ts",
-  "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  }
+  "version": "0.1.2",
+  "module": "json.lua",
+  "type": "module"
 }
