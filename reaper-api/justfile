@@ -1,5 +1,7 @@
+tstl := "node_modules/typescript-to-lua/dist/tstl.js"
+
 watch:
-    bunx tstl --watch
+    bun "{{tstl}}" --watch
 
 build:
-    bunx tstl
+    bun "{{tstl}}"
