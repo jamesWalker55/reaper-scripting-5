@@ -1,9 +1,11 @@
 tstl := "node_modules/typescript-to-lua/dist/tstl.js"
 
 watch:
+    just copy-files
     bun "{{tstl}}" --watch
 
 build:
+    just copy-files
     bun "{{tstl}}"
 
 # Manually copy some files to dist
