@@ -1,7 +1,7 @@
 AddCwdToImportPaths();
 
 import { encode } from "json";
-import { createContext, microUILoop, Option } from "rpts-microui";
+import { createContext, microUILoop, Option } from "reaper-microui";
 import { getLastTouchedFx } from "reaper-api/fx";
 
 function main() {

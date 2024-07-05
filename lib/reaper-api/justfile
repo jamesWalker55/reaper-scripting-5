@@ -15,6 +15,7 @@ copy-files:
 
     # == Copy package.json
 
+    mkdir -p dist
     cp -f package.json dist/package.json
 
     echo "package.json has been copied successfully."
