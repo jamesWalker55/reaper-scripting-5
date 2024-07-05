@@ -1,5 +1,5 @@
 {
-  "name": "json",
+  "name": "json.lua",
   "version": "0.1.2",
   "module": "json.lua",
   "type": "module"

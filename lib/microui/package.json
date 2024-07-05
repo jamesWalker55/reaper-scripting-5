@@ -1,5 +1,5 @@
 {
-  "name": "rpts-microui",
+  "name": "reaper-microui",
   "version": "0.3.0",
   "files": [
     "build/**/*.lua",
@@ -8,7 +8,7 @@
   "types": "./build/index.d.ts",
   "main": "./build/index",
   "dependencies": {
-    "json": "link:json",
+    "json": "link:json.lua",
     "reaper-api": "link:reaper-api"
   },
   "devDependencies": {
