@@ -102,6 +102,58 @@ declare namespace reaper {
 
   function GetMasterTrack(proj: ReaProject | number): MediaTrack;
 
+  /** Get a selected track from a project (proj=0 for active project) by selected track count (zero-based). */
+  function GetSelectedTrack2(
+    proj: ReaProject | number,
+    seltrackidx: number,
+    wantmaster: boolean,
+  ): MediaTrack | null;
+
+  /**
+   * Adds or queries the position of a named FX from the track FX chain (recFX=false) or record input FX/monitoring FX (recFX=true, monitoring FX are on master track).
+   *
+   * Specify a negative value for instantiate to always create a new effect, 0 to only query the first instance of an effect, or a positive value to add an instance if one is not found. If instantiate is <= -1000, it is used for the insertion position (-1000 is first item in chain, -1001 is second, etc).
+   *
+   * fxname can have prefix to specify type: VST3:,VST2:,VST:,AU:,JS:, or DX:, or FXADD: which adds selected items from the currently-open FX browser, FXADD:2 to limit to 2 FX added, or FXADD:2e to only succeed if exactly 2 FX are selected.
+   *
+   * Returns -1 on failure or the new position in chain on success.
+   */
+  function TrackFX_AddByName(
+    track: MediaTrack,
+    fxname: string,
+    recFX: boolean,
+    instantiate: number,
+  ): number;
+
+  /**
+   * Copies (or moves) FX from src_track to dest_take. src_fx can have 0x1000000 set to reference input FX. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track).
+   */
+  function TrackFX_CopyToTake(
+    src_track: MediaTrack,
+    src_fx: number,
+    dest_take: MediaItem_Take,
+    dest_fx: number,
+    is_move: boolean,
+  ): void;
+
+  /**
+   * Copies (or moves) FX from src_track to dest_track. Can be used with src_track=dest_track to reorder, FX indices have 0x1000000 set to reference input FX. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track).
+   */
+  function TrackFX_CopyToTrack(
+    src_track: MediaTrack,
+    src_fx: number,
+    dest_track: MediaTrack,
+    dest_fx: number,
+    is_move: boolean,
+  ): void;
+
+  /** Gets the RPPXML state of a track, returns true if successful. Undo flag is a performance/caching hint.  */
+  function GetTrackStateChunk(
+    track: MediaTrack,
+    str: string,
+    isundo: boolean,
+  ): LuaMultiReturn<[boolean, string]>;
+
   function GetTrackMediaItem(tr: MediaTrack, itemidx: number): MediaItem;
 
   /** get a take from an item by take count (zero-based) */
@@ -109,6 +161,10 @@ declare namespace reaper {
 
   /** returns NULL if the take is not valid */
   function GetTakeName(take: MediaItem_Take): string | null;
+
+  function TakeFX_GetCount(take: MediaItem_Take): number;
+
+  function TrackFX_GetCount(track: MediaTrack): number;
 
   /**
    * FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers.

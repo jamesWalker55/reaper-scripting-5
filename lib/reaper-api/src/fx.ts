@@ -24,6 +24,47 @@ abstract class BaseFX {
     return result;
   }
 
+  getName() {
+    const name = this.GetNamedConfigParm("fx_name");
+    if (!name) error("failed to get FX name");
+    return name;
+  }
+
+  getIdent() {
+    const ident = this.GetNamedConfigParm("fx_ident");
+    if (!ident) error("failed to get FX ident");
+    return ident;
+  }
+
+  getType() {
+    const type = this.GetNamedConfigParm("fx_type");
+    if (!type) error("failed to get FX type");
+    return type;
+  }
+
+  getPDCLatency() {
+    const pdc = this.GetNamedConfigParm("pdc");
+    if (!pdc) error("failed to get FX pdc");
+    return pdc;
+  }
+
+  /** Return the base64-encoded chunk if the plugin supports chunks. Otherwise, return null; */
+  getChunk(): string | null {
+    const type = this.getType().toUpperCase();
+    let chunk: string | null = null;
+    if (type.includes("VST")) {
+      chunk = this.GetNamedConfigParm("vst_chunk");
+    } else if (type.includes("VST")) {
+      chunk = this.GetNamedConfigParm("clap_chunk");
+    } else {
+      // plugin type doesn't support chunks
+      return null;
+    }
+    // if null, plugin supports chunks, but we can't get it for some reason
+    if (chunk === null) error("failed to get FX chunk");
+    return chunk;
+  }
+
   GetNamedConfigParmAsNumber(name: string, fallback: number) {
     const text = this.GetNamedConfigParm(name);
     if (!text) return fallback;
