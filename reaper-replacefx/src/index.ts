@@ -46,7 +46,7 @@ function main() {
         }
 
         fx.getParameters().forEach((param, i) => {
-          const title = `${i}. ${param.getName()} (${param.getIdentifier()})`;
+          const title = `${i}. ${param.getName()} (${param.getIdent()})`;
 
           if (ctx.header(title)) {
             const info = param.getModulationInfo();

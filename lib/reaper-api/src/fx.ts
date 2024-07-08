@@ -211,7 +211,7 @@ export class FXParam {
     this.param = param;
   }
 
-  getIdentifier() {
+  getIdent() {
     const rv = this.fx.GetParamIdent(this.param);
     if (!rv) error("param object is no longer valid");
     return rv;

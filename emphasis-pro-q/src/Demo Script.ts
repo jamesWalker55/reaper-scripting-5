@@ -1,10 +1,10 @@
 AddCwdToImportPaths();
 
 import { encode } from "json";
-import { FX } from "reaper-api/fx";
+import { FX, FXParam, TrackFX } from "reaper-api/fx";
 import { getSelectedTracks } from "reaper-api/track";
 
-const paramsToLink: { ident: string; inv?: true }[] = [
+const identsToLink: { ident: string; inv?: true }[] = [
   { ident: "0:0" }, // Band 1 Used
   { ident: "1:1" }, // Band 1 Enabled
   { ident: "2:2" }, // Band 1 Frequency
@@ -259,7 +259,7 @@ function log(msg: string) {
 
 function main() {
   const PARENT_NAME = "#EQ Emphasis";
-  const CHILD_NAME = "#EQ Demphasis";
+  const CHILD_NAME = "#EQ De-emphasis";
 
   const track = getSelectedTracks()[0];
   if (!track) error("no selected track");
@@ -277,12 +277,24 @@ function main() {
     }
     if (parent === null || child === null)
       error("failed to get parent and child fx");
+
+    assert(
+      parent.getIdent() === child.getIdent(),
+      "plugins have different ident",
+    );
+    assert(parent.getType() === child.getType(), "plugins have different type");
     return { parent, child };
   })();
 
-  log("Last touched FX params:");
-  for (const param of fx.getParameters()) {
-    log(`  ${encode(param.getIdentifier())} ${param.getName()}`);
+  for (const parentParam of parent.getParameters()) {
+    const ident = parentParam.getIdent();
+    const shouldLink = identsToLink.find((x) => x.ident === ident);
+    if (shouldLink === undefined) continue;
+
+    const childParam = new FXParam({ track: track.obj }, child.fxidx, parentParam.param);
+    const inverted = shouldLink?.inv === true;
+
+
   }
 }
 
