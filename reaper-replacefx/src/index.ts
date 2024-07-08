@@ -49,7 +49,7 @@ function main() {
           const title = `${i}. ${param.getName()} (${param.getIdent()})`;
 
           if (ctx.header(title)) {
-            const info = param.getModulationInfo();
+            const info = param.getModulation();
             if (!info) {
               ctx.layoutRow([-1], 0);
               ctx.label("null");

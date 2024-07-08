@@ -232,7 +232,7 @@ export class FXParam {
     );
   }
 
-  getModulationInfo(): ModulationInfo | null {
+  getModulation(): ModulationInfo | null {
     const param = this.param;
 
     const modActive =
@@ -359,6 +359,144 @@ export class FXParam {
           0,
         ),
       };
+    }
+
+    return modInfo;
+  }
+
+  setModulation(modInfo: ModulationInfo | null) {
+    const param = this.param;
+
+    this.fx.SetNamedConfigParm(
+      `param.${param}.mod.active`,
+      modInfo === null ? "0" : "1",
+    );
+    if (modInfo === null) return;
+
+    this.fx.SetNamedConfigParm(
+      `param.${param}.mod.baseline`,
+      modInfo.baseline.toString(),
+    );
+
+    this.fx.SetNamedConfigParm(
+      `param.${param}.lfo.active`,
+      modInfo.lfo === null ? "0" : "1",
+    );
+    if (modInfo.lfo !== null) {
+      this.fx.SetNamedConfigParm(
+        `param.${param}.lfo.dir`,
+        modInfo.lfo.dir.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.lfo.phase`,
+        modInfo.lfo.phase.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.lfo.speed`,
+        modInfo.lfo.speed.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.lfo.strength`,
+        modInfo.lfo.strength.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.lfo.temposync`,
+        modInfo.lfo.tempoSync ? "1" : "0",
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.lfo.free`,
+        modInfo.lfo.free ? "1" : "0",
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.lfo.shape`,
+        modInfo.lfo.shape.toString(),
+      );
+    }
+
+    this.fx.SetNamedConfigParm(
+      `param.${param}.acs.active`,
+      modInfo.acs === null ? "0" : "1",
+    );
+    if (modInfo.acs !== null) {
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.dir`,
+        modInfo.acs.dir.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.strength`,
+        modInfo.acs.strength.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.attack`,
+        modInfo.acs.attack.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.release`,
+        modInfo.acs.release.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.dblo`,
+        modInfo.acs.minVol.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.dbhi`,
+        modInfo.acs.maxVol.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.chan`,
+        modInfo.acs.chan.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.stereo`,
+        modInfo.acs.stereo ? "1" : "0",
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.x2`,
+        modInfo.acs.x2.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.y2`,
+        modInfo.acs.y2.toString(),
+      );
+    }
+
+    this.fx.SetNamedConfigParm(
+      `param.${param}.plink.active`,
+      modInfo.plink === null ? "0" : "1",
+    );
+    if (modInfo.plink) {
+      this.fx.SetNamedConfigParm(
+        `param.${param}.plink.scale`,
+        modInfo.plink.scale.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.plink.offset`,
+        modInfo.plink.offset.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.plink.effect`,
+        modInfo.plink.fxidx.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.plink.param`,
+        modInfo.plink.param.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.plink.midi_bus`,
+        modInfo.plink.midi_bus.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.plink.midi_chan`,
+        modInfo.plink.midi_chan.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.plink.midi_msg`,
+        modInfo.plink.midi_msg.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.plink.midi_msg2`,
+        modInfo.plink.midi_msg2.toString(),
+      );
     }
 
     return modInfo;
