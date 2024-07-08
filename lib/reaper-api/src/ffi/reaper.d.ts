@@ -215,6 +215,11 @@ declare namespace reaper {
     setNewValue: boolean,
   ): LuaMultiReturn<[boolean, string]>;
 
+  function TrackFX_GetFXName(
+    track: MediaTrack,
+    fx: number,
+  ): LuaMultiReturn<[boolean, string]>;
+
   /**
    * gets plug-in specific named configuration value (returns true on success).
    *
@@ -288,6 +293,11 @@ declare namespace reaper {
     parmname: string,
     value: string,
   ): boolean;
+
+  function TakeFX_GetFXName(
+    take: MediaItem_Take,
+    fx: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /** gets plug-in specific named configuration value (returns true on success). see TrackFX_GetNamedConfigParm */
   function TakeFX_GetNamedConfigParm(

@@ -24,7 +24,11 @@ abstract class BaseFX {
     return result;
   }
 
-  getName() {
+  /** Return the plugin name as seen by the user, might be renamed by the user */
+  abstract getName(): string;
+
+  /** Return the "true" plugin name, ignoring the user renamed title */
+  getOriginalName() {
     const name = this.GetNamedConfigParm("fx_name");
     if (!name) error("failed to get FX name");
     return name;
@@ -135,6 +139,12 @@ export class TrackFX extends BaseFX {
   getParameter(param: number): FXParam {
     return new FXParam({ track: this.track }, this.fxidx, param);
   }
+
+  getName() {
+    const [ok, value] = reaper.TrackFX_GetFXName(this.track, this.fxidx);
+    if (!ok) error("failed to get FX name");
+    return value;
+  }
 }
 
 export class TakeFX extends BaseFX {
@@ -189,6 +199,12 @@ export class TakeFX extends BaseFX {
 
   getParameter(param: number): FXParam {
     return new FXParam({ take: this.take }, this.fxidx, param);
+  }
+
+  getName() {
+    const [ok, value] = reaper.TakeFX_GetFXName(this.take, this.fxidx);
+    if (!ok) error("failed to get FX name");
+    return value;
   }
 }
 

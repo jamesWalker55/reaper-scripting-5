@@ -276,14 +276,25 @@ function main() {
         child = fx;
       }
     }
-    if (parent === null || child === null)
+    if (parent === null || child === null) {
+      msgBox(
+        "Usage:",
+        "Please name one existing Pro-Q instance '#EQ Emphasis', and another instance '#EQ De-emphasis'",
+      );
+      log(
+        "Please create 2 Pro-Q VST3 instances in the same track, and name them as follows:",
+      );
+      log("#EQ Emphasis");
+      log("#EQ De-emphasis");
       error("failed to get parent and child fx");
+    }
 
     assert(
       parent.getIdent() === child.getIdent(),
       "plugins have different ident",
     );
-    assert(parent.getType() === child.getType(), "plugins have different type");
+    assert(parent.getType() === "VST3", "plugins must be VST3");
+    assert(child.getType() === "VST3", "plugins must be VST3");
     return { parent, child };
   })();
 
@@ -301,13 +312,13 @@ function main() {
     if (inverted) log(`TODO: Invert ${parentParam.getName()}`);
 
     childParam.setModulation({
-      baseline: 0,
+      baseline: inverted ? 1 : 0,
       acs: null,
       lfo: null,
       plink: {
         fxidx: parentParam.fx.fxidx,
         param: parentParam.param,
-        scale: 1,
+        scale: inverted ? -1 : 1,
         offset: 0,
         midi_bus: 0,
         midi_chan: 0,
