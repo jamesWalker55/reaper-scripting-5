@@ -3,6 +3,7 @@ AddCwdToImportPaths();
 import { encode } from "json";
 import { FX, FXParam, TrackFX } from "reaper-api/fx";
 import { getSelectedTracks } from "reaper-api/track";
+import { msgBox } from "reaper-api/utils";
 
 const identsToLink: { ident: string; inv?: true }[] = [
   { ident: "0:0" }, // Band 1 Used
@@ -291,11 +292,32 @@ function main() {
     const shouldLink = identsToLink.find((x) => x.ident === ident);
     if (shouldLink === undefined) continue;
 
-    const childParam = new FXParam({ track: track.obj }, child.fxidx, parentParam.param);
+    const childParam = new FXParam(
+      { track: track.obj },
+      child.fxidx,
+      parentParam.param,
+    );
     const inverted = shouldLink?.inv === true;
+    if (inverted) log(`TODO: Invert ${parentParam.getName()}`);
 
-
+    childParam.setModulation({
+      baseline: 0,
+      acs: null,
+      lfo: null,
+      plink: {
+        fxidx: parentParam.fx.fxidx,
+        param: parentParam.param,
+        scale: 1,
+        offset: 0,
+        midi_bus: 0,
+        midi_chan: 0,
+        midi_msg: 0,
+        midi_msg2: 0,
+      },
+    });
   }
+
+  msgBox("Success", "Linked EQs together!");
 }
 
 main();
