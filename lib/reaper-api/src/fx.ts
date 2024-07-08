@@ -24,6 +24,51 @@ abstract class BaseFX {
     return result;
   }
 
+  /** Return the plugin name as seen by the user, might be renamed by the user */
+  abstract getName(): string;
+
+  /** Return the "true" plugin name, ignoring the user renamed title */
+  getOriginalName() {
+    const name = this.GetNamedConfigParm("fx_name");
+    if (!name) error("failed to get FX name");
+    return name;
+  }
+
+  getIdent() {
+    const ident = this.GetNamedConfigParm("fx_ident");
+    if (!ident) error("failed to get FX ident");
+    return ident;
+  }
+
+  getType() {
+    const type = this.GetNamedConfigParm("fx_type");
+    if (!type) error("failed to get FX type");
+    return type;
+  }
+
+  getPDCLatency() {
+    const pdc = this.GetNamedConfigParm("pdc");
+    if (!pdc) error("failed to get FX pdc");
+    return pdc;
+  }
+
+  /** Return the base64-encoded chunk if the plugin supports chunks. Otherwise, return null; */
+  getChunk(): string | null {
+    const type = this.getType().toUpperCase();
+    let chunk: string | null = null;
+    if (type.includes("VST")) {
+      chunk = this.GetNamedConfigParm("vst_chunk");
+    } else if (type.includes("VST")) {
+      chunk = this.GetNamedConfigParm("clap_chunk");
+    } else {
+      // plugin type doesn't support chunks
+      return null;
+    }
+    // if null, plugin supports chunks, but we can't get it for some reason
+    if (chunk === null) error("failed to get FX chunk");
+    return chunk;
+  }
+
   GetNamedConfigParmAsNumber(name: string, fallback: number) {
     const text = this.GetNamedConfigParm(name);
     if (!text) return fallback;
@@ -94,6 +139,12 @@ export class TrackFX extends BaseFX {
   getParameter(param: number): FXParam {
     return new FXParam({ track: this.track }, this.fxidx, param);
   }
+
+  getName() {
+    const [ok, value] = reaper.TrackFX_GetFXName(this.track, this.fxidx);
+    if (!ok) error("failed to get FX name");
+    return value;
+  }
 }
 
 export class TakeFX extends BaseFX {
@@ -149,6 +200,12 @@ export class TakeFX extends BaseFX {
   getParameter(param: number): FXParam {
     return new FXParam({ take: this.take }, this.fxidx, param);
   }
+
+  getName() {
+    const [ok, value] = reaper.TakeFX_GetFXName(this.take, this.fxidx);
+    if (!ok) error("failed to get FX name");
+    return value;
+  }
 }
 
 export type FX = TrackFX | TakeFX;
@@ -170,7 +227,7 @@ export class FXParam {
     this.param = param;
   }
 
-  getIdentifier() {
+  getIdent() {
     const rv = this.fx.GetParamIdent(this.param);
     if (!rv) error("param object is no longer valid");
     return rv;
@@ -191,7 +248,7 @@ export class FXParam {
     );
   }
 
-  getModulationInfo(): ModulationInfo | null {
+  getModulation(): ModulationInfo | null {
     const param = this.param;
 
     const modActive =
@@ -318,6 +375,144 @@ export class FXParam {
           0,
         ),
       };
+    }
+
+    return modInfo;
+  }
+
+  setModulation(modInfo: ModulationInfo | null) {
+    const param = this.param;
+
+    this.fx.SetNamedConfigParm(
+      `param.${param}.mod.active`,
+      modInfo === null ? "0" : "1",
+    );
+    if (modInfo === null) return;
+
+    this.fx.SetNamedConfigParm(
+      `param.${param}.mod.baseline`,
+      modInfo.baseline.toString(),
+    );
+
+    this.fx.SetNamedConfigParm(
+      `param.${param}.lfo.active`,
+      modInfo.lfo === null ? "0" : "1",
+    );
+    if (modInfo.lfo !== null) {
+      this.fx.SetNamedConfigParm(
+        `param.${param}.lfo.dir`,
+        modInfo.lfo.dir.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.lfo.phase`,
+        modInfo.lfo.phase.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.lfo.speed`,
+        modInfo.lfo.speed.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.lfo.strength`,
+        modInfo.lfo.strength.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.lfo.temposync`,
+        modInfo.lfo.tempoSync ? "1" : "0",
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.lfo.free`,
+        modInfo.lfo.free ? "1" : "0",
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.lfo.shape`,
+        modInfo.lfo.shape.toString(),
+      );
+    }
+
+    this.fx.SetNamedConfigParm(
+      `param.${param}.acs.active`,
+      modInfo.acs === null ? "0" : "1",
+    );
+    if (modInfo.acs !== null) {
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.dir`,
+        modInfo.acs.dir.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.strength`,
+        modInfo.acs.strength.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.attack`,
+        modInfo.acs.attack.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.release`,
+        modInfo.acs.release.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.dblo`,
+        modInfo.acs.minVol.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.dbhi`,
+        modInfo.acs.maxVol.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.chan`,
+        modInfo.acs.chan.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.stereo`,
+        modInfo.acs.stereo ? "1" : "0",
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.x2`,
+        modInfo.acs.x2.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.acs.y2`,
+        modInfo.acs.y2.toString(),
+      );
+    }
+
+    this.fx.SetNamedConfigParm(
+      `param.${param}.plink.active`,
+      modInfo.plink === null ? "0" : "1",
+    );
+    if (modInfo.plink) {
+      this.fx.SetNamedConfigParm(
+        `param.${param}.plink.scale`,
+        modInfo.plink.scale.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.plink.offset`,
+        modInfo.plink.offset.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.plink.effect`,
+        modInfo.plink.fxidx.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.plink.param`,
+        modInfo.plink.param.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.plink.midi_bus`,
+        modInfo.plink.midi_bus.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.plink.midi_chan`,
+        modInfo.plink.midi_chan.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.plink.midi_msg`,
+        modInfo.plink.midi_msg.toString(),
+      );
+      this.fx.SetNamedConfigParm(
+        `param.${param}.plink.midi_msg2`,
+        modInfo.plink.midi_msg2.toString(),
+      );
     }
 
     return modInfo;
