@@ -1,5 +1,10 @@
 /** @noSelfInFile **/
 
+declare type Ini = Record<
+  string,
+  Record<string, string | undefined> | undefined
+>;
+
 /**
  * Parse a given ini file to a table.
  * Returns `{null, (error message)}` if the input file is invalid
@@ -9,6 +14,4 @@
 export function parseIni(
   path: string,
   allowComments?: boolean,
-):
-  | Record<string, Record<string, string | undefined> | undefined>
-  | LuaMultiReturn<[null, string]>;
+): LuaMultiReturn<[Ini, null] | [null, string]>;
