@@ -2,6 +2,7 @@ import { encode } from "json";
 import { parseIni } from "./ini";
 import { inspect } from "./inspect";
 import { absPath, log } from "./utils";
+import { copy } from "./clipboard";
 
 /**
  * NOTE: Only works on Windows (because the filename contains "win64.ini")
@@ -111,17 +112,9 @@ function loadInstalledFX() {
 }
 
 export function main() {
-  const result = encode(loadInstalledFX());
-  const [f, msg] = io.open(
-    "D:\\Programming\\reaper-scripting-5\\lib\\reaper-api\\src\\installIOASHDJLKAS.json",
-    "w",
-  );
-  if (!f) {
-    error(msg);
-  }
-  f.write(result);
-  log("Successfully wrote to file");
-  // log(inspect(loadInstalledFX()));
+  const result = loadInstalledFX();
+  copy(encode(result));
+  log(inspect(result));
 }
 
 function temp() {
