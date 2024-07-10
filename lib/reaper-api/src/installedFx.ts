@@ -1,3 +1,4 @@
+import { encode } from "json";
 import { parseIni } from "./ini";
 import { inspect } from "./inspect";
 import { absPath, log } from "./utils";
@@ -84,8 +85,43 @@ function loadVSTPlugins() {
   return result;
 }
 
+/**
+ * Example of returned data:
+ * ```json
+ * [{ "displayName": "VST: Wider (airwindows)", "ident": "C:\\Program Files\\Steinberg\\VstPlugins\\Airwindows\\Wider64.dll" },
+ *  { "displayName": "VST3i: Skaka (Klevgrand)", "ident": "C:\\Program Files\\Common Files\\VST3\\KLVGR\\Skaka.vst3" },
+ *  { "displayName": "CLAPi: Vital (Vital Audio)", "ident": "audio.vital.synth" },
+ *  { "displayName": "JS: MIDI Polyphonic Splitter [downloaded/pcartwright MIDI Chord Splitter]", "ident": "downloaded/pcartwright MIDI Chord Splitter" },
+ *  { "displayName": "ReWire: REAPER", "ident": "ReWire: REAPER" },
+ *  { "displayName": "Container", "ident": "Container" },
+ *  { "displayName": "Video processor", "ident": "Video processor" },
+ *  ...]
+ * ```
+ */
+function loadInstalledFX() {
+  const result = [];
+  let i = 0;
+  while (true) {
+    const [ok, displayName, ident] = reaper.EnumInstalledFX(i);
+    if (!ok) return result;
+
+    result.push({ displayName, ident });
+    i += 1;
+  }
+}
+
 export function main() {
-  log(inspect(loadVSTPlugins()));
+  const result = encode(loadInstalledFX());
+  const [f, msg] = io.open(
+    "D:\\Programming\\reaper-scripting-5\\lib\\reaper-api\\src\\installIOASHDJLKAS.json",
+    "w",
+  );
+  if (!f) {
+    error(msg);
+  }
+  f.write(result);
+  log("Successfully wrote to file");
+  // log(inspect(loadInstalledFX()));
 }
 
 function temp() {

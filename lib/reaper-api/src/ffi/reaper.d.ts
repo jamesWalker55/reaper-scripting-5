@@ -373,6 +373,16 @@ declare namespace reaper {
   function GetLastColorThemeFile(): string;
 
   /**
+   * ```
+   * boolean retval, string name, string ident = reaper.EnumInstalledFX(integer index)
+   * ```
+   * Enumerates installed FX. Returns true if successful, sets nameOut and identOut to name and ident of FX at index.
+   */
+  function EnumInstalledFX(
+    index: number,
+  ): LuaMultiReturn<[boolean, string, string]>;
+
+  /**
    * Returns a HWND to a window whose title matches the specified string.
    * - Unlike the Win32 function FindWindow, this function searches top-level as well as child windows, so that the target window can be found irrespective of docked state.
    * - In addition, the function can optionally match substrings of the title.
