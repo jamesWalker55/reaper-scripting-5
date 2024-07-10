@@ -1,6 +1,14 @@
+import { encode } from "json";
+import * as ArrChunk from "./arrchunk";
+import * as Chunk from "./chunk";
+import { copy } from "./clipboard";
+import { inspect } from "./inspect";
+import { log } from "./utils";
+
 abstract class BaseFX {
   abstract readonly type: "track" | "take";
-  protected abstract GetNamedConfigParm(name: string): string | null;
+  abstract readonly fxidx: number;
+  abstract GetNamedConfigParm(name: string): string | null;
   abstract SetNamedConfigParm(name: string, value: string): boolean;
   protected abstract GetNumParams(): number;
   abstract GetParamIdent(param: number): string | null;
@@ -53,6 +61,30 @@ abstract class BaseFX {
     return pdc;
   }
 
+  /** 0x1000000 is used to indicate flags and shit, so remove that part */
+  decipherFxidx() {
+    const actualIdx = 0x0ffffff & this.fxidx;
+    const isRecInputOrHardwareOutput = (this.fxidx & 0x1000000) !== 0;
+    const isInContainer = (this.fxidx & 0x2000000) !== 0;
+
+    if (isInContainer) {
+      // the rules are fucking insane, i'm not doing this
+      return {
+        // actualIdx, // not actual idx
+        isRecInputOrHardwareOutput,
+        isInContainer,
+      };
+    } else {
+      return {
+        actualIdx,
+        isRecInputOrHardwareOutput,
+        isInContainer,
+      };
+    }
+  }
+
+  protected abstract getFXArrChunk(): ArrChunk.ArrChunk;
+
   /** Return the base64-encoded chunk if the plugin supports chunks. Otherwise, return null; */
   getChunk(): string | null {
     const type = this.getType().toUpperCase();
@@ -67,7 +99,12 @@ abstract class BaseFX {
     }
     // TODO: Handle offline plugin
     if (chunk === null && this.isOffline()) {
-      error("TODO: Get chunk data for offline plugin");
+      const arrchunk = this.getFXArrChunk();
+      log(inspect(arrchunk));
+      copy(encode(arrchunk));
+      error(
+        "TODO: Get chunk data for offline plugin (chunk has been copied to clipboard for debugging)",
+      );
     }
     // if null, plugin supports chunks, but we can't get it for some reason
     if (chunk === null) error("failed to get FX chunk");
@@ -101,7 +138,7 @@ export class TrackFX extends BaseFX {
     this.fxidx = fxidx;
   }
 
-  protected GetNamedConfigParm(name: string) {
+  GetNamedConfigParm(name: string) {
     const [ok, value] = reaper.TrackFX_GetNamedConfigParm(
       this.track,
       this.fxidx,
@@ -158,6 +195,59 @@ export class TrackFX extends BaseFX {
     if (!ok) error("failed to get FX name");
     return value;
   }
+
+  protected getFXArrChunk(): ArrChunk.ArrChunk {
+    const decipher = this.decipherFxidx();
+    // fuck containers
+    if (decipher.isInContainer)
+      error("unable to get chunk data from FX in containers");
+
+    let fxchainTag: string;
+    if (decipher.isRecInputOrHardwareOutput) {
+      const masterTrack = reaper.GetMasterTrack(0);
+      const isMasterTrack = this.track === masterTrack;
+      if (isMasterTrack) {
+        // is hardware output
+        // TODO: no idea where to find this
+        error("unable to get chunk data from FX in monitor FX");
+      } else {
+        // is rec input fx
+        fxchainTag = "FXCHAIN_REC";
+      }
+    } else {
+      const totalFxCount = reaper.TrackFX_GetCount(this.track);
+      assert(
+        decipher.actualIdx < totalFxCount,
+        `FX index of ${decipher.actualIdx} exceeds track FX count of ${totalFxCount}`,
+      );
+      fxchainTag = "FXCHAIN";
+    }
+
+    const chunk = Chunk.track(this.track);
+    if (!ArrChunk._testChunk(chunk))
+      error("failsafe - error when parsing track chunk data");
+    const arrchunk = ArrChunk.fromChunk(chunk);
+    let fxchainarr: ArrChunk.ArrChunk | null = null;
+    for (const child of arrchunk) {
+      if (typeof child === "string") continue;
+
+      const tag = child[0];
+      if (tag === fxchainTag) {
+        fxchainarr = child;
+        break;
+      }
+    }
+    if (fxchainarr === null)
+      error(`failed to find <${fxchainTag}> element in track chunk data`);
+
+    const fxchunks = fxchainarr.filter((x) => typeof x !== "string");
+
+    // TODO: There is extra data added to the beginning and end of the chunk data
+    // Find a way to remove it
+    // https://forum.cockos.com/showthread.php?t=292773
+
+    return fxchunks[decipher.actualIdx];
+  }
 }
 
 export class TakeFX extends BaseFX {
@@ -171,7 +261,7 @@ export class TakeFX extends BaseFX {
     this.fxidx = fxidx;
   }
 
-  protected GetNamedConfigParm(name: string) {
+  GetNamedConfigParm(name: string) {
     const [ok, value] = reaper.TakeFX_GetNamedConfigParm(
       this.take,
       this.fxidx,
@@ -222,6 +312,10 @@ export class TakeFX extends BaseFX {
     const [ok, value] = reaper.TakeFX_GetFXName(this.take, this.fxidx);
     if (!ok) error("failed to get FX name");
     return value;
+  }
+
+  protected getFXArrChunk(): ArrChunk.ArrChunk {
+    error("TODO: Implement parsing chunk data of items");
   }
 }
 
