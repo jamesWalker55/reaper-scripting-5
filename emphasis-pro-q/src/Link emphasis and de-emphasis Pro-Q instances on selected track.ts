@@ -309,7 +309,6 @@ function main() {
       parentParam.param,
     );
     const inverted = shouldLink?.inv === true;
-    if (inverted) log(`TODO: Invert ${parentParam.getName()}`);
 
     childParam.setModulation({
       baseline: inverted ? 1 : 0,
