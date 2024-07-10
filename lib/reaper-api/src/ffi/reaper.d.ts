@@ -14,6 +14,9 @@ declare namespace reaper {
   /** type 0=OK,1=OKCANCEL,2=ABORTRETRYIGNORE,3=YESNOCANCEL,4=YESNO,5=RETRYCANCEL : ret 1=OK,2=CANCEL,3=ABORT,4=RETRY,5=IGNORE,6=YES,7=NO */
   function ShowMessageBox(msg: string, title: string, type: number): number;
 
+  /** Get reaper.ini full filename. */
+  function get_ini_file(): string;
+
   /**
    * ```
    * is_new_value, filename, sectionID, cmdID, mode, resolution, val, contextstr = get_action_context()
