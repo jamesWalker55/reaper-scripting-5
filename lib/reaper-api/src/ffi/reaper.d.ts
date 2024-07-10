@@ -7,6 +7,7 @@ declare type MediaItem = { readonly _opaqueTypeTag: "MediaItem" };
 declare type MediaItem_Take = { readonly _opaqueTypeTag: "MediaItem_Take" };
 declare type identifier = { readonly _opaqueTypeTag: "identifier" };
 declare type FxChain = { readonly _opaqueTypeTag: "FxChain" };
+declare type TrackEnvelope = { readonly _opaqueTypeTag: "TrackEnvelope" };
 
 declare namespace reaper {
   /** Returns true if function_name exists in the REAPER API */
