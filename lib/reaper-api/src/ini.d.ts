@@ -1,9 +1,6 @@
 /** @noSelfInFile **/
 
-declare type Ini = Record<
-  string,
-  Record<string, string | undefined> | undefined
->;
+declare type Ini = Record<string, Record<string, string>>;
 
 /**
  * Parse a given ini file to a table.
