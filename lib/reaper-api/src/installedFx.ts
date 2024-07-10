@@ -20,12 +20,10 @@ function loadCLAPPlugins() {
 
   for (const filename in ini) {
     const data = ini[filename];
-    let identifier: string | null = null;
-    let displayName: string | null = null;
     for (const key in data) {
       if (key === "_") continue;
-      identifier = key;
-      displayName = data[key];
+      let identifier = key;
+      let displayName = data[key];
       // name is prefixed with some weird number, remove it
       const prefixMatch = string.match(displayName, `^%d+|`);
       if (prefixMatch[0]) {
@@ -38,8 +36,56 @@ function loadCLAPPlugins() {
   return result;
 }
 
+/**
+ * Includes VST2 and VST3 plugins.
+ * NOTE: Only works on Windows (because the filename contains "64.ini")
+ */
+function loadVSTPlugins() {
+  const [ini, msg] = parseIni(absPath("reaper-vstplugins64.ini"));
+  if (ini === null) {
+    if (msg.startsWith("Given path does not exist")) {
+      // assume no VST plugins are installed, hence INI is missing
+      return {};
+    }
+    error(`reaper's VST plugin database is malformed - ${msg}`);
+  }
+  if (!("vstcache" in ini)) {
+    error(
+      `reaper's VST plugin database is malformed - section 'vstcache' is missing`,
+    );
+  }
+
+  const vstcache = ini["vstcache"];
+
+  const result: Record<string, { displayName: string; isInstrument: boolean }> =
+    {};
+
+  for (const filename in vstcache) {
+    const data = vstcache[filename];
+    const match = string.match(data, `^[^,]+,[^,]+,(.+)$`)[0];
+    if (!match) {
+      // plugin failed to scan, e.g.:
+      // iZRX9GuitarDe_noise.dll=00D83861E546D801
+      continue;
+    }
+
+    let displayName = match;
+    let isInstrument = false;
+    if (displayName.endsWith("!!!VSTi")) {
+      // e.g.:
+      // Legend.vst3=00EC7E81AD71D901,988499895{A4FFC0A749EC4FCF89B8C590564830D3,The Legend (Synapse Audio)!!!VSTi
+      displayName = displayName.slice(0, -"!!!VSTi".length);
+      isInstrument = true;
+    }
+
+    result[filename] = { displayName, isInstrument };
+  }
+
+  return result;
+}
+
 export function main() {
-  log(inspect(loadCLAPPlugins()));
+  log(inspect(loadVSTPlugins()));
 }
 
 function temp() {
