@@ -6,6 +6,7 @@ declare type MediaTrack = { readonly _opaqueTypeTag: "MediaTrack" };
 declare type MediaItem = { readonly _opaqueTypeTag: "MediaItem" };
 declare type MediaItem_Take = { readonly _opaqueTypeTag: "MediaItem_Take" };
 declare type identifier = { readonly _opaqueTypeTag: "identifier" };
+declare type FxChain = { readonly _opaqueTypeTag: "FxChain" };
 
 declare namespace reaper {
   /** Returns true if function_name exists in the REAPER API */
@@ -418,6 +419,35 @@ declare namespace reaper {
 
   /** Read the contents of the system clipboard. */
   function CF_GetClipboard(): string;
+
+  /**
+   * Return a handle to the given take FX chain window. HACK: This temporarily renames the take in order to disambiguate the take FX chain window from similarily named takes.
+   */
+  function CF_GetTakeFXChain(take: MediaItem_Take): FxChain;
+
+  /**
+   * Return a handle to the given track FX chain window.
+   */
+  function CF_GetTrackFXChain(track: MediaTrack): FxChain;
+
+  /**
+   * Return a handle to the given track FX chain window. Set wantInputChain to get the track's input/monitoring FX chain.
+   */
+  function CF_GetTrackFXChainEx(
+    project: ReaProject | number,
+    track: MediaTrack,
+    wantInputChain: boolean,
+  ): FxChain;
+
+  /**
+   * Return a handle to the currently focused FX chain window.
+   */
+  function CF_GetFocusedFXChain(): FxChain;
+
+  /**
+   * Return the index of the next selected effect in the given FX chain. Start index should be -1. Returns -1 if there are no more selected effects.
+   */
+  function CF_EnumSelectedFX(hwnd: FxChain, index: number): number;
 }
 
 /** @noSelf */
