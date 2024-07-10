@@ -36,6 +36,7 @@ function LIP.load(fileName)
 	for line in file:lines() do
 		local tempSection = line:match("^%[([^%[%]]+)%]$")
 		if tempSection then
+			section = tempSection
 			data[section] = data[section] or {}
 		end
 		local param, value = line:match("^([%w|_]+)%s-=%s-(.+)$")
