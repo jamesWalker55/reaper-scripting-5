@@ -90,16 +90,16 @@ export function main() {
 
 function temp() {
   let temp;
-  // list of known CLAP plugins
-  temp = parseIni(absPath("reaper-clap-win64.ini"));
+  // // list of known CLAP plugins
+  // temp = parseIni(absPath("reaper-clap-win64.ini"));
   // CLAP renames
   temp = parseIni(absPath("reaper-clap-rename-win64.ini"));
   // fx favourites folder
   temp = parseIni(absPath("reaper-fxfolders.ini"));
   // (not INI format) list of known JSFX plugins
   temp = absPath("reaper-jsfx.ini");
-  // list of known VST plugins
-  temp = parseIni(absPath("reaper-vstplugins64.ini"));
+  // // list of known VST plugins
+  // temp = parseIni(absPath("reaper-vstplugins64.ini"));
   // vst renames
   temp = parseIni(absPath("reaper-vstrenames64.ini"));
 }
