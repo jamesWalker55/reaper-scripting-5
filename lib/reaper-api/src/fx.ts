@@ -58,7 +58,7 @@ abstract class BaseFX {
     let chunk: string | null = null;
     if (type.includes("VST")) {
       chunk = this.GetNamedConfigParm("vst_chunk");
-    } else if (type.includes("VST")) {
+    } else if (type.includes("CLAP")) {
       chunk = this.GetNamedConfigParm("clap_chunk");
     } else {
       // plugin type doesn't support chunks
