@@ -1,6 +1,0 @@
-{
-  "name": "lua-ini-parser",
-  "version": "0.1.2",
-  "module": "index.lua",
-  "type": "module"
-}
