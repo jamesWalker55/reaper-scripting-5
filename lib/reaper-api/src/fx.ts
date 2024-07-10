@@ -6,6 +6,7 @@ abstract class BaseFX {
   abstract GetParamIdent(param: number): string | null;
   abstract GetParamName(param: number): string | null;
   abstract GetFXGUID(): string | null;
+  abstract GetOffline(): boolean;
 
   guid() {
     const guid = this.GetFXGUID();
@@ -64,9 +65,17 @@ abstract class BaseFX {
       // plugin type doesn't support chunks
       return null;
     }
+    // TODO: Handle offline plugin
+    if (chunk === null && this.isOffline()) {
+      error("TODO: Get chunk data for offline plugin");
+    }
     // if null, plugin supports chunks, but we can't get it for some reason
     if (chunk === null) error("failed to get FX chunk");
     return chunk;
+  }
+
+  isOffline() {
+    return this.GetOffline();
   }
 
   GetNamedConfigParmAsNumber(name: string, fallback: number) {
@@ -136,6 +145,10 @@ export class TrackFX extends BaseFX {
     return reaper.TrackFX_GetFXGUID(this.track, this.fxidx);
   }
 
+  GetOffline() {
+    return reaper.TrackFX_GetOffline(this.track, this.fxidx);
+  }
+
   getParameter(param: number): FXParam {
     return new FXParam({ track: this.track }, this.fxidx, param);
   }
@@ -195,6 +208,10 @@ export class TakeFX extends BaseFX {
 
   GetFXGUID() {
     return reaper.TakeFX_GetFXGUID(this.take, this.fxidx);
+  }
+
+  GetOffline() {
+    return reaper.TakeFX_GetOffline(this.take, this.fxidx);
   }
 
   getParameter(param: number): FXParam {

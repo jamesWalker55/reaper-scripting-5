@@ -168,6 +168,10 @@ declare namespace reaper {
 
   function TakeFX_GetCount(take: MediaItem_Take): number;
 
+  function TrackFX_GetOffline(track: MediaTrack, fx: number): boolean;
+
+  function TakeFX_GetOffline(take: MediaItem_Take, fx: number): boolean;
+
   function TrackFX_GetCount(track: MediaTrack): number;
 
   /**
