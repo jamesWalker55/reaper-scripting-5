@@ -1,12 +1,12 @@
 abstract class BaseFX {
   abstract readonly type: "track" | "take";
-  abstract GetNamedConfigParm(name: string): string | null;
+  protected abstract GetNamedConfigParm(name: string): string | null;
   abstract SetNamedConfigParm(name: string, value: string): boolean;
-  abstract GetNumParams(): number;
+  protected abstract GetNumParams(): number;
   abstract GetParamIdent(param: number): string | null;
   abstract GetParamName(param: number): string | null;
-  abstract GetFXGUID(): string | null;
-  abstract GetOffline(): boolean;
+  protected abstract GetFXGUID(): string | null;
+  protected abstract GetOffline(): boolean;
 
   guid() {
     const guid = this.GetFXGUID();
@@ -101,7 +101,7 @@ export class TrackFX extends BaseFX {
     this.fxidx = fxidx;
   }
 
-  GetNamedConfigParm(name: string) {
+  protected GetNamedConfigParm(name: string) {
     const [ok, value] = reaper.TrackFX_GetNamedConfigParm(
       this.track,
       this.fxidx,
@@ -119,7 +119,7 @@ export class TrackFX extends BaseFX {
     );
   }
 
-  GetNumParams() {
+  protected GetNumParams() {
     return reaper.TrackFX_GetNumParams(this.track, this.fxidx);
   }
 
@@ -141,11 +141,11 @@ export class TrackFX extends BaseFX {
     return ok ? value : null;
   }
 
-  GetFXGUID() {
+  protected GetFXGUID() {
     return reaper.TrackFX_GetFXGUID(this.track, this.fxidx);
   }
 
-  GetOffline() {
+  protected GetOffline() {
     return reaper.TrackFX_GetOffline(this.track, this.fxidx);
   }
 
@@ -171,7 +171,7 @@ export class TakeFX extends BaseFX {
     this.fxidx = fxidx;
   }
 
-  GetNamedConfigParm(name: string) {
+  protected GetNamedConfigParm(name: string) {
     const [ok, value] = reaper.TakeFX_GetNamedConfigParm(
       this.take,
       this.fxidx,
@@ -184,7 +184,7 @@ export class TakeFX extends BaseFX {
     return reaper.TakeFX_SetNamedConfigParm(this.take, this.fxidx, name, value);
   }
 
-  GetNumParams() {
+  protected GetNumParams() {
     return reaper.TakeFX_GetNumParams(this.take, this.fxidx);
   }
 
@@ -206,11 +206,11 @@ export class TakeFX extends BaseFX {
     return ok ? value : null;
   }
 
-  GetFXGUID() {
+  protected GetFXGUID() {
     return reaper.TakeFX_GetFXGUID(this.take, this.fxidx);
   }
 
-  GetOffline() {
+  protected GetOffline() {
     return reaper.TakeFX_GetOffline(this.take, this.fxidx);
   }
 
