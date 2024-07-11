@@ -11,7 +11,7 @@ function main() {
     return;
   }
 
-  const chunk = fx.getChunk();
+  const chunk = fx.getData();
   if (chunk === null) {
     msgBox("Error", "This FX type does not have FX chunks");
     return;

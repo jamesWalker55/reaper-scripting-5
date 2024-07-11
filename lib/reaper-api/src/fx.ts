@@ -1,9 +1,19 @@
 import { encode } from "json";
 import * as ArrChunk from "./arrchunk";
 import * as Chunk from "./chunk";
+import * as Base64 from "./base64";
 import { copy } from "./clipboard";
 import { inspect } from "./inspect";
 import { log } from "./utils";
+
+function parseLittleEndianInteger(bytes: string): number {
+  let result: number = 0;
+  for (let i = 0; i < bytes.length; i++) {
+    let byte = string.byte(bytes, i + 1); // lua indexes start from 1
+    result += byte << (i * 8);
+  }
+  return result;
+}
 
 abstract class BaseFX {
   abstract readonly type: "track" | "take";
@@ -83,10 +93,110 @@ abstract class BaseFX {
     }
   }
 
-  protected abstract getFXArrChunk(): ArrChunk.ArrChunk;
+  protected abstract getArrChunk(): ArrChunk.ArrChunk;
 
-  /** Return the base64-encoded chunk if the plugin supports chunks. Otherwise, return null; */
-  getChunk(): string | null {
+  /** NOTE: This returns raw byte strings! Please encode with base64 before copying to clipboard */
+  private parseArrChunk(_arr: ArrChunk.ArrChunk) {
+    // should only contain strings
+    for (const x of _arr) {
+      if (typeof x !== "string")
+        error(
+          `fx chunk should not contain sub-elements, but found an element: ${x[0]}`,
+        );
+    }
+    let arr = _arr as string[];
+
+    // first line should be tag line
+    const tagLine = arr.shift();
+    if (!tagLine) error("fx chunk is missing header line");
+    if (!(tagLine.startsWith("VST") || tagLine.startsWith("CLAP")))
+      error(`this kind of fx chunk is not supported: ${tagLine}`);
+
+    // rest of 'arr' only contains base64 data
+    // but it may be separated into "blocks", detect and separate these blocks first
+    const arrBlocks = arr.reduce(
+      (acc, line) => {
+        // add line to current block
+        acc[acc.length - 1].push(line);
+
+        if (line.endsWith("=")) {
+          // end of current block, create a new block now
+          acc.push([]);
+        }
+
+        return acc;
+      },
+      [[]] as string[][],
+    );
+    if (arrBlocks[arrBlocks.length - 1].length === 0) {
+      // remove final empty block if exists
+      arrBlocks.pop();
+    }
+    // join each block into strings
+    const b64blocks = arrBlocks.map((lines) => lines.join(""));
+    // decode from base64 and join all of them
+    let alldata = b64blocks.map((b) => Base64.decode(b)).join("");
+
+    // parse header and footer
+    // https://forum.cockos.com/showthread.php?t=292773
+    // https://forum.cockos.com/showthread.php?t=168478
+    // https://forum.cockos.com/showthread.php?t=240523
+
+    // const vstid = alldata.slice(0, 4);
+    // const magic = alldata.slice(4, 8);
+
+    let i = 8;
+
+    const inputCount = parseLittleEndianInteger(alldata.slice(i, i + 4));
+    i += 4;
+    i += inputCount * 8;
+
+    const outputCount = parseLittleEndianInteger(alldata.slice(i, i + 4));
+    i += 4;
+    i += outputCount * 8;
+
+    const fxdataLength = parseLittleEndianInteger(alldata.slice(i, i + 4));
+    i += 4;
+
+    const magicEnd = alldata.slice(i, i + 8);
+    i += 8;
+
+    assert(
+      magicEnd === "\x01\x00\x00\x00\x00\x00\x10\x00",
+      `header end sequence is malformed: ${encode(magicEnd)}`,
+    );
+
+    const fxdataStart = i;
+
+    assert(
+      fxdataStart + fxdataLength < alldata.length,
+      "fxdata exceeds actual chunk size",
+    );
+    const headerdata = alldata.slice(0, fxdataStart);
+    const fxdata = alldata.slice(fxdataStart, fxdataStart + fxdataLength);
+    const footerdata = alldata.slice(
+      fxdataStart + fxdataLength,
+      alldata.length,
+    );
+
+    // log(`inputCount = ${inspect(inputCount)}`);
+    // log(`outputCount = ${inspect(outputCount)}`);
+    // log(`fxdataLength = ${inspect(fxdataLength)}`);
+    // log(`i = ${inspect(i)}`);
+    // log(`alldata.length = ${inspect(alldata.length)}`);
+
+    return {
+      headerdata,
+      fxdata,
+      footerdata,
+      inputCount,
+      outputCount,
+      fxdataLength,
+    };
+  }
+
+  /** Return the base64-encoded chunk data if the plugin supports chunks. Otherwise, return null; */
+  getData(): string | null {
     const type = this.getType().toUpperCase();
     let chunk: string | null = null;
     if (type.includes("VST")) {
@@ -99,12 +209,9 @@ abstract class BaseFX {
     }
     // TODO: Handle offline plugin
     if (chunk === null && this.isOffline()) {
-      const arrchunk = this.getFXArrChunk();
-      log(inspect(arrchunk));
-      copy(encode(arrchunk));
-      error(
-        "TODO: Get chunk data for offline plugin (chunk has been copied to clipboard for debugging)",
-      );
+      const arrchunk = this.getArrChunk();
+      const { fxdata } = this.parseArrChunk(arrchunk);
+      chunk = Base64.encode(fxdata);
     }
     // if null, plugin supports chunks, but we can't get it for some reason
     if (chunk === null) error("failed to get FX chunk");
@@ -196,7 +303,7 @@ export class TrackFX extends BaseFX {
     return value;
   }
 
-  protected getFXArrChunk(): ArrChunk.ArrChunk {
+  protected getArrChunk(): ArrChunk.ArrChunk {
     const decipher = this.decipherFxidx();
     // fuck containers
     if (decipher.isInContainer)
@@ -314,7 +421,7 @@ export class TakeFX extends BaseFX {
     return value;
   }
 
-  protected getFXArrChunk(): ArrChunk.ArrChunk {
+  protected getArrChunk(): ArrChunk.ArrChunk {
     error("TODO: Implement parsing chunk data of items");
   }
 }
