@@ -53,12 +53,12 @@ export function msgBox(title: string, msg: string) {
  * 16: freeze states
  * ```
  */
-export function undoBlock(desc: string, flags: number, func: () => void) {
+export function undoBlock(func: () => { desc: string; flags: number }) {
   reaper.Undo_BeginBlock2(0);
   reaper.PreventUIRefresh(1);
-  func();
+  const config = func();
   reaper.PreventUIRefresh(-1);
-  reaper.Undo_EndBlock2(0, desc, flags);
+  reaper.Undo_EndBlock2(0, config.desc, config.flags);
 }
 
 /**

@@ -1,66 +1,67 @@
 AddCwdToImportPaths();
 
 import { paste } from "reaper-api/clipboard";
-import { msgBox } from "reaper-api/utils";
+import { msgBox, undoBlock } from "reaper-api/utils";
 import { setLastTouchedFxChunk } from "./fxChunk";
 import { assertUnreachable } from "./utils";
+import { getLastTouchedFx } from "reaper-api/fx";
 
 function main() {
-  const chunk = paste();
-  if (chunk.length === 0) {
-    msgBox("Error", "Clipboard is empty!");
-    return;
-  }
+  const actionName = "Paste chunk data to last-focused FX";
 
-  reaper.Undo_BeginBlock2(0);
-  reaper.PreventUIRefresh(1);
-
-  const result = setLastTouchedFxChunk(chunk);
-  if (!result.ok) {
-    reaper.PreventUIRefresh(-1);
-    reaper.Undo_EndBlock2(0, "Paste chunk data to last-focused FX", 0);
-
-    switch (result.name) {
-      case "NoFocusedFX":
-        msgBox("Error", "Please focus on an FX before running this script");
-        break;
-      case "FXHasNoChunk":
-        msgBox("Error", "This FX type does not have FX chunks");
-        break;
-      case "FailedToGetFXChunk":
-        msgBox(
-          "Error",
-          "Unknown error: Failed to get FX chunk, please contact the developer!",
-        );
-        break;
-      case "FailedToSetFXChunk":
-        msgBox(
-          "Error",
-          "Unknown error: Failed to set FX chunk, please contact the developer!",
-        );
-        break;
-      default:
-        assertUnreachable(result);
+  undoBlock(() => {
+    const chunk = paste();
+    if (chunk.length === 0) {
+      msgBox("Error", "Clipboard is empty!");
+      return { desc: actionName, flags: 0 };
     }
-    return;
-  }
 
-  const fx = result.val;
-  if (fx.type === "track") {
-    reaper.PreventUIRefresh(-1);
-    reaper.Undo_EndBlock2(0, "Paste chunk data to last-focused track FX", 2);
-  } else if (fx.type === "take") {
-    reaper.PreventUIRefresh(-1);
-    reaper.Undo_EndBlock2(0, "Paste chunk data to last-focused take FX", 4);
-  } else {
-    msgBox(
-      "Error",
-      "Unknown error: Unknown target type, please contact the developer!",
-    );
-    reaper.PreventUIRefresh(-1);
-    reaper.Undo_EndBlock2(0, "Paste chunk data to last-focused FX", -1);
-    assertUnreachable(fx);
-  }
+    const fx = getLastTouchedFx();
+    if (!fx) {
+      msgBox("Error", "Please focus on an FX before running this script");
+      return { desc: actionName, flags: 0 };
+    }
+
+    if (fx.isOffline()) {
+      msgBox("Error", "Unable to set chunk data of offline FX");
+      return { desc: actionName, flags: 0 };
+    }
+
+    const fxType = fx.getType();
+
+    let success: boolean;
+    if (fxType.includes("VST")) {
+      success = fx.SetNamedConfigParm("vst_chunk", chunk);
+    } else if (fxType.includes("CLAP")) {
+      success = fx.SetNamedConfigParm("clap_chunk", chunk);
+    } else {
+      msgBox("Error", "This FX type does not have FX chunks");
+      return { desc: actionName, flags: 0 };
+    }
+
+    if (!success) {
+      msgBox(
+        "Error",
+        "Unknown error: Failed to set FX chunk, please contact the developer!",
+      );
+      return { desc: actionName, flags: 0 };
+    }
+
+    if (fx.type === "track") {
+      return { desc: actionName, flags: 2 };
+    } else if (fx.type === "take") {
+      return { desc: actionName, flags: 4 };
+    } else {
+      msgBox(
+        "Error",
+        "Unknown error: Unknown target type, please contact the developer!",
+      );
+      if (true as any) {
+        return { desc: actionName, flags: -1 };
+      }
+      assertUnreachable(fx);
+    }
+  });
 }
 
 main();
