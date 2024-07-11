@@ -207,7 +207,6 @@ abstract class BaseFX {
       // plugin type doesn't support chunks
       return null;
     }
-    // TODO: Handle offline plugin
     if (chunk === null && this.isOffline()) {
       const arrchunk = this.getArrChunk();
       const { fxdata } = this.parseArrChunk(arrchunk);
