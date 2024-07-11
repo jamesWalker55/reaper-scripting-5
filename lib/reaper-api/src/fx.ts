@@ -269,17 +269,6 @@ abstract class BaseFX {
   isOffline() {
     return this.GetOffline();
   }
-
-  GetNamedConfigParmAsNumber(name: string, fallback: number) {
-    const text = this.GetNamedConfigParm(name);
-    if (!text) return fallback;
-
-    const result = tonumber(text);
-    if (result === undefined)
-      error("failed to parse named config parm as number");
-
-    return result;
-  }
 }
 
 export class TrackFX extends BaseFX {
@@ -493,6 +482,27 @@ export class FXParam {
     this.param = param;
   }
 
+  /** A wrapper for the FX's GetNamedConfigParm() to parse it as a number. */
+  private _parseFXConfig(name: string, fallback: number) {
+    const text = this.fx.GetNamedConfigParm(name);
+    if (!text) return fallback;
+
+    const result = tonumber(text);
+    if (result === undefined)
+      error("failed to parse named config parm as number");
+
+    return result;
+  }
+
+  /** A wrapper for the FX's SetNamedConfigParm() to allow number / bool arguments. */
+  private _setFXConfig(name: string, value: number | boolean) {
+    if (typeof value === "number") {
+      this.fx.SetNamedConfigParm(name, value.toString());
+    } else {
+      this.fx.SetNamedConfigParm(name, value ? "1" : "0");
+    }
+  }
+
   getIdent() {
     const rv = this.fx.GetParamIdent(this.param);
     if (!rv) error("param object is no longer valid");
@@ -506,140 +516,63 @@ export class FXParam {
   }
 
   modulationActive(): boolean {
-    return (
-      this.fx.GetNamedConfigParmAsNumber(
-        `param.${this.param}.mod.active`,
-        0,
-      ) === 1
-    );
+    return this._parseFXConfig(`param.${this.param}.mod.active`, 0) === 1;
   }
 
   getModulation(): ModulationInfo | null {
     const param = this.param;
 
-    const modActive =
-      this.fx.GetNamedConfigParmAsNumber(`param.${param}.mod.active`, 0) === 1;
+    const modActive = this._parseFXConfig(`param.${param}.mod.active`, 0) === 1;
     if (!modActive) return null;
 
     const modInfo: ModulationInfo = {
-      baseline: this.fx.GetNamedConfigParmAsNumber(
-        `param.${param}.mod.baseline`,
-        0,
-      ),
+      baseline: this._parseFXConfig(`param.${param}.mod.baseline`, 0),
       acs: null,
       lfo: null,
       plink: null,
     };
 
-    const lfoActive =
-      this.fx.GetNamedConfigParmAsNumber(`param.${param}.lfo.active`, 0) === 1;
+    const lfoActive = this._parseFXConfig(`param.${param}.lfo.active`, 0) === 1;
     if (lfoActive) {
       modInfo.lfo = {
-        dir: this.fx.GetNamedConfigParmAsNumber(`param.${param}.lfo.dir`, 1) as
-          | -1
-          | 0
-          | 1,
-        phase: this.fx.GetNamedConfigParmAsNumber(
-          `param.${param}.lfo.phase`,
-          0,
-        ),
-        speed: this.fx.GetNamedConfigParmAsNumber(
-          `param.${param}.lfo.speed`,
-          1,
-        ),
-        strength: this.fx.GetNamedConfigParmAsNumber(
-          `param.${param}.lfo.strength`,
-          1,
-        ),
-        tempoSync:
-          this.fx.GetNamedConfigParmAsNumber(
-            `param.${param}.lfo.temposync`,
-            0,
-          ) === 1,
-        free:
-          this.fx.GetNamedConfigParmAsNumber(`param.${param}.lfo.free`, 0) ===
-          1,
-        shape: this.fx.GetNamedConfigParmAsNumber(
-          `param.${param}.lfo.shape`,
-          0,
-        ),
+        dir: this._parseFXConfig(`param.${param}.lfo.dir`, 1) as -1 | 0 | 1,
+        phase: this._parseFXConfig(`param.${param}.lfo.phase`, 0),
+        speed: this._parseFXConfig(`param.${param}.lfo.speed`, 1),
+        strength: this._parseFXConfig(`param.${param}.lfo.strength`, 1),
+        tempoSync: this._parseFXConfig(`param.${param}.lfo.temposync`, 0) === 1,
+        free: this._parseFXConfig(`param.${param}.lfo.free`, 0) === 1,
+        shape: this._parseFXConfig(`param.${param}.lfo.shape`, 0),
       };
     }
 
-    const acsActive =
-      this.fx.GetNamedConfigParmAsNumber(`param.${param}.acs.active`, 0) === 1;
+    const acsActive = this._parseFXConfig(`param.${param}.acs.active`, 0) === 1;
     if (acsActive) {
       modInfo.acs = {
-        dir: this.fx.GetNamedConfigParmAsNumber(`param.${param}.acs.dir`, 1) as
-          | -1
-          | 0
-          | 1,
-        strength: this.fx.GetNamedConfigParmAsNumber(
-          `param.${param}.acs.strength`,
-          1,
-        ),
-        attack: this.fx.GetNamedConfigParmAsNumber(
-          `param.${param}.acs.attack`,
-          300,
-        ),
-        release: this.fx.GetNamedConfigParmAsNumber(
-          `param.${param}.acs.release`,
-          300,
-        ),
-        minVol: this.fx.GetNamedConfigParmAsNumber(
-          `param.${param}.acs.dblo`,
-          -24,
-        ),
-        maxVol: this.fx.GetNamedConfigParmAsNumber(
-          `param.${param}.acs.dbhi`,
-          0,
-        ),
-        chan: this.fx.GetNamedConfigParmAsNumber(`param.${param}.acs.chan`, -1),
-        stereo:
-          this.fx.GetNamedConfigParmAsNumber(`param.${param}.acs.stereo`, 0) ===
-          1,
-        x2: this.fx.GetNamedConfigParmAsNumber(`param.${param}.acs.x2`, 0.5),
-        y2: this.fx.GetNamedConfigParmAsNumber(`param.${param}.acs.y2`, 0.5),
+        dir: this._parseFXConfig(`param.${param}.acs.dir`, 1) as -1 | 0 | 1,
+        strength: this._parseFXConfig(`param.${param}.acs.strength`, 1),
+        attack: this._parseFXConfig(`param.${param}.acs.attack`, 300),
+        release: this._parseFXConfig(`param.${param}.acs.release`, 300),
+        minVol: this._parseFXConfig(`param.${param}.acs.dblo`, -24),
+        maxVol: this._parseFXConfig(`param.${param}.acs.dbhi`, 0),
+        chan: this._parseFXConfig(`param.${param}.acs.chan`, -1),
+        stereo: this._parseFXConfig(`param.${param}.acs.stereo`, 0) === 1,
+        x2: this._parseFXConfig(`param.${param}.acs.x2`, 0.5),
+        y2: this._parseFXConfig(`param.${param}.acs.y2`, 0.5),
       };
     }
 
     const plinkActive =
-      this.fx.GetNamedConfigParmAsNumber(`param.${param}.plink.active`, 0) ===
-      1;
+      this._parseFXConfig(`param.${param}.plink.active`, 0) === 1;
     if (plinkActive) {
       modInfo.plink = {
-        scale: this.fx.GetNamedConfigParmAsNumber(
-          `param.${param}.plink.scale`,
-          1,
-        ),
-        offset: this.fx.GetNamedConfigParmAsNumber(
-          `param.${param}.plink.offset`,
-          0,
-        ),
-        fxidx: this.fx.GetNamedConfigParmAsNumber(
-          `param.${param}.plink.effect`,
-          -1,
-        ),
-        param: this.fx.GetNamedConfigParmAsNumber(
-          `param.${param}.plink.param`,
-          -1,
-        ),
-        midi_bus: this.fx.GetNamedConfigParmAsNumber(
-          `param.${param}.plink.midi_bus`,
-          0,
-        ),
-        midi_chan: this.fx.GetNamedConfigParmAsNumber(
-          `param.${param}.plink.midi_chan`,
-          0,
-        ),
-        midi_msg: this.fx.GetNamedConfigParmAsNumber(
-          `param.${param}.plink.midi_msg`,
-          0,
-        ),
-        midi_msg2: this.fx.GetNamedConfigParmAsNumber(
-          `param.${param}.plink.midi_msg2`,
-          0,
-        ),
+        scale: this._parseFXConfig(`param.${param}.plink.scale`, 1),
+        offset: this._parseFXConfig(`param.${param}.plink.offset`, 0),
+        fxidx: this._parseFXConfig(`param.${param}.plink.effect`, -1),
+        param: this._parseFXConfig(`param.${param}.plink.param`, -1),
+        midi_bus: this._parseFXConfig(`param.${param}.plink.midi_bus`, 0),
+        midi_chan: this._parseFXConfig(`param.${param}.plink.midi_chan`, 0),
+        midi_msg: this._parseFXConfig(`param.${param}.plink.midi_msg`, 0),
+        midi_msg2: this._parseFXConfig(`param.${param}.plink.midi_msg2`, 0),
       };
     }
 
@@ -649,135 +582,57 @@ export class FXParam {
   setModulation(modInfo: ModulationInfo | null) {
     const param = this.param;
 
-    this.fx.SetNamedConfigParm(
-      `param.${param}.mod.active`,
-      modInfo === null ? "0" : "1",
-    );
+    this._setFXConfig(`param.${param}.mod.active`, modInfo !== null);
     if (modInfo === null) return;
 
-    this.fx.SetNamedConfigParm(
-      `param.${param}.mod.baseline`,
-      modInfo.baseline.toString(),
-    );
+    this._setFXConfig(`param.${param}.mod.baseline`, modInfo.baseline);
 
-    this.fx.SetNamedConfigParm(
-      `param.${param}.lfo.active`,
-      modInfo.lfo === null ? "0" : "1",
-    );
+    this._setFXConfig(`param.${param}.lfo.active`, modInfo.lfo !== null);
     if (modInfo.lfo !== null) {
-      this.fx.SetNamedConfigParm(
-        `param.${param}.lfo.dir`,
-        modInfo.lfo.dir.toString(),
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.lfo.phase`,
-        modInfo.lfo.phase.toString(),
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.lfo.speed`,
-        modInfo.lfo.speed.toString(),
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.lfo.strength`,
-        modInfo.lfo.strength.toString(),
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.lfo.temposync`,
-        modInfo.lfo.tempoSync ? "1" : "0",
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.lfo.free`,
-        modInfo.lfo.free ? "1" : "0",
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.lfo.shape`,
-        modInfo.lfo.shape.toString(),
-      );
+      this._setFXConfig(`param.${param}.lfo.dir`, modInfo.lfo.dir);
+      this._setFXConfig(`param.${param}.lfo.phase`, modInfo.lfo.phase);
+      this._setFXConfig(`param.${param}.lfo.speed`, modInfo.lfo.speed);
+      this._setFXConfig(`param.${param}.lfo.strength`, modInfo.lfo.strength);
+      this._setFXConfig(`param.${param}.lfo.temposync`, modInfo.lfo.tempoSync);
+      this._setFXConfig(`param.${param}.lfo.free`, modInfo.lfo.free);
+      this._setFXConfig(`param.${param}.lfo.shape`, modInfo.lfo.shape);
     }
 
-    this.fx.SetNamedConfigParm(
-      `param.${param}.acs.active`,
-      modInfo.acs === null ? "0" : "1",
-    );
+    this._setFXConfig(`param.${param}.acs.active`, modInfo.acs !== null);
     if (modInfo.acs !== null) {
-      this.fx.SetNamedConfigParm(
-        `param.${param}.acs.dir`,
-        modInfo.acs.dir.toString(),
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.acs.strength`,
-        modInfo.acs.strength.toString(),
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.acs.attack`,
-        modInfo.acs.attack.toString(),
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.acs.release`,
-        modInfo.acs.release.toString(),
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.acs.dblo`,
-        modInfo.acs.minVol.toString(),
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.acs.dbhi`,
-        modInfo.acs.maxVol.toString(),
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.acs.chan`,
-        modInfo.acs.chan.toString(),
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.acs.stereo`,
-        modInfo.acs.stereo ? "1" : "0",
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.acs.x2`,
-        modInfo.acs.x2.toString(),
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.acs.y2`,
-        modInfo.acs.y2.toString(),
-      );
+      this._setFXConfig(`param.${param}.acs.dir`, modInfo.acs.dir);
+      this._setFXConfig(`param.${param}.acs.strength`, modInfo.acs.strength);
+      this._setFXConfig(`param.${param}.acs.attack`, modInfo.acs.attack);
+      this._setFXConfig(`param.${param}.acs.release`, modInfo.acs.release);
+      this._setFXConfig(`param.${param}.acs.dblo`, modInfo.acs.minVol);
+      this._setFXConfig(`param.${param}.acs.dbhi`, modInfo.acs.maxVol);
+      this._setFXConfig(`param.${param}.acs.chan`, modInfo.acs.chan);
+      this._setFXConfig(`param.${param}.acs.stereo`, modInfo.acs.stereo);
+      this._setFXConfig(`param.${param}.acs.x2`, modInfo.acs.x2);
+      this._setFXConfig(`param.${param}.acs.y2`, modInfo.acs.y2);
     }
 
-    this.fx.SetNamedConfigParm(
-      `param.${param}.plink.active`,
-      modInfo.plink === null ? "0" : "1",
-    );
+    this._setFXConfig(`param.${param}.plink.active`, modInfo.plink !== null);
     if (modInfo.plink) {
-      this.fx.SetNamedConfigParm(
-        `param.${param}.plink.scale`,
-        modInfo.plink.scale.toString(),
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.plink.offset`,
-        modInfo.plink.offset.toString(),
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.plink.effect`,
-        modInfo.plink.fxidx.toString(),
-      );
-      this.fx.SetNamedConfigParm(
-        `param.${param}.plink.param`,
-        modInfo.plink.param.toString(),
-      );
-      this.fx.SetNamedConfigParm(
+      this._setFXConfig(`param.${param}.plink.scale`, modInfo.plink.scale);
+      this._setFXConfig(`param.${param}.plink.offset`, modInfo.plink.offset);
+      this._setFXConfig(`param.${param}.plink.effect`, modInfo.plink.fxidx);
+      this._setFXConfig(`param.${param}.plink.param`, modInfo.plink.param);
+      this._setFXConfig(
         `param.${param}.plink.midi_bus`,
-        modInfo.plink.midi_bus.toString(),
+        modInfo.plink.midi_bus,
       );
-      this.fx.SetNamedConfigParm(
+      this._setFXConfig(
         `param.${param}.plink.midi_chan`,
-        modInfo.plink.midi_chan.toString(),
+        modInfo.plink.midi_chan,
       );
-      this.fx.SetNamedConfigParm(
+      this._setFXConfig(
         `param.${param}.plink.midi_msg`,
-        modInfo.plink.midi_msg.toString(),
+        modInfo.plink.midi_msg,
       );
-      this.fx.SetNamedConfigParm(
+      this._setFXConfig(
         `param.${param}.plink.midi_msg2`,
-        modInfo.plink.midi_msg2.toString(),
+        modInfo.plink.midi_msg2,
       );
     }
 
