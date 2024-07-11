@@ -143,8 +143,8 @@ abstract class BaseFX {
     // https://forum.cockos.com/showthread.php?t=168478
     // https://forum.cockos.com/showthread.php?t=240523
 
-    // const vstid = alldata.slice(0, 4);
-    // const magic = alldata.slice(4, 8);
+    const vstid = alldata.slice(0, 4);
+    const magic = alldata.slice(4, 8);
 
     let i = 8;
 
@@ -167,14 +167,15 @@ abstract class BaseFX {
     log(`fxdataLength = ${inspect(fxdataLength)}`);
     log(`i = ${inspect(i)}`);
     log(`alldata.length = ${inspect(alldata.length)}`);
+    log(`vstid = ${inspect(vstid)}`);
+    log(`magic = ${inspect(magic)}`);
+    log(`magicEnd = ${inspect(magicEnd)}`);
 
-    copy(Base64.encode(alldata))
-
-    if (magicEnd !== "\x01\x00\x00\x00\x00\x00\x10\x00") {
-      log(`WARNING: header end sequence is malformed: ${encode(magicEnd)}`)
-    }
+    // This doesn't work due to transpilation issues:
+    // https://github.com/TypeScriptToLua/TypeScriptToLua/issues/903
     // assert(
-    //   magicEnd === "\x01\x00\x00\x00\x00\x00\x10\x00",
+    //   magicEnd === "\x01\x00\x00\x00\x00\x00\x10\x00" ||
+    //     magicEnd === "\x01\x00\x00\x00\xff\xff\x10\x00",
     //   `header end sequence is malformed: ${encode(magicEnd)}`,
     // );
 
@@ -191,7 +192,6 @@ abstract class BaseFX {
       alldata.length,
     );
 
-
     return {
       headerdata,
       fxdata,
@@ -199,6 +199,8 @@ abstract class BaseFX {
       inputCount,
       outputCount,
       fxdataLength,
+      vstid,
+      magic,
     };
   }
 
