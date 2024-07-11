@@ -97,20 +97,45 @@ abstract class BaseFX {
 
   /** NOTE: This returns raw byte strings! Please encode with base64 before copying to clipboard */
   private parseArrChunk(_arr: ArrChunk.ArrChunk) {
-    // should only contain strings
-    for (const x of _arr) {
-      if (typeof x !== "string")
-        error(
-          `fx chunk should not contain sub-elements, but found an element: ${x[0]}`,
-        );
-    }
-    let arr = _arr as string[];
-
     // first line should be tag line
-    const tagLine = arr.shift();
+    const tagLine = _arr.shift();
+    if (typeof tagLine !== "string") error("fx chunk is missing header line");
     if (!tagLine) error("fx chunk is missing header line");
-    if (!(tagLine.startsWith("VST") || tagLine.startsWith("CLAP")))
-      error(`this kind of fx chunk is not supported: ${tagLine}`);
+
+    // find the base64 array
+    const arr = (() => {
+      if (tagLine.startsWith("VST")) {
+        // vst, rest of the array must be strings
+        for (const x of _arr) {
+          if (typeof x !== "string")
+            error(
+              `fx chunk should not contain sub-elements, but found an element: ${x[0]}`,
+            );
+        }
+        return _arr as string[];
+      } else if (tagLine.startsWith("CLAP")) {
+        // clap, find the subelement <STATE ...>
+        for (const x of _arr) {
+          if (typeof x !== "string") {
+            const stateTag = x[0];
+            if (typeof stateTag !== "string")
+              error("clap state chunk is missing header line");
+            if (stateTag !== "STATE") continue;
+            const state = x.slice(1, x.length);
+            for (const x of state) {
+              if (typeof x !== "string")
+                error(
+                  `clap state element should not contain sub-elements, but found an element: ${x[0]}`,
+                );
+            }
+            return state as string[];
+          }
+        }
+        error(`failed to get CLAP plugin state: ${tagLine}`);
+      } else {
+        error(`this kind of fx chunk is not supported: ${tagLine}`);
+      }
+    })();
 
     // rest of 'arr' only contains base64 data
     // but it may be separated into "blocks", detect and separate these blocks first
