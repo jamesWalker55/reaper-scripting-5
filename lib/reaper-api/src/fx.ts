@@ -4,7 +4,7 @@ import * as Chunk from "./chunk";
 import * as Base64 from "./base64";
 import { copy } from "./clipboard";
 import { inspect } from "./inspect";
-import { log } from "./utils";
+import { log, msgBox } from "./utils";
 
 function parseLittleEndianInteger(bytes: string): number {
   let result: number = 0;
@@ -134,6 +134,7 @@ abstract class BaseFX {
     }
     // join each block into strings
     const b64blocks = arrBlocks.map((lines) => lines.join(""));
+    log(`b64blocks.length = ${inspect(b64blocks.length)}`);
     // decode from base64 and join all of them
     let alldata = b64blocks.map((b) => Base64.decode(b)).join("");
 
@@ -161,10 +162,21 @@ abstract class BaseFX {
     const magicEnd = alldata.slice(i, i + 8);
     i += 8;
 
-    assert(
-      magicEnd === "\x01\x00\x00\x00\x00\x00\x10\x00",
-      `header end sequence is malformed: ${encode(magicEnd)}`,
-    );
+    log(`inputCount = ${inspect(inputCount)}`);
+    log(`outputCount = ${inspect(outputCount)}`);
+    log(`fxdataLength = ${inspect(fxdataLength)}`);
+    log(`i = ${inspect(i)}`);
+    log(`alldata.length = ${inspect(alldata.length)}`);
+
+    copy(Base64.encode(alldata))
+
+    if (magicEnd !== "\x01\x00\x00\x00\x00\x00\x10\x00") {
+      log(`WARNING: header end sequence is malformed: ${encode(magicEnd)}`)
+    }
+    // assert(
+    //   magicEnd === "\x01\x00\x00\x00\x00\x00\x10\x00",
+    //   `header end sequence is malformed: ${encode(magicEnd)}`,
+    // );
 
     const fxdataStart = i;
 
@@ -179,11 +191,6 @@ abstract class BaseFX {
       alldata.length,
     );
 
-    // log(`inputCount = ${inspect(inputCount)}`);
-    // log(`outputCount = ${inspect(outputCount)}`);
-    // log(`fxdataLength = ${inspect(fxdataLength)}`);
-    // log(`i = ${inspect(i)}`);
-    // log(`alldata.length = ${inspect(alldata.length)}`);
 
     return {
       headerdata,
@@ -207,6 +214,19 @@ abstract class BaseFX {
       // plugin type doesn't support chunks
       return null;
     }
+    // failsafe testing
+    if (chunk !== null) {
+      const arrchunk = this.getArrChunk();
+      const { fxdata } = this.parseArrChunk(arrchunk);
+      const testchunk = Base64.encode(fxdata);
+      if (chunk !== testchunk) {
+        msgBox(
+          "Debug",
+          "Successfully got chunk data the normal way!\nHowever, the alternative FX chunk parser would have given different output, please debug this!",
+        );
+      }
+    }
+    // handle offline FX chunk data
     if (chunk === null && this.isOffline()) {
       const arrchunk = this.getArrChunk();
       const { fxdata } = this.parseArrChunk(arrchunk);
