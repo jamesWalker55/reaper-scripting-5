@@ -1,10 +1,8 @@
 AddCwdToImportPaths();
 
 import { paste } from "reaper-api/clipboard";
-import { msgBox, undoBlock } from "reaper-api/utils";
-import { setLastTouchedFxChunk } from "./fxChunk";
-import { assertUnreachable } from "./utils";
 import { getLastTouchedFx } from "reaper-api/fx";
+import { assertUnreachable, msgBox, undoBlock } from "reaper-api/utils";
 
 function main() {
   const actionName = "Paste chunk data to last-focused FX";
