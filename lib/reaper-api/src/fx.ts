@@ -96,26 +96,117 @@ abstract class BaseFX {
   protected abstract getArrChunk(): ArrChunk.ArrChunk;
 
   /** NOTE: This returns raw byte strings! Please encode with base64 before copying to clipboard */
-  private parseArrChunk(_arr: ArrChunk.ArrChunk) {
+  private parseArrChunk(arr: ArrChunk.ArrChunk) {
     // first line should be tag line
-    const tagLine = _arr.shift();
+    const tagLine = arr.shift();
     if (typeof tagLine !== "string") error("fx chunk is missing header line");
     if (!tagLine) error("fx chunk is missing header line");
 
     // find the base64 array
-    const arr = (() => {
-      if (tagLine.startsWith("VST")) {
-        // vst, rest of the array must be strings
-        for (const x of _arr) {
-          if (typeof x !== "string")
-            error(
-              `fx chunk should not contain sub-elements, but found an element: ${x[0]}`,
-            );
-        }
-        return _arr as string[];
-      } else if (tagLine.startsWith("CLAP")) {
-        // clap, find the subelement <STATE ...>
-        for (const x of _arr) {
+    if (tagLine.startsWith("VST")) {
+      // vst, rest of the array must be strings
+      for (const x of arr) {
+        if (typeof x !== "string")
+          error(
+            `fx chunk should not contain sub-elements, but found an element: ${x[0]}`,
+          );
+      }
+      const b64arr = arr as string[];
+
+      // rest of 'arr' only contains base64 data
+      // but it may be separated into "blocks", detect and separate these blocks first
+      const b64arrBlocks = b64arr.reduce(
+        (acc, line) => {
+          // add line to current block
+          acc[acc.length - 1].push(line);
+
+          if (line.endsWith("=")) {
+            // end of current block, create a new block now
+            acc.push([]);
+          }
+
+          return acc;
+        },
+        [[]] as string[][],
+      );
+      if (b64arrBlocks[b64arrBlocks.length - 1].length === 0) {
+        // remove final empty block if exists
+        b64arrBlocks.pop();
+      }
+      // join each block into strings
+      const b64blocks = b64arrBlocks.map((lines) => lines.join(""));
+      log(`b64blocks.length = ${inspect(b64blocks.length)}`);
+      // decode from base64 and join all of them
+      let alldata = b64blocks.map((b) => Base64.decode(b)).join("");
+
+      // parse header and footer
+      // https://forum.cockos.com/showthread.php?t=292773
+      // https://forum.cockos.com/showthread.php?t=168478
+      // https://forum.cockos.com/showthread.php?t=240523
+
+      const vstid = alldata.slice(0, 4);
+      const magic = alldata.slice(4, 8);
+
+      let i = 8;
+
+      const inputCount = parseLittleEndianInteger(alldata.slice(i, i + 4));
+      i += 4;
+      i += inputCount * 8;
+
+      const outputCount = parseLittleEndianInteger(alldata.slice(i, i + 4));
+      i += 4;
+      i += outputCount * 8;
+
+      const fxdataLength = parseLittleEndianInteger(alldata.slice(i, i + 4));
+      i += 4;
+
+      const magicEnd = alldata.slice(i, i + 8);
+      i += 8;
+
+      log(`inputCount = ${inspect(inputCount)}`);
+      log(`outputCount = ${inspect(outputCount)}`);
+      log(`fxdataLength = ${inspect(fxdataLength)}`);
+      log(`i = ${inspect(i)}`);
+      log(`alldata.length = ${inspect(alldata.length)}`);
+      log(`vstid = ${inspect(vstid)}`);
+      log(`magic = ${inspect(magic)}`);
+      log(`magicEnd = ${inspect(magicEnd)}`);
+
+      // This doesn't work due to transpilation issues:
+      // https://github.com/TypeScriptToLua/TypeScriptToLua/issues/903
+      // assert(
+      //   magicEnd === "\x01\x00\x00\x00\x00\x00\x10\x00" ||
+      //     magicEnd === "\x01\x00\x00\x00\xff\xff\x10\x00",
+      //   `header end sequence is malformed: ${encode(magicEnd)}`,
+      // );
+
+      const fxdataStart = i;
+
+      assert(
+        fxdataStart + fxdataLength < alldata.length,
+        "fxdata exceeds actual chunk size",
+      );
+      const headerdata = alldata.slice(0, fxdataStart);
+      const fxdata = alldata.slice(fxdataStart, fxdataStart + fxdataLength);
+      const footerdata = alldata.slice(
+        fxdataStart + fxdataLength,
+        alldata.length,
+      );
+
+      return {
+        headerdata,
+        fxdata,
+        footerdata,
+        inputCount,
+        outputCount,
+        fxdataLength,
+        vstid,
+        magic,
+      };
+    } else if (tagLine.startsWith("CLAP")) {
+      // clap, find the subelement <STATE ...>
+      const b64arr = (() => {
+        for (const x of arr) {
           if (typeof x !== "string") {
             const stateTag = x[0];
             if (typeof stateTag !== "string")
@@ -132,101 +223,15 @@ abstract class BaseFX {
           }
         }
         error(`failed to get CLAP plugin state: ${tagLine}`);
-      } else {
-        error(`this kind of fx chunk is not supported: ${tagLine}`);
-      }
-    })();
+      })();
 
-    // rest of 'arr' only contains base64 data
-    // but it may be separated into "blocks", detect and separate these blocks first
-    const arrBlocks = arr.reduce(
-      (acc, line) => {
-        // add line to current block
-        acc[acc.length - 1].push(line);
+      // join the arr and decode it
+      const fxdata = Base64.decode(b64arr.join(""));
 
-        if (line.endsWith("=")) {
-          // end of current block, create a new block now
-          acc.push([]);
-        }
-
-        return acc;
-      },
-      [[]] as string[][],
-    );
-    if (arrBlocks[arrBlocks.length - 1].length === 0) {
-      // remove final empty block if exists
-      arrBlocks.pop();
+      return { fxdata };
+    } else {
+      error(`this kind of fx chunk is not supported: ${tagLine}`);
     }
-    // join each block into strings
-    const b64blocks = arrBlocks.map((lines) => lines.join(""));
-    log(`b64blocks.length = ${inspect(b64blocks.length)}`);
-    // decode from base64 and join all of them
-    let alldata = b64blocks.map((b) => Base64.decode(b)).join("");
-
-    // parse header and footer
-    // https://forum.cockos.com/showthread.php?t=292773
-    // https://forum.cockos.com/showthread.php?t=168478
-    // https://forum.cockos.com/showthread.php?t=240523
-
-    const vstid = alldata.slice(0, 4);
-    const magic = alldata.slice(4, 8);
-
-    let i = 8;
-
-    const inputCount = parseLittleEndianInteger(alldata.slice(i, i + 4));
-    i += 4;
-    i += inputCount * 8;
-
-    const outputCount = parseLittleEndianInteger(alldata.slice(i, i + 4));
-    i += 4;
-    i += outputCount * 8;
-
-    const fxdataLength = parseLittleEndianInteger(alldata.slice(i, i + 4));
-    i += 4;
-
-    const magicEnd = alldata.slice(i, i + 8);
-    i += 8;
-
-    log(`inputCount = ${inspect(inputCount)}`);
-    log(`outputCount = ${inspect(outputCount)}`);
-    log(`fxdataLength = ${inspect(fxdataLength)}`);
-    log(`i = ${inspect(i)}`);
-    log(`alldata.length = ${inspect(alldata.length)}`);
-    log(`vstid = ${inspect(vstid)}`);
-    log(`magic = ${inspect(magic)}`);
-    log(`magicEnd = ${inspect(magicEnd)}`);
-
-    // This doesn't work due to transpilation issues:
-    // https://github.com/TypeScriptToLua/TypeScriptToLua/issues/903
-    // assert(
-    //   magicEnd === "\x01\x00\x00\x00\x00\x00\x10\x00" ||
-    //     magicEnd === "\x01\x00\x00\x00\xff\xff\x10\x00",
-    //   `header end sequence is malformed: ${encode(magicEnd)}`,
-    // );
-
-    const fxdataStart = i;
-
-    assert(
-      fxdataStart + fxdataLength < alldata.length,
-      "fxdata exceeds actual chunk size",
-    );
-    const headerdata = alldata.slice(0, fxdataStart);
-    const fxdata = alldata.slice(fxdataStart, fxdataStart + fxdataLength);
-    const footerdata = alldata.slice(
-      fxdataStart + fxdataLength,
-      alldata.length,
-    );
-
-    return {
-      headerdata,
-      fxdata,
-      footerdata,
-      inputCount,
-      outputCount,
-      fxdataLength,
-      vstid,
-      magic,
-    };
   }
 
   /** Return the base64-encoded chunk data if the plugin supports chunks. Otherwise, return null; */
