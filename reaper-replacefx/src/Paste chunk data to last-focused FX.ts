@@ -33,7 +33,10 @@ function main() {
     } else if (fxType.includes("CLAP")) {
       success = fx.SetNamedConfigParm("clap_chunk", chunk);
     } else {
-      msgBox("Error", "This FX type does not have FX chunks");
+      msgBox(
+        "Error",
+        `This plugin type '${fxType}' does not support FX chunks`,
+      );
       return { desc: actionName, flags: 0 };
     }
 

@@ -13,7 +13,10 @@ function main() {
 
   const chunk = fx.getData();
   if (chunk === null) {
-    msgBox("Error", "This FX type does not have FX chunks");
+    msgBox(
+      "Error",
+      `This plugin type '${fx.getType()}' does not support FX chunks`,
+    );
     return;
   }
 
