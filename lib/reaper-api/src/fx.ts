@@ -483,8 +483,8 @@ export class FXParam {
   }
 
   /** A wrapper for the FX's GetNamedConfigParm() to parse it as a number. */
-  private _parseFXConfig(name: string, fallback: number) {
-    const text = this.fx.GetNamedConfigParm(name);
+  private _parseParamConfig(name: string, fallback: number) {
+    const text = this.fx.GetNamedConfigParm(`param.${this.param}.${name}`);
     if (!text) return fallback;
 
     const result = tonumber(text);
@@ -495,11 +495,12 @@ export class FXParam {
   }
 
   /** A wrapper for the FX's SetNamedConfigParm() to allow number / bool arguments. */
-  private _setFXConfig(name: string, value: number | boolean) {
+  private _setParamConfig(name: string, value: number | boolean) {
+    const key = `param.${this.param}.${name}`;
     if (typeof value === "number") {
-      this.fx.SetNamedConfigParm(name, value.toString());
+      this.fx.SetNamedConfigParm(key, value.toString());
     } else {
-      this.fx.SetNamedConfigParm(name, value ? "1" : "0");
+      this.fx.SetNamedConfigParm(key, value ? "1" : "0");
     }
   }
 
@@ -516,63 +517,60 @@ export class FXParam {
   }
 
   modulationActive(): boolean {
-    return this._parseFXConfig(`param.${this.param}.mod.active`, 0) === 1;
+    return this._parseParamConfig(`mod.active`, 0) === 1;
   }
 
   getModulation(): ModulationInfo | null {
-    const param = this.param;
-
-    const modActive = this._parseFXConfig(`param.${param}.mod.active`, 0) === 1;
+    const modActive = this._parseParamConfig(`mod.active`, 0) === 1;
     if (!modActive) return null;
 
     const modInfo: ModulationInfo = {
-      baseline: this._parseFXConfig(`param.${param}.mod.baseline`, 0),
+      baseline: this._parseParamConfig(`mod.baseline`, 0),
       acs: null,
       lfo: null,
       plink: null,
     };
 
-    const lfoActive = this._parseFXConfig(`param.${param}.lfo.active`, 0) === 1;
+    const lfoActive = this._parseParamConfig(`lfo.active`, 0) === 1;
     if (lfoActive) {
       modInfo.lfo = {
-        dir: this._parseFXConfig(`param.${param}.lfo.dir`, 1) as -1 | 0 | 1,
-        phase: this._parseFXConfig(`param.${param}.lfo.phase`, 0),
-        speed: this._parseFXConfig(`param.${param}.lfo.speed`, 1),
-        strength: this._parseFXConfig(`param.${param}.lfo.strength`, 1),
-        tempoSync: this._parseFXConfig(`param.${param}.lfo.temposync`, 0) === 1,
-        free: this._parseFXConfig(`param.${param}.lfo.free`, 0) === 1,
-        shape: this._parseFXConfig(`param.${param}.lfo.shape`, 0),
+        dir: this._parseParamConfig(`lfo.dir`, 1) as -1 | 0 | 1,
+        phase: this._parseParamConfig(`lfo.phase`, 0),
+        speed: this._parseParamConfig(`lfo.speed`, 1),
+        strength: this._parseParamConfig(`lfo.strength`, 1),
+        tempoSync: this._parseParamConfig(`lfo.temposync`, 0) === 1,
+        free: this._parseParamConfig(`lfo.free`, 0) === 1,
+        shape: this._parseParamConfig(`lfo.shape`, 0),
       };
     }
 
-    const acsActive = this._parseFXConfig(`param.${param}.acs.active`, 0) === 1;
+    const acsActive = this._parseParamConfig(`acs.active`, 0) === 1;
     if (acsActive) {
       modInfo.acs = {
-        dir: this._parseFXConfig(`param.${param}.acs.dir`, 1) as -1 | 0 | 1,
-        strength: this._parseFXConfig(`param.${param}.acs.strength`, 1),
-        attack: this._parseFXConfig(`param.${param}.acs.attack`, 300),
-        release: this._parseFXConfig(`param.${param}.acs.release`, 300),
-        minVol: this._parseFXConfig(`param.${param}.acs.dblo`, -24),
-        maxVol: this._parseFXConfig(`param.${param}.acs.dbhi`, 0),
-        chan: this._parseFXConfig(`param.${param}.acs.chan`, -1),
-        stereo: this._parseFXConfig(`param.${param}.acs.stereo`, 0) === 1,
-        x2: this._parseFXConfig(`param.${param}.acs.x2`, 0.5),
-        y2: this._parseFXConfig(`param.${param}.acs.y2`, 0.5),
+        dir: this._parseParamConfig(`acs.dir`, 1) as -1 | 0 | 1,
+        strength: this._parseParamConfig(`acs.strength`, 1),
+        attack: this._parseParamConfig(`acs.attack`, 300),
+        release: this._parseParamConfig(`acs.release`, 300),
+        minVol: this._parseParamConfig(`acs.dblo`, -24),
+        maxVol: this._parseParamConfig(`acs.dbhi`, 0),
+        chan: this._parseParamConfig(`acs.chan`, -1),
+        stereo: this._parseParamConfig(`acs.stereo`, 0) === 1,
+        x2: this._parseParamConfig(`acs.x2`, 0.5),
+        y2: this._parseParamConfig(`acs.y2`, 0.5),
       };
     }
 
-    const plinkActive =
-      this._parseFXConfig(`param.${param}.plink.active`, 0) === 1;
+    const plinkActive = this._parseParamConfig(`plink.active`, 0) === 1;
     if (plinkActive) {
       modInfo.plink = {
-        scale: this._parseFXConfig(`param.${param}.plink.scale`, 1),
-        offset: this._parseFXConfig(`param.${param}.plink.offset`, 0),
-        fxidx: this._parseFXConfig(`param.${param}.plink.effect`, -1),
-        param: this._parseFXConfig(`param.${param}.plink.param`, -1),
-        midi_bus: this._parseFXConfig(`param.${param}.plink.midi_bus`, 0),
-        midi_chan: this._parseFXConfig(`param.${param}.plink.midi_chan`, 0),
-        midi_msg: this._parseFXConfig(`param.${param}.plink.midi_msg`, 0),
-        midi_msg2: this._parseFXConfig(`param.${param}.plink.midi_msg2`, 0),
+        scale: this._parseParamConfig(`plink.scale`, 1),
+        offset: this._parseParamConfig(`plink.offset`, 0),
+        fxidx: this._parseParamConfig(`plink.effect`, -1),
+        param: this._parseParamConfig(`plink.param`, -1),
+        midi_bus: this._parseParamConfig(`plink.midi_bus`, 0),
+        midi_chan: this._parseParamConfig(`plink.midi_chan`, 0),
+        midi_msg: this._parseParamConfig(`plink.midi_msg`, 0),
+        midi_msg2: this._parseParamConfig(`plink.midi_msg2`, 0),
       };
     }
 
@@ -580,60 +578,46 @@ export class FXParam {
   }
 
   setModulation(modInfo: ModulationInfo | null) {
-    const param = this.param;
-
-    this._setFXConfig(`param.${param}.mod.active`, modInfo !== null);
+    this._setParamConfig(`mod.active`, modInfo !== null);
     if (modInfo === null) return;
 
-    this._setFXConfig(`param.${param}.mod.baseline`, modInfo.baseline);
+    this._setParamConfig(`mod.baseline`, modInfo.baseline);
 
-    this._setFXConfig(`param.${param}.lfo.active`, modInfo.lfo !== null);
+    this._setParamConfig(`lfo.active`, modInfo.lfo !== null);
     if (modInfo.lfo !== null) {
-      this._setFXConfig(`param.${param}.lfo.dir`, modInfo.lfo.dir);
-      this._setFXConfig(`param.${param}.lfo.phase`, modInfo.lfo.phase);
-      this._setFXConfig(`param.${param}.lfo.speed`, modInfo.lfo.speed);
-      this._setFXConfig(`param.${param}.lfo.strength`, modInfo.lfo.strength);
-      this._setFXConfig(`param.${param}.lfo.temposync`, modInfo.lfo.tempoSync);
-      this._setFXConfig(`param.${param}.lfo.free`, modInfo.lfo.free);
-      this._setFXConfig(`param.${param}.lfo.shape`, modInfo.lfo.shape);
+      this._setParamConfig(`lfo.dir`, modInfo.lfo.dir);
+      this._setParamConfig(`lfo.phase`, modInfo.lfo.phase);
+      this._setParamConfig(`lfo.speed`, modInfo.lfo.speed);
+      this._setParamConfig(`lfo.strength`, modInfo.lfo.strength);
+      this._setParamConfig(`lfo.temposync`, modInfo.lfo.tempoSync);
+      this._setParamConfig(`lfo.free`, modInfo.lfo.free);
+      this._setParamConfig(`lfo.shape`, modInfo.lfo.shape);
     }
 
-    this._setFXConfig(`param.${param}.acs.active`, modInfo.acs !== null);
+    this._setParamConfig(`acs.active`, modInfo.acs !== null);
     if (modInfo.acs !== null) {
-      this._setFXConfig(`param.${param}.acs.dir`, modInfo.acs.dir);
-      this._setFXConfig(`param.${param}.acs.strength`, modInfo.acs.strength);
-      this._setFXConfig(`param.${param}.acs.attack`, modInfo.acs.attack);
-      this._setFXConfig(`param.${param}.acs.release`, modInfo.acs.release);
-      this._setFXConfig(`param.${param}.acs.dblo`, modInfo.acs.minVol);
-      this._setFXConfig(`param.${param}.acs.dbhi`, modInfo.acs.maxVol);
-      this._setFXConfig(`param.${param}.acs.chan`, modInfo.acs.chan);
-      this._setFXConfig(`param.${param}.acs.stereo`, modInfo.acs.stereo);
-      this._setFXConfig(`param.${param}.acs.x2`, modInfo.acs.x2);
-      this._setFXConfig(`param.${param}.acs.y2`, modInfo.acs.y2);
+      this._setParamConfig(`acs.dir`, modInfo.acs.dir);
+      this._setParamConfig(`acs.strength`, modInfo.acs.strength);
+      this._setParamConfig(`acs.attack`, modInfo.acs.attack);
+      this._setParamConfig(`acs.release`, modInfo.acs.release);
+      this._setParamConfig(`acs.dblo`, modInfo.acs.minVol);
+      this._setParamConfig(`acs.dbhi`, modInfo.acs.maxVol);
+      this._setParamConfig(`acs.chan`, modInfo.acs.chan);
+      this._setParamConfig(`acs.stereo`, modInfo.acs.stereo);
+      this._setParamConfig(`acs.x2`, modInfo.acs.x2);
+      this._setParamConfig(`acs.y2`, modInfo.acs.y2);
     }
 
-    this._setFXConfig(`param.${param}.plink.active`, modInfo.plink !== null);
+    this._setParamConfig(`plink.active`, modInfo.plink !== null);
     if (modInfo.plink) {
-      this._setFXConfig(`param.${param}.plink.scale`, modInfo.plink.scale);
-      this._setFXConfig(`param.${param}.plink.offset`, modInfo.plink.offset);
-      this._setFXConfig(`param.${param}.plink.effect`, modInfo.plink.fxidx);
-      this._setFXConfig(`param.${param}.plink.param`, modInfo.plink.param);
-      this._setFXConfig(
-        `param.${param}.plink.midi_bus`,
-        modInfo.plink.midi_bus,
-      );
-      this._setFXConfig(
-        `param.${param}.plink.midi_chan`,
-        modInfo.plink.midi_chan,
-      );
-      this._setFXConfig(
-        `param.${param}.plink.midi_msg`,
-        modInfo.plink.midi_msg,
-      );
-      this._setFXConfig(
-        `param.${param}.plink.midi_msg2`,
-        modInfo.plink.midi_msg2,
-      );
+      this._setParamConfig(`plink.scale`, modInfo.plink.scale);
+      this._setParamConfig(`plink.offset`, modInfo.plink.offset);
+      this._setParamConfig(`plink.effect`, modInfo.plink.fxidx);
+      this._setParamConfig(`plink.param`, modInfo.plink.param);
+      this._setParamConfig(`plink.midi_bus`, modInfo.plink.midi_bus);
+      this._setParamConfig(`plink.midi_chan`, modInfo.plink.midi_chan);
+      this._setParamConfig(`plink.midi_msg`, modInfo.plink.midi_msg);
+      this._setParamConfig(`plink.midi_msg2`, modInfo.plink.midi_msg2);
     }
 
     return modInfo;
