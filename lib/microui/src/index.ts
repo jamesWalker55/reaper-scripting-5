@@ -37,6 +37,8 @@ function deferLoop(func: (stop: () => void) => void) {
  *
  *     gfx.init("My window", 260, 450);
  *     gfx.setfont(1, "Arial", 12);
+ *
+ * Afterwards, use {@link microUILoop} to run the main GUI loop.
  */
 export function createContext() {
   return new Context(
@@ -53,6 +55,14 @@ export function createContext() {
   );
 }
 
+/**
+ * Main loop for a microUI GUI. Use {@link createContext} to create a context first.
+ *
+ * Example code:
+ * - {@link demoSimple}
+ * - {@link demoSingleWindow}
+ * - {@link demoMultiWindow}
+ */
 export function microUILoop(ctx: Context, func: () => void) {
   const downKeys = {
     // mouse
@@ -632,5 +642,102 @@ export function demoSingleWindow() {
     ctx.end();
 
     gfx.clear = bgColor[0] + bgColor[1] * 256 + bgColor[2] * 65536;
+  });
+}
+
+export function demoSimple() {
+  gfx.init("My Window", 260, 450);
+  gfx.setfont(1, "Arial", 12);
+
+  const ctx = createContext();
+
+  const checks = [true, false, true];
+
+  microUILoop(ctx, () => {
+    ctx.begin();
+
+    if (
+      ctx.beginWindow(
+        "Demo Window",
+        { x: 0, y: 0, w: 0, h: 0 },
+        Option.NoResize | Option.NoTitle | Option.NoClose,
+      )
+    ) {
+      const win = ctx.getCurrentContainer();
+      win.rect.w = gfx.w;
+      win.rect.h = gfx.h;
+
+      if (ctx.header("Window Info")) {
+        const win = ctx.getCurrentContainer();
+        ctx.layoutRow([54, -1], 0);
+
+        ctx.label("Position:");
+        ctx.label(`${win.rect.x}, ${win.rect.y}`);
+
+        ctx.label("Size:");
+        ctx.label(`${win.rect.w}, ${win.rect.h}`);
+      }
+
+      if (ctx.header("Test Buttons", Option.Expanded)) {
+        ctx.layoutRow([86, -110, -1], 0);
+        ctx.label("Test buttons 1:");
+        if (ctx.button("Button 1")) {
+          log.info("Pressed button 1");
+        }
+        if (ctx.button("Button 2")) {
+          log.info("Pressed button 2");
+        }
+        ctx.label("Test buttons 2:");
+        if (ctx.button("Button 3")) {
+          log.info("Pressed button 3");
+        }
+        if (ctx.button("Popup")) {
+          ctx.openPopup("Test Popup");
+        }
+        if (ctx.beginPopup("Test Popup")) {
+          ctx.button("Hello");
+          ctx.button("World");
+          ctx.endPopup();
+        }
+      }
+
+      if (ctx.header("Tree and Text", Option.Expanded)) {
+        ctx.layoutRow([140, -1], 0);
+        ctx.layoutBeginColumn();
+        if (ctx.beginTreenode("Test 1")) {
+          if (ctx.beginTreenode("Test 1a")) {
+            ctx.label("Hello");
+            ctx.label("world");
+            ctx.endTreenode();
+          }
+          if (ctx.beginTreenode("Test 1b")) {
+            if (ctx.button("Button 1")) log.info("Pressed button 1");
+            if (ctx.button("Button 2")) log.info("Pressed button 2");
+            ctx.endTreenode();
+          }
+          ctx.endTreenode();
+        }
+        if (ctx.beginTreenode("Test 2")) {
+          checks[0] = ctx.checkbox("Checkbox 1", checks[0]);
+          checks[1] = ctx.checkbox("Checkbox 2", checks[1]);
+          checks[2] = ctx.checkbox("Checkbox 3", checks[2]);
+          ctx.endTreenode();
+        }
+        ctx.layoutEndColumn();
+
+        ctx.layoutBeginColumn();
+        ctx.layoutRow([-1], 0);
+        ctx.text(
+          "Lorem ipsum dolor sit amet, consectetur adipiscing " +
+            "elit. Maecenas lacinia, sem eu lacinia molestie, mi risus faucibus " +
+            "ipsum, eu varius magna felis a nulla.",
+        );
+        ctx.layoutEndColumn();
+      }
+
+      ctx.endWindow();
+    }
+
+    ctx.end();
   });
 }
