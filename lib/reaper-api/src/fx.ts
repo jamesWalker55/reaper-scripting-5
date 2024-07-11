@@ -1,10 +1,7 @@
-import { encode } from "json";
 import * as ArrChunk from "./arrchunk";
-import * as Chunk from "./chunk";
 import * as Base64 from "./base64";
-import { copy } from "./clipboard";
-import { inspect } from "./inspect";
-import { log, msgBox } from "./utils";
+import * as Chunk from "./chunk";
+import { msgBox } from "./utils";
 
 function parseLittleEndianInteger(bytes: string): number {
   let result: number = 0;
@@ -135,7 +132,6 @@ abstract class BaseFX {
       }
       // join each block into strings
       const b64blocks = b64arrBlocks.map((lines) => lines.join(""));
-      log(`b64blocks.length = ${inspect(b64blocks.length)}`);
       // decode from base64 and join all of them
       let alldata = b64blocks.map((b) => Base64.decode(b)).join("");
 
@@ -163,14 +159,15 @@ abstract class BaseFX {
       const magicEnd = alldata.slice(i, i + 8);
       i += 8;
 
-      log(`inputCount = ${inspect(inputCount)}`);
-      log(`outputCount = ${inspect(outputCount)}`);
-      log(`fxdataLength = ${inspect(fxdataLength)}`);
-      log(`i = ${inspect(i)}`);
-      log(`alldata.length = ${inspect(alldata.length)}`);
-      log(`vstid = ${inspect(vstid)}`);
-      log(`magic = ${inspect(magic)}`);
-      log(`magicEnd = ${inspect(magicEnd)}`);
+      // log(`b64blocks.length = ${inspect(b64blocks.length)}`);
+      // log(`inputCount = ${inspect(inputCount)}`);
+      // log(`outputCount = ${inspect(outputCount)}`);
+      // log(`fxdataLength = ${inspect(fxdataLength)}`);
+      // log(`i = ${inspect(i)}`);
+      // log(`alldata.length = ${inspect(alldata.length)}`);
+      // log(`vstid = ${inspect(vstid)}`);
+      // log(`magic = ${inspect(magic)}`);
+      // log(`magicEnd = ${inspect(magicEnd)}`);
 
       // This doesn't work due to transpilation issues:
       // https://github.com/TypeScriptToLua/TypeScriptToLua/issues/903
