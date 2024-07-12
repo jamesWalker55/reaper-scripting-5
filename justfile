@@ -1,46 +1,40 @@
+REAPER_INDEXER := "reaper-indexer-4"
+INDEX_REPOSITORY := "D:/Programming/reaper-scripting-5-index"
+
 BASH_PATH := if os_family() == "windows" { "bash" } else { "/usr/bin/env bash" }
-SCRIPT_HEADER := "set -euxo pipefail"
 
-all:
-  just json
-  just reaper-api
-  just reaper-microui
-  just script-template
-  just fx-chunk-data
-
-json:
+rebuild:
   #!{{BASH_PATH}}
-  {{SCRIPT_HEADER}}
+  set -euxo pipefail
 
+  # store root dir to return to later
+  WORKING_DIR=$(pwd)
+
+  cd "$WORKING_DIR"
   cd lib/json
   bun link
 
-reaper-api:
-  #!{{BASH_PATH}}
-  {{SCRIPT_HEADER}}
-
+  cd "$WORKING_DIR"
   cd lib/reaper-api
+  rm -rf dist
   rm -rf node_modules; bun install; just build
   cd './dist'; bun link
 
-reaper-microui:
-  #!{{BASH_PATH}}
-  {{SCRIPT_HEADER}}
-
+  cd "$WORKING_DIR"
   cd lib/microui
+  rm -rf build
   rm -rf node_modules; bun install; just build
   bun link
 
-script-template:
-  #!{{BASH_PATH}}
-  {{SCRIPT_HEADER}}
-
+  cd "$WORKING_DIR"
   cd script-template
+  rm -rf dist
   rm -rf node_modules; bun install; just build
 
-fx-chunk-data:
-  #!{{BASH_PATH}}
-  {{SCRIPT_HEADER}}
-
+  cd "$WORKING_DIR"
   cd fx-chunk-data
+  rm -rf dist
   rm -rf node_modules; bun install; just build
+
+publish package path:
+  {{REAPER_INDEXER}} publish --repo "{{INDEX_REPOSITORY}}" --identifier "{{package}}" "{{path}}"
