@@ -1,5 +1,5 @@
 {
-  "name": "reaper-replacefx",
+  "name": "fx-chunk-data",
   "module": "src/index.ts",
   "type": "module",
   "dependencies": {},

@@ -6,7 +6,7 @@ all:
   just reaper-api
   just reaper-microui
   just script-template
-  just reaper-replacefx
+  just fx-chunk-data
 
 json:
   #!{{BASH_PATH}}
@@ -38,9 +38,9 @@ script-template:
   cd script-template
   rm -rf node_modules; bun install; just build
 
-reaper-replacefx:
+fx-chunk-data:
   #!{{BASH_PATH}}
   {{SCRIPT_HEADER}}
 
-  cd reaper-replacefx
+  cd fx-chunk-data
   rm -rf node_modules; bun install; just build
