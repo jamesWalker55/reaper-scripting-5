@@ -1,4 +1,4 @@
-REAPER_INDEXER := "reaper-indexer-4"
+REAPER_INDEXER := "reapack-indexer-4"
 INDEX_REPOSITORY := "D:/Programming/reaper-scripting-5-index"
 
 BASH_PATH := if os_family() == "windows" { "bash" } else { "/usr/bin/env bash" }
