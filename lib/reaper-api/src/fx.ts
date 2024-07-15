@@ -255,14 +255,13 @@ abstract class BaseFX {
         );
       }
     }
-    // handle offline FX chunk data
-    if (chunk === null && this.isOffline()) {
+    // if null, plugin supports chunks, but we can't get it for some reason
+    // try getting it manually
+    if (chunk === null) {
       const arrchunk = this.getArrChunk();
       const { fxdata } = this.parseArrChunk(arrchunk);
       chunk = Base64.encode(fxdata);
     }
-    // if null, plugin supports chunks, but we can't get it for some reason
-    if (chunk === null) error("failed to get FX chunk");
     return chunk;
   }
 
