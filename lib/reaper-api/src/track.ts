@@ -285,7 +285,7 @@ module TrackRouting {
       category,
       idx,
       "P_DESTTRACK",
-    );
+    ) as MediaTrack | 0;
     const src: MediaTrack = reaper.GetTrackSendInfo_Value(
       track,
       category,
