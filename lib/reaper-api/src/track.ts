@@ -1,4 +1,4 @@
-import { TrackFX } from "./fx";
+import { AddFxParams, stringifyAddFxParams, TrackFX } from "./fx";
 
 export class Track {
   obj: MediaTrack;
@@ -45,6 +45,23 @@ export class Track {
       result.push(Track.getByIdx(i));
     }
     return result;
+  }
+
+  /** Returns new position if success, otherwise return nil */
+  addFx(fx: AddFxParams, position?: number) {
+    const fxname = stringifyAddFxParams(fx);
+
+    const rv = reaper.TrackFX_AddByName(
+      this.obj,
+      fxname,
+      false,
+      position === undefined ? -1 : -1000 - position,
+    );
+    if (rv === -1) {
+      return null;
+    }
+    const newPosition = rv;
+    return newPosition;
   }
 
   getFxCount() {

@@ -1,7 +1,7 @@
 import * as ArrChunk from "./arrchunk";
 import * as Base64 from "./base64";
 import * as Chunk from "./chunk";
-import { msgBox } from "./utils";
+import { assertUnreachable, msgBox } from "./utils";
 
 function parseLittleEndianInteger(bytes: string): number {
   let result: number = 0;
@@ -10,6 +10,49 @@ function parseLittleEndianInteger(bytes: string): number {
     result += byte << (i * 8);
   }
   return result;
+}
+
+export type AddFxParams =
+  | { vst3: string }
+  | { vst2: string }
+  | { vst: string }
+  | { au: string }
+  | { js: string }
+  | { dx: string }
+  | { browser: true | { max: number } | { exactly: number } }
+  | string;
+
+export function stringifyAddFxParams(params: AddFxParams): string {
+  if (typeof params === "string") {
+    return params;
+  }
+
+  if ("vst3" in params) {
+    return `VST3: ${params.vst3}`;
+  } else if ("vst2" in params) {
+    return `VST2: ${params.vst2}`;
+  } else if ("vst" in params) {
+    return `VST: ${params.vst}`;
+  } else if ("au" in params) {
+    return `AU: ${params.au}`;
+  } else if ("js" in params) {
+    return `JS: ${params.js}`;
+  } else if ("dx" in params) {
+    return `DX: ${params.dx}`;
+  } else if ("browser" in params) {
+    const browser = params.browser;
+    if (browser === true) {
+      return "FXADD:";
+    } else if ("max" in browser) {
+      return `FXADD:${browser.max}`;
+    } else if ("exactly" in browser) {
+      return `FXADD:${browser.exactly}e`;
+    } else {
+      assertUnreachable(browser);
+    }
+  } else {
+    assertUnreachable(params);
+  }
 }
 
 abstract class BaseFX {
