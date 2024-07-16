@@ -57,13 +57,12 @@ export function stringifyAddFxParams(params: AddFxParams): string {
 
 // container indexing functions from:
 // https://forum.cockos.com/showthread.php?p=2714770#post2714770
-/** NOTE: return value is 1-based! */
 export function parseContainerFxidx(
   track: MediaTrack,
   fxidx: number,
 ): number[] {
   const isContainerFxidx = (fxidx & 0x2000000) !== 0;
-  if (!isContainerFxidx) return [fxidx + 1];
+  if (!isContainerFxidx) return [fxidx];
 
   const ret = [];
   let n = reaper.TrackFX_GetCount(track);
@@ -84,11 +83,11 @@ export function parseContainerFxidx(
     if (!ccok) {
       error("bad container address: not a container");
     }
-    ret.push(curidx);
+    ret.push(curidx - 1);
     n = parseInt(cc);
     if (remain <= n) {
       if (remain > 0) {
-        ret.push(remain);
+        ret.push(remain - 1);
       }
       return ret;
     }
@@ -101,16 +100,15 @@ export function parseContainerFxidx(
     addr_sc = addr_sc * (n + 1);
   }
 }
-/** NOTE: fxidx is 1-based! */
 export function generateContainerFxidx(
   track: MediaTrack,
-  idx1: number,
-  ...idxrest: number[]
+  allidx: number[],
 ): number {
+  assert(allidx.length > 0, "container index must be at least length 1");
   let sc = reaper.TrackFX_GetCount(track) + 1;
-  let rv = 0x2000000 + idx1;
-  for (let i = 0; i < idxrest.length; i++) {
-    const v = idxrest[i];
+  let rv = 0x2000000 + allidx[0] + 1;
+  for (let i = 1; i < allidx.length; i++) {
+    const v = allidx[i] + 1;
 
     const [ccok, cc] = reaper.TrackFX_GetNamedConfigParm(
       track,
