@@ -2,41 +2,48 @@
 
 // https://stackoverflow.com/questions/56737033/how-to-define-an-opaque-type-in-typescript
 declare const opaqueTypeTag: unique symbol;
-declare type LuaMultiReturn<T> = T;
-declare type AudioAccessor = { readonly [opaqueTypeTag]: 'AudioAccessor' };
-declare type AudioWriter = { readonly [opaqueTypeTag]: 'AudioWriter' };
-declare type BR_Envelope = { readonly [opaqueTypeTag]: 'BR_Envelope' };
-declare type CF_Preview = { readonly [opaqueTypeTag]: 'CF_Preview' };
-declare type FxChain = { readonly [opaqueTypeTag]: 'FxChain' };
-declare type HWND = { readonly [opaqueTypeTag]: 'HWND' };
-declare type IReaperControlSurface = { readonly [opaqueTypeTag]: 'IReaperControlSurface' };
-declare type ImGui_Context = { readonly [opaqueTypeTag]: 'ImGui_Context' };
-declare type ImGui_DrawList = { readonly [opaqueTypeTag]: 'ImGui_DrawList' };
-declare type ImGui_DrawListSplitter = { readonly [opaqueTypeTag]: 'ImGui_DrawListSplitter' };
-declare type ImGui_Font = { readonly [opaqueTypeTag]: 'ImGui_Font' };
-declare type ImGui_Function = { readonly [opaqueTypeTag]: 'ImGui_Function' };
-declare type ImGui_Image = { readonly [opaqueTypeTag]: 'ImGui_Image' };
-declare type ImGui_ImageSet = { readonly [opaqueTypeTag]: 'ImGui_ImageSet' };
-declare type ImGui_ListClipper = { readonly [opaqueTypeTag]: 'ImGui_ListClipper' };
-declare type ImGui_Resource = { readonly [opaqueTypeTag]: 'ImGui_Resource' };
-declare type ImGui_TextFilter = { readonly [opaqueTypeTag]: 'ImGui_TextFilter' };
-declare type ImGui_Viewport = { readonly [opaqueTypeTag]: 'ImGui_Viewport' };
-declare type KbdSectionInfo = { readonly [opaqueTypeTag]: 'KbdSectionInfo' };
-declare type LICE_IBitmap = { readonly [opaqueTypeTag]: 'LICE_IBitmap' };
-declare type MediaItem = { readonly [opaqueTypeTag]: 'MediaItem' };
-declare type MediaItem_Take = { readonly [opaqueTypeTag]: 'MediaItem_Take' };
-declare type MediaTrack = { readonly [opaqueTypeTag]: 'MediaTrack' };
-declare type PCM_source = { readonly [opaqueTypeTag]: 'PCM_source' };
-declare type PackageEntry = { readonly [opaqueTypeTag]: 'PackageEntry' };
-declare type ReaProject = { readonly [opaqueTypeTag]: 'ReaProject' };
-declare type RprMidiNote = { readonly [opaqueTypeTag]: 'RprMidiNote' };
-declare type RprMidiTake = { readonly [opaqueTypeTag]: 'RprMidiTake' };
-declare type TrackEnvelope = { readonly [opaqueTypeTag]: 'TrackEnvelope' };
-declare type WDL_FastString = { readonly [opaqueTypeTag]: 'WDL_FastString' };
-declare type identifier = { readonly [opaqueTypeTag]: 'identifier' };
-declare type joystick_device = { readonly [opaqueTypeTag]: 'joystick_device' };
-declare type reaper_array = { readonly [opaqueTypeTag]: 'reaper_array' };
-declare type unsupported = { readonly [opaqueTypeTag]: 'unsupported' };
+declare type AudioAccessor = { readonly [opaqueTypeTag]: "AudioAccessor" };
+declare type AudioWriter = { readonly [opaqueTypeTag]: "AudioWriter" };
+declare type BR_Envelope = { readonly [opaqueTypeTag]: "BR_Envelope" };
+declare type CF_Preview = { readonly [opaqueTypeTag]: "CF_Preview" };
+declare type FxChain = { readonly [opaqueTypeTag]: "FxChain" };
+declare type HWND = { readonly [opaqueTypeTag]: "HWND" };
+declare type IReaperControlSurface = {
+  readonly [opaqueTypeTag]: "IReaperControlSurface";
+};
+declare type ImGui_Context = { readonly [opaqueTypeTag]: "ImGui_Context" };
+declare type ImGui_DrawList = { readonly [opaqueTypeTag]: "ImGui_DrawList" };
+declare type ImGui_DrawListSplitter = {
+  readonly [opaqueTypeTag]: "ImGui_DrawListSplitter";
+};
+declare type ImGui_Font = { readonly [opaqueTypeTag]: "ImGui_Font" };
+declare type ImGui_Function = { readonly [opaqueTypeTag]: "ImGui_Function" };
+declare type ImGui_Image = { readonly [opaqueTypeTag]: "ImGui_Image" };
+declare type ImGui_ImageSet = { readonly [opaqueTypeTag]: "ImGui_ImageSet" };
+declare type ImGui_ListClipper = {
+  readonly [opaqueTypeTag]: "ImGui_ListClipper";
+};
+declare type ImGui_Resource = { readonly [opaqueTypeTag]: "ImGui_Resource" };
+declare type ImGui_TextFilter = {
+  readonly [opaqueTypeTag]: "ImGui_TextFilter";
+};
+declare type ImGui_Viewport = { readonly [opaqueTypeTag]: "ImGui_Viewport" };
+declare type KbdSectionInfo = { readonly [opaqueTypeTag]: "KbdSectionInfo" };
+declare type LICE_IBitmap = { readonly [opaqueTypeTag]: "LICE_IBitmap" };
+declare type MediaItem = { readonly [opaqueTypeTag]: "MediaItem" };
+declare type MediaItem_Take = { readonly [opaqueTypeTag]: "MediaItem_Take" };
+declare type MediaTrack = { readonly [opaqueTypeTag]: "MediaTrack" };
+declare type PCM_source = { readonly [opaqueTypeTag]: "PCM_source" };
+declare type PackageEntry = { readonly [opaqueTypeTag]: "PackageEntry" };
+declare type ReaProject = { readonly [opaqueTypeTag]: "ReaProject" };
+declare type RprMidiNote = { readonly [opaqueTypeTag]: "RprMidiNote" };
+declare type RprMidiTake = { readonly [opaqueTypeTag]: "RprMidiTake" };
+declare type TrackEnvelope = { readonly [opaqueTypeTag]: "TrackEnvelope" };
+declare type WDL_FastString = { readonly [opaqueTypeTag]: "WDL_FastString" };
+declare type identifier = { readonly [opaqueTypeTag]: "identifier" };
+declare type joystick_device = { readonly [opaqueTypeTag]: "joystick_device" };
+declare type reaper_array = { readonly [opaqueTypeTag]: "reaper_array" };
+declare type unsupported = { readonly [opaqueTypeTag]: "unsupported" };
 
 declare namespace reaper {
   /**
@@ -53,7 +60,14 @@ declare namespace reaper {
    * ```
    * Returns the index of the created marker/region, or -1 on failure. Supply wantidx>=0 if you want a particular index number, but you'll get a different index number a region and wantidx is already in use.
    */
-  function AddProjectMarker(proj: ReaProject, isrgn: boolean, pos: number, rgnend: number, name: string, wantidx: number): number;
+  function AddProjectMarker(
+    proj: ReaProject,
+    isrgn: boolean,
+    pos: number,
+    rgnend: number,
+    name: string,
+    wantidx: number,
+  ): number;
 
   /**
    * ```
@@ -61,7 +75,15 @@ declare namespace reaper {
    * ```
    * Returns the index of the created marker/region, or -1 on failure. Supply wantidx>=0 if you want a particular index number, but you'll get a different index number a region and wantidx is already in use. color should be 0 (default color), or ColorToNative(r,g,b)|0x1000000
    */
-  function AddProjectMarker2(proj: ReaProject, isrgn: boolean, pos: number, rgnend: number, name: string, wantidx: number, color: number): number;
+  function AddProjectMarker2(
+    proj: ReaProject,
+    isrgn: boolean,
+    pos: number,
+    rgnend: number,
+    name: string,
+    wantidx: number,
+    color: number,
+  ): number;
 
   /**
    * ```
@@ -69,7 +91,12 @@ declare namespace reaper {
    * ```
    * Add a ReaScript (return the new command ID, or 0 if failed) or remove a ReaScript (return >0 on success). Use commit==true when adding/removing a single script. When bulk adding/removing n scripts, you can optimize the n-1 first calls with commit==false and commit==true for the last call.
    */
-  function AddRemoveReaScript(add: boolean, sectionID: number, scriptfn: string, commit: boolean): number;
+  function AddRemoveReaScript(
+    add: boolean,
+    sectionID: number,
+    scriptfn: string,
+    commit: boolean,
+  ): number;
 
   /**
    * ```
@@ -86,7 +113,14 @@ declare namespace reaper {
    * Deprecated. Use SetTempoTimeSigMarker with ptidx=-1.
    * @deprecated
    */
-  function AddTempoTimeSigMarker(proj: ReaProject, timepos: number, bpm: number, timesig_num: number, timesig_denom: number, lineartempochange: boolean): boolean;
+  function AddTempoTimeSigMarker(
+    proj: ReaProject,
+    timepos: number,
+    bpm: number,
+    timesig_num: number,
+    timesig_denom: number,
+    lineartempochange: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -94,7 +128,12 @@ declare namespace reaper {
    * ```
    * forceset=0,doupd=true,centermode=-1 for default
    */
-  function adjustZoom(amt: number, forceset: number, doupd: boolean, centermode: number): void;
+  function adjustZoom(
+    amt: number,
+    forceset: number,
+    doupd: boolean,
+    centermode: number,
+  ): void;
 
   /**
    * ```
@@ -135,7 +174,15 @@ declare namespace reaper {
    *
    * copies: in nudge duplicate mode, number of copies (otherwise ignored)
    */
-  function ApplyNudge(project: ReaProject, nudgeflag: number, nudgewhat: number, nudgeunits: number, value: number, reverse: boolean, copies: number): boolean;
+  function ApplyNudge(
+    project: ReaProject,
+    nudgeflag: number,
+    nudgewhat: number,
+    nudgeunits: number,
+    value: number,
+    reverse: boolean,
+    copies: number,
+  ): boolean;
 
   /**
    * ```
@@ -223,7 +270,13 @@ declare namespace reaper {
    * ```
    * Calculate normalize adjustment for source media. normalizeTo: 0=LUFS-I, 1=RMS-I, 2=peak, 3=true peak, 4=LUFS-M max, 5=LUFS-S max. normalizeTarget: dBFS or LUFS value. normalizeStart, normalizeEnd: time bounds within source media for normalization calculation. If normalizationStart=0 and normalizationEnd=0, the full duration of the media will be used for the calculation.
    */
-  function CalculateNormalization(source: PCM_source, normalizeTo: number, normalizeTarget: number, normalizeStart: number, normalizeEnd: number): number;
+  function CalculateNormalization(
+    source: PCM_source,
+    normalizeTo: number,
+    normalizeTarget: number,
+    normalizeStart: number,
+    normalizeEnd: number,
+  ): number;
 
   /**
    * ```
@@ -254,7 +307,9 @@ declare namespace reaper {
    * ```
    * Extract RGB values from an OS dependent color. See ColorToNative.
    */
-  function ColorFromNative(col: number): LuaMultiReturn<[number, number, number]>;
+  function ColorFromNative(
+    col: number,
+  ): LuaMultiReturn<[number, number, number]>;
 
   /**
    * ```
@@ -306,7 +361,10 @@ declare namespace reaper {
    *
    * See GetEnvelopePointEx, SetEnvelopePointEx, InsertEnvelopePointEx, DeleteEnvelopePointEx.
    */
-  function CountEnvelopePointsEx(envelope: TrackEnvelope, autoitem_idx: number): number;
+  function CountEnvelopePointsEx(
+    envelope: TrackEnvelope,
+    autoitem_idx: number,
+  ): number;
 
   /**
    * ```
@@ -322,7 +380,9 @@ declare namespace reaper {
    * ```
    * num_markersOut and num_regionsOut may be NULL.
    */
-  function CountProjectMarkers(proj: ReaProject): LuaMultiReturn<[number, number, number]>;
+  function CountProjectMarkers(
+    proj: ReaProject,
+  ): LuaMultiReturn<[number, number, number]>;
 
   /**
    * ```
@@ -410,7 +470,12 @@ declare namespace reaper {
    * ```
    * Create a new MIDI media item, containing no MIDI events. Time is in seconds unless qn is set.
    */
-  function CreateNewMIDIItemInProj(track: MediaTrack, starttime: number, endtime: number, qnIn?: boolean): MediaItem;
+  function CreateNewMIDIItemInProj(
+    track: MediaTrack,
+    starttime: number,
+    endtime: number,
+    qnIn?: boolean,
+  ): MediaItem;
 
   /**
    * ```
@@ -498,14 +563,21 @@ declare namespace reaper {
    * integer _ = reaper.CSurf_OnInputMonitorChange(MediaTrack trackid, integer monitor)
    * ```
    */
-  function CSurf_OnInputMonitorChange(trackid: MediaTrack, monitor: number): number;
+  function CSurf_OnInputMonitorChange(
+    trackid: MediaTrack,
+    monitor: number,
+  ): number;
 
   /**
    * ```
    * integer _ = reaper.CSurf_OnInputMonitorChangeEx(MediaTrack trackid, integer monitor, boolean allowgang)
    * ```
    */
-  function CSurf_OnInputMonitorChangeEx(trackid: MediaTrack, monitor: number, allowgang: boolean): number;
+  function CSurf_OnInputMonitorChangeEx(
+    trackid: MediaTrack,
+    monitor: number,
+    allowgang: boolean,
+  ): number;
 
   /**
    * ```
@@ -519,21 +591,34 @@ declare namespace reaper {
    * boolean _ = reaper.CSurf_OnMuteChangeEx(MediaTrack trackid, integer mute, boolean allowgang)
    * ```
    */
-  function CSurf_OnMuteChangeEx(trackid: MediaTrack, mute: number, allowgang: boolean): boolean;
+  function CSurf_OnMuteChangeEx(
+    trackid: MediaTrack,
+    mute: number,
+    allowgang: boolean,
+  ): boolean;
 
   /**
    * ```
    * number _ = reaper.CSurf_OnPanChange(MediaTrack trackid, number pan, boolean relative)
    * ```
    */
-  function CSurf_OnPanChange(trackid: MediaTrack, pan: number, relative: boolean): number;
+  function CSurf_OnPanChange(
+    trackid: MediaTrack,
+    pan: number,
+    relative: boolean,
+  ): number;
 
   /**
    * ```
    * number _ = reaper.CSurf_OnPanChangeEx(MediaTrack trackid, number pan, boolean relative, boolean allowGang)
    * ```
    */
-  function CSurf_OnPanChangeEx(trackid: MediaTrack, pan: number, relative: boolean, allowGang: boolean): number;
+  function CSurf_OnPanChangeEx(
+    trackid: MediaTrack,
+    pan: number,
+    relative: boolean,
+    allowGang: boolean,
+  ): number;
 
   /**
    * ```
@@ -568,7 +653,11 @@ declare namespace reaper {
    * boolean _ = reaper.CSurf_OnRecArmChangeEx(MediaTrack trackid, integer recarm, boolean allowgang)
    * ```
    */
-  function CSurf_OnRecArmChangeEx(trackid: MediaTrack, recarm: number, allowgang: boolean): boolean;
+  function CSurf_OnRecArmChangeEx(
+    trackid: MediaTrack,
+    recarm: number,
+    allowgang: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -582,14 +671,24 @@ declare namespace reaper {
    * number _ = reaper.CSurf_OnRecvPanChange(MediaTrack trackid, integer recv_index, number pan, boolean relative)
    * ```
    */
-  function CSurf_OnRecvPanChange(trackid: MediaTrack, recv_index: number, pan: number, relative: boolean): number;
+  function CSurf_OnRecvPanChange(
+    trackid: MediaTrack,
+    recv_index: number,
+    pan: number,
+    relative: boolean,
+  ): number;
 
   /**
    * ```
    * number _ = reaper.CSurf_OnRecvVolumeChange(MediaTrack trackid, integer recv_index, number volume, boolean relative)
    * ```
    */
-  function CSurf_OnRecvVolumeChange(trackid: MediaTrack, recv_index: number, volume: number, relative: boolean): number;
+  function CSurf_OnRecvVolumeChange(
+    trackid: MediaTrack,
+    recv_index: number,
+    volume: number,
+    relative: boolean,
+  ): number;
 
   /**
    * ```
@@ -617,21 +716,34 @@ declare namespace reaper {
    * boolean _ = reaper.CSurf_OnSelectedChange(MediaTrack trackid, integer selected)
    * ```
    */
-  function CSurf_OnSelectedChange(trackid: MediaTrack, selected: number): boolean;
+  function CSurf_OnSelectedChange(
+    trackid: MediaTrack,
+    selected: number,
+  ): boolean;
 
   /**
    * ```
    * number _ = reaper.CSurf_OnSendPanChange(MediaTrack trackid, integer send_index, number pan, boolean relative)
    * ```
    */
-  function CSurf_OnSendPanChange(trackid: MediaTrack, send_index: number, pan: number, relative: boolean): number;
+  function CSurf_OnSendPanChange(
+    trackid: MediaTrack,
+    send_index: number,
+    pan: number,
+    relative: boolean,
+  ): number;
 
   /**
    * ```
    * number _ = reaper.CSurf_OnSendVolumeChange(MediaTrack trackid, integer send_index, number volume, boolean relative)
    * ```
    */
-  function CSurf_OnSendVolumeChange(trackid: MediaTrack, send_index: number, volume: number, relative: boolean): number;
+  function CSurf_OnSendVolumeChange(
+    trackid: MediaTrack,
+    send_index: number,
+    volume: number,
+    relative: boolean,
+  ): number;
 
   /**
    * ```
@@ -645,7 +757,11 @@ declare namespace reaper {
    * boolean _ = reaper.CSurf_OnSoloChangeEx(MediaTrack trackid, integer solo, boolean allowgang)
    * ```
    */
-  function CSurf_OnSoloChangeEx(trackid: MediaTrack, solo: number, allowgang: boolean): boolean;
+  function CSurf_OnSoloChangeEx(
+    trackid: MediaTrack,
+    solo: number,
+    allowgang: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -673,28 +789,46 @@ declare namespace reaper {
    * number _ = reaper.CSurf_OnVolumeChange(MediaTrack trackid, number volume, boolean relative)
    * ```
    */
-  function CSurf_OnVolumeChange(trackid: MediaTrack, volume: number, relative: boolean): number;
+  function CSurf_OnVolumeChange(
+    trackid: MediaTrack,
+    volume: number,
+    relative: boolean,
+  ): number;
 
   /**
    * ```
    * number _ = reaper.CSurf_OnVolumeChangeEx(MediaTrack trackid, number volume, boolean relative, boolean allowGang)
    * ```
    */
-  function CSurf_OnVolumeChangeEx(trackid: MediaTrack, volume: number, relative: boolean, allowGang: boolean): number;
+  function CSurf_OnVolumeChangeEx(
+    trackid: MediaTrack,
+    volume: number,
+    relative: boolean,
+    allowGang: boolean,
+  ): number;
 
   /**
    * ```
    * number _ = reaper.CSurf_OnWidthChange(MediaTrack trackid, number width, boolean relative)
    * ```
    */
-  function CSurf_OnWidthChange(trackid: MediaTrack, width: number, relative: boolean): number;
+  function CSurf_OnWidthChange(
+    trackid: MediaTrack,
+    width: number,
+    relative: boolean,
+  ): number;
 
   /**
    * ```
    * number _ = reaper.CSurf_OnWidthChangeEx(MediaTrack trackid, number width, boolean relative, boolean allowGang)
    * ```
    */
-  function CSurf_OnWidthChangeEx(trackid: MediaTrack, width: number, relative: boolean, allowGang: boolean): number;
+  function CSurf_OnWidthChangeEx(
+    trackid: MediaTrack,
+    width: number,
+    relative: boolean,
+    allowGang: boolean,
+  ): number;
 
   /**
    * ```
@@ -722,63 +856,98 @@ declare namespace reaper {
    * reaper.CSurf_SetAutoMode(integer mode, IReaperControlSurface ignoresurf)
    * ```
    */
-  function CSurf_SetAutoMode(mode: number, ignoresurf: IReaperControlSurface): void;
+  function CSurf_SetAutoMode(
+    mode: number,
+    ignoresurf: IReaperControlSurface,
+  ): void;
 
   /**
    * ```
    * reaper.CSurf_SetPlayState(boolean play, boolean pause, boolean rec, IReaperControlSurface ignoresurf)
    * ```
    */
-  function CSurf_SetPlayState(play: boolean, pause: boolean, rec: boolean, ignoresurf: IReaperControlSurface): void;
+  function CSurf_SetPlayState(
+    play: boolean,
+    pause: boolean,
+    rec: boolean,
+    ignoresurf: IReaperControlSurface,
+  ): void;
 
   /**
    * ```
    * reaper.CSurf_SetRepeatState(boolean rep, IReaperControlSurface ignoresurf)
    * ```
    */
-  function CSurf_SetRepeatState(rep: boolean, ignoresurf: IReaperControlSurface): void;
+  function CSurf_SetRepeatState(
+    rep: boolean,
+    ignoresurf: IReaperControlSurface,
+  ): void;
 
   /**
    * ```
    * reaper.CSurf_SetSurfaceMute(MediaTrack trackid, boolean mute, IReaperControlSurface ignoresurf)
    * ```
    */
-  function CSurf_SetSurfaceMute(trackid: MediaTrack, mute: boolean, ignoresurf: IReaperControlSurface): void;
+  function CSurf_SetSurfaceMute(
+    trackid: MediaTrack,
+    mute: boolean,
+    ignoresurf: IReaperControlSurface,
+  ): void;
 
   /**
    * ```
    * reaper.CSurf_SetSurfacePan(MediaTrack trackid, number pan, IReaperControlSurface ignoresurf)
    * ```
    */
-  function CSurf_SetSurfacePan(trackid: MediaTrack, pan: number, ignoresurf: IReaperControlSurface): void;
+  function CSurf_SetSurfacePan(
+    trackid: MediaTrack,
+    pan: number,
+    ignoresurf: IReaperControlSurface,
+  ): void;
 
   /**
    * ```
    * reaper.CSurf_SetSurfaceRecArm(MediaTrack trackid, boolean recarm, IReaperControlSurface ignoresurf)
    * ```
    */
-  function CSurf_SetSurfaceRecArm(trackid: MediaTrack, recarm: boolean, ignoresurf: IReaperControlSurface): void;
+  function CSurf_SetSurfaceRecArm(
+    trackid: MediaTrack,
+    recarm: boolean,
+    ignoresurf: IReaperControlSurface,
+  ): void;
 
   /**
    * ```
    * reaper.CSurf_SetSurfaceSelected(MediaTrack trackid, boolean selected, IReaperControlSurface ignoresurf)
    * ```
    */
-  function CSurf_SetSurfaceSelected(trackid: MediaTrack, selected: boolean, ignoresurf: IReaperControlSurface): void;
+  function CSurf_SetSurfaceSelected(
+    trackid: MediaTrack,
+    selected: boolean,
+    ignoresurf: IReaperControlSurface,
+  ): void;
 
   /**
    * ```
    * reaper.CSurf_SetSurfaceSolo(MediaTrack trackid, boolean solo, IReaperControlSurface ignoresurf)
    * ```
    */
-  function CSurf_SetSurfaceSolo(trackid: MediaTrack, solo: boolean, ignoresurf: IReaperControlSurface): void;
+  function CSurf_SetSurfaceSolo(
+    trackid: MediaTrack,
+    solo: boolean,
+    ignoresurf: IReaperControlSurface,
+  ): void;
 
   /**
    * ```
    * reaper.CSurf_SetSurfaceVolume(MediaTrack trackid, number volume, IReaperControlSurface ignoresurf)
    * ```
    */
-  function CSurf_SetSurfaceVolume(trackid: MediaTrack, volume: number, ignoresurf: IReaperControlSurface): void;
+  function CSurf_SetSurfaceVolume(
+    trackid: MediaTrack,
+    volume: number,
+    ignoresurf: IReaperControlSurface,
+  ): void;
 
   /**
    * ```
@@ -816,7 +985,11 @@ declare namespace reaper {
    *
    * See CountActionShortcuts, GetActionShortcutDesc, DoActionShortcutDialog.
    */
-  function DeleteActionShortcut(section: KbdSectionInfo, cmdID: number, shortcutidx: number): boolean;
+  function DeleteActionShortcut(
+    section: KbdSectionInfo,
+    cmdID: number,
+    shortcutidx: number,
+  ): boolean;
 
   /**
    * ```
@@ -834,7 +1007,11 @@ declare namespace reaper {
    *
    * See CountEnvelopePointsEx, GetEnvelopePointEx, SetEnvelopePointEx, InsertEnvelopePointEx.
    */
-  function DeleteEnvelopePointEx(envelope: TrackEnvelope, autoitem_idx: number, ptidx: number): boolean;
+  function DeleteEnvelopePointEx(
+    envelope: TrackEnvelope,
+    autoitem_idx: number,
+    ptidx: number,
+  ): boolean;
 
   /**
    * ```
@@ -842,7 +1019,11 @@ declare namespace reaper {
    * ```
    * Delete a range of envelope points. See DeleteEnvelopePointRangeEx, DeleteEnvelopePointEx.
    */
-  function DeleteEnvelopePointRange(envelope: TrackEnvelope, time_start: number, time_end: number): boolean;
+  function DeleteEnvelopePointRange(
+    envelope: TrackEnvelope,
+    time_start: number,
+    time_end: number,
+  ): boolean;
 
   /**
    * ```
@@ -850,7 +1031,12 @@ declare namespace reaper {
    * ```
    * Delete a range of envelope points. autoitem_idx=-1 for the underlying envelope, 0 for the first automation item on the envelope, etc.
    */
-  function DeleteEnvelopePointRangeEx(envelope: TrackEnvelope, autoitem_idx: number, time_start: number, time_end: number): boolean;
+  function DeleteEnvelopePointRangeEx(
+    envelope: TrackEnvelope,
+    autoitem_idx: number,
+    time_start: number,
+    time_end: number,
+  ): boolean;
 
   /**
    * ```
@@ -866,7 +1052,11 @@ declare namespace reaper {
    * ```
    * Delete a marker.  proj==NULL for the active project.
    */
-  function DeleteProjectMarker(proj: ReaProject, markrgnindexnumber: number, isrgn: boolean): boolean;
+  function DeleteProjectMarker(
+    proj: ReaProject,
+    markrgnindexnumber: number,
+    isrgn: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -874,7 +1064,10 @@ declare namespace reaper {
    * ```
    * Differs from DeleteProjectMarker only in that markrgnidx is 0 for the first marker/region, 1 for the next, etc (see EnumProjectMarkers3), rather than representing the displayed marker/region ID number (see SetProjectMarker4).
    */
-  function DeleteProjectMarkerByIndex(proj: ReaProject, markrgnidx: number): boolean;
+  function DeleteProjectMarkerByIndex(
+    proj: ReaProject,
+    markrgnidx: number,
+  ): boolean;
 
   /**
    * ```
@@ -890,7 +1083,11 @@ declare namespace reaper {
    * ```
    * Deletes one or more stretch markers. Returns number of stretch markers deleted.
    */
-  function DeleteTakeStretchMarkers(take: MediaItem_Take, idx: number, countIn?: number): number;
+  function DeleteTakeStretchMarkers(
+    take: MediaItem_Take,
+    idx: number,
+    countIn?: number,
+  ): number;
 
   /**
    * ```
@@ -898,7 +1095,10 @@ declare namespace reaper {
    * ```
    * Delete a tempo/time signature marker.
    */
-  function DeleteTempoTimeSigMarker(project: ReaProject, markerindex: number): boolean;
+  function DeleteTempoTimeSigMarker(
+    project: ReaProject,
+    markerindex: number,
+  ): boolean;
 
   /**
    * ```
@@ -931,7 +1131,12 @@ declare namespace reaper {
    *
    * See CountActionShortcuts, GetActionShortcutDesc, DeleteActionShortcut.
    */
-  function DoActionShortcutDialog(hwnd: HWND, section: KbdSectionInfo, cmdID: number, shortcutidx: number): boolean;
+  function DoActionShortcutDialog(
+    hwnd: HWND,
+    section: KbdSectionInfo,
+    cmdID: number,
+    shortcutidx: number,
+  ): boolean;
 
   /**
    * ```
@@ -969,14 +1174,24 @@ declare namespace reaper {
    * reaper.DockWindowAdd(HWND hwnd, string name, integer pos, boolean allowShow)
    * ```
    */
-  function DockWindowAdd(hwnd: HWND, name: string, pos: number, allowShow: boolean): void;
+  function DockWindowAdd(
+    hwnd: HWND,
+    name: string,
+    pos: number,
+    allowShow: boolean,
+  ): void;
 
   /**
    * ```
    * reaper.DockWindowAddEx(HWND hwnd, string name, string identstr, boolean allowShow)
    * ```
    */
-  function DockWindowAddEx(hwnd: HWND, name: string, identstr: string, allowShow: boolean): void;
+  function DockWindowAddEx(
+    hwnd: HWND,
+    name: string,
+    identstr: string,
+    allowShow: boolean,
+  ): void;
 
   /**
    * ```
@@ -1005,7 +1220,10 @@ declare namespace reaper {
    * ```
    * Open the tempo/time signature marker editor dialog.
    */
-  function EditTempoTimeSigMarker(project: ReaProject, markerindex: number): boolean;
+  function EditTempoTimeSigMarker(
+    project: ReaProject,
+    markerindex: number,
+  ): boolean;
 
   /**
    * ```
@@ -1013,7 +1231,12 @@ declare namespace reaper {
    * ```
    * call with a saved window rect for your window and it'll correct any positioning info.
    */
-  function EnsureNotCompletelyOffscreen(r_left: number, r_top: number, r_right: number, r_bot: number): LuaMultiReturn<[number, number, number, number]>;
+  function EnsureNotCompletelyOffscreen(
+    r_left: number,
+    r_top: number,
+    r_right: number,
+    r_bot: number,
+  ): LuaMultiReturn<[number, number, number, number]>;
 
   /**
    * ```
@@ -1037,7 +1260,9 @@ declare namespace reaper {
    * ```
    * Enumerates installed FX. Returns true if successful, sets nameOut and identOut to name and ident of FX at index.
    */
-  function EnumInstalledFX(index: number): LuaMultiReturn<[boolean, string, string]>;
+  function EnumInstalledFX(
+    index: number,
+  ): LuaMultiReturn<[boolean, string, string]>;
 
   /**
    * ```
@@ -1060,21 +1285,29 @@ declare namespace reaper {
    * integer retval, boolean isrgn, number pos, number rgnend, string name, integer markrgnindexnumber = reaper.EnumProjectMarkers(integer idx)
    * ```
    */
-  function EnumProjectMarkers(idx: number): LuaMultiReturn<[number, boolean, number, number, string, number]>;
+  function EnumProjectMarkers(
+    idx: number,
+  ): LuaMultiReturn<[number, boolean, number, number, string, number]>;
 
   /**
    * ```
    * integer retval, boolean isrgn, number pos, number rgnend, string name, integer markrgnindexnumber = reaper.EnumProjectMarkers2(ReaProject proj, integer idx)
    * ```
    */
-  function EnumProjectMarkers2(proj: ReaProject, idx: number): LuaMultiReturn<[number, boolean, number, number, string, number]>;
+  function EnumProjectMarkers2(
+    proj: ReaProject,
+    idx: number,
+  ): LuaMultiReturn<[number, boolean, number, number, string, number]>;
 
   /**
    * ```
    * integer retval, boolean isrgn, number pos, number rgnend, string name, integer markrgnindexnumber, integer color = reaper.EnumProjectMarkers3(ReaProject proj, integer idx)
    * ```
    */
-  function EnumProjectMarkers3(proj: ReaProject, idx: number): LuaMultiReturn<[number, boolean, number, number, string, number, number]>;
+  function EnumProjectMarkers3(
+    proj: ReaProject,
+    idx: number,
+  ): LuaMultiReturn<[number, boolean, number, number, string, number, number]>;
 
   /**
    * ```
@@ -1090,7 +1323,11 @@ declare namespace reaper {
    * ```
    * Enumerate the data stored with the project for a specific extname. Returns false when there is no more data. See SetProjExtState, GetProjExtState.
    */
-  function EnumProjExtState(proj: ReaProject, extname: string, idx: number): LuaMultiReturn<[boolean, string, string]>;
+  function EnumProjExtState(
+    proj: ReaProject,
+    extname: string,
+    idx: number,
+  ): LuaMultiReturn<[boolean, string, string]>;
 
   /**
    * ```
@@ -1098,7 +1335,11 @@ declare namespace reaper {
    * ```
    * Enumerate which tracks will be rendered within this region when using the region render matrix. When called with rendertrack==0, the function returns the first track that will be rendered (which may be the master track); rendertrack==1 will return the next track rendered, and so on. The function returns NULL when there are no more tracks that will be rendered within this region.
    */
-  function EnumRegionRenderMatrix(proj: ReaProject, regionindex: number, rendertrack: number): MediaTrack;
+  function EnumRegionRenderMatrix(
+    proj: ReaProject,
+    regionindex: number,
+    rendertrack: number,
+  ): MediaTrack;
 
   /**
    * ```
@@ -1106,7 +1347,11 @@ declare namespace reaper {
    * ```
    * returns false if there are no plugins on the track that support MIDI programs,or if all programs have been enumerated
    */
-  function EnumTrackMIDIProgramNames(track: number, programNumber: number, programName: string): LuaMultiReturn<[boolean, string]>;
+  function EnumTrackMIDIProgramNames(
+    track: number,
+    programNumber: number,
+    programName: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -1114,7 +1359,12 @@ declare namespace reaper {
    * ```
    * returns false if there are no plugins on the track that support MIDI programs,or if all programs have been enumerated
    */
-  function EnumTrackMIDIProgramNamesEx(proj: ReaProject, track: MediaTrack, programNumber: number, programName: string): LuaMultiReturn<[boolean, string]>;
+  function EnumTrackMIDIProgramNamesEx(
+    proj: ReaProject,
+    track: MediaTrack,
+    programNumber: number,
+    programName: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -1122,7 +1372,12 @@ declare namespace reaper {
    * ```
    * Get the effective envelope value at a given time position. samplesRequested is how long the caller expects until the next call to Envelope_Evaluate (often, the buffer block size). The return value is how many samples beyond that time position that the returned values are valid. dVdS is the change in value per sample (first derivative), ddVdS is the second derivative, dddVdS is the third derivative. See GetEnvelopeScalingMode.
    */
-  function Envelope_Evaluate(envelope: TrackEnvelope, time: number, samplerate: number, samplesRequested: number): LuaMultiReturn<[number, number, number, number, number]>;
+  function Envelope_Evaluate(
+    envelope: TrackEnvelope,
+    time: number,
+    samplerate: number,
+    samplesRequested: number,
+  ): LuaMultiReturn<[number, number, number, number, number]>;
 
   /**
    * ```
@@ -1138,7 +1393,9 @@ declare namespace reaper {
    * ```
    * If take envelope, gets the take from the envelope. If FX, indexOut set to FX index, index2Out set to parameter index, otherwise -1.
    */
-  function Envelope_GetParentTake(env: TrackEnvelope): LuaMultiReturn<[MediaItem_Take, number, number]>;
+  function Envelope_GetParentTake(
+    env: TrackEnvelope,
+  ): LuaMultiReturn<[MediaItem_Take, number, number]>;
 
   /**
    * ```
@@ -1146,7 +1403,9 @@ declare namespace reaper {
    * ```
    * If track envelope, gets the track from the envelope. If FX, indexOut set to FX index, index2Out set to parameter index, otherwise -1.
    */
-  function Envelope_GetParentTrack(env: TrackEnvelope): LuaMultiReturn<[MediaTrack, number, number]>;
+  function Envelope_GetParentTrack(
+    env: TrackEnvelope,
+  ): LuaMultiReturn<[MediaTrack, number, number]>;
 
   /**
    * ```
@@ -1162,7 +1421,10 @@ declare namespace reaper {
    * ```
    * Sort envelope points by time. autoitem_idx=-1 for the underlying envelope, 0 for the first automation item on the envelope, etc. See SetEnvelopePoint, InsertEnvelopePoint.
    */
-  function Envelope_SortPointsEx(envelope: TrackEnvelope, autoitem_idx: number): boolean;
+  function Envelope_SortPointsEx(
+    envelope: TrackEnvelope,
+    autoitem_idx: number,
+  ): boolean;
 
   /**
    * ```
@@ -1216,7 +1478,12 @@ declare namespace reaper {
    *
    * offset is start of where the length will be calculated from
    */
-  function format_timestr_len(tpos: number, buf: string, offset: number, modeoverride: number): string;
+  function format_timestr_len(
+    tpos: number,
+    buf: string,
+    offset: number,
+    modeoverride: number,
+  ): string;
 
   /**
    * ```
@@ -1236,7 +1503,11 @@ declare namespace reaper {
    *
    * 5=h:m:s:f
    */
-  function format_timestr_pos(tpos: number, buf: string, modeoverride: number): string;
+  function format_timestr_pos(
+    tpos: number,
+    buf: string,
+    modeoverride: number,
+  ): string;
 
   /**
    * ```
@@ -1251,7 +1522,9 @@ declare namespace reaper {
    * ```
    * gets ini configuration variable value as string
    */
-  function get_config_var_string(name: string): LuaMultiReturn<[boolean, string]>;
+  function get_config_var_string(
+    name: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -1269,7 +1542,11 @@ declare namespace reaper {
    *
    * See CountActionShortcuts,DeleteActionShortcut,DoActionShortcutDialog.
    */
-  function GetActionShortcutDesc(section: KbdSectionInfo, cmdID: number, shortcutidx: number): LuaMultiReturn<[boolean, string]>;
+  function GetActionShortcutDesc(
+    section: KbdSectionInfo,
+    cmdID: number,
+    shortcutidx: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -1318,7 +1595,10 @@ declare namespace reaper {
    * Deprecated. See AudioAccessorStateChanged instead.
    * @deprecated
    */
-  function GetAudioAccessorHash(accessor: AudioAccessor, hashNeed128: string): string;
+  function GetAudioAccessorHash(
+    accessor: AudioAccessor,
+    hashNeed128: string,
+  ): string;
 
   /**
    * ```
@@ -1346,7 +1626,14 @@ declare namespace reaper {
    *
    * # typically GetAudioAccessorSamples() would be called within a loop, increasing pos each time.
    */
-  function GetAudioAccessorSamples(accessor: AudioAccessor, samplerate: number, numchannels: number, starttime_sec: number, numsamplesperchannel: number, samplebuffer: reaper_array): number;
+  function GetAudioAccessorSamples(
+    accessor: AudioAccessor,
+    samplerate: number,
+    numchannels: number,
+    starttime_sec: number,
+    numsamplesperchannel: number,
+    samplebuffer: reaper_array,
+  ): number;
 
   /**
    * ```
@@ -1362,7 +1649,9 @@ declare namespace reaper {
    * ```
    * get information about the currently open audio device. attribute can be MODE, IDENT_IN, IDENT_OUT, BSIZE, SRATE, BPS. returns false if unknown attribute or device not open.
    */
-  function GetAudioDeviceInfo(attribute: string): LuaMultiReturn<[boolean, string]>;
+  function GetAudioDeviceInfo(
+    attribute: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -1426,7 +1715,10 @@ declare namespace reaper {
    * ```
    * Returns the custom take, item, or track color that is used (according to the user preference) to color the media item. The returned color is OS dependent|0x01000000 (i.e. ColorToNative(r,g,b)|0x01000000), so a return of zero means "no color", not black.
    */
-  function GetDisplayedMediaItemColor2(item: MediaItem, take: MediaItem_Take): number;
+  function GetDisplayedMediaItemColor2(
+    item: MediaItem,
+    take: MediaItem_Take,
+  ): number;
 
   /**
    * ```
@@ -1463,7 +1755,9 @@ declare namespace reaper {
    * boolean retval, string buf = reaper.GetEnvelopeName(TrackEnvelope env)
    * ```
    */
-  function GetEnvelopeName(env: TrackEnvelope): LuaMultiReturn<[boolean, string]>;
+  function GetEnvelopeName(
+    env: TrackEnvelope,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -1471,7 +1765,10 @@ declare namespace reaper {
    * ```
    * Get the attributes of an envelope point. See GetEnvelopePointEx.
    */
-  function GetEnvelopePoint(envelope: TrackEnvelope, ptidx: number): LuaMultiReturn<[boolean, number, number, number, number, boolean]>;
+  function GetEnvelopePoint(
+    envelope: TrackEnvelope,
+    ptidx: number,
+  ): LuaMultiReturn<[boolean, number, number, number, number, boolean]>;
 
   /**
    * ```
@@ -1479,7 +1776,10 @@ declare namespace reaper {
    * ```
    * Returns the envelope point at or immediately prior to the given time position. See GetEnvelopePointByTimeEx.
    */
-  function GetEnvelopePointByTime(envelope: TrackEnvelope, time: number): number;
+  function GetEnvelopePointByTime(
+    envelope: TrackEnvelope,
+    time: number,
+  ): number;
 
   /**
    * ```
@@ -1497,7 +1797,11 @@ declare namespace reaper {
    *
    * See GetEnvelopePointEx, SetEnvelopePointEx, InsertEnvelopePointEx, DeleteEnvelopePointEx.
    */
-  function GetEnvelopePointByTimeEx(envelope: TrackEnvelope, autoitem_idx: number, time: number): number;
+  function GetEnvelopePointByTimeEx(
+    envelope: TrackEnvelope,
+    autoitem_idx: number,
+    time: number,
+  ): number;
 
   /**
    * ```
@@ -1515,7 +1819,11 @@ declare namespace reaper {
    *
    * See CountEnvelopePointsEx, SetEnvelopePointEx, InsertEnvelopePointEx, DeleteEnvelopePointEx.
    */
-  function GetEnvelopePointEx(envelope: TrackEnvelope, autoitem_idx: number, ptidx: number): LuaMultiReturn<[boolean, number, number, number, number, boolean]>;
+  function GetEnvelopePointEx(
+    envelope: TrackEnvelope,
+    autoitem_idx: number,
+    ptidx: number,
+  ): LuaMultiReturn<[boolean, number, number, number, number, boolean]>;
 
   /**
    * ```
@@ -1531,7 +1839,11 @@ declare namespace reaper {
    * ```
    * Gets the RPPXML state of an envelope, returns true if successful. Undo flag is a performance/caching hint.
    */
-  function GetEnvelopeStateChunk(env: TrackEnvelope, str: string, isundo: boolean): LuaMultiReturn<[boolean, string]>;
+  function GetEnvelopeStateChunk(
+    env: TrackEnvelope,
+    str: string,
+    isundo: boolean,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -1581,7 +1893,10 @@ declare namespace reaper {
    * ```
    * returns free disk space in megabytes, pathIdx 0 for normal, 1 for alternate.
    */
-  function GetFreeDiskSpaceForRecordPath(proj: ReaProject, pathidx: number): number;
+  function GetFreeDiskSpaceForRecordPath(
+    proj: ReaProject,
+    pathidx: number,
+  ): number;
 
   /**
    * ```
@@ -1589,7 +1904,12 @@ declare namespace reaper {
    * ```
    * Returns the FX parameter envelope. If the envelope does not exist and create=true, the envelope will be created. If the envelope already exists and is bypassed and create=true, then the envelope will be unbypassed.
    */
-  function GetFXEnvelope(track: MediaTrack, fxindex: number, parameterindex: number, create: boolean): TrackEnvelope;
+  function GetFXEnvelope(
+    track: MediaTrack,
+    fxindex: number,
+    parameterindex: number,
+    create: boolean,
+  ): TrackEnvelope;
 
   /**
    * ```
@@ -1644,7 +1964,11 @@ declare namespace reaper {
    * ```
    * Returns the first item at the screen coordinates specified. If allow_locked is false, locked items are ignored. If takeOutOptional specified, returns the take hit. See GetThingFromPoint.
    */
-  function GetItemFromPoint(screen_x: number, screen_y: number, allow_locked: boolean): LuaMultiReturn<[MediaItem, MediaItem_Take]>;
+  function GetItemFromPoint(
+    screen_x: number,
+    screen_y: number,
+    allow_locked: boolean,
+  ): LuaMultiReturn<[MediaItem, MediaItem_Take]>;
 
   /**
    * ```
@@ -1659,7 +1983,11 @@ declare namespace reaper {
    * ```
    * Gets the RPPXML state of an item, returns true if successful. Undo flag is a performance/caching hint.
    */
-  function GetItemStateChunk(item: MediaItem, str: string, isundo: boolean): LuaMultiReturn<[boolean, string]>;
+  function GetItemStateChunk(
+    item: MediaItem,
+    str: string,
+    isundo: boolean,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -1674,7 +2002,10 @@ declare namespace reaper {
    * ```
    * Get the last project marker before time, and/or the project region that includes time. markeridx and regionidx are returned not necessarily as the displayed marker/region index, but as the index that can be passed to EnumProjectMarkers. Either or both of markeridx and regionidx may be NULL. See EnumProjectMarkers.
    */
-  function GetLastMarkerAndCurRegion(proj: ReaProject, time: number): LuaMultiReturn<[number, number]>;
+  function GetLastMarkerAndCurRegion(
+    proj: ReaProject,
+    time: number,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -1683,7 +2014,9 @@ declare namespace reaper {
    * Returns true if the last touched FX parameter is valid, false otherwise. The low word of tracknumber is the 1-based track index -- 0 means the master track, 1 means track 1, etc. If the high word of tracknumber is nonzero, it refers to the 1-based item index (1 is the first item on the track, etc). For track FX, the low 24 bits of fxnumber refer to the FX index in the chain, and if the next 8 bits are 01, then the FX is record FX. For item FX, the low word defines the FX index in the chain, and the high word defines the take number. Deprecated, see GetTouchedOrFocusedFX.
    * @deprecated
    */
-  function GetLastTouchedFX(): LuaMultiReturn<[boolean, number, number, number]>;
+  function GetLastTouchedFX(): LuaMultiReturn<
+    [boolean, number, number, number]
+  >;
 
   /**
    * ```
@@ -1744,7 +2077,10 @@ declare namespace reaper {
    * ```
    * Get text-based metadata from a media file for a given identifier. Call with identifier="" to list all identifiers contained in the file, separated by newlines. May return "[Binary data]" for metadata that REAPER doesn't handle.
    */
-  function GetMediaFileMetadata(mediaSource: PCM_source, identifier: string): LuaMultiReturn<[number, string]>;
+  function GetMediaFileMetadata(
+    mediaSource: PCM_source,
+    identifier: string,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -1864,7 +2200,15 @@ declare namespace reaper {
    * ```
    * Gets block of peak samples to buf. Note that the peak samples are interleaved, but in two or three blocks (maximums, then minimums, then extra). Return value has 20 bits of returned sample count, then 4 bits of output_mode (0xf00000), then a bit to signify whether extra_type was available (0x1000000). extra_type can be 115 ('s') for spectral information, which will return peak samples as integers with the low 15 bits frequency, next 14 bits tonality.
    */
-  function GetMediaItemTake_Peaks(take: MediaItem_Take, peakrate: number, starttime: number, numchannels: number, numsamplesperchannel: number, want_extra_type: number, buf: reaper_array): number;
+  function GetMediaItemTake_Peaks(
+    take: MediaItem_Take,
+    peakrate: number,
+    starttime: number,
+    numchannels: number,
+    numsamplesperchannel: number,
+    want_extra_type: number,
+    buf: reaper_array,
+  ): number;
 
   /**
    * ```
@@ -1887,7 +2231,10 @@ declare namespace reaper {
    * MediaItem_Take _ = reaper.GetMediaItemTakeByGUID(ReaProject project, string guidGUID)
    * ```
    */
-  function GetMediaItemTakeByGUID(project: ReaProject, guidGUID: string): MediaItem_Take;
+  function GetMediaItemTakeByGUID(
+    project: ReaProject,
+    guidGUID: string,
+  ): MediaItem_Take;
 
   /**
    * ```
@@ -1935,7 +2282,10 @@ declare namespace reaper {
    *
    * P_SOURCE : PCM_source *. Note that if setting this, you should first retrieve the old source, set the new, THEN delete the old.
    */
-  function GetMediaItemTakeInfo_Value(take: MediaItem_Take, parmname: string): number;
+  function GetMediaItemTakeInfo_Value(
+    take: MediaItem_Take,
+    parmname: string,
+  ): number;
 
   /**
    * ```
@@ -1958,7 +2308,9 @@ declare namespace reaper {
    * ```
    * Returns the length of the source media. If the media source is beat-based, the length will be in quarter notes, otherwise it will be in seconds.
    */
-  function GetMediaSourceLength(source: PCM_source): LuaMultiReturn<[number, boolean]>;
+  function GetMediaSourceLength(
+    source: PCM_source,
+  ): LuaMultiReturn<[number, boolean]>;
 
   /**
    * ```
@@ -2135,7 +2487,10 @@ declare namespace reaper {
    * ```
    * returns true if device present
    */
-  function GetMIDIInputName(dev: number, nameout: string): LuaMultiReturn<[boolean, string]>;
+  function GetMIDIInputName(
+    dev: number,
+    nameout: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -2143,7 +2498,10 @@ declare namespace reaper {
    * ```
    * returns true if device present
    */
-  function GetMIDIOutputName(dev: number, nameout: string): LuaMultiReturn<[boolean, string]>;
+  function GetMIDIOutputName(
+    dev: number,
+    nameout: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -2269,7 +2627,11 @@ declare namespace reaper {
    * ```
    * get the peak file name for a given file (can be either filename.reapeaks,or a hashed filename in another path)
    */
-  function GetPeakFileNameEx(fn: string, buf: string, forWrite: boolean): string;
+  function GetPeakFileNameEx(
+    fn: string,
+    buf: string,
+    forWrite: boolean,
+  ): string;
 
   /**
    * ```
@@ -2277,7 +2639,12 @@ declare namespace reaper {
    * ```
    * Like GetPeakFileNameEx, but you can specify peaksfileextension such as ".reapeaks"
    */
-  function GetPeakFileNameEx2(fn: string, buf: string, forWrite: boolean, peaksfileextension: string): string;
+  function GetPeakFileNameEx2(
+    fn: string,
+    buf: string,
+    forWrite: boolean,
+    peaksfileextension: string,
+  ): string;
 
   /**
    * ```
@@ -2391,7 +2758,9 @@ declare namespace reaper {
    *
    * this does not reflect tempo envelopes but is purely what is set in the project settings.
    */
-  function GetProjectTimeSignature2(proj: ReaProject): LuaMultiReturn<[number, number]>;
+  function GetProjectTimeSignature2(
+    proj: ReaProject,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -2399,7 +2768,11 @@ declare namespace reaper {
    * ```
    * Get the value previously associated with this extname and key, the last time the project was saved. See SetProjExtState, EnumProjExtState.
    */
-  function GetProjExtState(proj: ReaProject, extname: string, key: string): LuaMultiReturn<[number, string]>;
+  function GetProjExtState(
+    proj: ReaProject,
+    extname: string,
+    key: string,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -2439,7 +2812,11 @@ declare namespace reaper {
    * ```
    * Get a selected track from a project (proj=0 for active project) by selected track count (zero-based).
    */
-  function GetSelectedTrack2(proj: ReaProject, seltrackidx: number, wantmaster: boolean): MediaTrack;
+  function GetSelectedTrack2(
+    proj: ReaProject,
+    seltrackidx: number,
+    wantmaster: boolean,
+  ): MediaTrack;
 
   /**
    * ```
@@ -2455,21 +2832,41 @@ declare namespace reaper {
    * ```
    * Gets or sets the arrange view start/end time for screen coordinates. use screen_x_start=screen_x_end=0 to use the full arrange view's start/end time
    */
-  function GetSet_ArrangeView2(proj: ReaProject, isSet: boolean, screen_x_start: number, screen_x_end: number, start_time: number, end_time: number): LuaMultiReturn<[number, number]>;
+  function GetSet_ArrangeView2(
+    proj: ReaProject,
+    isSet: boolean,
+    screen_x_start: number,
+    screen_x_end: number,
+    start_time: number,
+    end_time: number,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
    * number start, number _end = reaper.GetSet_LoopTimeRange(boolean isSet, boolean isLoop, number start, number _end, boolean allowautoseek)
    * ```
    */
-  function GetSet_LoopTimeRange(isSet: boolean, isLoop: boolean, start: number, _end: number, allowautoseek: boolean): LuaMultiReturn<[number, number]>;
+  function GetSet_LoopTimeRange(
+    isSet: boolean,
+    isLoop: boolean,
+    start: number,
+    _end: number,
+    allowautoseek: boolean,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
    * number start, number _end = reaper.GetSet_LoopTimeRange2(ReaProject proj, boolean isSet, boolean isLoop, number start, number _end, boolean allowautoseek)
    * ```
    */
-  function GetSet_LoopTimeRange2(proj: ReaProject, isSet: boolean, isLoop: boolean, start: number, _end: number, allowautoseek: boolean): LuaMultiReturn<[number, number]>;
+  function GetSet_LoopTimeRange2(
+    proj: ReaProject,
+    isSet: boolean,
+    isLoop: boolean,
+    start: number,
+    _end: number,
+    allowautoseek: boolean,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -2497,7 +2894,13 @@ declare namespace reaper {
    *
    * D_POOL_QNLEN : double * : automation item pooled source length in quarter notes (setting will affect all pooled instances)
    */
-  function GetSetAutomationItemInfo(env: TrackEnvelope, autoitem_idx: number, desc: string, value: number, is_set: boolean): number;
+  function GetSetAutomationItemInfo(
+    env: TrackEnvelope,
+    autoitem_idx: number,
+    desc: string,
+    value: number,
+    is_set: boolean,
+  ): number;
 
   /**
    * ```
@@ -2509,7 +2912,13 @@ declare namespace reaper {
    *
    * P_POOL_EXT:xyz : char * : extension-specific persistent data
    */
-  function GetSetAutomationItemInfo_String(env: TrackEnvelope, autoitem_idx: number, desc: string, valuestrNeedBig: string, is_set: boolean): LuaMultiReturn<[boolean, string]>;
+  function GetSetAutomationItemInfo_String(
+    env: TrackEnvelope,
+    autoitem_idx: number,
+    desc: string,
+    valuestrNeedBig: string,
+    is_set: boolean,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -2521,7 +2930,12 @@ declare namespace reaper {
    *
    * GUID : GUID * : 16-byte GUID, can query only, not set. If using a _String() function, GUID is a string {xyz-...}.
    */
-  function GetSetEnvelopeInfo_String(env: TrackEnvelope, parmname: string, stringNeedBig: string, setNewValue: boolean): LuaMultiReturn<[boolean, string]>;
+  function GetSetEnvelopeInfo_String(
+    env: TrackEnvelope,
+    parmname: string,
+    stringNeedBig: string,
+    setNewValue: boolean,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -2530,7 +2944,10 @@ declare namespace reaper {
    * deprecated -- see SetEnvelopeStateChunk, GetEnvelopeStateChunk
    * @deprecated
    */
-  function GetSetEnvelopeState(env: TrackEnvelope, str: string): LuaMultiReturn<[boolean, string]>;
+  function GetSetEnvelopeState(
+    env: TrackEnvelope,
+    str: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -2539,7 +2956,11 @@ declare namespace reaper {
    * deprecated -- see SetEnvelopeStateChunk, GetEnvelopeStateChunk
    * @deprecated
    */
-  function GetSetEnvelopeState2(env: TrackEnvelope, str: string, isundo: boolean): LuaMultiReturn<[boolean, string]>;
+  function GetSetEnvelopeState2(
+    env: TrackEnvelope,
+    str: string,
+    isundo: boolean,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -2548,7 +2969,10 @@ declare namespace reaper {
    * deprecated -- see SetItemStateChunk, GetItemStateChunk
    * @deprecated
    */
-  function GetSetItemState(item: MediaItem, str: string): LuaMultiReturn<[boolean, string]>;
+  function GetSetItemState(
+    item: MediaItem,
+    str: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -2557,7 +2981,11 @@ declare namespace reaper {
    * deprecated -- see SetItemStateChunk, GetItemStateChunk
    * @deprecated
    */
-  function GetSetItemState2(item: MediaItem, str: string, isundo: boolean): LuaMultiReturn<[boolean, string]>;
+  function GetSetItemState2(
+    item: MediaItem,
+    str: string,
+    isundo: boolean,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -2571,7 +2999,12 @@ declare namespace reaper {
    *
    * GUID : GUID * : 16-byte GUID, can query or update. If using a _String() function, GUID is a string {xyz-...}.
    */
-  function GetSetMediaItemInfo_String(item: MediaItem, parmname: string, stringNeedBig: string, setNewValue: boolean): LuaMultiReturn<[boolean, string]>;
+  function GetSetMediaItemInfo_String(
+    item: MediaItem,
+    parmname: string,
+    stringNeedBig: string,
+    setNewValue: boolean,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -2585,7 +3018,12 @@ declare namespace reaper {
    *
    * GUID : GUID * : 16-byte GUID, can query or update. If using a _String() function, GUID is a string {xyz-...}.
    */
-  function GetSetMediaItemTakeInfo_String(tk: MediaItem_Take, parmname: string, stringNeedBig: string, setNewValue: boolean): LuaMultiReturn<[boolean, string]>;
+  function GetSetMediaItemTakeInfo_String(
+    tk: MediaItem_Take,
+    parmname: string,
+    stringNeedBig: string,
+    setNewValue: boolean,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -2617,7 +3055,12 @@ declare namespace reaper {
    *
    * GUID : GUID * : 16-byte GUID, can query or update. If using a _String() function, GUID is a string {xyz-...}.
    */
-  function GetSetMediaTrackInfo_String(tr: MediaTrack, parmname: string, stringNeedBig: string, setNewValue: boolean): LuaMultiReturn<[boolean, string]>;
+  function GetSetMediaTrackInfo_String(
+    tr: MediaTrack,
+    parmname: string,
+    stringNeedBig: string,
+    setNewValue: boolean,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -2626,7 +3069,11 @@ declare namespace reaper {
    * deprecated, see GetSetProjectInfo_String with desc="PROJECT_AUTHOR"
    * @deprecated
    */
-  function GetSetProjectAuthor(proj: ReaProject, set: boolean, author: string): string;
+  function GetSetProjectAuthor(
+    proj: ReaProject,
+    set: boolean,
+    author: string,
+  ): string;
 
   /**
    * ```
@@ -2634,7 +3081,13 @@ declare namespace reaper {
    * ```
    * Get or set the arrange view grid division. 0.25=quarter note, 1.0/3.0=half note triplet, etc. swingmode can be 1 for swing enabled, swingamt is -1..1. swingmode can be 3 for measure-grid. Returns grid configuration flags
    */
-  function GetSetProjectGrid(project: ReaProject, set: boolean, division?: number, swingmode?: number, swingamt?: number): LuaMultiReturn<[number, number, number, number]>;
+  function GetSetProjectGrid(
+    project: ReaProject,
+    set: boolean,
+    division?: number,
+    swingmode?: number,
+    swingamt?: number,
+  ): LuaMultiReturn<[number, number, number, number]>;
 
   /**
    * ```
@@ -2680,7 +3133,12 @@ declare namespace reaper {
    *
    * PROJECT_SRATE_USE : set to 1 if project sample rate is used
    */
-  function GetSetProjectInfo(project: ReaProject, desc: string, value: number, is_set: boolean): number;
+  function GetSetProjectInfo(
+    project: ReaProject,
+    desc: string,
+    value: number,
+    is_set: boolean,
+  ): number;
 
   /**
    * ```
@@ -2728,7 +3186,12 @@ declare namespace reaper {
    *
    *     "wave" "aiff" "caff" "raw " "iso " "ddp " "flac" "mp3l" "oggv" "OggS" "FFMP" "WMF " "GIF " "LCF " "wvpk"
    */
-  function GetSetProjectInfo_String(project: ReaProject, desc: string, valuestrNeedBig: string, is_set: boolean): LuaMultiReturn<[boolean, string]>;
+  function GetSetProjectInfo_String(
+    project: ReaProject,
+    desc: string,
+    valuestrNeedBig: string,
+    is_set: boolean,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -2736,7 +3199,11 @@ declare namespace reaper {
    * ```
    * gets or sets project notes, notesNeedBig_sz is ignored when setting
    */
-  function GetSetProjectNotes(proj: ReaProject, set: boolean, notes: string): string;
+  function GetSetProjectNotes(
+    proj: ReaProject,
+    set: boolean,
+    notes: string,
+  ): string;
 
   /**
    * ```
@@ -2815,7 +3282,12 @@ declare namespace reaper {
    * Note: REAPER v6.11 and earlier used _MASTER and _SLAVE rather than _LEAD and _FOLLOW, which is deprecated but still supported (scripts that must support v6.11 and earlier can use the deprecated strings).
    * @deprecated
    */
-  function GetSetTrackGroupMembership(tr: MediaTrack, groupname: string, setmask: number, setvalue: number): number;
+  function GetSetTrackGroupMembership(
+    tr: MediaTrack,
+    groupname: string,
+    setmask: number,
+    setvalue: number,
+  ): number;
 
   /**
    * ```
@@ -2878,7 +3350,12 @@ declare namespace reaper {
    * Note: REAPER v6.11 and earlier used _MASTER and _SLAVE rather than _LEAD and _FOLLOW, which is deprecated but still supported (scripts that must support v6.11 and earlier can use the deprecated strings).
    * @deprecated
    */
-  function GetSetTrackGroupMembershipHigh(tr: MediaTrack, groupname: string, setmask: number, setvalue: number): number;
+  function GetSetTrackGroupMembershipHigh(
+    tr: MediaTrack,
+    groupname: string,
+    setmask: number,
+    setvalue: number,
+  ): number;
 
   /**
    * ```
@@ -2888,7 +3365,14 @@ declare namespace reaper {
    *
    * P_EXT:xyz : char * : extension-specific persistent data
    */
-  function GetSetTrackSendInfo_String(tr: MediaTrack, category: number, sendidx: number, parmname: string, stringNeedBig: string, setNewValue: boolean): LuaMultiReturn<[boolean, string]>;
+  function GetSetTrackSendInfo_String(
+    tr: MediaTrack,
+    category: number,
+    sendidx: number,
+    parmname: string,
+    stringNeedBig: string,
+    setNewValue: boolean,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -2897,7 +3381,10 @@ declare namespace reaper {
    * deprecated -- see SetTrackStateChunk, GetTrackStateChunk
    * @deprecated
    */
-  function GetSetTrackState(track: MediaTrack, str: string): LuaMultiReturn<[boolean, string]>;
+  function GetSetTrackState(
+    track: MediaTrack,
+    str: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -2906,7 +3393,11 @@ declare namespace reaper {
    * deprecated -- see SetTrackStateChunk, GetTrackStateChunk
    * @deprecated
    */
-  function GetSetTrackState2(track: MediaTrack, str: string, isundo: boolean): LuaMultiReturn<[boolean, string]>;
+  function GetSetTrackState2(
+    track: MediaTrack,
+    str: string,
+    isundo: boolean,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -2935,7 +3426,10 @@ declare namespace reaper {
    * TrackEnvelope _ = reaper.GetTakeEnvelopeByName(MediaItem_Take take, string envname)
    * ```
    */
-  function GetTakeEnvelopeByName(take: MediaItem_Take, envname: string): TrackEnvelope;
+  function GetTakeEnvelopeByName(
+    take: MediaItem_Take,
+    envname: string,
+  ): TrackEnvelope;
 
   /**
    * ```
@@ -2943,7 +3437,10 @@ declare namespace reaper {
    * ```
    * Get information about a take marker. Returns the position in media item source time, or -1 if the take marker does not exist. See GetNumTakeMarkers, SetTakeMarker, DeleteTakeMarker
    */
-  function GetTakeMarker(take: MediaItem_Take, idx: number): LuaMultiReturn<[number, string, number]>;
+  function GetTakeMarker(
+    take: MediaItem_Take,
+    idx: number,
+  ): LuaMultiReturn<[number, string, number]>;
 
   /**
    * ```
@@ -2967,7 +3464,10 @@ declare namespace reaper {
    * ```
    * Gets information on a stretch marker, idx is 0..n. Returns -1 if stretch marker not valid. posOut will be set to position in item, srcposOutOptional will be set to source media position. Returns index. if input index is -1, the following marker is found using position (or source position if position is -1). If position/source position are used to find marker position, their values are not updated.
    */
-  function GetTakeStretchMarker(take: MediaItem_Take, idx: number): LuaMultiReturn<[number, number, number]>;
+  function GetTakeStretchMarker(
+    take: MediaItem_Take,
+    idx: number,
+  ): LuaMultiReturn<[number, number, number]>;
 
   /**
    * ```
@@ -2983,7 +3483,11 @@ declare namespace reaper {
    * ```
    * Get information about a specific FX parameter knob (see CountTCPFXParms).
    */
-  function GetTCPFXParm(project: ReaProject, track: MediaTrack, index: number): LuaMultiReturn<[boolean, number, number]>;
+  function GetTCPFXParm(
+    project: ReaProject,
+    track: MediaTrack,
+    index: number,
+  ): LuaMultiReturn<[boolean, number, number]>;
 
   /**
    * ```
@@ -2991,7 +3495,12 @@ declare namespace reaper {
    * ```
    * finds the playrate and target length to insert this item stretched to a round power-of-2 number of bars, between 1/8 and 256
    */
-  function GetTempoMatchPlayRate(source: PCM_source, srcscale: number, position: number, mult: number): LuaMultiReturn<[boolean, number, number]>;
+  function GetTempoMatchPlayRate(
+    source: PCM_source,
+    srcscale: number,
+    position: number,
+    mult: number,
+  ): LuaMultiReturn<[boolean, number, number]>;
 
   /**
    * ```
@@ -2999,7 +3508,12 @@ declare namespace reaper {
    * ```
    * Get information about a tempo/time signature marker. See CountTempoTimeSigMarkers, SetTempoTimeSigMarker, AddTempoTimeSigMarker.
    */
-  function GetTempoTimeSigMarker(proj: ReaProject, ptidx: number): LuaMultiReturn<[boolean, number, number, number, number, number, number, boolean]>;
+  function GetTempoTimeSigMarker(
+    proj: ReaProject,
+    ptidx: number,
+  ): LuaMultiReturn<
+    [boolean, number, number, number, number, number, number, boolean]
+  >;
 
   /**
    * ```
@@ -3015,7 +3529,10 @@ declare namespace reaper {
    * ```
    * Hit tests a point in screen coordinates. Updates infoOut with information such as "arrange", "fx_chain", "fx_0" (first FX in chain, floating), "spacer_0" (spacer before first track). If a track panel is hit, string will begin with "tcp" or "mcp" or "tcp.mute" etc (future versions may append additional information). May return NULL with valid info string to indicate non-track thing.
    */
-  function GetThingFromPoint(screen_x: number, screen_y: number): LuaMultiReturn<[MediaTrack, string]>;
+  function GetThingFromPoint(
+    screen_x: number,
+    screen_y: number,
+  ): LuaMultiReturn<[MediaTrack, string]>;
 
   /**
    * ```
@@ -3031,7 +3548,10 @@ declare namespace reaper {
    * ```
    * For the main action context, the MIDI editor, or the media explorer, returns the toggle state of the action. 0=off, 1=on, -1=NA because the action does not have on/off states. For the MIDI editor, the action state for the most recently focused window will be returned.
    */
-  function GetToggleCommandStateEx(section_id: number, command_id: number): number;
+  function GetToggleCommandStateEx(
+    section_id: number,
+    command_id: number,
+  ): number;
 
   /**
    * ```
@@ -3047,7 +3567,9 @@ declare namespace reaper {
    * ```
    * mode can be 0 to query last touched parameter, or 1 to query currently focused FX. Returns false if failed. If successful, trackIdxOut will be track index (-1 is master track, 0 is first track). itemidxOut will be 0-based item index if an item, or -1 if not an item. takeidxOut will be 0-based take index. fxidxOut will be FX index, potentially with 0x2000000 set to signify container-addressing, or with 0x1000000 set to signify record-input FX. parmOut will be set to the parameter index if querying last-touched. parmOut will have 1 set if querying focused state and FX is no longer focused but still open.
    */
-  function GetTouchedOrFocusedFX(mode: number): LuaMultiReturn<[boolean, number, number, number, number, number]>;
+  function GetTouchedOrFocusedFX(
+    mode: number,
+  ): LuaMultiReturn<[boolean, number, number, number, number, number]>;
 
   /**
    * ```
@@ -3093,14 +3615,20 @@ declare namespace reaper {
    * ```
    * Gets a built-in track envelope by configuration chunk name, like "<VOLENV", or GUID string, like "{B577250D-146F-B544-9B34-F24FBE488F1F}".
    */
-  function GetTrackEnvelopeByChunkName(tr: MediaTrack, cfgchunkname_or_guid: string): TrackEnvelope;
+  function GetTrackEnvelopeByChunkName(
+    tr: MediaTrack,
+    cfgchunkname_or_guid: string,
+  ): TrackEnvelope;
 
   /**
    * ```
    * TrackEnvelope _ = reaper.GetTrackEnvelopeByName(MediaTrack track, string envname)
    * ```
    */
-  function GetTrackEnvelopeByName(track: MediaTrack, envname: string): TrackEnvelope;
+  function GetTrackEnvelopeByName(
+    track: MediaTrack,
+    envname: string,
+  ): TrackEnvelope;
 
   /**
    * ```
@@ -3108,7 +3636,10 @@ declare namespace reaper {
    * ```
    * Returns the track from the screen coordinates specified. If the screen coordinates refer to a window associated to the track (such as FX), the track will be returned. infoOutOptional will be set to 1 if it is likely an envelope, 2 if it is likely a track FX. For a free item positioning or fixed lane track, the second byte of infoOutOptional will be set to the (approximate, for fipm tracks) item lane underneath the mouse. See GetThingFromPoint.
    */
-  function GetTrackFromPoint(screen_x: number, screen_y: number): LuaMultiReturn<[MediaTrack, number]>;
+  function GetTrackFromPoint(
+    screen_x: number,
+    screen_y: number,
+  ): LuaMultiReturn<[MediaTrack, number]>;
 
   /**
    * ```
@@ -3130,7 +3661,10 @@ declare namespace reaper {
    * ```
    * Get all MIDI lyrics on the track. Lyrics will be returned as one string with tabs between each word. flag&1: double tabs at the end of each measure and triple tabs when skipping measures, flag&2: each lyric is preceded by its beat position in the project (example with flag=2: "1.1.2\tLyric for measure 1 beat 2\t2.1.1\tLyric for measure 2 beat 1	"). See SetTrackMIDILyrics
    */
-  function GetTrackMIDILyrics(track: MediaTrack, flag: number): LuaMultiReturn<[boolean, string]>;
+  function GetTrackMIDILyrics(
+    track: MediaTrack,
+    flag: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -3138,7 +3672,11 @@ declare namespace reaper {
    * ```
    * see GetTrackMIDINoteNameEx
    */
-  function GetTrackMIDINoteName(track: number, pitch: number, chan: number): string;
+  function GetTrackMIDINoteName(
+    track: number,
+    pitch: number,
+    chan: number,
+  ): string;
 
   /**
    * ```
@@ -3146,14 +3684,22 @@ declare namespace reaper {
    * ```
    * Get note/CC name. pitch 128 for CC0 name, 129 for CC1 name, etc. See SetTrackMIDINoteNameEx
    */
-  function GetTrackMIDINoteNameEx(proj: ReaProject, track: MediaTrack, pitch: number, chan: number): string;
+  function GetTrackMIDINoteNameEx(
+    proj: ReaProject,
+    track: MediaTrack,
+    pitch: number,
+    chan: number,
+  ): string;
 
   /**
    * ```
    * integer note_lo, integer note_hi = reaper.GetTrackMIDINoteRange(ReaProject proj, MediaTrack track)
    * ```
    */
-  function GetTrackMIDINoteRange(proj: ReaProject, track: MediaTrack): LuaMultiReturn<[number, number]>;
+  function GetTrackMIDINoteRange(
+    proj: ReaProject,
+    track: MediaTrack,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -3184,7 +3730,10 @@ declare namespace reaper {
    * ```
    * See GetTrackSendName.
    */
-  function GetTrackReceiveName(track: MediaTrack, recv_index: number): LuaMultiReturn<[boolean, string]>;
+  function GetTrackReceiveName(
+    track: MediaTrack,
+    recv_index: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -3192,7 +3741,10 @@ declare namespace reaper {
    * ```
    * See GetTrackSendUIMute.
    */
-  function GetTrackReceiveUIMute(track: MediaTrack, recv_index: number): LuaMultiReturn<[boolean, boolean]>;
+  function GetTrackReceiveUIMute(
+    track: MediaTrack,
+    recv_index: number,
+  ): LuaMultiReturn<[boolean, boolean]>;
 
   /**
    * ```
@@ -3200,7 +3752,10 @@ declare namespace reaper {
    * ```
    * See GetTrackSendUIVolPan.
    */
-  function GetTrackReceiveUIVolPan(track: MediaTrack, recv_index: number): LuaMultiReturn<[boolean, number, number]>;
+  function GetTrackReceiveUIVolPan(
+    track: MediaTrack,
+    recv_index: number,
+  ): LuaMultiReturn<[boolean, number, number]>;
 
   /**
    * ```
@@ -3243,7 +3798,12 @@ declare namespace reaper {
    * See CreateTrackSend, RemoveTrackSend, GetTrackNumSends.
    * @deprecated
    */
-  function GetTrackSendInfo_Value(tr: MediaTrack, category: number, sendidx: number, parmname: string): number;
+  function GetTrackSendInfo_Value(
+    tr: MediaTrack,
+    category: number,
+    sendidx: number,
+    parmname: string,
+  ): number;
 
   /**
    * ```
@@ -3251,7 +3811,10 @@ declare namespace reaper {
    * ```
    * send_idx>=0 for hw ouputs, >=nb_of_hw_ouputs for sends. See GetTrackReceiveName.
    */
-  function GetTrackSendName(track: MediaTrack, send_index: number): LuaMultiReturn<[boolean, string]>;
+  function GetTrackSendName(
+    track: MediaTrack,
+    send_index: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -3259,7 +3822,10 @@ declare namespace reaper {
    * ```
    * send_idx>=0 for hw ouputs, >=nb_of_hw_ouputs for sends. See GetTrackReceiveUIMute.
    */
-  function GetTrackSendUIMute(track: MediaTrack, send_index: number): LuaMultiReturn<[boolean, boolean]>;
+  function GetTrackSendUIMute(
+    track: MediaTrack,
+    send_index: number,
+  ): LuaMultiReturn<[boolean, boolean]>;
 
   /**
    * ```
@@ -3267,7 +3833,10 @@ declare namespace reaper {
    * ```
    * send_idx>=0 for hw ouputs, >=nb_of_hw_ouputs for sends. See GetTrackReceiveUIVolPan.
    */
-  function GetTrackSendUIVolPan(track: MediaTrack, send_index: number): LuaMultiReturn<[boolean, number, number]>;
+  function GetTrackSendUIVolPan(
+    track: MediaTrack,
+    send_index: number,
+  ): LuaMultiReturn<[boolean, number, number]>;
 
   /**
    * ```
@@ -3307,28 +3876,38 @@ declare namespace reaper {
    * ```
    * Gets the RPPXML state of a track, returns true if successful. Undo flag is a performance/caching hint.
    */
-  function GetTrackStateChunk(track: MediaTrack, str: string, isundo: boolean): LuaMultiReturn<[boolean, string]>;
+  function GetTrackStateChunk(
+    track: MediaTrack,
+    str: string,
+    isundo: boolean,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
    * boolean retval, boolean mute = reaper.GetTrackUIMute(MediaTrack track)
    * ```
    */
-  function GetTrackUIMute(track: MediaTrack): LuaMultiReturn<[boolean, boolean]>;
+  function GetTrackUIMute(
+    track: MediaTrack,
+  ): LuaMultiReturn<[boolean, boolean]>;
 
   /**
    * ```
    * boolean retval, number pan1, number pan2, integer panmode = reaper.GetTrackUIPan(MediaTrack track)
    * ```
    */
-  function GetTrackUIPan(track: MediaTrack): LuaMultiReturn<[boolean, number, number, number]>;
+  function GetTrackUIPan(
+    track: MediaTrack,
+  ): LuaMultiReturn<[boolean, number, number, number]>;
 
   /**
    * ```
    * boolean retval, number volume, number pan = reaper.GetTrackUIVolPan(MediaTrack track)
    * ```
    */
-  function GetTrackUIVolPan(track: MediaTrack): LuaMultiReturn<[boolean, number, number]>;
+  function GetTrackUIVolPan(
+    track: MediaTrack,
+  ): LuaMultiReturn<[boolean, number, number]>;
 
   /**
    * ```
@@ -3344,7 +3923,11 @@ declare namespace reaper {
    * ```
    * returns true if the user selected a valid file, false if the user canceled the dialog
    */
-  function GetUserFileNameForRead(filenameNeed4096: string, title: string, defext: string): LuaMultiReturn<[boolean, string]>;
+  function GetUserFileNameForRead(
+    filenameNeed4096: string,
+    title: string,
+    defext: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -3356,7 +3939,12 @@ declare namespace reaper {
    *
    * Maximum fields is 16. Values are returned as a comma-separated string. Returns false if the user canceled the dialog. You can supply special extra information via additional caption fields: extrawidth=XXX to increase text field width, separator=X to use a different separator for returned fields.
    */
-  function GetUserInputs(title: string, num_inputs: number, captions_csv: string, retvals_csv: string): LuaMultiReturn<[boolean, string]>;
+  function GetUserInputs(
+    title: string,
+    num_inputs: number,
+    captions_csv: string,
+    retvals_csv: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -3364,7 +3952,11 @@ declare namespace reaper {
    * ```
    * Go to marker. If use_timeline_order==true, marker_index 1 refers to the first marker on the timeline.  If use_timeline_order==false, marker_index 1 refers to the first marker with the user-editable index of 1.
    */
-  function GoToMarker(proj: ReaProject, marker_index: number, use_timeline_order: boolean): void;
+  function GoToMarker(
+    proj: ReaProject,
+    marker_index: number,
+    use_timeline_order: boolean,
+  ): void;
 
   /**
    * ```
@@ -3372,7 +3964,11 @@ declare namespace reaper {
    * ```
    * Seek to region after current region finishes playing (smooth seek). If use_timeline_order==true, region_index 1 refers to the first region on the timeline.  If use_timeline_order==false, region_index 1 refers to the first region with the user-editable index of 1.
    */
-  function GoToRegion(proj: ReaProject, region_index: number, use_timeline_order: boolean): void;
+  function GoToRegion(
+    proj: ReaProject,
+    region_index: number,
+    use_timeline_order: boolean,
+  ): void;
 
   /**
    * ```
@@ -3442,7 +4038,12 @@ declare namespace reaper {
    * ```
    * Insert a new automation item. pool_id < 0 collects existing envelope points into the automation item; if pool_id is >= 0 the automation item will be a new instance of that pool (which will be created as an empty instance if it does not exist). Returns the index of the item, suitable for passing to other automation item API functions. See GetSetAutomationItemInfo.
    */
-  function InsertAutomationItem(env: TrackEnvelope, pool_id: number, position: number, length: number): number;
+  function InsertAutomationItem(
+    env: TrackEnvelope,
+    pool_id: number,
+    position: number,
+    length: number,
+  ): number;
 
   /**
    * ```
@@ -3450,7 +4051,15 @@ declare namespace reaper {
    * ```
    * Insert an envelope point. If setting multiple points at once, set noSort=true, and call Envelope_SortPoints when done. See InsertEnvelopePointEx.
    */
-  function InsertEnvelopePoint(envelope: TrackEnvelope, time: number, value: number, shape: number, tension: number, selected: boolean, noSortIn?: boolean): boolean;
+  function InsertEnvelopePoint(
+    envelope: TrackEnvelope,
+    time: number,
+    value: number,
+    shape: number,
+    tension: number,
+    selected: boolean,
+    noSortIn?: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -3468,7 +4077,16 @@ declare namespace reaper {
    *
    * See CountEnvelopePointsEx, GetEnvelopePointEx, SetEnvelopePointEx, DeleteEnvelopePointEx.
    */
-  function InsertEnvelopePointEx(envelope: TrackEnvelope, autoitem_idx: number, time: number, value: number, shape: number, tension: number, selected: boolean, noSortIn?: boolean): boolean;
+  function InsertEnvelopePointEx(
+    envelope: TrackEnvelope,
+    autoitem_idx: number,
+    time: number,
+    value: number,
+    shape: number,
+    tension: number,
+    selected: boolean,
+    noSortIn?: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -3484,7 +4102,13 @@ declare namespace reaper {
    * ```
    * See InsertMedia.
    */
-  function InsertMediaSection(file: string, mode: number, startpct: number, endpct: number, pitchshift: number): number;
+  function InsertMediaSection(
+    file: string,
+    mode: number,
+    startpct: number,
+    endpct: number,
+    pitchshift: number,
+  ): number;
 
   /**
    * ```
@@ -3500,7 +4124,11 @@ declare namespace reaper {
    * ```
    * inserts a track in project proj at idx, this will be clamped to 0..CountTracks(proj). flags&1 for default envelopes/FX, otherwise no enabled fx/envelopes will be added.
    */
-  function InsertTrackInProject(proj: ReaProject, idx: number, flags: number): void;
+  function InsertTrackInProject(
+    proj: ReaProject,
+    idx: number,
+    flags: number,
+  ): void;
 
   /**
    * ```
@@ -3588,7 +4216,9 @@ declare namespace reaper {
    * ```
    * returns button count
    */
-  function joystick_getinfo(dev: joystick_device): LuaMultiReturn<[number, number, number]>;
+  function joystick_getinfo(
+    dev: joystick_device,
+  ): LuaMultiReturn<[number, number, number]>;
 
   /**
    * ```
@@ -3611,7 +4241,10 @@ declare namespace reaper {
    * integer retval, string name = reaper.kbd_enumerateActions(KbdSectionInfo section, integer idx)
    * ```
    */
-  function kbd_enumerateActions(section: KbdSectionInfo, idx: number): LuaMultiReturn<[number, string]>;
+  function kbd_enumerateActions(
+    section: KbdSectionInfo,
+    idx: number,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -3626,7 +4259,16 @@ declare namespace reaper {
    * ```
    * Returns false if the line is entirely offscreen.
    */
-  function LICE_ClipLine(pX1: number, pY1: number, pX2: number, pY2: number, xLo: number, yLo: number, xHi: number, yHi: number): LuaMultiReturn<[boolean, number, number, number, number]>;
+  function LICE_ClipLine(
+    pX1: number,
+    pY1: number,
+    pX2: number,
+    pY2: number,
+    xLo: number,
+    yLo: number,
+    xHi: number,
+    yHi: number,
+  ): LuaMultiReturn<[boolean, number, number, number, number]>;
 
   /**
    * ```
@@ -3634,7 +4276,11 @@ declare namespace reaper {
    * ```
    * Returns a localized version of src_string, in section section. flags can have 1 set to only localize if sprintf-style formatting matches the original.
    */
-  function LocalizeString(src_string: string, section: string, flags: number): string;
+  function LocalizeString(
+    src_string: string,
+    section: string,
+    flags: number,
+  ): string;
 
   /**
    * ```
@@ -3658,7 +4304,11 @@ declare namespace reaper {
    * ```
    * Performs an action belonging to the main action section. To perform non-native actions (ReaScripts, custom or extension plugins' actions) safely, see NamedCommandLookup().
    */
-  function Main_OnCommandEx(command: number, flag: number, proj: ReaProject): void;
+  function Main_OnCommandEx(
+    command: number,
+    flag: number,
+    proj: ReaProject,
+  ): void;
 
   /**
    * ```
@@ -3684,7 +4334,11 @@ declare namespace reaper {
    * ```
    * Save the project. options: &1=save selected tracks as track template, &2=include media with track template, &4=include envelopes with track template. See Main_openProject, Main_SaveProject.
    */
-  function Main_SaveProjectEx(proj: ReaProject, filename: string, options: number): void;
+  function Main_SaveProjectEx(
+    proj: ReaProject,
+    filename: string,
+    options: number,
+  ): void;
 
   /**
    * ```
@@ -3736,7 +4390,10 @@ declare namespace reaper {
    * ```
    * Convert play rate to/from a value between 0 and 1, representing the position on the project playrate slider.
    */
-  function Master_NormalizePlayRate(playrate: number, isnormalized: boolean): number;
+  function Master_NormalizePlayRate(
+    playrate: number,
+    isnormalized: boolean,
+  ): number;
 
   /**
    * ```
@@ -3760,7 +4417,10 @@ declare namespace reaper {
    * ```
    * Returns 1 if the track holds the item, 2 if the track is a folder containing the track that holds the item, etc.
    */
-  function MediaItemDescendsFromTrack(item: MediaItem, track: MediaTrack): number;
+  function MediaItemDescendsFromTrack(
+    item: MediaItem,
+    track: MediaTrack,
+  ): number;
 
   /**
    * ```
@@ -3768,7 +4428,10 @@ declare namespace reaper {
    * ```
    * Get a string that only changes when menu/toolbar entries are added or removed (not re-ordered). Can be used to determine if a customized menu/toolbar differs from the default, or if the default changed after a menu/toolbar was customized. flag==0: current default menu/toolbar; flag==1: current customized menu/toolbar; flag==2: default menu/toolbar at the time the current menu/toolbar was most recently customized, if it was customized in REAPER v7.08 or later.
    */
-  function Menu_GetHash(menuname: string, flag: number): LuaMultiReturn<[boolean, string]>;
+  function Menu_GetHash(
+    menuname: string,
+    flag: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -3776,7 +4439,9 @@ declare namespace reaper {
    * ```
    * Count the number of notes, CC events, and text/sysex events in a given MIDI item.
    */
-  function MIDI_CountEvts(take: MediaItem_Take): LuaMultiReturn<[number, number, number, number]>;
+  function MIDI_CountEvts(
+    take: MediaItem_Take,
+  ): LuaMultiReturn<[number, number, number, number]>;
 
   /**
    * ```
@@ -3808,7 +4473,10 @@ declare namespace reaper {
    * ```
    * Delete a MIDI text or sysex event.
    */
-  function MIDI_DeleteTextSysexEvt(take: MediaItem_Take, textsyxevtidx: number): boolean;
+  function MIDI_DeleteTextSysexEvt(
+    take: MediaItem_Take,
+    textsyxevtidx: number,
+  ): boolean;
 
   /**
    * ```
@@ -3848,7 +4516,10 @@ declare namespace reaper {
    * ```
    * Returns the index of the next selected MIDI text/sysex event after textsyxidx (-1 if there are no more selected events).
    */
-  function MIDI_EnumSelTextSysexEvts(take: MediaItem_Take, textsyxidx: number): number;
+  function MIDI_EnumSelTextSysexEvts(
+    take: MediaItem_Take,
+    textsyxidx: number,
+  ): number;
 
   /**
    * ```
@@ -3870,7 +4541,9 @@ declare namespace reaper {
    *
    * See MIDI_SetAllEvts.
    */
-  function MIDI_GetAllEvts(take: MediaItem_Take): LuaMultiReturn<[boolean, string]>;
+  function MIDI_GetAllEvts(
+    take: MediaItem_Take,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -3878,7 +4551,12 @@ declare namespace reaper {
    * ```
    * Get MIDI CC event properties.
    */
-  function MIDI_GetCC(take: MediaItem_Take, ccidx: number): LuaMultiReturn<[boolean, boolean, boolean, number, number, number, number, number]>;
+  function MIDI_GetCC(
+    take: MediaItem_Take,
+    ccidx: number,
+  ): LuaMultiReturn<
+    [boolean, boolean, boolean, number, number, number, number, number]
+  >;
 
   /**
    * ```
@@ -3886,7 +4564,10 @@ declare namespace reaper {
    * ```
    * Get CC shape and bezier tension. See MIDI_GetCC, MIDI_SetCCShape
    */
-  function MIDI_GetCCShape(take: MediaItem_Take, ccidx: number): LuaMultiReturn<[boolean, number, number]>;
+  function MIDI_GetCCShape(
+    take: MediaItem_Take,
+    ccidx: number,
+  ): LuaMultiReturn<[boolean, number, number]>;
 
   /**
    * ```
@@ -3894,7 +4575,10 @@ declare namespace reaper {
    * ```
    * Get MIDI event properties.
    */
-  function MIDI_GetEvt(take: MediaItem_Take, evtidx: number): LuaMultiReturn<[boolean, boolean, boolean, number, string]>;
+  function MIDI_GetEvt(
+    take: MediaItem_Take,
+    evtidx: number,
+  ): LuaMultiReturn<[boolean, boolean, boolean, number, string]>;
 
   /**
    * ```
@@ -3902,7 +4586,9 @@ declare namespace reaper {
    * ```
    * Returns the most recent MIDI editor grid size for this MIDI take, in QN. Swing is between 0 and 1. Note length is 0 if it follows the grid size.
    */
-  function MIDI_GetGrid(take: MediaItem_Take): LuaMultiReturn<[number, number, number]>;
+  function MIDI_GetGrid(
+    take: MediaItem_Take,
+  ): LuaMultiReturn<[number, number, number]>;
 
   /**
    * ```
@@ -3910,7 +4596,10 @@ declare namespace reaper {
    * ```
    * Get a string that only changes when the MIDI data changes. If notesonly==true, then the string changes only when the MIDI notes change. See MIDI_GetTrackHash
    */
-  function MIDI_GetHash(take: MediaItem_Take, notesonly: boolean): LuaMultiReturn<[boolean, string]>;
+  function MIDI_GetHash(
+    take: MediaItem_Take,
+    notesonly: boolean,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -3918,7 +4607,12 @@ declare namespace reaper {
    * ```
    * Get MIDI note properties.
    */
-  function MIDI_GetNote(take: MediaItem_Take, noteidx: number): LuaMultiReturn<[boolean, boolean, boolean, number, number, number, number, number]>;
+  function MIDI_GetNote(
+    take: MediaItem_Take,
+    noteidx: number,
+  ): LuaMultiReturn<
+    [boolean, boolean, boolean, number, number, number, number, number]
+  >;
 
   /**
    * ```
@@ -3926,7 +4620,10 @@ declare namespace reaper {
    * ```
    * Returns the MIDI tick (ppq) position corresponding to the end of the measure.
    */
-  function MIDI_GetPPQPos_EndOfMeasure(take: MediaItem_Take, ppqpos: number): number;
+  function MIDI_GetPPQPos_EndOfMeasure(
+    take: MediaItem_Take,
+    ppqpos: number,
+  ): number;
 
   /**
    * ```
@@ -3934,7 +4631,10 @@ declare namespace reaper {
    * ```
    * Returns the MIDI tick (ppq) position corresponding to the start of the measure.
    */
-  function MIDI_GetPPQPos_StartOfMeasure(take: MediaItem_Take, ppqpos: number): number;
+  function MIDI_GetPPQPos_StartOfMeasure(
+    take: MediaItem_Take,
+    ppqpos: number,
+  ): number;
 
   /**
    * ```
@@ -3942,7 +4642,10 @@ declare namespace reaper {
    * ```
    * Returns the MIDI tick (ppq) position corresponding to a specific project time in quarter notes.
    */
-  function MIDI_GetPPQPosFromProjQN(take: MediaItem_Take, projqn: number): number;
+  function MIDI_GetPPQPosFromProjQN(
+    take: MediaItem_Take,
+    projqn: number,
+  ): number;
 
   /**
    * ```
@@ -3950,7 +4653,10 @@ declare namespace reaper {
    * ```
    * Returns the MIDI tick (ppq) position corresponding to a specific project time in seconds.
    */
-  function MIDI_GetPPQPosFromProjTime(take: MediaItem_Take, projtime: number): number;
+  function MIDI_GetPPQPosFromProjTime(
+    take: MediaItem_Take,
+    projtime: number,
+  ): number;
 
   /**
    * ```
@@ -3958,7 +4664,10 @@ declare namespace reaper {
    * ```
    * Returns the project time in quarter notes corresponding to a specific MIDI tick (ppq) position.
    */
-  function MIDI_GetProjQNFromPPQPos(take: MediaItem_Take, ppqpos: number): number;
+  function MIDI_GetProjQNFromPPQPos(
+    take: MediaItem_Take,
+    ppqpos: number,
+  ): number;
 
   /**
    * ```
@@ -3966,7 +4675,10 @@ declare namespace reaper {
    * ```
    * Returns the project time in seconds corresponding to a specific MIDI tick (ppq) position.
    */
-  function MIDI_GetProjTimeFromPPQPos(take: MediaItem_Take, ppqpos: number): number;
+  function MIDI_GetProjTimeFromPPQPos(
+    take: MediaItem_Take,
+    ppqpos: number,
+  ): number;
 
   /**
    * ```
@@ -3974,7 +4686,9 @@ declare namespace reaper {
    * ```
    * Gets a recent MIDI input event from the global history. idx=0 for the most recent event, which also latches to the latest MIDI event state (to get a more recent list, calling with idx=0 is necessary). idx=1 next most recent event, returns a non-zero sequence number for the event, or zero if no more events. tsOut will be set to the timestamp in samples relative to the current position (0 is current, -48000 is one second ago, etc). devIdxOut will have the low 16 bits set to the input device index, and 0x10000 will be set if device was enabled only for control. projPosOut will be set to project position in seconds if project was playing back at time of event, otherwise -1. Large SysEx events will not be included in this event list.
    */
-  function MIDI_GetRecentInputEvent(idx: number): LuaMultiReturn<[number, string, number, number, number, number]>;
+  function MIDI_GetRecentInputEvent(
+    idx: number,
+  ): LuaMultiReturn<[number, string, number, number, number, number]>;
 
   /**
    * ```
@@ -3982,7 +4696,9 @@ declare namespace reaper {
    * ```
    * Get the active scale in the media source, if any. root 0=C, 1=C#, etc. scale &0x1=root, &0x2=minor 2nd, &0x4=major 2nd, &0x8=minor 3rd, &0xF=fourth, etc.
    */
-  function MIDI_GetScale(take: MediaItem_Take): LuaMultiReturn<[boolean, number, number, string]>;
+  function MIDI_GetScale(
+    take: MediaItem_Take,
+  ): LuaMultiReturn<[boolean, number, number, string]>;
 
   /**
    * ```
@@ -3990,7 +4706,15 @@ declare namespace reaper {
    * ```
    * Get MIDI meta-event properties. Allowable types are -1:sysex (msg should not include bounding F0..F7), 1-14:MIDI text event types, 15=REAPER notation event. For all other meta-messages, type is returned as -2 and msg returned as all zeroes. See MIDI_GetEvt.
    */
-  function MIDI_GetTextSysexEvt(take: MediaItem_Take, textsyxevtidx: number, selected?: boolean, muted?: boolean, ppqpos?: number, type?: number, msg?: string): LuaMultiReturn<[boolean, boolean, boolean, number, number, string]>;
+  function MIDI_GetTextSysexEvt(
+    take: MediaItem_Take,
+    textsyxevtidx: number,
+    selected?: boolean,
+    muted?: boolean,
+    ppqpos?: number,
+    type?: number,
+    msg?: string,
+  ): LuaMultiReturn<[boolean, boolean, boolean, number, number, string]>;
 
   /**
    * ```
@@ -3998,7 +4722,10 @@ declare namespace reaper {
    * ```
    * Get a string that only changes when the MIDI data changes. If notesonly==true, then the string changes only when the MIDI notes change. See MIDI_GetHash
    */
-  function MIDI_GetTrackHash(track: MediaTrack, notesonly: boolean): LuaMultiReturn<[boolean, string]>;
+  function MIDI_GetTrackHash(
+    track: MediaTrack,
+    notesonly: boolean,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -4006,7 +4733,10 @@ declare namespace reaper {
    * ```
    * Opens MIDI devices as configured in preferences. force_reinit_input and force_reinit_output force a particular device index to close/re-open (pass -1 to not force any devices to reopen).
    */
-  function midi_init(force_reinit_input: number, force_reinit_output: number): void;
+  function midi_init(
+    force_reinit_input: number,
+    force_reinit_output: number,
+  ): void;
 
   /**
    * ```
@@ -4014,7 +4744,16 @@ declare namespace reaper {
    * ```
    * Insert a new MIDI CC event.
    */
-  function MIDI_InsertCC(take: MediaItem_Take, selected: boolean, muted: boolean, ppqpos: number, chanmsg: number, chan: number, msg2: number, msg3: number): boolean;
+  function MIDI_InsertCC(
+    take: MediaItem_Take,
+    selected: boolean,
+    muted: boolean,
+    ppqpos: number,
+    chanmsg: number,
+    chan: number,
+    msg2: number,
+    msg3: number,
+  ): boolean;
 
   /**
    * ```
@@ -4022,7 +4761,13 @@ declare namespace reaper {
    * ```
    * Insert a new MIDI event.
    */
-  function MIDI_InsertEvt(take: MediaItem_Take, selected: boolean, muted: boolean, ppqpos: number, bytestr: string): boolean;
+  function MIDI_InsertEvt(
+    take: MediaItem_Take,
+    selected: boolean,
+    muted: boolean,
+    ppqpos: number,
+    bytestr: string,
+  ): boolean;
 
   /**
    * ```
@@ -4030,7 +4775,17 @@ declare namespace reaper {
    * ```
    * Insert a new MIDI note. Set noSort if inserting multiple events, then call MIDI_Sort when done.
    */
-  function MIDI_InsertNote(take: MediaItem_Take, selected: boolean, muted: boolean, startppqpos: number, endppqpos: number, chan: number, pitch: number, vel: number, noSortIn?: boolean): boolean;
+  function MIDI_InsertNote(
+    take: MediaItem_Take,
+    selected: boolean,
+    muted: boolean,
+    startppqpos: number,
+    endppqpos: number,
+    chan: number,
+    pitch: number,
+    vel: number,
+    noSortIn?: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -4038,7 +4793,14 @@ declare namespace reaper {
    * ```
    * Insert a new MIDI text or sysex event. Allowable types are -1:sysex (msg should not include bounding F0..F7), 1-14:MIDI text event types, 15=REAPER notation event.
    */
-  function MIDI_InsertTextSysexEvt(take: MediaItem_Take, selected: boolean, muted: boolean, ppqpos: number, type: number, bytestr: string): boolean;
+  function MIDI_InsertTextSysexEvt(
+    take: MediaItem_Take,
+    selected: boolean,
+    muted: boolean,
+    ppqpos: number,
+    type: number,
+    bytestr: string,
+  ): boolean;
 
   /**
    * ```
@@ -4092,7 +4854,18 @@ declare namespace reaper {
    * ```
    * Set MIDI CC event properties. Properties passed as NULL will not be set. set noSort if setting multiple events, then call MIDI_Sort when done.
    */
-  function MIDI_SetCC(take: MediaItem_Take, ccidx: number, selectedIn?: boolean, mutedIn?: boolean, ppqposIn?: number, chanmsgIn?: number, chanIn?: number, msg2In?: number, msg3In?: number, noSortIn?: boolean): boolean;
+  function MIDI_SetCC(
+    take: MediaItem_Take,
+    ccidx: number,
+    selectedIn?: boolean,
+    mutedIn?: boolean,
+    ppqposIn?: number,
+    chanmsgIn?: number,
+    chanIn?: number,
+    msg2In?: number,
+    msg3In?: number,
+    noSortIn?: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -4100,7 +4873,13 @@ declare namespace reaper {
    * ```
    * Set CC shape and bezier tension. set noSort if setting multiple events, then call MIDI_Sort when done. See MIDI_SetCC, MIDI_GetCCShape
    */
-  function MIDI_SetCCShape(take: MediaItem_Take, ccidx: number, shape: number, beztension: number, noSortIn?: boolean): boolean;
+  function MIDI_SetCCShape(
+    take: MediaItem_Take,
+    ccidx: number,
+    shape: number,
+    beztension: number,
+    noSortIn?: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -4108,7 +4887,15 @@ declare namespace reaper {
    * ```
    * Set MIDI event properties. Properties passed as NULL will not be set.  set noSort if setting multiple events, then call MIDI_Sort when done.
    */
-  function MIDI_SetEvt(take: MediaItem_Take, evtidx: number, selectedIn?: boolean, mutedIn?: boolean, ppqposIn?: number, msg?: string, noSortIn?: boolean): boolean;
+  function MIDI_SetEvt(
+    take: MediaItem_Take,
+    evtidx: number,
+    selectedIn?: boolean,
+    mutedIn?: boolean,
+    ppqposIn?: number,
+    msg?: string,
+    noSortIn?: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -4116,7 +4903,11 @@ declare namespace reaper {
    * ```
    * Set the start/end positions of a media item that contains a MIDI take.
    */
-  function MIDI_SetItemExtents(item: MediaItem, startQN: number, endQN: number): boolean;
+  function MIDI_SetItemExtents(
+    item: MediaItem,
+    startQN: number,
+    endQN: number,
+  ): boolean;
 
   /**
    * ```
@@ -4124,7 +4915,18 @@ declare namespace reaper {
    * ```
    * Set MIDI note properties. Properties passed as NULL (or negative values) will not be set. Set noSort if setting multiple events, then call MIDI_Sort when done. Setting multiple note start positions at once is done more safely by deleting and re-inserting the notes.
    */
-  function MIDI_SetNote(take: MediaItem_Take, noteidx: number, selectedIn?: boolean, mutedIn?: boolean, startppqposIn?: number, endppqposIn?: number, chanIn?: number, pitchIn?: number, velIn?: number, noSortIn?: boolean): boolean;
+  function MIDI_SetNote(
+    take: MediaItem_Take,
+    noteidx: number,
+    selectedIn?: boolean,
+    mutedIn?: boolean,
+    startppqposIn?: number,
+    endppqposIn?: number,
+    chanIn?: number,
+    pitchIn?: number,
+    velIn?: number,
+    noSortIn?: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -4132,7 +4934,16 @@ declare namespace reaper {
    * ```
    * Set MIDI text or sysex event properties. Properties passed as NULL will not be set. Allowable types are -1:sysex (msg should not include bounding F0..F7), 1-14:MIDI text event types, 15=REAPER notation event. set noSort if setting multiple events, then call MIDI_Sort when done.
    */
-  function MIDI_SetTextSysexEvt(take: MediaItem_Take, textsyxevtidx: number, selectedIn?: boolean, mutedIn?: boolean, ppqposIn?: number, typeIn?: number, msg?: string, noSortIn?: boolean): boolean;
+  function MIDI_SetTextSysexEvt(
+    take: MediaItem_Take,
+    textsyxevtidx: number,
+    selectedIn?: boolean,
+    mutedIn?: boolean,
+    ppqposIn?: number,
+    typeIn?: number,
+    msg?: string,
+    noSortIn?: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -4148,7 +4959,11 @@ declare namespace reaper {
    * ```
    * list the takes that are currently being edited in this MIDI editor, starting with the active take. See MIDIEditor_GetTake
    */
-  function MIDIEditor_EnumTakes(midieditor: HWND, takeindex: number, editable_only: boolean): MediaItem_Take;
+  function MIDIEditor_EnumTakes(
+    midieditor: HWND,
+    takeindex: number,
+    editable_only: boolean,
+  ): MediaItem_Take;
 
   /**
    * ```
@@ -4198,7 +5013,10 @@ declare namespace reaper {
    *
    * See MIDIEditor_SetSetting_int, MIDIEditor_GetActive, MIDIEditor_GetSetting_str
    */
-  function MIDIEditor_GetSetting_int(midieditor: HWND, setting_desc: string): number;
+  function MIDIEditor_GetSetting_int(
+    midieditor: HWND,
+    setting_desc: string,
+  ): number;
 
   /**
    * ```
@@ -4216,7 +5034,10 @@ declare namespace reaper {
    *
    * See MIDIEditor_GetActive, MIDIEditor_GetSetting_int
    */
-  function MIDIEditor_GetSetting_str(midieditor: HWND, setting_desc: string): LuaMultiReturn<[boolean, string]>;
+  function MIDIEditor_GetSetting_str(
+    midieditor: HWND,
+    setting_desc: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -4234,7 +5055,10 @@ declare namespace reaper {
    *
    * see MIDIEditor_OnCommand
    */
-  function MIDIEditor_LastFocused_OnCommand(command_id: number, islistviewcommand: boolean): boolean;
+  function MIDIEditor_LastFocused_OnCommand(
+    command_id: number,
+    islistviewcommand: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -4256,7 +5080,11 @@ declare namespace reaper {
    *
    * See MIDIEditor_GetSetting_int
    */
-  function MIDIEditor_SetSetting_int(midieditor: HWND, setting_desc: string, setting: number): boolean;
+  function MIDIEditor_SetSetting_int(
+    midieditor: HWND,
+    setting_desc: string,
+    setting: number,
+  ): boolean;
 
   /**
    * ```
@@ -4264,7 +5092,12 @@ declare namespace reaper {
    * ```
    * Get or set MIDI editor settings for this track. pitchwheelrange: semitones up or down. flags &1: snap pitch lane edits to semitones if pitchwheel range is defined.
    */
-  function MIDIEditorFlagsForTrack(track: MediaTrack, pitchwheelrange: number, flags: number, is_set: boolean): LuaMultiReturn<[number, number]>;
+  function MIDIEditorFlagsForTrack(
+    track: MediaTrack,
+    pitchwheelrange: number,
+    flags: number,
+    is_set: boolean,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -4314,7 +5147,17 @@ declare namespace reaper {
    * reaper.my_getViewport(integer r_left, integer r_top, integer r_right, integer r_bot, integer sr_left, integer sr_top, integer sr_right, integer sr_bot, boolean wantWorkArea)
    * ```
    */
-  function my_getViewport(r_left: number, r_top: number, r_right: number, r_bot: number, sr_left: number, sr_top: number, sr_right: number, sr_bot: number, wantWorkArea: boolean): void;
+  function my_getViewport(
+    r_left: number,
+    r_top: number,
+    r_right: number,
+    r_bot: number,
+    sr_left: number,
+    sr_top: number,
+    sr_right: number,
+    sr_bot: number,
+    wantWorkArea: boolean,
+  ): void;
 
   /**
    * ```
@@ -4421,7 +5264,11 @@ declare namespace reaper {
    *
    * 5=h:m:s:f
    */
-  function parse_timestr_len(buf: string, offset: number, modeoverride: number): number;
+  function parse_timestr_len(
+    buf: string,
+    offset: number,
+    modeoverride: number,
+  ): number;
 
   /**
    * ```
@@ -4493,7 +5340,10 @@ declare namespace reaper {
    * ```
    * Create a PCM_source from filename, and override pref of MIDI files being imported as in-project MIDI events.
    */
-  function PCM_Source_CreateFromFileEx(filename: string, forcenoMidiImp: boolean): PCM_source;
+  function PCM_Source_CreateFromFileEx(
+    filename: string,
+    forcenoMidiImp: boolean,
+  ): PCM_source;
 
   /**
    * ```
@@ -4519,7 +5369,15 @@ declare namespace reaper {
    * ```
    * Gets block of peak samples to buf. Note that the peak samples are interleaved, but in two or three blocks (maximums, then minimums, then extra). Return value has 20 bits of returned sample count, then 4 bits of output_mode (0xf00000), then a bit to signify whether extra_type was available (0x1000000). extra_type can be 115 ('s') for spectral information, which will return peak samples as integers with the low 15 bits frequency, next 14 bits tonality.
    */
-  function PCM_Source_GetPeaks(src: PCM_source, peakrate: number, starttime: number, numchannels: number, numsamplesperchannel: number, want_extra_type: number, buf: reaper_array): number;
+  function PCM_Source_GetPeaks(
+    src: PCM_source,
+    peakrate: number,
+    starttime: number,
+    numchannels: number,
+    numsamplesperchannel: number,
+    want_extra_type: number,
+    buf: reaper_array,
+  ): number;
 
   /**
    * ```
@@ -4527,7 +5385,9 @@ declare namespace reaper {
    * ```
    * If a section/reverse block, retrieves offset/len/reverse. return true if success
    */
-  function PCM_Source_GetSectionInfo(src: PCM_source): LuaMultiReturn<[boolean, number, number, boolean]>;
+  function PCM_Source_GetSectionInfo(
+    src: PCM_source,
+  ): LuaMultiReturn<[boolean, number, number, boolean]>;
 
   /**
    * ```
@@ -4550,7 +5410,11 @@ declare namespace reaper {
    * ```
    * Uses the action list to choose an action. Call with session_mode=1 to create a session (init_id will be the initial action to select, or 0), then poll with session_mode=0, checking return value for user-selected action (will return 0 if no action selected yet, or -1 if the action window is no longer available). When finished, call with session_mode=-1.
    */
-  function PromptForAction(session_mode: number, init_id: number, section_id: number): number;
+  function PromptForAction(
+    session_mode: number,
+    init_id: number,
+    section_id: number,
+  ): number;
 
   /**
    * ```
@@ -4606,7 +5470,11 @@ declare namespace reaper {
    * ```
    * Remove a send/receive/hardware output, return true on success. category is <0 for receives, 0=sends, >0 for hardware outputs. See CreateTrackSend, GetSetTrackSendInfo, GetTrackSendInfo_Value, SetTrackSendInfo_Value, GetTrackNumSends.
    */
-  function RemoveTrackSend(tr: MediaTrack, category: number, sendidx: number): boolean;
+  function RemoveTrackSend(
+    tr: MediaTrack,
+    category: number,
+    sendidx: number,
+  ): boolean;
 
   /**
    * ```
@@ -4614,7 +5482,13 @@ declare namespace reaper {
    * ```
    * Not available while playing back.
    */
-  function RenderFileSection(source_filename: string, target_filename: string, start_percent: number, end_percent: number, playrate: number): boolean;
+  function RenderFileSection(
+    source_filename: string,
+    target_filename: string,
+    start_percent: number,
+    end_percent: number,
+    playrate: number,
+  ): boolean;
 
   /**
    * ```
@@ -4622,7 +5496,10 @@ declare namespace reaper {
    * ```
    * Moves all selected tracks to immediately above track specified by index beforeTrackIdx, returns false if no tracks were selected. makePrevFolder=0 for normal, 1 = as child of track preceding track specified by beforeTrackIdx, 2 = if track preceding track specified by beforeTrackIdx is last track in folder, extend folder
    */
-  function ReorderSelectedTracks(beforeTrackIdx: number, makePrevFolder: number): boolean;
+  function ReorderSelectedTracks(
+    beforeTrackIdx: number,
+    makePrevFolder: number,
+  ): boolean;
 
   /**
    * ```
@@ -4728,7 +5605,11 @@ declare namespace reaper {
    * ```
    * set current BPM in project, set wantUndo=true to add undo point
    */
-  function SetCurrentBPM(__proj: ReaProject, bpm: number, wantUndo: boolean): void;
+  function SetCurrentBPM(
+    __proj: ReaProject,
+    bpm: number,
+    wantUndo: boolean,
+  ): void;
 
   /**
    * ```
@@ -4743,14 +5624,23 @@ declare namespace reaper {
    * reaper.SetEditCurPos(number time, boolean moveview, boolean seekplay)
    * ```
    */
-  function SetEditCurPos(time: number, moveview: boolean, seekplay: boolean): void;
+  function SetEditCurPos(
+    time: number,
+    moveview: boolean,
+    seekplay: boolean,
+  ): void;
 
   /**
    * ```
    * reaper.SetEditCurPos2(ReaProject proj, number time, boolean moveview, boolean seekplay)
    * ```
    */
-  function SetEditCurPos2(proj: ReaProject, time: number, moveview: boolean, seekplay: boolean): void;
+  function SetEditCurPos2(
+    proj: ReaProject,
+    time: number,
+    moveview: boolean,
+    seekplay: boolean,
+  ): void;
 
   /**
    * ```
@@ -4758,7 +5648,16 @@ declare namespace reaper {
    * ```
    * Set attributes of an envelope point. Values that are not supplied will be ignored. If setting multiple points at once, set noSort=true, and call Envelope_SortPoints when done. See SetEnvelopePointEx.
    */
-  function SetEnvelopePoint(envelope: TrackEnvelope, ptidx: number, timeIn?: number, valueIn?: number, shapeIn?: number, tensionIn?: number, selectedIn?: boolean, noSortIn?: boolean): boolean;
+  function SetEnvelopePoint(
+    envelope: TrackEnvelope,
+    ptidx: number,
+    timeIn?: number,
+    valueIn?: number,
+    shapeIn?: number,
+    tensionIn?: number,
+    selectedIn?: boolean,
+    noSortIn?: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -4776,7 +5675,17 @@ declare namespace reaper {
    *
    * See CountEnvelopePointsEx, GetEnvelopePointEx, InsertEnvelopePointEx, DeleteEnvelopePointEx.
    */
-  function SetEnvelopePointEx(envelope: TrackEnvelope, autoitem_idx: number, ptidx: number, timeIn?: number, valueIn?: number, shapeIn?: number, tensionIn?: number, selectedIn?: boolean, noSortIn?: boolean): boolean;
+  function SetEnvelopePointEx(
+    envelope: TrackEnvelope,
+    autoitem_idx: number,
+    ptidx: number,
+    timeIn?: number,
+    valueIn?: number,
+    shapeIn?: number,
+    tensionIn?: number,
+    selectedIn?: boolean,
+    noSortIn?: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -4784,7 +5693,11 @@ declare namespace reaper {
    * ```
    * Sets the RPPXML state of an envelope, returns true if successful. Undo flag is a performance/caching hint.
    */
-  function SetEnvelopeStateChunk(env: TrackEnvelope, str: string, isundo: boolean): boolean;
+  function SetEnvelopeStateChunk(
+    env: TrackEnvelope,
+    str: string,
+    isundo: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -4792,7 +5705,12 @@ declare namespace reaper {
    * ```
    * Set the extended state value for a specific section and key. persist=true means the value should be stored and reloaded the next time REAPER is opened. See GetExtState, DeleteExtState, HasExtState.
    */
-  function SetExtState(section: string, key: string, value: string, persist: boolean): void;
+  function SetExtState(
+    section: string,
+    key: string,
+    value: string,
+    persist: boolean,
+  ): void;
 
   /**
    * ```
@@ -4808,7 +5726,11 @@ declare namespace reaper {
    * ```
    * Sets the RPPXML state of an item, returns true if successful. Undo flag is a performance/caching hint.
    */
-  function SetItemStateChunk(item: MediaItem, str: string, isundo: boolean): boolean;
+  function SetItemStateChunk(
+    item: MediaItem,
+    str: string,
+    isundo: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -4888,7 +5810,11 @@ declare namespace reaper {
    *
    * B_FIXEDLANE_HIDDEN : bool * : true if displaying only one fixed lane and this item is in a different lane (read-only)
    */
-  function SetMediaItemInfo_Value(item: MediaItem, parmname: string, newvalue: number): boolean;
+  function SetMediaItemInfo_Value(
+    item: MediaItem,
+    parmname: string,
+    newvalue: number,
+  ): boolean;
 
   /**
    * ```
@@ -4898,7 +5824,11 @@ declare namespace reaper {
    *
    * See UpdateArrange().
    */
-  function SetMediaItemLength(item: MediaItem, length: number, refreshUI: boolean): boolean;
+  function SetMediaItemLength(
+    item: MediaItem,
+    length: number,
+    refreshUI: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -4908,7 +5838,11 @@ declare namespace reaper {
    *
    * See UpdateArrange().
    */
-  function SetMediaItemPosition(item: MediaItem, position: number, refreshUI: boolean): boolean;
+  function SetMediaItemPosition(
+    item: MediaItem,
+    position: number,
+    refreshUI: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -4923,7 +5857,10 @@ declare namespace reaper {
    * ```
    * Set media source of media item take. The old source will not be destroyed, it is the caller's responsibility to retrieve it and destroy it after. If source already exists in any project, it will be duplicated before being set. C/C++ code should not use this and instead use GetSetMediaItemTakeInfo() with P_SOURCE to manage ownership directly.
    */
-  function SetMediaItemTake_Source(take: MediaItem_Take, source: PCM_source): boolean;
+  function SetMediaItemTake_Source(
+    take: MediaItem_Take,
+    source: PCM_source,
+  ): boolean;
 
   /**
    * ```
@@ -4965,7 +5902,11 @@ declare namespace reaper {
    *
    * IP_TAKENUMBER : int : take number (read-only, returns the take number directly)
    */
-  function SetMediaItemTakeInfo_Value(take: MediaItem_Take, parmname: string, newvalue: number): boolean;
+  function SetMediaItemTakeInfo_Value(
+    take: MediaItem_Take,
+    parmname: string,
+    newvalue: number,
+  ): boolean;
 
   /**
    * ```
@@ -5098,7 +6039,11 @@ declare namespace reaper {
    * D_PLAY_OFFSET : double * : track media playback offset, units depend on I_PLAY_OFFSET_FLAG
    * @deprecated
    */
-  function SetMediaTrackInfo_Value(tr: MediaTrack, parmname: string, newvalue: number): boolean;
+  function SetMediaTrackInfo_Value(
+    tr: MediaTrack,
+    parmname: string,
+    newvalue: number,
+  ): boolean;
 
   /**
    * ```
@@ -5150,7 +6095,11 @@ declare namespace reaper {
    *
    * See GetMouseModifier.
    */
-  function SetMouseModifier(context: string, modifier_flag: number, action: string): void;
+  function SetMouseModifier(
+    context: string,
+    modifier_flag: number,
+    action: string,
+  ): void;
 
   /**
    * ```
@@ -5174,7 +6123,13 @@ declare namespace reaper {
    * ```
    * Note: this function can't clear a marker's name (an empty string will leave the name unchanged), see SetProjectMarker4.
    */
-  function SetProjectMarker(markrgnindexnumber: number, isrgn: boolean, pos: number, rgnend: number, name: string): boolean;
+  function SetProjectMarker(
+    markrgnindexnumber: number,
+    isrgn: boolean,
+    pos: number,
+    rgnend: number,
+    name: string,
+  ): boolean;
 
   /**
    * ```
@@ -5182,7 +6137,14 @@ declare namespace reaper {
    * ```
    * Note: this function can't clear a marker's name (an empty string will leave the name unchanged), see SetProjectMarker4.
    */
-  function SetProjectMarker2(proj: ReaProject, markrgnindexnumber: number, isrgn: boolean, pos: number, rgnend: number, name: string): boolean;
+  function SetProjectMarker2(
+    proj: ReaProject,
+    markrgnindexnumber: number,
+    isrgn: boolean,
+    pos: number,
+    rgnend: number,
+    name: string,
+  ): boolean;
 
   /**
    * ```
@@ -5190,7 +6152,15 @@ declare namespace reaper {
    * ```
    * Note: this function can't clear a marker's name (an empty string will leave the name unchanged), see SetProjectMarker4.
    */
-  function SetProjectMarker3(proj: ReaProject, markrgnindexnumber: number, isrgn: boolean, pos: number, rgnend: number, name: string, color: number): boolean;
+  function SetProjectMarker3(
+    proj: ReaProject,
+    markrgnindexnumber: number,
+    isrgn: boolean,
+    pos: number,
+    rgnend: number,
+    name: string,
+    color: number,
+  ): boolean;
 
   /**
    * ```
@@ -5198,7 +6168,16 @@ declare namespace reaper {
    * ```
    * color should be 0 to not change, or ColorToNative(r,g,b)|0x1000000, flags&1 to clear name
    */
-  function SetProjectMarker4(proj: ReaProject, markrgnindexnumber: number, isrgn: boolean, pos: number, rgnend: number, name: string, color: number, flags: number): boolean;
+  function SetProjectMarker4(
+    proj: ReaProject,
+    markrgnindexnumber: number,
+    isrgn: boolean,
+    pos: number,
+    rgnend: number,
+    name: string,
+    color: number,
+    flags: number,
+  ): boolean;
 
   /**
    * ```
@@ -5206,7 +6185,16 @@ declare namespace reaper {
    * ```
    * See SetProjectMarkerByIndex2.
    */
-  function SetProjectMarkerByIndex(proj: ReaProject, markrgnidx: number, isrgn: boolean, pos: number, rgnend: number, IDnumber: number, name: string, color: number): boolean;
+  function SetProjectMarkerByIndex(
+    proj: ReaProject,
+    markrgnidx: number,
+    isrgn: boolean,
+    pos: number,
+    rgnend: number,
+    IDnumber: number,
+    name: string,
+    color: number,
+  ): boolean;
 
   /**
    * ```
@@ -5214,7 +6202,17 @@ declare namespace reaper {
    * ```
    * Differs from SetProjectMarker4 in that markrgnidx is 0 for the first marker/region, 1 for the next, etc (see EnumProjectMarkers3), rather than representing the displayed marker/region ID number (see SetProjectMarker3). Function will fail if attempting to set a duplicate ID number for a region (duplicate ID numbers for markers are OK). , flags&1 to clear name. If flags&2, markers will not be re-sorted, and after making updates, you MUST call SetProjectMarkerByIndex2 with markrgnidx=-1 and flags&2 to force re-sort/UI updates.
    */
-  function SetProjectMarkerByIndex2(proj: ReaProject, markrgnidx: number, isrgn: boolean, pos: number, rgnend: number, IDnumber: number, name: string, color: number, flags: number): boolean;
+  function SetProjectMarkerByIndex2(
+    proj: ReaProject,
+    markrgnidx: number,
+    isrgn: boolean,
+    pos: number,
+    rgnend: number,
+    IDnumber: number,
+    name: string,
+    color: number,
+    flags: number,
+  ): boolean;
 
   /**
    * ```
@@ -5222,7 +6220,12 @@ declare namespace reaper {
    * ```
    * Save a key/value pair for a specific extension, to be restored the next time this specific project is loaded. Typically extname will be the name of a reascript or extension section. If key is NULL or "", all extended data for that extname will be deleted.  If val is NULL or "", the data previously associated with that key will be deleted. Returns the size of the state for this extname. See GetProjExtState, EnumProjExtState.
    */
-  function SetProjExtState(proj: ReaProject, extname: string, key: string, value: string): number;
+  function SetProjExtState(
+    proj: ReaProject,
+    extname: string,
+    key: string,
+    value: string,
+  ): number;
 
   /**
    * ```
@@ -5230,7 +6233,12 @@ declare namespace reaper {
    * ```
    * Add (flag > 0) or remove (flag < 0) a track from this region when using the region render matrix. If adding, flag==2 means force mono, flag==4 means force stereo, flag==N means force N/2 channels.
    */
-  function SetRegionRenderMatrix(proj: ReaProject, regionindex: number, track: MediaTrack, flag: number): void;
+  function SetRegionRenderMatrix(
+    proj: ReaProject,
+    regionindex: number,
+    track: MediaTrack,
+    flag: number,
+  ): void;
 
   /**
    * ```
@@ -5238,7 +6246,13 @@ declare namespace reaper {
    * ```
    * Inserts or updates a take marker. If idx<0, a take marker will be added, otherwise an existing take marker will be updated. Returns the index of the new or updated take marker (which may change if srcPos is updated). See GetNumTakeMarkers, GetTakeMarker, DeleteTakeMarker
    */
-  function SetTakeMarker(take: MediaItem_Take, idx: number, nameIn: string, srcposIn?: number, colorIn?: number): number;
+  function SetTakeMarker(
+    take: MediaItem_Take,
+    idx: number,
+    nameIn: string,
+    srcposIn?: number,
+    colorIn?: number,
+  ): number;
 
   /**
    * ```
@@ -5246,7 +6260,12 @@ declare namespace reaper {
    * ```
    * Adds or updates a stretch marker. If idx<0, stretch marker will be added. If idx>=0, stretch marker will be updated. When adding, if srcposInOptional is omitted, source position will be auto-calculated. When updating a stretch marker, if srcposInOptional is omitted, srcpos will not be modified. Position/srcposition values will be constrained to nearby stretch markers. Returns index of stretch marker, or -1 if did not insert (or marker already existed at time).
    */
-  function SetTakeStretchMarker(take: MediaItem_Take, idx: number, pos: number, srcposIn?: number): number;
+  function SetTakeStretchMarker(
+    take: MediaItem_Take,
+    idx: number,
+    pos: number,
+    srcposIn?: number,
+  ): number;
 
   /**
    * ```
@@ -5254,7 +6273,11 @@ declare namespace reaper {
    * ```
    * See GetTakeStretchMarkerSlope
    */
-  function SetTakeStretchMarkerSlope(take: MediaItem_Take, idx: number, slope: number): boolean;
+  function SetTakeStretchMarkerSlope(
+    take: MediaItem_Take,
+    idx: number,
+    slope: number,
+  ): boolean;
 
   /**
    * ```
@@ -5262,7 +6285,17 @@ declare namespace reaper {
    * ```
    * Set parameters of a tempo/time signature marker. Provide either timepos (with measurepos=-1, beatpos=-1), or measurepos and beatpos (with timepos=-1). If timesig_num and timesig_denom are zero, the previous time signature will be used. ptidx=-1 will insert a new tempo/time signature marker. See CountTempoTimeSigMarkers, GetTempoTimeSigMarker, AddTempoTimeSigMarker.
    */
-  function SetTempoTimeSigMarker(proj: ReaProject, ptidx: number, timepos: number, measurepos: number, beatpos: number, bpm: number, timesig_num: number, timesig_denom: number, lineartempo: boolean): boolean;
+  function SetTempoTimeSigMarker(
+    proj: ReaProject,
+    ptidx: number,
+    timepos: number,
+    measurepos: number,
+    beatpos: number,
+    bpm: number,
+    timesig_num: number,
+    timesig_denom: number,
+    lineartempo: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -6786,7 +7819,11 @@ declare namespace reaper {
    * ```
    * Updates the toggle state of an action, returns true if succeeded. Only ReaScripts can have their toggle states changed programmatically. See RefreshToolbar2.
    */
-  function SetToggleCommandState(section_id: number, command_id: number, state: number): boolean;
+  function SetToggleCommandState(
+    section_id: number,
+    command_id: number,
+    state: number,
+  ): boolean;
 
   /**
    * ```
@@ -6809,7 +7846,11 @@ declare namespace reaper {
    * ```
    * Set all MIDI lyrics on the track. Lyrics will be stuffed into any MIDI items found in range. Flag is unused at present. str is passed in as beat position, tab, text, tab (example with flag=2: "1.1.2\tLyric for measure 1 beat 2\t2.1.1\tLyric for measure 2 beat 1	"). See GetTrackMIDILyrics
    */
-  function SetTrackMIDILyrics(track: MediaTrack, flag: number, str: string): boolean;
+  function SetTrackMIDILyrics(
+    track: MediaTrack,
+    flag: number,
+    str: string,
+  ): boolean;
 
   /**
    * ```
@@ -6817,7 +7858,12 @@ declare namespace reaper {
    * ```
    * channel < 0 assigns these note names to all channels.
    */
-  function SetTrackMIDINoteName(track: number, pitch: number, chan: number, name: string): boolean;
+  function SetTrackMIDINoteName(
+    track: number,
+    pitch: number,
+    chan: number,
+    name: string,
+  ): boolean;
 
   /**
    * ```
@@ -6825,7 +7871,13 @@ declare namespace reaper {
    * ```
    * channel < 0 assigns note name to all channels. pitch 128 assigns name for CC0, pitch 129 for CC1, etc.
    */
-  function SetTrackMIDINoteNameEx(proj: ReaProject, track: MediaTrack, pitch: number, chan: number, name: string): boolean;
+  function SetTrackMIDINoteNameEx(
+    proj: ReaProject,
+    track: MediaTrack,
+    pitch: number,
+    chan: number,
+    name: string,
+  ): boolean;
 
   /**
    * ```
@@ -6869,7 +7921,13 @@ declare namespace reaper {
    * See CreateTrackSend, RemoveTrackSend, GetTrackNumSends.
    * @deprecated
    */
-  function SetTrackSendInfo_Value(tr: MediaTrack, category: number, sendidx: number, parmname: string, newvalue: number): boolean;
+  function SetTrackSendInfo_Value(
+    tr: MediaTrack,
+    category: number,
+    sendidx: number,
+    parmname: string,
+    newvalue: number,
+  ): boolean;
 
   /**
    * ```
@@ -6877,7 +7935,12 @@ declare namespace reaper {
    * ```
    * send_idx<0 for receives, >=0 for hw ouputs, >=nb_of_hw_ouputs for sends. isend=1 for end of edit, -1 for an instant edit (such as reset), 0 for normal tweak.
    */
-  function SetTrackSendUIPan(track: MediaTrack, send_idx: number, pan: number, isend: number): boolean;
+  function SetTrackSendUIPan(
+    track: MediaTrack,
+    send_idx: number,
+    pan: number,
+    isend: number,
+  ): boolean;
 
   /**
    * ```
@@ -6885,7 +7948,12 @@ declare namespace reaper {
    * ```
    * send_idx<0 for receives, >=0 for hw ouputs, >=nb_of_hw_ouputs for sends. isend=1 for end of edit, -1 for an instant edit (such as reset), 0 for normal tweak.
    */
-  function SetTrackSendUIVol(track: MediaTrack, send_idx: number, vol: number, isend: number): boolean;
+  function SetTrackSendUIVol(
+    track: MediaTrack,
+    send_idx: number,
+    vol: number,
+    isend: number,
+  ): boolean;
 
   /**
    * ```
@@ -6893,7 +7961,11 @@ declare namespace reaper {
    * ```
    * Sets the RPPXML state of a track, returns true if successful. Undo flag is a performance/caching hint.
    */
-  function SetTrackStateChunk(track: MediaTrack, str: string, isundo: boolean): boolean;
+  function SetTrackStateChunk(
+    track: MediaTrack,
+    str: string,
+    isundo: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -6901,7 +7973,11 @@ declare namespace reaper {
    * ```
    * monitor: 0=no monitoring, 1=monitoring, 2=auto-monitoring. returns new value or -1 if error. igngroupflags: &1 to prevent track grouping, &2 to prevent selection ganging
    */
-  function SetTrackUIInputMonitor(track: MediaTrack, monitor: number, igngroupflags: number): number;
+  function SetTrackUIInputMonitor(
+    track: MediaTrack,
+    monitor: number,
+    igngroupflags: number,
+  ): number;
 
   /**
    * ```
@@ -6909,7 +7985,11 @@ declare namespace reaper {
    * ```
    * mute: <0 toggles, >0 sets mute, 0=unsets mute. returns new value or -1 if error. igngroupflags: &1 to prevent track grouping, &2 to prevent selection ganging
    */
-  function SetTrackUIMute(track: MediaTrack, mute: number, igngroupflags: number): number;
+  function SetTrackUIMute(
+    track: MediaTrack,
+    mute: number,
+    igngroupflags: number,
+  ): number;
 
   /**
    * ```
@@ -6917,7 +7997,13 @@ declare namespace reaper {
    * ```
    * igngroupflags: &1 to prevent track grouping, &2 to prevent selection ganging
    */
-  function SetTrackUIPan(track: MediaTrack, pan: number, relative: boolean, done: boolean, igngroupflags: number): number;
+  function SetTrackUIPan(
+    track: MediaTrack,
+    pan: number,
+    relative: boolean,
+    done: boolean,
+    igngroupflags: number,
+  ): number;
 
   /**
    * ```
@@ -6925,7 +8011,11 @@ declare namespace reaper {
    * ```
    * polarity (AKA phase): <0 toggles, 0=normal, >0=inverted. returns new value or -1 if error.igngroupflags: &1 to prevent track grouping, &2 to prevent selection ganging
    */
-  function SetTrackUIPolarity(track: MediaTrack, polarity: number, igngroupflags: number): number;
+  function SetTrackUIPolarity(
+    track: MediaTrack,
+    polarity: number,
+    igngroupflags: number,
+  ): number;
 
   /**
    * ```
@@ -6933,7 +8023,11 @@ declare namespace reaper {
    * ```
    * recarm: <0 toggles, >0 sets recarm, 0=unsets recarm. returns new value or -1 if error. igngroupflags: &1 to prevent track grouping, &2 to prevent selection ganging
    */
-  function SetTrackUIRecArm(track: MediaTrack, recarm: number, igngroupflags: number): number;
+  function SetTrackUIRecArm(
+    track: MediaTrack,
+    recarm: number,
+    igngroupflags: number,
+  ): number;
 
   /**
    * ```
@@ -6941,7 +8035,11 @@ declare namespace reaper {
    * ```
    * solo: <0 toggles, 1 sets solo (default mode), 0=unsets solo, 2 sets solo (non-SIP), 4 sets solo (SIP). returns new value or -1 if error. igngroupflags: &1 to prevent track grouping, &2 to prevent selection ganging
    */
-  function SetTrackUISolo(track: MediaTrack, solo: number, igngroupflags: number): number;
+  function SetTrackUISolo(
+    track: MediaTrack,
+    solo: number,
+    igngroupflags: number,
+  ): number;
 
   /**
    * ```
@@ -6949,7 +8047,13 @@ declare namespace reaper {
    * ```
    * igngroupflags: &1 to prevent track grouping, &2 to prevent selection ganging
    */
-  function SetTrackUIVolume(track: MediaTrack, volume: number, relative: boolean, done: boolean, igngroupflags: number): number;
+  function SetTrackUIVolume(
+    track: MediaTrack,
+    volume: number,
+    relative: boolean,
+    done: boolean,
+    igngroupflags: number,
+  ): number;
 
   /**
    * ```
@@ -6957,7 +8061,13 @@ declare namespace reaper {
    * ```
    * igngroupflags: &1 to prevent track grouping, &2 to prevent selection ganging
    */
-  function SetTrackUIWidth(track: MediaTrack, width: number, relative: boolean, done: boolean, igngroupflags: number): number;
+  function SetTrackUIWidth(
+    track: MediaTrack,
+    width: number,
+    relative: boolean,
+    done: boolean,
+    igngroupflags: number,
+  ): number;
 
   /**
    * ```
@@ -6988,7 +8098,15 @@ declare namespace reaper {
    * ```
    * shows a context menu, valid names include: track_input, track_panel, track_area, track_routing, item, ruler, envelope, envelope_point, envelope_item. ctxOptional can be a track pointer for track_*, item pointer for item* (but is optional). for envelope_point, ctx2Optional has point index, ctx3Optional has item index (0=main envelope, 1=first AI). for envelope_item, ctx2Optional has AI index (1=first AI)
    */
-  function ShowPopupMenu(name: string, x: number, y: number, hwndParent: HWND, ctx: identifier, ctx2: number, ctx3: number): void;
+  function ShowPopupMenu(
+    name: string,
+    x: number,
+    y: number,
+    hwndParent: HWND,
+    ctx: identifier,
+    ctx2: number,
+    ctx3: number,
+  ): void;
 
   /**
    * ```
@@ -7041,7 +8159,12 @@ declare namespace reaper {
    * ```
    * Stuffs a 3 byte MIDI message into either the Virtual MIDI Keyboard queue, or the MIDI-as-control input queue, or sends to a MIDI hardware output. mode=0 for VKB, 1 for control (actions map etc), 2 for VKB-on-current-channel; 16 for external MIDI device 0, 17 for external MIDI device 1, etc; see GetNumMIDIOutputs, GetMIDIOutputName.
    */
-  function StuffMIDIMessage(mode: number, msg1: number, msg2: number, msg3: number): void;
+  function StuffMIDIMessage(
+    mode: number,
+    msg1: number,
+    msg2: number,
+    msg3: number,
+  ): void;
 
   /**
    * ```
@@ -7049,7 +8172,11 @@ declare namespace reaper {
    * ```
    * Adds or queries the position of a named FX in a take. See TrackFX_AddByName() for information on fxname and instantiate. FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_AddByName(take: MediaItem_Take, fxname: string, instantiate: number): number;
+  function TakeFX_AddByName(
+    take: MediaItem_Take,
+    fxname: string,
+    instantiate: number,
+  ): number;
 
   /**
    * ```
@@ -7057,7 +8184,13 @@ declare namespace reaper {
    * ```
    * Copies (or moves) FX from src_take to dest_take. Can be used with src_take=dest_take to reorder. FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_CopyToTake(src_take: MediaItem_Take, src_fx: number, dest_take: MediaItem_Take, dest_fx: number, is_move: boolean): void;
+  function TakeFX_CopyToTake(
+    src_take: MediaItem_Take,
+    src_fx: number,
+    dest_take: MediaItem_Take,
+    dest_fx: number,
+    is_move: boolean,
+  ): void;
 
   /**
    * ```
@@ -7065,7 +8198,13 @@ declare namespace reaper {
    * ```
    * Copies (or moves) FX from src_take to dest_track. dest_fx can have 0x1000000 set to reference input FX. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_CopyToTrack(src_take: MediaItem_Take, src_fx: number, dest_track: MediaTrack, dest_fx: number, is_move: boolean): void;
+  function TakeFX_CopyToTrack(
+    src_take: MediaItem_Take,
+    src_fx: number,
+    dest_track: MediaTrack,
+    dest_fx: number,
+    is_move: boolean,
+  ): void;
 
   /**
    * ```
@@ -7081,7 +8220,11 @@ declare namespace reaper {
    * ```
    * FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_EndParamEdit(take: MediaItem_Take, fx: number, param: number): boolean;
+  function TakeFX_EndParamEdit(
+    take: MediaItem_Take,
+    fx: number,
+    param: number,
+  ): boolean;
 
   /**
    * ```
@@ -7089,7 +8232,12 @@ declare namespace reaper {
    * ```
    * Note: only works with FX that support Cockos VST extensions. FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_FormatParamValue(take: MediaItem_Take, fx: number, param: number, val: number): LuaMultiReturn<[boolean, string]>;
+  function TakeFX_FormatParamValue(
+    take: MediaItem_Take,
+    fx: number,
+    param: number,
+    val: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -7097,7 +8245,13 @@ declare namespace reaper {
    * ```
    * Note: only works with FX that support Cockos VST extensions. FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_FormatParamValueNormalized(take: MediaItem_Take, fx: number, param: number, value: number, buf: string): LuaMultiReturn<[boolean, string]>;
+  function TakeFX_FormatParamValueNormalized(
+    take: MediaItem_Take,
+    fx: number,
+    param: number,
+    value: number,
+    buf: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -7128,7 +8282,12 @@ declare namespace reaper {
    * ```
    * Returns the FX parameter envelope. If the envelope does not exist and create=true, the envelope will be created. If the envelope already exists and is bypassed and create=true, then the envelope will be unbypassed. FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_GetEnvelope(take: MediaItem_Take, fxindex: number, parameterindex: number, create: boolean): TrackEnvelope;
+  function TakeFX_GetEnvelope(
+    take: MediaItem_Take,
+    fxindex: number,
+    parameterindex: number,
+    create: boolean,
+  ): TrackEnvelope;
 
   /**
    * ```
@@ -7144,7 +8303,11 @@ declare namespace reaper {
    * ```
    * FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_GetFormattedParamValue(take: MediaItem_Take, fx: number, param: number): LuaMultiReturn<[boolean, string]>;
+  function TakeFX_GetFormattedParamValue(
+    take: MediaItem_Take,
+    fx: number,
+    param: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -7160,7 +8323,10 @@ declare namespace reaper {
    * ```
    * FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_GetFXName(take: MediaItem_Take, fx: number): LuaMultiReturn<[boolean, string]>;
+  function TakeFX_GetFXName(
+    take: MediaItem_Take,
+    fx: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -7168,7 +8334,10 @@ declare namespace reaper {
    * ```
    * Gets the number of input/output pins for FX if available, returns plug-in type or -1 on error FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_GetIOSize(take: MediaItem_Take, fx: number): LuaMultiReturn<[number, number, number]>;
+  function TakeFX_GetIOSize(
+    take: MediaItem_Take,
+    fx: number,
+  ): LuaMultiReturn<[number, number, number]>;
 
   /**
    * ```
@@ -7176,7 +8345,11 @@ declare namespace reaper {
    * ```
    * gets plug-in specific named configuration value (returns true on success). see TrackFX_GetNamedConfigParm FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_GetNamedConfigParm(take: MediaItem_Take, fx: number, parmname: string): LuaMultiReturn<[boolean, string]>;
+  function TakeFX_GetNamedConfigParm(
+    take: MediaItem_Take,
+    fx: number,
+    parmname: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -7208,7 +8381,11 @@ declare namespace reaper {
    * ```
    * FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_GetParam(take: MediaItem_Take, fx: number, param: number): LuaMultiReturn<[number, number, number]>;
+  function TakeFX_GetParam(
+    take: MediaItem_Take,
+    fx: number,
+    param: number,
+  ): LuaMultiReturn<[number, number, number]>;
 
   /**
    * ```
@@ -7216,7 +8393,11 @@ declare namespace reaper {
    * ```
    * FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_GetParameterStepSizes(take: MediaItem_Take, fx: number, param: number): LuaMultiReturn<[boolean, number, number, number, boolean]>;
+  function TakeFX_GetParameterStepSizes(
+    take: MediaItem_Take,
+    fx: number,
+    param: number,
+  ): LuaMultiReturn<[boolean, number, number, number, boolean]>;
 
   /**
    * ```
@@ -7224,7 +8405,11 @@ declare namespace reaper {
    * ```
    * FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_GetParamEx(take: MediaItem_Take, fx: number, param: number): LuaMultiReturn<[number, number, number, number]>;
+  function TakeFX_GetParamEx(
+    take: MediaItem_Take,
+    fx: number,
+    param: number,
+  ): LuaMultiReturn<[number, number, number, number]>;
 
   /**
    * ```
@@ -7232,7 +8417,11 @@ declare namespace reaper {
    * ```
    * gets the parameter index from an identifying string (:wet, :bypass, or a string returned from GetParamIdent), or -1 if unknown. FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_GetParamFromIdent(take: MediaItem_Take, fx: number, ident_str: string): number;
+  function TakeFX_GetParamFromIdent(
+    take: MediaItem_Take,
+    fx: number,
+    ident_str: string,
+  ): number;
 
   /**
    * ```
@@ -7240,7 +8429,11 @@ declare namespace reaper {
    * ```
    * gets an identifying string for the parameter FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_GetParamIdent(take: MediaItem_Take, fx: number, param: number): LuaMultiReturn<[boolean, string]>;
+  function TakeFX_GetParamIdent(
+    take: MediaItem_Take,
+    fx: number,
+    param: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -7248,7 +8441,11 @@ declare namespace reaper {
    * ```
    * FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_GetParamName(take: MediaItem_Take, fx: number, param: number): LuaMultiReturn<[boolean, string]>;
+  function TakeFX_GetParamName(
+    take: MediaItem_Take,
+    fx: number,
+    param: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -7256,7 +8453,11 @@ declare namespace reaper {
    * ```
    * FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_GetParamNormalized(take: MediaItem_Take, fx: number, param: number): number;
+  function TakeFX_GetParamNormalized(
+    take: MediaItem_Take,
+    fx: number,
+    param: number,
+  ): number;
 
   /**
    * ```
@@ -7264,7 +8465,12 @@ declare namespace reaper {
    * ```
    * gets the effective channel mapping bitmask for a particular pin. high32Out will be set to the high 32 bits. Add 0x1000000 to pin index in order to access the second 64 bits of mappings independent of the first 64 bits. FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_GetPinMappings(take: MediaItem_Take, fx: number, isoutput: number, pin: number): LuaMultiReturn<[number, number]>;
+  function TakeFX_GetPinMappings(
+    take: MediaItem_Take,
+    fx: number,
+    isoutput: number,
+    pin: number,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -7272,7 +8478,10 @@ declare namespace reaper {
    * ```
    * Get the name of the preset currently showing in the REAPER dropdown, or the full path to a factory preset file for VST3 plug-ins (.vstpreset). See TakeFX_SetPreset. FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_GetPreset(take: MediaItem_Take, fx: number): LuaMultiReturn<[boolean, string]>;
+  function TakeFX_GetPreset(
+    take: MediaItem_Take,
+    fx: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -7280,7 +8489,10 @@ declare namespace reaper {
    * ```
    * Returns current preset index, or -1 if error. numberOfPresetsOut will be set to total number of presets available. See TakeFX_SetPresetByIndex FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_GetPresetIndex(take: MediaItem_Take, fx: number): LuaMultiReturn<[number, number]>;
+  function TakeFX_GetPresetIndex(
+    take: MediaItem_Take,
+    fx: number,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -7288,7 +8500,10 @@ declare namespace reaper {
    * ```
    * FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_GetUserPresetFilename(take: MediaItem_Take, fx: number): string;
+  function TakeFX_GetUserPresetFilename(
+    take: MediaItem_Take,
+    fx: number,
+  ): string;
 
   /**
    * ```
@@ -7296,7 +8511,11 @@ declare namespace reaper {
    * ```
    * presetmove==1 activates the next preset, presetmove==-1 activates the previous preset, etc. FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_NavigatePresets(take: MediaItem_Take, fx: number, presetmove: number): boolean;
+  function TakeFX_NavigatePresets(
+    take: MediaItem_Take,
+    fx: number,
+    presetmove: number,
+  ): boolean;
 
   /**
    * ```
@@ -7304,7 +8523,11 @@ declare namespace reaper {
    * ```
    * See TakeFX_GetEnabled FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_SetEnabled(take: MediaItem_Take, fx: number, enabled: boolean): void;
+  function TakeFX_SetEnabled(
+    take: MediaItem_Take,
+    fx: number,
+    enabled: boolean,
+  ): void;
 
   /**
    * ```
@@ -7312,7 +8535,12 @@ declare namespace reaper {
    * ```
    * gets plug-in specific named configuration value (returns true on success). see TrackFX_SetNamedConfigParm FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_SetNamedConfigParm(take: MediaItem_Take, fx: number, parmname: string, value: string): boolean;
+  function TakeFX_SetNamedConfigParm(
+    take: MediaItem_Take,
+    fx: number,
+    parmname: string,
+    value: string,
+  ): boolean;
 
   /**
    * ```
@@ -7320,7 +8548,11 @@ declare namespace reaper {
    * ```
    * See TakeFX_GetOffline FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_SetOffline(take: MediaItem_Take, fx: number, offline: boolean): void;
+  function TakeFX_SetOffline(
+    take: MediaItem_Take,
+    fx: number,
+    offline: boolean,
+  ): void;
 
   /**
    * ```
@@ -7328,7 +8560,11 @@ declare namespace reaper {
    * ```
    * Open this FX UI. See TakeFX_GetOpen FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_SetOpen(take: MediaItem_Take, fx: number, open: boolean): void;
+  function TakeFX_SetOpen(
+    take: MediaItem_Take,
+    fx: number,
+    open: boolean,
+  ): void;
 
   /**
    * ```
@@ -7336,7 +8572,12 @@ declare namespace reaper {
    * ```
    * FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_SetParam(take: MediaItem_Take, fx: number, param: number, val: number): boolean;
+  function TakeFX_SetParam(
+    take: MediaItem_Take,
+    fx: number,
+    param: number,
+    val: number,
+  ): boolean;
 
   /**
    * ```
@@ -7344,7 +8585,12 @@ declare namespace reaper {
    * ```
    * FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_SetParamNormalized(take: MediaItem_Take, fx: number, param: number, value: number): boolean;
+  function TakeFX_SetParamNormalized(
+    take: MediaItem_Take,
+    fx: number,
+    param: number,
+    value: number,
+  ): boolean;
 
   /**
    * ```
@@ -7352,7 +8598,14 @@ declare namespace reaper {
    * ```
    * sets the channel mapping bitmask for a particular pin. returns false if unsupported (not all types of plug-ins support this capability). Add 0x1000000 to pin index in order to access the second 64 bits of mappings independent of the first 64 bits. FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_SetPinMappings(take: MediaItem_Take, fx: number, isoutput: number, pin: number, low32bits: number, hi32bits: number): boolean;
+  function TakeFX_SetPinMappings(
+    take: MediaItem_Take,
+    fx: number,
+    isoutput: number,
+    pin: number,
+    low32bits: number,
+    hi32bits: number,
+  ): boolean;
 
   /**
    * ```
@@ -7360,7 +8613,11 @@ declare namespace reaper {
    * ```
    * Activate a preset with the name shown in the REAPER dropdown. Full paths to .vstpreset files are also supported for VST3 plug-ins. See TakeFX_GetPreset. FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_SetPreset(take: MediaItem_Take, fx: number, presetname: string): boolean;
+  function TakeFX_SetPreset(
+    take: MediaItem_Take,
+    fx: number,
+    presetname: string,
+  ): boolean;
 
   /**
    * ```
@@ -7368,7 +8625,11 @@ declare namespace reaper {
    * ```
    * Sets the preset idx, or the factory preset (idx==-2), or the default user preset (idx==-1). Returns true on success. See TakeFX_GetPresetIndex. FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_SetPresetByIndex(take: MediaItem_Take, fx: number, idx: number): boolean;
+  function TakeFX_SetPresetByIndex(
+    take: MediaItem_Take,
+    fx: number,
+    idx: number,
+  ): boolean;
 
   /**
    * ```
@@ -7376,7 +8637,11 @@ declare namespace reaper {
    * ```
    * showflag=0 for hidechain, =1 for show chain(index valid), =2 for hide floating window(index valid), =3 for show floating window (index valid) FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TakeFX_Show(take: MediaItem_Take, index: number, showFlag: number): void;
+  function TakeFX_Show(
+    take: MediaItem_Take,
+    index: number,
+    showFlag: number,
+  ): void;
 
   /**
    * ```
@@ -7392,7 +8657,10 @@ declare namespace reaper {
    * ```
    * Gets theme layout information. section can be 'global' for global layout override, 'seclist' to enumerate a list of layout sections, otherwise a layout section such as 'mcp', 'tcp', 'trans', etc. idx can be -1 to query the current value, -2 to get the description of the section (if not global), -3 will return the current context DPI-scaling (256=normal, 512=retina, etc), or 0..x. returns false if failed.
    */
-  function ThemeLayout_GetLayout(section: string, idx: number): LuaMultiReturn<[boolean, string]>;
+  function ThemeLayout_GetLayout(
+    section: string,
+    idx: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -7400,7 +8668,9 @@ declare namespace reaper {
    * ```
    * returns theme layout parameter. return value is cfg-name, or nil/empty if out of range.
    */
-  function ThemeLayout_GetParameter(wp: number): LuaMultiReturn<[string, string, number, number, number, number]>;
+  function ThemeLayout_GetParameter(
+    wp: number,
+  ): LuaMultiReturn<[string, string, number, number, number, number]>;
 
   /**
    * ```
@@ -7424,7 +8694,11 @@ declare namespace reaper {
    * ```
    * sets theme layout parameter to value. persist=true in order to have change loaded on next theme load. note that the caller should update layouts via ??? to make changes visible.
    */
-  function ThemeLayout_SetParameter(wp: number, value: number, persist: boolean): boolean;
+  function ThemeLayout_SetParameter(
+    wp: number,
+    value: number,
+    persist: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -7440,7 +8714,11 @@ declare namespace reaper {
    * ```
    * convert a beat position (or optionally a beats+measures if measures is non-NULL) to time.
    */
-  function TimeMap2_beatsToTime(proj: ReaProject, tpos: number, measuresIn?: number): number;
+  function TimeMap2_beatsToTime(
+    proj: ReaProject,
+    tpos: number,
+    measuresIn?: number,
+  ): number;
 
   /**
    * ```
@@ -7480,7 +8758,10 @@ declare namespace reaper {
    *
    * if cdenom is non-NULL, will be set to the current time signature denominator.
    */
-  function TimeMap2_timeToBeats(proj: ReaProject, tpos: number): LuaMultiReturn<[number, number, number, number, number]>;
+  function TimeMap2_timeToBeats(
+    proj: ReaProject,
+    tpos: number,
+  ): LuaMultiReturn<[number, number, number, number, number]>;
 
   /**
    * ```
@@ -7496,7 +8777,9 @@ declare namespace reaper {
    * ```
    * Gets project framerate, and optionally whether it is drop-frame timecode
    */
-  function TimeMap_curFrameRate(proj: ReaProject): LuaMultiReturn<[number, boolean]>;
+  function TimeMap_curFrameRate(
+    proj: ReaProject,
+  ): LuaMultiReturn<[number, boolean]>;
 
   /**
    * ```
@@ -7512,7 +8795,10 @@ declare namespace reaper {
    * ```
    * Get the QN position and time signature information for the start of a measure. Return the time in seconds of the measure start.
    */
-  function TimeMap_GetMeasureInfo(proj: ReaProject, measure: number): LuaMultiReturn<[number, number, number, number, number, number]>;
+  function TimeMap_GetMeasureInfo(
+    proj: ReaProject,
+    measure: number,
+  ): LuaMultiReturn<[number, number, number, number, number, number]>;
 
   /**
    * ```
@@ -7520,7 +8806,11 @@ declare namespace reaper {
    * ```
    * Fills in a string representing the active metronome pattern. For example, in a 7/8 measure divided 3+4, the pattern might be "1221222". The length of the string is the time signature numerator, and the function returns the time signature denominator.
    */
-  function TimeMap_GetMetronomePattern(proj: ReaProject, time: number, pattern: string): LuaMultiReturn<[number, string]>;
+  function TimeMap_GetMetronomePattern(
+    proj: ReaProject,
+    time: number,
+    pattern: string,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -7528,7 +8818,10 @@ declare namespace reaper {
    * ```
    * get the effective time signature and tempo
    */
-  function TimeMap_GetTimeSigAtTime(proj: ReaProject, time: number): LuaMultiReturn<[number, number, number]>;
+  function TimeMap_GetTimeSigAtTime(
+    proj: ReaProject,
+    time: number,
+  ): LuaMultiReturn<[number, number, number]>;
 
   /**
    * ```
@@ -7536,7 +8829,10 @@ declare namespace reaper {
    * ```
    * Find which measure the given QN position falls in.
    */
-  function TimeMap_QNToMeasures(proj: ReaProject, qn: number): LuaMultiReturn<[number, number, number]>;
+  function TimeMap_QNToMeasures(
+    proj: ReaProject,
+    qn: number,
+  ): LuaMultiReturn<[number, number, number]>;
 
   /**
    * ```
@@ -7584,7 +8880,11 @@ declare namespace reaper {
    * ```
    * Returns meter hold state, in dB*0.01 (0 = +0dB, -0.01 = -1dB, 0.02 = +2dB, etc). If clear is set, clears the meter hold. If channel==1024 or channel==1025, returns loudness values if this is the master track or this track's VU meters are set to display loudness.
    */
-  function Track_GetPeakHoldDB(track: MediaTrack, channel: number, clear: boolean): number;
+  function Track_GetPeakHoldDB(
+    track: MediaTrack,
+    channel: number,
+    clear: boolean,
+  ): number;
 
   /**
    * ```
@@ -7600,7 +8900,12 @@ declare namespace reaper {
    * ```
    * displays tooltip at location, or removes if empty string
    */
-  function TrackCtl_SetToolTip(fmt: string, xpos: number, ypos: number, topmost: boolean): void;
+  function TrackCtl_SetToolTip(
+    fmt: string,
+    xpos: number,
+    ypos: number,
+    topmost: boolean,
+  ): void;
 
   /**
    * ```
@@ -7608,7 +8913,12 @@ declare namespace reaper {
    * ```
    * Adds or queries the position of a named FX from the track FX chain (recFX=false) or record input FX/monitoring FX (recFX=true, monitoring FX are on master track). Specify a negative value for instantiate to always create a new effect, 0 to only query the first instance of an effect, or a positive value to add an instance if one is not found. If instantiate is <= -1000, it is used for the insertion position (-1000 is first item in chain, -1001 is second, etc). fxname can have prefix to specify type: VST3:,VST2:,VST:,AU:,JS:, or DX:, or FXADD: which adds selected items from the currently-open FX browser, FXADD:2 to limit to 2 FX added, or FXADD:2e to only succeed if exactly 2 FX are selected. Returns -1 on failure or the new position in chain on success. FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_AddByName(track: MediaTrack, fxname: string, recFX: boolean, instantiate: number): number;
+  function TrackFX_AddByName(
+    track: MediaTrack,
+    fxname: string,
+    recFX: boolean,
+    instantiate: number,
+  ): number;
 
   /**
    * ```
@@ -7616,7 +8926,13 @@ declare namespace reaper {
    * ```
    * Copies (or moves) FX from src_track to dest_take. src_fx can have 0x1000000 set to reference input FX. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_CopyToTake(src_track: MediaTrack, src_fx: number, dest_take: MediaItem_Take, dest_fx: number, is_move: boolean): void;
+  function TrackFX_CopyToTake(
+    src_track: MediaTrack,
+    src_fx: number,
+    dest_take: MediaItem_Take,
+    dest_fx: number,
+    is_move: boolean,
+  ): void;
 
   /**
    * ```
@@ -7624,7 +8940,13 @@ declare namespace reaper {
    * ```
    * Copies (or moves) FX from src_track to dest_track. Can be used with src_track=dest_track to reorder, FX indices have 0x1000000 set to reference input FX. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_CopyToTrack(src_track: MediaTrack, src_fx: number, dest_track: MediaTrack, dest_fx: number, is_move: boolean): void;
+  function TrackFX_CopyToTrack(
+    src_track: MediaTrack,
+    src_fx: number,
+    dest_track: MediaTrack,
+    dest_fx: number,
+    is_move: boolean,
+  ): void;
 
   /**
    * ```
@@ -7640,7 +8962,11 @@ declare namespace reaper {
    * ```
    * FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_EndParamEdit(track: MediaTrack, fx: number, param: number): boolean;
+  function TrackFX_EndParamEdit(
+    track: MediaTrack,
+    fx: number,
+    param: number,
+  ): boolean;
 
   /**
    * ```
@@ -7648,7 +8974,12 @@ declare namespace reaper {
    * ```
    * Note: only works with FX that support Cockos VST extensions. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_FormatParamValue(track: MediaTrack, fx: number, param: number, val: number): LuaMultiReturn<[boolean, string]>;
+  function TrackFX_FormatParamValue(
+    track: MediaTrack,
+    fx: number,
+    param: number,
+    val: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -7656,7 +8987,13 @@ declare namespace reaper {
    * ```
    * Note: only works with FX that support Cockos VST extensions. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_FormatParamValueNormalized(track: MediaTrack, fx: number, param: number, value: number, buf: string): LuaMultiReturn<[boolean, string]>;
+  function TrackFX_FormatParamValueNormalized(
+    track: MediaTrack,
+    fx: number,
+    param: number,
+    value: number,
+    buf: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -7665,7 +9002,11 @@ declare namespace reaper {
    * Get the index of the first track FX insert that matches fxname. If the FX is not in the chain and instantiate is true, it will be inserted. See TrackFX_GetInstrument, TrackFX_GetEQ. Deprecated in favor of TrackFX_AddByName.
    * @deprecated
    */
-  function TrackFX_GetByName(track: MediaTrack, fxname: string, instantiate: boolean): number;
+  function TrackFX_GetByName(
+    track: MediaTrack,
+    fxname: string,
+    instantiate: boolean,
+  ): number;
 
   /**
    * ```
@@ -7714,7 +9055,12 @@ declare namespace reaper {
    *
    * See TrackFX_GetEQ, TrackFX_GetEQParam, TrackFX_SetEQParam, TrackFX_SetEQBandEnabled. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_GetEQBandEnabled(track: MediaTrack, fxidx: number, bandtype: number, bandidx: number): boolean;
+  function TrackFX_GetEQBandEnabled(
+    track: MediaTrack,
+    fxidx: number,
+    bandtype: number,
+    bandidx: number,
+  ): boolean;
 
   /**
    * ```
@@ -7730,7 +9076,11 @@ declare namespace reaper {
    *
    * See TrackFX_GetEQ, TrackFX_SetEQParam, TrackFX_GetEQBandEnabled, TrackFX_SetEQBandEnabled. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_GetEQParam(track: MediaTrack, fxidx: number, paramidx: number): LuaMultiReturn<[boolean, number, number, number, number]>;
+  function TrackFX_GetEQParam(
+    track: MediaTrack,
+    fxidx: number,
+    paramidx: number,
+  ): LuaMultiReturn<[boolean, number, number, number, number]>;
 
   /**
    * ```
@@ -7746,7 +9096,11 @@ declare namespace reaper {
    * ```
    * FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_GetFormattedParamValue(track: MediaTrack, fx: number, param: number): LuaMultiReturn<[boolean, string]>;
+  function TrackFX_GetFormattedParamValue(
+    track: MediaTrack,
+    fx: number,
+    param: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -7762,7 +9116,10 @@ declare namespace reaper {
    * ```
    * FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_GetFXName(track: MediaTrack, fx: number): LuaMultiReturn<[boolean, string]>;
+  function TrackFX_GetFXName(
+    track: MediaTrack,
+    fx: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -7778,7 +9135,10 @@ declare namespace reaper {
    * ```
    * Gets the number of input/output pins for FX if available, returns plug-in type or -1 on error FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_GetIOSize(track: MediaTrack, fx: number): LuaMultiReturn<[number, number, number]>;
+  function TrackFX_GetIOSize(
+    track: MediaTrack,
+    fx: number,
+  ): LuaMultiReturn<[number, number, number]>;
 
   /**
    * ```
@@ -7896,7 +9256,11 @@ declare namespace reaper {
    *
    *  FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_GetNamedConfigParm(track: MediaTrack, fx: number, parmname: string): LuaMultiReturn<[boolean, string]>;
+  function TrackFX_GetNamedConfigParm(
+    track: MediaTrack,
+    fx: number,
+    parmname: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -7928,7 +9292,11 @@ declare namespace reaper {
    * ```
    * FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_GetParam(track: MediaTrack, fx: number, param: number): LuaMultiReturn<[number, number, number]>;
+  function TrackFX_GetParam(
+    track: MediaTrack,
+    fx: number,
+    param: number,
+  ): LuaMultiReturn<[number, number, number]>;
 
   /**
    * ```
@@ -7936,7 +9304,11 @@ declare namespace reaper {
    * ```
    * FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_GetParameterStepSizes(track: MediaTrack, fx: number, param: number): LuaMultiReturn<[boolean, number, number, number, boolean]>;
+  function TrackFX_GetParameterStepSizes(
+    track: MediaTrack,
+    fx: number,
+    param: number,
+  ): LuaMultiReturn<[boolean, number, number, number, boolean]>;
 
   /**
    * ```
@@ -7944,7 +9316,11 @@ declare namespace reaper {
    * ```
    * FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_GetParamEx(track: MediaTrack, fx: number, param: number): LuaMultiReturn<[number, number, number, number]>;
+  function TrackFX_GetParamEx(
+    track: MediaTrack,
+    fx: number,
+    param: number,
+  ): LuaMultiReturn<[number, number, number, number]>;
 
   /**
    * ```
@@ -7952,7 +9328,11 @@ declare namespace reaper {
    * ```
    * gets the parameter index from an identifying string (:wet, :bypass, :delta, or a string returned from GetParamIdent), or -1 if unknown. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_GetParamFromIdent(track: MediaTrack, fx: number, ident_str: string): number;
+  function TrackFX_GetParamFromIdent(
+    track: MediaTrack,
+    fx: number,
+    ident_str: string,
+  ): number;
 
   /**
    * ```
@@ -7960,7 +9340,11 @@ declare namespace reaper {
    * ```
    * gets an identifying string for the parameter FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_GetParamIdent(track: MediaTrack, fx: number, param: number): LuaMultiReturn<[boolean, string]>;
+  function TrackFX_GetParamIdent(
+    track: MediaTrack,
+    fx: number,
+    param: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -7968,7 +9352,11 @@ declare namespace reaper {
    * ```
    * FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_GetParamName(track: MediaTrack, fx: number, param: number): LuaMultiReturn<[boolean, string]>;
+  function TrackFX_GetParamName(
+    track: MediaTrack,
+    fx: number,
+    param: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -7976,7 +9364,11 @@ declare namespace reaper {
    * ```
    * FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_GetParamNormalized(track: MediaTrack, fx: number, param: number): number;
+  function TrackFX_GetParamNormalized(
+    track: MediaTrack,
+    fx: number,
+    param: number,
+  ): number;
 
   /**
    * ```
@@ -7984,7 +9376,12 @@ declare namespace reaper {
    * ```
    * gets the effective channel mapping bitmask for a particular pin. high32Out will be set to the high 32 bits. Add 0x1000000 to pin index in order to access the second 64 bits of mappings independent of the first 64 bits. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_GetPinMappings(tr: MediaTrack, fx: number, isoutput: number, pin: number): LuaMultiReturn<[number, number]>;
+  function TrackFX_GetPinMappings(
+    tr: MediaTrack,
+    fx: number,
+    isoutput: number,
+    pin: number,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -7992,7 +9389,10 @@ declare namespace reaper {
    * ```
    * Get the name of the preset currently showing in the REAPER dropdown, or the full path to a factory preset file for VST3 plug-ins (.vstpreset). See TrackFX_SetPreset. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_GetPreset(track: MediaTrack, fx: number): LuaMultiReturn<[boolean, string]>;
+  function TrackFX_GetPreset(
+    track: MediaTrack,
+    fx: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -8000,7 +9400,10 @@ declare namespace reaper {
    * ```
    * Returns current preset index, or -1 if error. numberOfPresetsOut will be set to total number of presets available. See TrackFX_SetPresetByIndex FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_GetPresetIndex(track: MediaTrack, fx: number): LuaMultiReturn<[number, number]>;
+  function TrackFX_GetPresetIndex(
+    track: MediaTrack,
+    fx: number,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -8032,7 +9435,11 @@ declare namespace reaper {
    * ```
    * presetmove==1 activates the next preset, presetmove==-1 activates the previous preset, etc. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_NavigatePresets(track: MediaTrack, fx: number, presetmove: number): boolean;
+  function TrackFX_NavigatePresets(
+    track: MediaTrack,
+    fx: number,
+    presetmove: number,
+  ): boolean;
 
   /**
    * ```
@@ -8040,7 +9447,11 @@ declare namespace reaper {
    * ```
    * See TrackFX_GetEnabled FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_SetEnabled(track: MediaTrack, fx: number, enabled: boolean): void;
+  function TrackFX_SetEnabled(
+    track: MediaTrack,
+    fx: number,
+    enabled: boolean,
+  ): void;
 
   /**
    * ```
@@ -8058,7 +9469,13 @@ declare namespace reaper {
    *
    * See TrackFX_GetEQ, TrackFX_GetEQParam, TrackFX_SetEQParam, TrackFX_GetEQBandEnabled. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_SetEQBandEnabled(track: MediaTrack, fxidx: number, bandtype: number, bandidx: number, enable: boolean): boolean;
+  function TrackFX_SetEQBandEnabled(
+    track: MediaTrack,
+    fxidx: number,
+    bandtype: number,
+    bandidx: number,
+    enable: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -8074,7 +9491,15 @@ declare namespace reaper {
    *
    * See TrackFX_GetEQ, TrackFX_GetEQParam, TrackFX_GetEQBandEnabled, TrackFX_SetEQBandEnabled. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_SetEQParam(track: MediaTrack, fxidx: number, bandtype: number, bandidx: number, paramtype: number, val: number, isnorm: boolean): boolean;
+  function TrackFX_SetEQParam(
+    track: MediaTrack,
+    fxidx: number,
+    bandtype: number,
+    bandidx: number,
+    paramtype: number,
+    val: number,
+    isnorm: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -8152,7 +9577,12 @@ declare namespace reaper {
    *
    *  FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_SetNamedConfigParm(track: MediaTrack, fx: number, parmname: string, value: string): boolean;
+  function TrackFX_SetNamedConfigParm(
+    track: MediaTrack,
+    fx: number,
+    parmname: string,
+    value: string,
+  ): boolean;
 
   /**
    * ```
@@ -8160,7 +9590,11 @@ declare namespace reaper {
    * ```
    * See TrackFX_GetOffline FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_SetOffline(track: MediaTrack, fx: number, offline: boolean): void;
+  function TrackFX_SetOffline(
+    track: MediaTrack,
+    fx: number,
+    offline: boolean,
+  ): void;
 
   /**
    * ```
@@ -8176,7 +9610,12 @@ declare namespace reaper {
    * ```
    * FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_SetParam(track: MediaTrack, fx: number, param: number, val: number): boolean;
+  function TrackFX_SetParam(
+    track: MediaTrack,
+    fx: number,
+    param: number,
+    val: number,
+  ): boolean;
 
   /**
    * ```
@@ -8184,7 +9623,12 @@ declare namespace reaper {
    * ```
    * FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_SetParamNormalized(track: MediaTrack, fx: number, param: number, value: number): boolean;
+  function TrackFX_SetParamNormalized(
+    track: MediaTrack,
+    fx: number,
+    param: number,
+    value: number,
+  ): boolean;
 
   /**
    * ```
@@ -8192,7 +9636,14 @@ declare namespace reaper {
    * ```
    * sets the channel mapping bitmask for a particular pin. returns false if unsupported (not all types of plug-ins support this capability). Add 0x1000000 to pin index in order to access the second 64 bits of mappings independent of the first 64 bits. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_SetPinMappings(tr: MediaTrack, fx: number, isoutput: number, pin: number, low32bits: number, hi32bits: number): boolean;
+  function TrackFX_SetPinMappings(
+    tr: MediaTrack,
+    fx: number,
+    isoutput: number,
+    pin: number,
+    low32bits: number,
+    hi32bits: number,
+  ): boolean;
 
   /**
    * ```
@@ -8200,7 +9651,11 @@ declare namespace reaper {
    * ```
    * Activate a preset with the name shown in the REAPER dropdown. Full paths to .vstpreset files are also supported for VST3 plug-ins. See TrackFX_GetPreset. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_SetPreset(track: MediaTrack, fx: number, presetname: string): boolean;
+  function TrackFX_SetPreset(
+    track: MediaTrack,
+    fx: number,
+    presetname: string,
+  ): boolean;
 
   /**
    * ```
@@ -8208,7 +9663,11 @@ declare namespace reaper {
    * ```
    * Sets the preset idx, or the factory preset (idx==-2), or the default user preset (idx==-1). Returns true on success. See TrackFX_GetPresetIndex. FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_SetPresetByIndex(track: MediaTrack, fx: number, idx: number): boolean;
+  function TrackFX_SetPresetByIndex(
+    track: MediaTrack,
+    fx: number,
+    idx: number,
+  ): boolean;
 
   /**
    * ```
@@ -8216,7 +9675,11 @@ declare namespace reaper {
    * ```
    * showflag=0 for hidechain, =1 for show chain(index valid), =2 for hide floating window(index valid), =3 for show floating window (index valid) FX indices for tracks can have 0x1000000 added to them in order to reference record input FX (normal tracks) or hardware output FX (master track). FX indices can have 0x2000000 added to them, in which case they will be used to address FX in containers. To address a container, the 1-based subitem is multiplied by one plus the count of the FX chain and added to the 1-based container item index. e.g. to address the third item in the container at the second position of the track FX chain for tr, the index would be 0x2000000 + 3*(TrackFX_GetCount(tr)+1) + 2. This can be extended to sub-containers using TrackFX_GetNamedConfigParm with container_count and similar logic. In REAPER v7.06+, you can use the much more convenient method to navigate hierarchies, see TrackFX_GetNamedConfigParm with parent_container and container_item.X.
    */
-  function TrackFX_Show(track: MediaTrack, index: number, showFlag: number): void;
+  function TrackFX_Show(
+    track: MediaTrack,
+    index: number,
+    showFlag: number,
+  ): void;
 
   /**
    * ```
@@ -8294,7 +9757,11 @@ declare namespace reaper {
    * ```
    * call to end the block,with extra flags if any,and a description
    */
-  function Undo_EndBlock2(proj: ReaProject, descchange: string, extraflags: number): void;
+  function Undo_EndBlock2(
+    proj: ReaProject,
+    descchange: string,
+    extraflags: number,
+  ): void;
 
   /**
    * ```
@@ -8317,7 +9784,11 @@ declare namespace reaper {
    * reaper.Undo_OnStateChange_Item(ReaProject proj, string name, MediaItem item)
    * ```
    */
-  function Undo_OnStateChange_Item(proj: ReaProject, name: string, item: MediaItem): void;
+  function Undo_OnStateChange_Item(
+    proj: ReaProject,
+    name: string,
+    item: MediaItem,
+  ): void;
 
   /**
    * ```
@@ -8325,7 +9796,11 @@ declare namespace reaper {
    * ```
    * trackparm=-1 by default,or if updating one fx chain,you can specify track index
    */
-  function Undo_OnStateChangeEx(descchange: string, whichStates: number, trackparm: number): void;
+  function Undo_OnStateChangeEx(
+    descchange: string,
+    whichStates: number,
+    trackparm: number,
+  ): void;
 
   /**
    * ```
@@ -8333,7 +9808,12 @@ declare namespace reaper {
    * ```
    * trackparm=-1 by default,or if updating one fx chain,you can specify track index
    */
-  function Undo_OnStateChangeEx2(proj: ReaProject, descchange: string, whichStates: number, trackparm: number): void;
+  function Undo_OnStateChangeEx2(
+    proj: ReaProject,
+    descchange: string,
+    whichStates: number,
+    trackparm: number,
+  ): void;
 
   /**
    * ```
@@ -8380,7 +9860,11 @@ declare namespace reaper {
    * ```
    * Return true if the pointer is a valid object of the right type in proj (proj is ignored if pointer is itself a project). Supported types are: ReaProject*, MediaTrack*, MediaItem*, MediaItem_Take*, TrackEnvelope* and PCM_source*.
    */
-  function ValidatePtr2(proj: ReaProject, pointer: identifier, ctypename: string): boolean;
+  function ValidatePtr2(
+    proj: ReaProject,
+    pointer: identifier,
+    ctypename: string,
+  ): boolean;
 
   /**
    * ```
@@ -8402,7 +9886,10 @@ declare namespace reaper {
    *
    * For further manipulation see BR_EnvCountPoints, BR_EnvDeletePoint, BR_EnvFind, BR_EnvFindNext, BR_EnvFindPrevious, BR_EnvGetParentTake, BR_EnvGetParentTrack, BR_EnvGetPoint, BR_EnvGetProperties, BR_EnvSetPoint, BR_EnvSetProperties, BR_EnvValueAtPos.
    */
-  function BR_EnvAlloc(envelope: TrackEnvelope, takeEnvelopesUseProjectTime: boolean): BR_Envelope;
+  function BR_EnvAlloc(
+    envelope: TrackEnvelope,
+    takeEnvelopesUseProjectTime: boolean,
+  ): BR_Envelope;
 
   /**
    * ```
@@ -8426,7 +9913,11 @@ declare namespace reaper {
    * ```
    * [BR] Find envelope point at time position in the envelope object allocated with BR_EnvAlloc. Pass delta > 0 to search surrounding range - in that case the closest point to position within delta will be searched for. Returns envelope point id (zero-based) on success or -1 on failure.
    */
-  function BR_EnvFind(envelope: BR_Envelope, position: number, delta: number): number;
+  function BR_EnvFind(
+    envelope: BR_Envelope,
+    position: number,
+    delta: number,
+  ): number;
 
   /**
    * ```
@@ -8474,7 +9965,10 @@ declare namespace reaper {
    * ```
    * [BR] Get envelope point by id (zero-based) from the envelope object allocated with BR_EnvAlloc. Returns true on success.
    */
-  function BR_EnvGetPoint(envelope: BR_Envelope, id: number): LuaMultiReturn<[boolean, number, number, number, boolean, number]>;
+  function BR_EnvGetPoint(
+    envelope: BR_Envelope,
+    id: number,
+  ): LuaMultiReturn<[boolean, number, number, number, boolean, number]>;
 
   /**
    * ```
@@ -8506,7 +10000,24 @@ declare namespace reaper {
    *
    * automationItemsOptions: -1->project default, &1=0->don't attach to underl. env., &1->attach to underl. env. on right side,  &2->attach to underl. env. on both sides, &4: bypass underl. env.
    */
-  function BR_EnvGetProperties(envelope: BR_Envelope): LuaMultiReturn<[boolean, boolean, boolean, boolean, number, number, number, number, number, number, boolean, number]>;
+  function BR_EnvGetProperties(
+    envelope: BR_Envelope,
+  ): LuaMultiReturn<
+    [
+      boolean,
+      boolean,
+      boolean,
+      boolean,
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+      boolean,
+      number,
+    ]
+  >;
 
   /**
    * ```
@@ -8516,7 +10027,15 @@ declare namespace reaper {
    *
    * Returns true on success.
    */
-  function BR_EnvSetPoint(envelope: BR_Envelope, id: number, position: number, value: number, shape: number, selected: boolean, bezier: number): boolean;
+  function BR_EnvSetPoint(
+    envelope: BR_Envelope,
+    id: number,
+    position: number,
+    value: number,
+    shape: number,
+    selected: boolean,
+    bezier: number,
+  ): boolean;
 
   /**
    * ```
@@ -8526,7 +10045,17 @@ declare namespace reaper {
    *
    * Setting automationItemsOptions requires REAPER 5.979+.
    */
-  function BR_EnvSetProperties(envelope: BR_Envelope, active: boolean, visible: boolean, armed: boolean, inLane: boolean, laneHeight: number, defaultShape: number, faderScaling: boolean, automationItemsOptionsIn?: number): void;
+  function BR_EnvSetProperties(
+    envelope: BR_Envelope,
+    active: boolean,
+    visible: boolean,
+    armed: boolean,
+    inLane: boolean,
+    laneHeight: number,
+    defaultShape: number,
+    faderScaling: boolean,
+    automationItemsOptionsIn?: number,
+  ): void;
 
   /**
    * ```
@@ -8551,7 +10080,9 @@ declare namespace reaper {
    * [BR] Deprecated, see GetSet_ArrangeView2 (REAPER v5.12pre4+) -- Get start and end time position of arrange view. To set arrange view instead, see BR_SetArrangeView.
    * @deprecated
    */
-  function BR_GetArrangeView(proj: ReaProject): LuaMultiReturn<[number, number]>;
+  function BR_GetArrangeView(
+    proj: ReaProject,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -8575,7 +10106,10 @@ declare namespace reaper {
    * ```
    * [BR] Get media item from GUID string. Note that the GUID must be enclosed in braces {}. To get item's GUID as a string, see BR_GetMediaItemGUID.
    */
-  function BR_GetMediaItemByGUID(proj: ReaProject, guidStringIn: string): MediaItem;
+  function BR_GetMediaItemByGUID(
+    proj: ReaProject,
+    guidStringIn: string,
+  ): MediaItem;
 
   /**
    * ```
@@ -8591,7 +10125,9 @@ declare namespace reaper {
    * ```
    * [BR] Get currently loaded image resource and its flags for a given item. Returns false if there is no image resource set. To set image resource, see BR_SetMediaItemImageResource.
    */
-  function BR_GetMediaItemImageResource(item: MediaItem): LuaMultiReturn<[boolean, string, number]>;
+  function BR_GetMediaItemImageResource(
+    item: MediaItem,
+  ): LuaMultiReturn<[boolean, string, number]>;
 
   /**
    * ```
@@ -8609,7 +10145,9 @@ declare namespace reaper {
    *
    * To set source properties, see BR_SetMediaSourceProperties.
    */
-  function BR_GetMediaSourceProperties(take: MediaItem_Take): LuaMultiReturn<[boolean, boolean, number, number, number, boolean]>;
+  function BR_GetMediaSourceProperties(
+    take: MediaItem_Take,
+  ): LuaMultiReturn<[boolean, boolean, number, number, number, boolean]>;
 
   /**
    * ```
@@ -8617,7 +10155,10 @@ declare namespace reaper {
    * ```
    * [BR] Get media track from GUID string. Note that the GUID must be enclosed in braces {}. To get track's GUID as a string, see GetSetMediaTrackInfo_String.
    */
-  function BR_GetMediaTrackByGUID(proj: ReaProject, guidStringIn: string): MediaTrack;
+  function BR_GetMediaTrackByGUID(
+    proj: ReaProject,
+    guidStringIn: string,
+  ): MediaTrack;
 
   /**
    * ```
@@ -8643,7 +10184,9 @@ declare namespace reaper {
    * [BR] Deprecated, see GetSetMediaTrackInfo (REAPER v5.02+). Get media track layouts for MCP and TCP. Empty string ("") means that layout is set to the default layout. To set media track layouts, see BR_SetMediaTrackLayouts.
    * @deprecated
    */
-  function BR_GetMediaTrackLayouts(track: MediaTrack): LuaMultiReturn<[string, string]>;
+  function BR_GetMediaTrackLayouts(
+    track: MediaTrack,
+  ): LuaMultiReturn<[string, string]>;
 
   /**
    * ```
@@ -8663,7 +10206,12 @@ declare namespace reaper {
    *
    * Note: To get or set other send attributes, see BR_GetSetTrackSendInfo and BR_GetMediaTrackSendInfo_Track.
    */
-  function BR_GetMediaTrackSendInfo_Envelope(track: MediaTrack, category: number, sendidx: number, envelopeType: number): TrackEnvelope;
+  function BR_GetMediaTrackSendInfo_Envelope(
+    track: MediaTrack,
+    category: number,
+    sendidx: number,
+    envelopeType: number,
+  ): TrackEnvelope;
 
   /**
    * ```
@@ -8683,7 +10231,12 @@ declare namespace reaper {
    *
    * Note: To get or set other send attributes, see BR_GetSetTrackSendInfo and BR_GetMediaTrackSendInfo_Envelope.
    */
-  function BR_GetMediaTrackSendInfo_Track(track: MediaTrack, category: number, sendidx: number, trackType: number): MediaTrack;
+  function BR_GetMediaTrackSendInfo_Track(
+    track: MediaTrack,
+    category: number,
+    sendidx: number,
+    trackType: number,
+  ): MediaTrack;
 
   /**
    * ```
@@ -8699,7 +10252,9 @@ declare namespace reaper {
    * ```
    * [BR] Get MIDI take pool GUID as a string (guidStringOut_sz should be at least 64). Returns true if take is pooled.
    */
-  function BR_GetMidiTakePoolGUID(take: MediaItem_Take): LuaMultiReturn<[boolean, string]>;
+  function BR_GetMidiTakePoolGUID(
+    take: MediaItem_Take,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -8707,7 +10262,9 @@ declare namespace reaper {
    * ```
    * [BR] Get "ignore project tempo" information for MIDI take. Returns true if take can ignore project tempo (no matter if it's actually ignored), otherwise false.
    */
-  function BR_GetMidiTakeTempoInfo(take: MediaItem_Take): LuaMultiReturn<[boolean, boolean, number, number, number]>;
+  function BR_GetMidiTakeTempoInfo(
+    take: MediaItem_Take,
+  ): LuaMultiReturn<[boolean, boolean, number, number, number]>;
 
   /**
    * ```
@@ -8731,7 +10288,9 @@ declare namespace reaper {
    * ```
    * [BR] Returns envelope that was captured with the last call to BR_GetMouseCursorContext. In case the envelope belongs to take, takeEnvelope will be true.
    */
-  function BR_GetMouseCursorContext_Envelope(): LuaMultiReturn<[TrackEnvelope, boolean]>;
+  function BR_GetMouseCursorContext_Envelope(): LuaMultiReturn<
+    [TrackEnvelope, boolean]
+  >;
 
   /**
    * ```
@@ -8763,7 +10322,9 @@ declare namespace reaper {
    *
    * Note: due to API limitations, if mouse is over inline MIDI editor with some note rows hidden, noteRow will be -1
    */
-  function BR_GetMouseCursorContext_MIDI(): LuaMultiReturn<[identifier, boolean, number, number, number, number]>;
+  function BR_GetMouseCursorContext_MIDI(): LuaMultiReturn<
+    [identifier, boolean, number, number, number, number]
+  >;
 
   /**
    * ```
@@ -8864,7 +10425,14 @@ declare namespace reaper {
    * Note: To get or set other send attributes, see BR_GetMediaTrackSendInfo_Envelope and BR_GetMediaTrackSendInfo_Track.
    * @deprecated
    */
-  function BR_GetSetTrackSendInfo(track: MediaTrack, category: number, sendidx: number, parmname: string, setNewValue: boolean, newValue: number): number;
+  function BR_GetSetTrackSendInfo(
+    track: MediaTrack,
+    category: number,
+    sendidx: number,
+    parmname: string,
+    setNewValue: boolean,
+    newValue: number,
+  ): number;
 
   /**
    * ```
@@ -8888,7 +10456,9 @@ declare namespace reaper {
    * ```
    * [BR] Check if take is MIDI take, in case MIDI take is in-project MIDI source data, inProjectMidiOut will be true, otherwise false.
    */
-  function BR_IsTakeMidi(take: MediaItem_Take): LuaMultiReturn<[boolean, boolean]>;
+  function BR_IsTakeMidi(
+    take: MediaItem_Take,
+  ): LuaMultiReturn<[boolean, boolean]>;
 
   /**
    * ```
@@ -8904,7 +10474,10 @@ declare namespace reaper {
    * ```
    * [BR] Remove CC lane in midi editor. Top visible CC lane is laneId 0. Returns true on success
    */
-  function BR_MIDI_CCLaneRemove(midiEditor: identifier, laneId: number): boolean;
+  function BR_MIDI_CCLaneRemove(
+    midiEditor: identifier,
+    laneId: number,
+  ): boolean;
 
   /**
    * ```
@@ -8914,7 +10487,11 @@ declare namespace reaper {
    *
    * Valid CC lanes: CC0-127=CC, 0x100|(0-31)=14-bit CC, 0x200=velocity, 0x201=pitch, 0x202=program, 0x203=channel pressure, 0x204=bank/program select, 0x205=text, 0x206=sysex, 0x207
    */
-  function BR_MIDI_CCLaneReplace(midiEditor: identifier, laneId: number, newCC: number): boolean;
+  function BR_MIDI_CCLaneReplace(
+    midiEditor: identifier,
+    laneId: number,
+    newCC: number,
+  ): boolean;
 
   /**
    * ```
@@ -8931,7 +10508,11 @@ declare namespace reaper {
    * [BR] Deprecated, see GetSet_ArrangeView2 (REAPER v5.12pre4+) -- Set start and end time position of arrange view. To get arrange view instead, see BR_GetArrangeView.
    * @deprecated
    */
-  function BR_SetArrangeView(proj: ReaProject, startTime: number, endTime: number): void;
+  function BR_SetArrangeView(
+    proj: ReaProject,
+    startTime: number,
+    endTime: number,
+  ): void;
 
   /**
    * ```
@@ -8939,7 +10520,11 @@ declare namespace reaper {
    * ```
    * [BR] Set item start and end edges' position - returns true in case of any changes
    */
-  function BR_SetItemEdges(item: MediaItem, startTime: number, endTime: number): boolean;
+  function BR_SetItemEdges(
+    item: MediaItem,
+    startTime: number,
+    endTime: number,
+  ): boolean;
 
   /**
    * ```
@@ -8953,7 +10538,11 @@ declare namespace reaper {
    *
    * To get image resource, see BR_GetMediaItemImageResource.
    */
-  function BR_SetMediaItemImageResource(item: MediaItem, imageIn: string, imageFlags: number): void;
+  function BR_SetMediaItemImageResource(
+    item: MediaItem,
+    imageIn: string,
+    imageFlags: number,
+  ): void;
 
   /**
    * ```
@@ -8963,7 +10552,14 @@ declare namespace reaper {
    *
    * To get source properties, see BR_GetMediaSourceProperties.
    */
-  function BR_SetMediaSourceProperties(take: MediaItem_Take, section: boolean, start: number, length: number, fade: number, reverse: boolean): boolean;
+  function BR_SetMediaSourceProperties(
+    take: MediaItem_Take,
+    section: boolean,
+    start: number,
+    length: number,
+    fade: number,
+    reverse: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -8974,7 +10570,11 @@ declare namespace reaper {
    * To get media track layouts, see BR_GetMediaTrackLayouts.
    * @deprecated
    */
-  function BR_SetMediaTrackLayouts(track: MediaTrack, mcpLayoutNameIn: string, tcpLayoutNameIn: string): boolean;
+  function BR_SetMediaTrackLayouts(
+    track: MediaTrack,
+    mcpLayoutNameIn: string,
+    tcpLayoutNameIn: string,
+  ): boolean;
 
   /**
    * ```
@@ -8982,7 +10582,13 @@ declare namespace reaper {
    * ```
    * [BR] Set "ignore project tempo" information for MIDI take. Returns true in case the take was successfully updated.
    */
-  function BR_SetMidiTakeTempoInfo(take: MediaItem_Take, ignoreProjTempo: boolean, bpm: number, num: number, den: number): boolean;
+  function BR_SetMidiTakeTempoInfo(
+    take: MediaItem_Take,
+    ignoreProjTempo: boolean,
+    bpm: number,
+    num: number,
+    den: number,
+  ): boolean;
 
   /**
    * ```
@@ -8994,7 +10600,11 @@ declare namespace reaper {
    *
    * Note: To set source from existing take, see SNM_GetSetSourceState2.
    */
-  function BR_SetTakeSourceFromFile(take: MediaItem_Take, filenameIn: string, inProjectData: boolean): boolean;
+  function BR_SetTakeSourceFromFile(
+    take: MediaItem_Take,
+    filenameIn: string,
+    inProjectData: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -9002,7 +10612,12 @@ declare namespace reaper {
    * ```
    * [BR] Differs from BR_SetTakeSourceFromFile only that it can also preserve existing take media source properties.
    */
-  function BR_SetTakeSourceFromFile2(take: MediaItem_Take, filenameIn: string, inProjectData: boolean, keepSourceProperties: boolean): boolean;
+  function BR_SetTakeSourceFromFile2(
+    take: MediaItem_Take,
+    filenameIn: string,
+    inProjectData: boolean,
+    keepSourceProperties: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -9022,7 +10637,9 @@ declare namespace reaper {
    *
    * Position will hold mouse cursor position in arrange if applicable.
    */
-  function BR_TrackAtMouseCursor(): LuaMultiReturn<[MediaTrack, number, number]>;
+  function BR_TrackAtMouseCursor(): LuaMultiReturn<
+    [MediaTrack, number, number]
+  >;
 
   /**
    * ```
@@ -9031,7 +10648,10 @@ declare namespace reaper {
    * [BR] Deprecated, see TrackFX_GetNamedConfigParm/'fx_ident' (v6.37+). Get the exact name (like effect.dll, effect.vst3, etc...) of an FX.
    * @deprecated
    */
-  function BR_TrackFX_GetFXModuleName(track: MediaTrack, fx: number): LuaMultiReturn<[boolean, string]>;
+  function BR_TrackFX_GetFXModuleName(
+    track: MediaTrack,
+    fx: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -9039,7 +10659,11 @@ declare namespace reaper {
    * ```
    * [BR] Equivalent to win32 API ComboBox_FindString().
    */
-  function BR_Win32_CB_FindString(comboBoxHwnd: identifier, startId: number, string: string): number;
+  function BR_Win32_CB_FindString(
+    comboBoxHwnd: identifier,
+    startId: number,
+    string: string,
+  ): number;
 
   /**
    * ```
@@ -9047,7 +10671,11 @@ declare namespace reaper {
    * ```
    * [BR] Equivalent to win32 API ComboBox_FindStringExact().
    */
-  function BR_Win32_CB_FindStringExact(comboBoxHwnd: identifier, startId: number, string: string): number;
+  function BR_Win32_CB_FindStringExact(
+    comboBoxHwnd: identifier,
+    startId: number,
+    string: string,
+  ): number;
 
   /**
    * ```
@@ -9055,7 +10683,11 @@ declare namespace reaper {
    * ```
    * [BR] Equivalent to win32 API ClientToScreen().
    */
-  function BR_Win32_ClientToScreen(hwnd: identifier, xIn: number, yIn: number): LuaMultiReturn<[number, number]>;
+  function BR_Win32_ClientToScreen(
+    hwnd: identifier,
+    xIn: number,
+    yIn: number,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -9063,7 +10695,14 @@ declare namespace reaper {
    * ```
    * [BR] Equivalent to win32 API FindWindowEx(). Since ReaScript doesn't allow passing NULL (None in Python, nil in Lua etc...) parameters, to search by supplied class or name set searchClass and searchName accordingly. HWND parameters should be passed as either "0" to signify NULL or as string obtained from BR_Win32_HwndToString.
    */
-  function BR_Win32_FindWindowEx(hwndParent: string, hwndChildAfter: string, className: string, windowName: string, searchClass: boolean, searchName: boolean): identifier;
+  function BR_Win32_FindWindowEx(
+    hwndParent: string,
+    hwndChildAfter: string,
+    className: string,
+    windowName: string,
+    searchClass: boolean,
+    searchName: boolean,
+  ): identifier;
 
   /**
    * ```
@@ -9155,7 +10794,13 @@ declare namespace reaper {
    * ```
    * [BR] Get coordinates for screen which is nearest to supplied coordinates. Pass workingAreaOnly as true to get screen coordinates excluding taskbar (or menu bar on OSX).
    */
-  function BR_Win32_GetMonitorRectFromRect(workingAreaOnly: boolean, leftIn: number, topIn: number, rightIn: number, bottomIn: number): LuaMultiReturn<[number, number, number, number]>;
+  function BR_Win32_GetMonitorRectFromRect(
+    workingAreaOnly: boolean,
+    leftIn: number,
+    topIn: number,
+    rightIn: number,
+    bottomIn: number,
+  ): LuaMultiReturn<[number, number, number, number]>;
 
   /**
    * ```
@@ -9171,7 +10816,12 @@ declare namespace reaper {
    * ```
    * [BR] Equivalent to win32 API GetPrivateProfileString(). For example, you can use this to get values from REAPER.ini.
    */
-  function BR_Win32_GetPrivateProfileString(sectionName: string, keyName: string, defaultString: string, filePath: string): LuaMultiReturn<[number, string]>;
+  function BR_Win32_GetPrivateProfileString(
+    sectionName: string,
+    keyName: string,
+    defaultString: string,
+    filePath: string,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -9195,7 +10845,9 @@ declare namespace reaper {
    * ```
    * [BR] Equivalent to win32 API GetWindowRect().
    */
-  function BR_Win32_GetWindowRect(hwnd: identifier): LuaMultiReturn<[boolean, number, number, number, number]>;
+  function BR_Win32_GetWindowRect(
+    hwnd: identifier,
+  ): LuaMultiReturn<[boolean, number, number, number, number]>;
 
   /**
    * ```
@@ -9203,7 +10855,9 @@ declare namespace reaper {
    * ```
    * [BR] Equivalent to win32 API GetWindowText().
    */
-  function BR_Win32_GetWindowText(hwnd: identifier): LuaMultiReturn<[number, string]>;
+  function BR_Win32_GetWindowText(
+    hwnd: identifier,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -9315,7 +10969,11 @@ declare namespace reaper {
    * ```
    * [BR] Equivalent to win32 API ClientToScreen().
    */
-  function BR_Win32_ScreenToClient(hwnd: identifier, xIn: number, yIn: number): LuaMultiReturn<[number, number]>;
+  function BR_Win32_ScreenToClient(
+    hwnd: identifier,
+    xIn: number,
+    yIn: number,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -9323,7 +10981,12 @@ declare namespace reaper {
    * ```
    * [BR] Equivalent to win32 API SendMessage().
    */
-  function BR_Win32_SendMessage(hwnd: identifier, msg: number, lParam: number, wParam: number): number;
+  function BR_Win32_SendMessage(
+    hwnd: identifier,
+    msg: number,
+    lParam: number,
+    wParam: number,
+  ): number;
 
   /**
    * ```
@@ -9347,7 +11010,11 @@ declare namespace reaper {
    * ```
    * [BR] Equivalent to win32 API SetWindowLong().
    */
-  function BR_Win32_SetWindowLong(hwnd: identifier, index: number, newLong: number): number;
+  function BR_Win32_SetWindowLong(
+    hwnd: identifier,
+    index: number,
+    newLong: number,
+  ): number;
 
   /**
    * ```
@@ -9357,7 +11024,15 @@ declare namespace reaper {
    *
    * hwndInsertAfter may be a string: "HWND_BOTTOM", "HWND_NOTOPMOST", "HWND_TOP", "HWND_TOPMOST" or a string obtained with BR_Win32_HwndToString.
    */
-  function BR_Win32_SetWindowPos(hwnd: identifier, hwndInsertAfter: string, x: number, y: number, width: number, height: number, flags: number): boolean;
+  function BR_Win32_SetWindowPos(
+    hwnd: identifier,
+    hwndInsertAfter: string,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    flags: number,
+  ): boolean;
 
   /**
    * ```
@@ -9365,7 +11040,13 @@ declare namespace reaper {
    * ```
    * [BR] Equivalent to win32 API ShellExecute() with HWND set to main window
    */
-  function BR_Win32_ShellExecute(operation: string, file: string, parameters: string, directory: string, showFlags: number): number;
+  function BR_Win32_ShellExecute(
+    operation: string,
+    file: string,
+    parameters: string,
+    directory: string,
+    showFlags: number,
+  ): number;
 
   /**
    * ```
@@ -9397,7 +11078,12 @@ declare namespace reaper {
    * ```
    * [BR] Equivalent to win32 API WritePrivateProfileString(). For example, you can use this to write to REAPER.ini. You can pass an empty string as value to delete a key.
    */
-  function BR_Win32_WritePrivateProfileString(sectionName: string, keyName: string, value: string, filePath: string): boolean;
+  function BR_Win32_WritePrivateProfileString(
+    sectionName: string,
+    keyName: string,
+    value: string,
+    filePath: string,
+  ): boolean;
 
   /**
    * ```
@@ -9423,7 +11109,10 @@ declare namespace reaper {
    * ```
    * Enumerate the source's media cues. Returns the next index or 0 when finished.
    */
-  function CF_EnumMediaSourceCues(src: PCM_source, index: number): LuaMultiReturn<[number, number, number, boolean, string, boolean]>;
+  function CF_EnumMediaSourceCues(
+    src: PCM_source,
+    index: number,
+  ): LuaMultiReturn<[number, number, number, boolean, string, boolean]>;
 
   /**
    * ```
@@ -9442,7 +11131,10 @@ declare namespace reaper {
    * Main=0, Main (alt recording)=100, MIDI Editor=32060, MIDI Event List Editor=32061, MIDI Inline Editor=32062, Media Explorer=32063
    * @deprecated
    */
-  function CF_EnumerateActions(section: number, index: number): LuaMultiReturn<[number, string]>;
+  function CF_EnumerateActions(
+    section: number,
+    index: number,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -9508,7 +11200,11 @@ declare namespace reaper {
    * ```
    * Get the value of the given metadata field (eg. DESC, ORIG, ORIGREF, DATE, TIME, UMI, CODINGHISTORY for BWF).
    */
-  function CF_GetMediaSourceMetadata(src: PCM_source, name: string, out: string): LuaMultiReturn<[boolean, string]>;
+  function CF_GetMediaSourceMetadata(
+    src: PCM_source,
+    name: string,
+    out: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -9524,7 +11220,9 @@ declare namespace reaper {
    * ```
    * Get the project associated with this source (BWF, subproject...).
    */
-  function CF_GetMediaSourceRPP(src: PCM_source): LuaMultiReturn<[boolean, string]>;
+  function CF_GetMediaSourceRPP(
+    src: PCM_source,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -9556,7 +11254,11 @@ declare namespace reaper {
    * ```
    * Return a handle to the given track FX chain window. Set wantInputChain to get the track's input/monitoring FX chain.
    */
-  function CF_GetTrackFXChainEx(project: ReaProject, track: MediaTrack, wantInputChain: boolean): FxChain;
+  function CF_GetTrackFXChainEx(
+    project: ReaProject,
+    track: MediaTrack,
+    wantInputChain: boolean,
+  ): FxChain;
 
   /**
    * ```
@@ -9596,7 +11298,14 @@ declare namespace reaper {
    * ```
    * Give a section source created using PCM_Source_CreateFromType("SECTION"). Offset and length are ignored if 0. Negative length to subtract from the total length of the source.
    */
-  function CF_PCM_Source_SetSectionInfo(section: PCM_source, source: PCM_source, offset: number, length: number, reverse: boolean, fadeIn?: number): boolean;
+  function CF_PCM_Source_SetSectionInfo(
+    section: PCM_source,
+    source: PCM_source,
+    offset: number,
+    length: number,
+    reverse: boolean,
+    fadeIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -9611,7 +11320,10 @@ declare namespace reaper {
    * ```
    * Return the maximum sample value played since the last read. Refresh speed depends on buffer size.
    */
-  function CF_Preview_GetPeak(preview: CF_Preview, channel: number): LuaMultiReturn<[boolean, number]>;
+  function CF_Preview_GetPeak(
+    preview: CF_Preview,
+    channel: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
@@ -9645,7 +11357,10 @@ declare namespace reaper {
    *
    * I_PITCHMODE    highest 16 bits=pitch shift mode (see EnumPitchShiftModes), lower 16 bits=pitch shift submode (see EnumPitchShiftSubModes)
    */
-  function CF_Preview_GetValue(preview: CF_Preview, name: string): LuaMultiReturn<[boolean, number]>;
+  function CF_Preview_GetValue(
+    preview: CF_Preview,
+    name: string,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
@@ -9660,7 +11375,11 @@ declare namespace reaper {
    * boolean _ = reaper.CF_Preview_SetOutputTrack(CF_Preview preview, ReaProject project, MediaTrack track)
    * ```
    */
-  function CF_Preview_SetOutputTrack(preview: CF_Preview, project: ReaProject, track: MediaTrack): boolean;
+  function CF_Preview_SetOutputTrack(
+    preview: CF_Preview,
+    project: ReaProject,
+    track: MediaTrack,
+  ): boolean;
 
   /**
    * ```
@@ -9668,7 +11387,11 @@ declare namespace reaper {
    * ```
    * See CF_Preview_GetValue.
    */
-  function CF_Preview_SetValue(preview: CF_Preview, name: string, newValue: number): boolean;
+  function CF_Preview_SetValue(
+    preview: CF_Preview,
+    name: string,
+    newValue: number,
+  ): boolean;
 
   /**
    * ```
@@ -9714,7 +11437,12 @@ declare namespace reaper {
    *
    * 	Modifier values: nil = read from keyboard, 0 = no modifier, &4 = Control (Cmd on macOS), &8 = Shift, &16 = Alt, &32 = Super
    */
-  function CF_SendActionShortcut(hwnd: identifier, section: number, key: number, modifiersIn?: number): boolean;
+  function CF_SendActionShortcut(
+    hwnd: identifier,
+    section: number,
+    key: number,
+    modifiersIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -9794,7 +11522,10 @@ declare namespace reaper {
    * ```
    * [FNG] Get MIDI note property
    */
-  function FNG_GetMidiNoteIntProperty(midiNote: RprMidiNote, property: string): number;
+  function FNG_GetMidiNoteIntProperty(
+    midiNote: RprMidiNote,
+    property: string,
+  ): number;
 
   /**
    * ```
@@ -9802,7 +11533,11 @@ declare namespace reaper {
    * ```
    * [FNG] Set MIDI note property
    */
-  function FNG_SetMidiNoteIntProperty(midiNote: RprMidiNote, property: string, value: number): void;
+  function FNG_SetMidiNoteIntProperty(
+    midiNote: RprMidiNote,
+    property: string,
+    value: number,
+  ): void;
 
   /**
    * ```
@@ -9812,7 +11547,12 @@ declare namespace reaper {
    *
    * you can peek into the payload before the mouse button is released.
    */
-  function ImGui_AcceptDragDropPayload(ctx: ImGui_Context, type: string, payload: string, flagsIn?: number): LuaMultiReturn<[boolean, string]>;
+  function ImGui_AcceptDragDropPayload(
+    ctx: ImGui_Context,
+    type: string,
+    payload: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -9820,7 +11560,11 @@ declare namespace reaper {
    * ```
    * Accept a list of dropped files. See AcceptDragDropPayload and GetDragDropPayloadFile.
    */
-  function ImGui_AcceptDragDropPayloadFiles(ctx: ImGui_Context, count: number, flagsIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_AcceptDragDropPayloadFiles(
+    ctx: ImGui_Context,
+    count: number,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
@@ -9828,7 +11572,11 @@ declare namespace reaper {
    * ```
    * Accept a RGB color. See AcceptDragDropPayload.
    */
-  function ImGui_AcceptDragDropPayloadRGB(ctx: ImGui_Context, rgb: number, flagsIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_AcceptDragDropPayloadRGB(
+    ctx: ImGui_Context,
+    rgb: number,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
@@ -9836,7 +11584,11 @@ declare namespace reaper {
    * ```
    * Accept a RGBA color. See AcceptDragDropPayload.
    */
-  function ImGui_AcceptDragDropPayloadRGBA(ctx: ImGui_Context, rgba: number, flagsIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_AcceptDragDropPayloadRGBA(
+    ctx: ImGui_Context,
+    rgba: number,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
@@ -9856,7 +11608,11 @@ declare namespace reaper {
    * ```
    * Square button with an arrow shape. 'dir' is one of the Dir_* values
    */
-  function ImGui_ArrowButton(ctx: ImGui_Context, str_id: string, dir: number): boolean;
+  function ImGui_ArrowButton(
+    ctx: ImGui_Context,
+    str_id: string,
+    dir: number,
+  ): boolean;
 
   /**
    * ```
@@ -9906,7 +11662,12 @@ declare namespace reaper {
    *
    *   so you may early out and omit submitting anything to the window.
    */
-  function ImGui_Begin(ctx: ImGui_Context, name: string, p_open?: boolean, flagsIn?: number): LuaMultiReturn<[boolean, boolean]>;
+  function ImGui_Begin(
+    ctx: ImGui_Context,
+    name: string,
+    p_open?: boolean,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, boolean]>;
 
   /**
    * ```
@@ -9936,7 +11697,14 @@ declare namespace reaper {
    *
    * Returns false to indicate the window is collapsed or fully clipped.
    */
-  function ImGui_BeginChild(ctx: ImGui_Context, str_id: string, size_wIn?: number, size_hIn?: number, child_flagsIn?: number, window_flagsIn?: number): boolean;
+  function ImGui_BeginChild(
+    ctx: ImGui_Context,
+    str_id: string,
+    size_wIn?: number,
+    size_hIn?: number,
+    child_flagsIn?: number,
+    window_flagsIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -9946,7 +11714,12 @@ declare namespace reaper {
    *
    * state however you want it, by creating e.g. Selectable items.
    */
-  function ImGui_BeginCombo(ctx: ImGui_Context, label: string, preview_value: string, flagsIn?: number): boolean;
+  function ImGui_BeginCombo(
+    ctx: ImGui_Context,
+    label: string,
+    preview_value: string,
+    flagsIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -9992,7 +11765,10 @@ declare namespace reaper {
    *
    * as replacement).
    */
-  function ImGui_BeginDragDropSource(ctx: ImGui_Context, flagsIn?: number): boolean;
+  function ImGui_BeginDragDropSource(
+    ctx: ImGui_Context,
+    flagsIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -10056,7 +11832,12 @@ declare namespace reaper {
    *
    * See EndListBox.
    */
-  function ImGui_BeginListBox(ctx: ImGui_Context, label: string, size_wIn?: number, size_hIn?: number): boolean;
+  function ImGui_BeginListBox(
+    ctx: ImGui_Context,
+    label: string,
+    size_wIn?: number,
+    size_hIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -10064,7 +11845,11 @@ declare namespace reaper {
    * ```
    * Create a sub-menu entry. only call EndMenu if this returns true!
    */
-  function ImGui_BeginMenu(ctx: ImGui_Context, label: string, enabledIn?: boolean): boolean;
+  function ImGui_BeginMenu(
+    ctx: ImGui_Context,
+    label: string,
+    enabledIn?: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -10088,7 +11873,11 @@ declare namespace reaper {
    *
    * Return true if the popup is open, and you can start outputting to it.
    */
-  function ImGui_BeginPopup(ctx: ImGui_Context, str_id: string, flagsIn?: number): boolean;
+  function ImGui_BeginPopup(
+    ctx: ImGui_Context,
+    str_id: string,
+    flagsIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -10110,7 +11899,11 @@ declare namespace reaper {
    *
    * in an explicit ID here.
    */
-  function ImGui_BeginPopupContextItem(ctx: ImGui_Context, str_idIn?: string, popup_flagsIn?: number): boolean;
+  function ImGui_BeginPopupContextItem(
+    ctx: ImGui_Context,
+    str_idIn?: string,
+    popup_flagsIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -10118,7 +11911,11 @@ declare namespace reaper {
    * ```
    * Open+begin popup when clicked on current window.
    */
-  function ImGui_BeginPopupContextWindow(ctx: ImGui_Context, str_idIn?: string, popup_flagsIn?: number): boolean;
+  function ImGui_BeginPopupContextWindow(
+    ctx: ImGui_Context,
+    str_idIn?: string,
+    popup_flagsIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -10130,7 +11927,12 @@ declare namespace reaper {
    *
    * can start outputting to it. See BeginPopup.
    */
-  function ImGui_BeginPopupModal(ctx: ImGui_Context, name: string, p_open?: boolean, flagsIn?: number): LuaMultiReturn<[boolean, boolean]>;
+  function ImGui_BeginPopupModal(
+    ctx: ImGui_Context,
+    name: string,
+    p_open?: boolean,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, boolean]>;
 
   /**
    * ```
@@ -10138,7 +11940,11 @@ declare namespace reaper {
    * ```
    * Create and append into a TabBar.
    */
-  function ImGui_BeginTabBar(ctx: ImGui_Context, str_id: string, flagsIn?: number): boolean;
+  function ImGui_BeginTabBar(
+    ctx: ImGui_Context,
+    str_id: string,
+    flagsIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -10148,14 +11954,27 @@ declare namespace reaper {
    *
    * Set 'p_open' to true to enable the close button.
    */
-  function ImGui_BeginTabItem(ctx: ImGui_Context, label: string, p_open?: boolean, flagsIn?: number): LuaMultiReturn<[boolean, boolean]>;
+  function ImGui_BeginTabItem(
+    ctx: ImGui_Context,
+    label: string,
+    p_open?: boolean,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, boolean]>;
 
   /**
    * ```
    * boolean _ = reaper.ImGui_BeginTable(ImGui_Context ctx, string str_id, integer columns, optional integer flagsIn, optional number outer_size_wIn, optional number outer_size_hIn, optional number inner_widthIn)
    * ```
    */
-  function ImGui_BeginTable(ctx: ImGui_Context, str_id: string, columns: number, flagsIn?: number, outer_size_wIn?: number, outer_size_hIn?: number, inner_widthIn?: number): boolean;
+  function ImGui_BeginTable(
+    ctx: ImGui_Context,
+    str_id: string,
+    columns: number,
+    flagsIn?: number,
+    outer_size_wIn?: number,
+    outer_size_hIn?: number,
+    inner_widthIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -10190,7 +12009,12 @@ declare namespace reaper {
    * boolean _ = reaper.ImGui_Button(ImGui_Context ctx, string label, optional number size_wIn, optional number size_hIn)
    * ```
    */
-  function ImGui_Button(ctx: ImGui_Context, label: string, size_wIn?: number, size_hIn?: number): boolean;
+  function ImGui_Button(
+    ctx: ImGui_Context,
+    label: string,
+    size_wIn?: number,
+    size_hIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -10238,21 +12062,37 @@ declare namespace reaper {
    * number w, number h = reaper.ImGui_CalcTextSize(ImGui_Context ctx, string text, number w, number h, optional boolean hide_text_after_double_hashIn, optional number wrap_widthIn)
    * ```
    */
-  function ImGui_CalcTextSize(ctx: ImGui_Context, text: string, w: number, h: number, hide_text_after_double_hashIn?: boolean, wrap_widthIn?: number): LuaMultiReturn<[number, number]>;
+  function ImGui_CalcTextSize(
+    ctx: ImGui_Context,
+    text: string,
+    w: number,
+    h: number,
+    hide_text_after_double_hashIn?: boolean,
+    wrap_widthIn?: number,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
    * boolean retval, boolean v = reaper.ImGui_Checkbox(ImGui_Context ctx, string label, boolean v)
    * ```
    */
-  function ImGui_Checkbox(ctx: ImGui_Context, label: string, v: boolean): LuaMultiReturn<[boolean, boolean]>;
+  function ImGui_Checkbox(
+    ctx: ImGui_Context,
+    label: string,
+    v: boolean,
+  ): LuaMultiReturn<[boolean, boolean]>;
 
   /**
    * ```
    * boolean retval, integer flags = reaper.ImGui_CheckboxFlags(ImGui_Context ctx, string label, integer flags, integer flags_value)
    * ```
    */
-  function ImGui_CheckboxFlags(ctx: ImGui_Context, label: string, flags: number, flags_value: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_CheckboxFlags(
+    ctx: ImGui_Context,
+    label: string,
+    flags: number,
+    flags_value: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
@@ -10815,7 +12655,12 @@ declare namespace reaper {
    *
    * if 'false' don't display the header.
    */
-  function ImGui_CollapsingHeader(ctx: ImGui_Context, label: string, p_visible?: boolean, flagsIn?: number): LuaMultiReturn<[boolean, boolean]>;
+  function ImGui_CollapsingHeader(
+    ctx: ImGui_Context,
+    label: string,
+    p_visible?: boolean,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, boolean]>;
 
   /**
    * ```
@@ -10825,7 +12670,14 @@ declare namespace reaper {
    *
    * Color is in 0xRRGGBBAA or, if ColorEditFlags_NoAlpha is set, 0xRRGGBB.
    */
-  function ImGui_ColorButton(ctx: ImGui_Context, desc_id: string, col_rgba: number, flagsIn?: number, size_wIn?: number, size_hIn?: number): boolean;
+  function ImGui_ColorButton(
+    ctx: ImGui_Context,
+    desc_id: string,
+    col_rgba: number,
+    flagsIn?: number,
+    size_wIn?: number,
+    size_hIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -10833,7 +12685,12 @@ declare namespace reaper {
    * ```
    * Pack 0..1 RGBA values into a 32-bit integer (0xRRGGBBAA).
    */
-  function ImGui_ColorConvertDouble4ToU32(r: number, g: number, b: number, a: number): number;
+  function ImGui_ColorConvertDouble4ToU32(
+    r: number,
+    g: number,
+    b: number,
+    a: number,
+  ): number;
 
   /**
    * ```
@@ -10841,7 +12698,11 @@ declare namespace reaper {
    * ```
    * Convert HSV values (0..1) into RGB (0..1).
    */
-  function ImGui_ColorConvertHSVtoRGB(h: number, s: number, v: number): LuaMultiReturn<[number, number, number]>;
+  function ImGui_ColorConvertHSVtoRGB(
+    h: number,
+    s: number,
+    v: number,
+  ): LuaMultiReturn<[number, number, number]>;
 
   /**
    * ```
@@ -10859,7 +12720,11 @@ declare namespace reaper {
    * ```
    * Convert RGB values (0..1) into HSV (0..1).
    */
-  function ImGui_ColorConvertRGBtoHSV(r: number, g: number, b: number): LuaMultiReturn<[number, number, number]>;
+  function ImGui_ColorConvertRGBtoHSV(
+    r: number,
+    g: number,
+    b: number,
+  ): LuaMultiReturn<[number, number, number]>;
 
   /**
    * ```
@@ -10867,7 +12732,9 @@ declare namespace reaper {
    * ```
    * Unpack a 32-bit integer (0xRRGGBBAA) into separate RGBA values (0..1).
    */
-  function ImGui_ColorConvertU32ToDouble4(rgba: number): LuaMultiReturn<[number, number, number, number]>;
+  function ImGui_ColorConvertU32ToDouble4(
+    rgba: number,
+  ): LuaMultiReturn<[number, number, number, number]>;
 
   /**
    * ```
@@ -10875,7 +12742,12 @@ declare namespace reaper {
    * ```
    * Color is in 0xXXRRGGBB. XX is ignored and will not be modified.
    */
-  function ImGui_ColorEdit3(ctx: ImGui_Context, label: string, col_rgb: number, flagsIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_ColorEdit3(
+    ctx: ImGui_Context,
+    label: string,
+    col_rgb: number,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
@@ -10885,7 +12757,12 @@ declare namespace reaper {
    *
    * (XX is ignored and will not be modified).
    */
-  function ImGui_ColorEdit4(ctx: ImGui_Context, label: string, col_rgba: number, flagsIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_ColorEdit4(
+    ctx: ImGui_Context,
+    label: string,
+    col_rgba: number,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
@@ -11098,14 +12975,25 @@ declare namespace reaper {
    * ```
    * Color is in 0xXXRRGGBB. XX is ignored and will not be modified.
    */
-  function ImGui_ColorPicker3(ctx: ImGui_Context, label: string, col_rgb: number, flagsIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_ColorPicker3(
+    ctx: ImGui_Context,
+    label: string,
+    col_rgb: number,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
    * boolean retval, integer col_rgba = reaper.ImGui_ColorPicker4(ImGui_Context ctx, string label, integer col_rgba, optional integer flagsIn, optional integer ref_colIn)
    * ```
    */
-  function ImGui_ColorPicker4(ctx: ImGui_Context, label: string, col_rgba: number, flagsIn?: number, ref_colIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_ColorPicker4(
+    ctx: ImGui_Context,
+    label: string,
+    col_rgba: number,
+    flagsIn?: number,
+    ref_colIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
@@ -11115,7 +13003,13 @@ declare namespace reaper {
    *
    * null-terminated (requires REAPER v6.44 or newer for EEL and Lua).
    */
-  function ImGui_Combo(ctx: ImGui_Context, label: string, current_item: number, items: string, popup_max_height_in_itemsIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_Combo(
+    ctx: ImGui_Context,
+    label: string,
+    current_item: number,
+    items: string,
+    popup_max_height_in_itemsIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
@@ -11563,14 +13457,19 @@ declare namespace reaper {
    *
    * and also as a unique identifier for storing settings.
    */
-  function ImGui_CreateContext(label: string, config_flagsIn?: number): ImGui_Context;
+  function ImGui_CreateContext(
+    label: string,
+    config_flagsIn?: number,
+  ): ImGui_Context;
 
   /**
    * ```
    * ImGui_DrawListSplitter _ = reaper.ImGui_CreateDrawListSplitter(ImGui_DrawList draw_list)
    * ```
    */
-  function ImGui_CreateDrawListSplitter(draw_list: ImGui_DrawList): ImGui_DrawListSplitter;
+  function ImGui_CreateDrawListSplitter(
+    draw_list: ImGui_DrawList,
+  ): ImGui_DrawListSplitter;
 
   /**
    * ```
@@ -11594,7 +13493,11 @@ declare namespace reaper {
    *
    * - The font styles in 'flags' are simulated by the font renderer
    */
-  function ImGui_CreateFont(family_or_file: string, size: number, flagsIn?: number): ImGui_Font;
+  function ImGui_CreateFont(
+    family_or_file: string,
+    size: number,
+    flagsIn?: number,
+  ): ImGui_Font;
 
   /**
    * ```
@@ -11634,7 +13537,10 @@ declare namespace reaper {
    * ```
    * Copies pixel data from a LICE bitmap created using JS_LICE_CreateBitmap.
    */
-  function ImGui_CreateImageFromLICE(bitmap: LICE_IBitmap, flagsIn?: number): ImGui_Image;
+  function ImGui_CreateImageFromLICE(
+    bitmap: LICE_IBitmap,
+    flagsIn?: number,
+  ): ImGui_Image;
 
   /**
    * ```
@@ -11644,7 +13550,10 @@ declare namespace reaper {
    *
    * CreateImage or explicitely specify data_sz if supporting older versions.
    */
-  function ImGui_CreateImageFromMem(data: string, flagsIn?: number): ImGui_Image;
+  function ImGui_CreateImageFromMem(
+    data: string,
+    flagsIn?: number,
+  ): ImGui_Image;
 
   /**
    * ```
@@ -11740,35 +13649,86 @@ declare namespace reaper {
    * boolean retval, number v = reaper.ImGui_DragDouble(ImGui_Context ctx, string label, number v, optional number v_speedIn, optional number v_minIn, optional number v_maxIn, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_DragDouble(ctx: ImGui_Context, label: string, v: number, v_speedIn?: number, v_minIn?: number, v_maxIn?: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_DragDouble(
+    ctx: ImGui_Context,
+    label: string,
+    v: number,
+    v_speedIn?: number,
+    v_minIn?: number,
+    v_maxIn?: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
    * boolean retval, number v1, number v2 = reaper.ImGui_DragDouble2(ImGui_Context ctx, string label, number v1, number v2, optional number v_speedIn, optional number v_minIn, optional number v_maxIn, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_DragDouble2(ctx: ImGui_Context, label: string, v1: number, v2: number, v_speedIn?: number, v_minIn?: number, v_maxIn?: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number, number]>;
+  function ImGui_DragDouble2(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    v_speedIn?: number,
+    v_minIn?: number,
+    v_maxIn?: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number]>;
 
   /**
    * ```
    * boolean retval, number v1, number v2, number v3 = reaper.ImGui_DragDouble3(ImGui_Context ctx, string label, number v1, number v2, number v3, optional number v_speedIn, optional number v_minIn, optional number v_maxIn, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_DragDouble3(ctx: ImGui_Context, label: string, v1: number, v2: number, v3: number, v_speedIn?: number, v_minIn?: number, v_maxIn?: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number, number, number]>;
+  function ImGui_DragDouble3(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    v3: number,
+    v_speedIn?: number,
+    v_minIn?: number,
+    v_maxIn?: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number, number]>;
 
   /**
    * ```
    * boolean retval, number v1, number v2, number v3, number v4 = reaper.ImGui_DragDouble4(ImGui_Context ctx, string label, number v1, number v2, number v3, number v4, optional number v_speedIn, optional number v_minIn, optional number v_maxIn, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_DragDouble4(ctx: ImGui_Context, label: string, v1: number, v2: number, v3: number, v4: number, v_speedIn?: number, v_minIn?: number, v_maxIn?: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number, number, number, number]>;
+  function ImGui_DragDouble4(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    v3: number,
+    v4: number,
+    v_speedIn?: number,
+    v_minIn?: number,
+    v_maxIn?: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number, number, number]>;
 
   /**
    * ```
    * boolean _ = reaper.ImGui_DragDoubleN(ImGui_Context ctx, string label, reaper_array values, optional number speedIn, optional number minIn, optional number maxIn, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_DragDoubleN(ctx: ImGui_Context, label: string, values: reaper_array, speedIn?: number, minIn?: number, maxIn?: number, formatIn?: string, flagsIn?: number): boolean;
+  function ImGui_DragDoubleN(
+    ctx: ImGui_Context,
+    label: string,
+    values: reaper_array,
+    speedIn?: number,
+    minIn?: number,
+    maxIn?: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -11892,42 +13852,106 @@ declare namespace reaper {
    * boolean retval, number v_current_min, number v_current_max = reaper.ImGui_DragFloatRange2(ImGui_Context ctx, string label, number v_current_min, number v_current_max, optional number v_speedIn, optional number v_minIn, optional number v_maxIn, optional string formatIn, optional string format_maxIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_DragFloatRange2(ctx: ImGui_Context, label: string, v_current_min: number, v_current_max: number, v_speedIn?: number, v_minIn?: number, v_maxIn?: number, formatIn?: string, format_maxIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number, number]>;
+  function ImGui_DragFloatRange2(
+    ctx: ImGui_Context,
+    label: string,
+    v_current_min: number,
+    v_current_max: number,
+    v_speedIn?: number,
+    v_minIn?: number,
+    v_maxIn?: number,
+    formatIn?: string,
+    format_maxIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number]>;
 
   /**
    * ```
    * boolean retval, integer v = reaper.ImGui_DragInt(ImGui_Context ctx, string label, integer v, optional number v_speedIn, optional integer v_minIn, optional integer v_maxIn, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_DragInt(ctx: ImGui_Context, label: string, v: number, v_speedIn?: number, v_minIn?: number, v_maxIn?: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_DragInt(
+    ctx: ImGui_Context,
+    label: string,
+    v: number,
+    v_speedIn?: number,
+    v_minIn?: number,
+    v_maxIn?: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
    * boolean retval, integer v1, integer v2 = reaper.ImGui_DragInt2(ImGui_Context ctx, string label, integer v1, integer v2, optional number v_speedIn, optional integer v_minIn, optional integer v_maxIn, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_DragInt2(ctx: ImGui_Context, label: string, v1: number, v2: number, v_speedIn?: number, v_minIn?: number, v_maxIn?: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number, number]>;
+  function ImGui_DragInt2(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    v_speedIn?: number,
+    v_minIn?: number,
+    v_maxIn?: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number]>;
 
   /**
    * ```
    * boolean retval, integer v1, integer v2, integer v3 = reaper.ImGui_DragInt3(ImGui_Context ctx, string label, integer v1, integer v2, integer v3, optional number v_speedIn, optional integer v_minIn, optional integer v_maxIn, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_DragInt3(ctx: ImGui_Context, label: string, v1: number, v2: number, v3: number, v_speedIn?: number, v_minIn?: number, v_maxIn?: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number, number, number]>;
+  function ImGui_DragInt3(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    v3: number,
+    v_speedIn?: number,
+    v_minIn?: number,
+    v_maxIn?: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number, number]>;
 
   /**
    * ```
    * boolean retval, integer v1, integer v2, integer v3, integer v4 = reaper.ImGui_DragInt4(ImGui_Context ctx, string label, integer v1, integer v2, integer v3, integer v4, optional number v_speedIn, optional integer v_minIn, optional integer v_maxIn, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_DragInt4(ctx: ImGui_Context, label: string, v1: number, v2: number, v3: number, v4: number, v_speedIn?: number, v_minIn?: number, v_maxIn?: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number, number, number, number]>;
+  function ImGui_DragInt4(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    v3: number,
+    v4: number,
+    v_speedIn?: number,
+    v_minIn?: number,
+    v_maxIn?: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number, number, number]>;
 
   /**
    * ```
    * boolean retval, integer v_current_min, integer v_current_max = reaper.ImGui_DragIntRange2(ImGui_Context ctx, string label, integer v_current_min, integer v_current_max, optional number v_speedIn, optional integer v_minIn, optional integer v_maxIn, optional string formatIn, optional string format_maxIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_DragIntRange2(ctx: ImGui_Context, label: string, v_current_min: number, v_current_max: number, v_speedIn?: number, v_minIn?: number, v_maxIn?: number, formatIn?: string, format_maxIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number, number]>;
+  function ImGui_DragIntRange2(
+    ctx: ImGui_Context,
+    label: string,
+    v_current_min: number,
+    v_current_max: number,
+    v_speedIn?: number,
+    v_minIn?: number,
+    v_maxIn?: number,
+    formatIn?: string,
+    format_maxIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number]>;
 
   /**
    * ```
@@ -12050,14 +14074,20 @@ declare namespace reaper {
    * reaper.ImGui_DrawListSplitter_SetCurrentChannel(ImGui_DrawListSplitter splitter, integer channel_idx)
    * ```
    */
-  function ImGui_DrawListSplitter_SetCurrentChannel(splitter: ImGui_DrawListSplitter, channel_idx: number): void;
+  function ImGui_DrawListSplitter_SetCurrentChannel(
+    splitter: ImGui_DrawListSplitter,
+    channel_idx: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawListSplitter_Split(ImGui_DrawListSplitter splitter, integer count)
    * ```
    */
-  function ImGui_DrawListSplitter_Split(splitter: ImGui_DrawListSplitter, count: number): void;
+  function ImGui_DrawListSplitter_Split(
+    splitter: ImGui_DrawListSplitter,
+    count: number,
+  ): void;
 
   /**
    * ```
@@ -12065,7 +14095,20 @@ declare namespace reaper {
    * ```
    * Cubic Bezier (4 control points)
    */
-  function ImGui_DrawList_AddBezierCubic(draw_list: ImGui_DrawList, p1_x: number, p1_y: number, p2_x: number, p2_y: number, p3_x: number, p3_y: number, p4_x: number, p4_y: number, col_rgba: number, thickness: number, num_segmentsIn?: number): void;
+  function ImGui_DrawList_AddBezierCubic(
+    draw_list: ImGui_DrawList,
+    p1_x: number,
+    p1_y: number,
+    p2_x: number,
+    p2_y: number,
+    p3_x: number,
+    p3_y: number,
+    p4_x: number,
+    p4_y: number,
+    col_rgba: number,
+    thickness: number,
+    num_segmentsIn?: number,
+  ): void;
 
   /**
    * ```
@@ -12073,7 +14116,18 @@ declare namespace reaper {
    * ```
    * Quadratic Bezier (3 control points)
    */
-  function ImGui_DrawList_AddBezierQuadratic(draw_list: ImGui_DrawList, p1_x: number, p1_y: number, p2_x: number, p2_y: number, p3_x: number, p3_y: number, col_rgba: number, thickness: number, num_segmentsIn?: number): void;
+  function ImGui_DrawList_AddBezierQuadratic(
+    draw_list: ImGui_DrawList,
+    p1_x: number,
+    p1_y: number,
+    p2_x: number,
+    p2_y: number,
+    p3_x: number,
+    p3_y: number,
+    col_rgba: number,
+    thickness: number,
+    num_segmentsIn?: number,
+  ): void;
 
   /**
    * ```
@@ -12081,7 +14135,15 @@ declare namespace reaper {
    * ```
    * Use "num_segments == 0" to automatically calculate tessellation (preferred).
    */
-  function ImGui_DrawList_AddCircle(draw_list: ImGui_DrawList, center_x: number, center_y: number, radius: number, col_rgba: number, num_segmentsIn?: number, thicknessIn?: number): void;
+  function ImGui_DrawList_AddCircle(
+    draw_list: ImGui_DrawList,
+    center_x: number,
+    center_y: number,
+    radius: number,
+    col_rgba: number,
+    num_segmentsIn?: number,
+    thicknessIn?: number,
+  ): void;
 
   /**
    * ```
@@ -12089,7 +14151,14 @@ declare namespace reaper {
    * ```
    * Use "num_segments == 0" to automatically calculate tessellation (preferred).
    */
-  function ImGui_DrawList_AddCircleFilled(draw_list: ImGui_DrawList, center_x: number, center_y: number, radius: number, col_rgba: number, num_segmentsIn?: number): void;
+  function ImGui_DrawList_AddCircleFilled(
+    draw_list: ImGui_DrawList,
+    center_x: number,
+    center_y: number,
+    radius: number,
+    col_rgba: number,
+    num_segmentsIn?: number,
+  ): void;
 
   /**
    * ```
@@ -12097,7 +14166,11 @@ declare namespace reaper {
    * ```
    * Concave polygon fill is more expensive than convex one: it has O(N^2) complexity.
    */
-  function ImGui_DrawList_AddConcavePolyFilled(draw_list: ImGui_DrawList, points: reaper_array, col_rgba: number): void;
+  function ImGui_DrawList_AddConcavePolyFilled(
+    draw_list: ImGui_DrawList,
+    points: reaper_array,
+    col_rgba: number,
+  ): void;
 
   /**
    * ```
@@ -12105,63 +14178,155 @@ declare namespace reaper {
    * ```
    * Note: Anti-aliased filling requires points to be in clockwise order.
    */
-  function ImGui_DrawList_AddConvexPolyFilled(draw_list: ImGui_DrawList, points: reaper_array, col_rgba: number): void;
+  function ImGui_DrawList_AddConvexPolyFilled(
+    draw_list: ImGui_DrawList,
+    points: reaper_array,
+    col_rgba: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_AddEllipse(ImGui_DrawList draw_list, number center_x, number center_y, number radius_x, number radius_y, integer col_rgba, optional number rotIn, optional integer num_segmentsIn, optional number thicknessIn)
    * ```
    */
-  function ImGui_DrawList_AddEllipse(draw_list: ImGui_DrawList, center_x: number, center_y: number, radius_x: number, radius_y: number, col_rgba: number, rotIn?: number, num_segmentsIn?: number, thicknessIn?: number): void;
+  function ImGui_DrawList_AddEllipse(
+    draw_list: ImGui_DrawList,
+    center_x: number,
+    center_y: number,
+    radius_x: number,
+    radius_y: number,
+    col_rgba: number,
+    rotIn?: number,
+    num_segmentsIn?: number,
+    thicknessIn?: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_AddEllipseFilled(ImGui_DrawList draw_list, number center_x, number center_y, number radius_x, number radius_y, integer col_rgba, optional number rotIn, optional integer num_segmentsIn)
    * ```
    */
-  function ImGui_DrawList_AddEllipseFilled(draw_list: ImGui_DrawList, center_x: number, center_y: number, radius_x: number, radius_y: number, col_rgba: number, rotIn?: number, num_segmentsIn?: number): void;
+  function ImGui_DrawList_AddEllipseFilled(
+    draw_list: ImGui_DrawList,
+    center_x: number,
+    center_y: number,
+    radius_x: number,
+    radius_y: number,
+    col_rgba: number,
+    rotIn?: number,
+    num_segmentsIn?: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_AddImage(ImGui_DrawList draw_list, ImGui_Image image, number p_min_x, number p_min_y, number p_max_x, number p_max_y, optional number uv_min_xIn, optional number uv_min_yIn, optional number uv_max_xIn, optional number uv_max_yIn, optional integer col_rgbaIn)
    * ```
    */
-  function ImGui_DrawList_AddImage(draw_list: ImGui_DrawList, image: ImGui_Image, p_min_x: number, p_min_y: number, p_max_x: number, p_max_y: number, uv_min_xIn?: number, uv_min_yIn?: number, uv_max_xIn?: number, uv_max_yIn?: number, col_rgbaIn?: number): void;
+  function ImGui_DrawList_AddImage(
+    draw_list: ImGui_DrawList,
+    image: ImGui_Image,
+    p_min_x: number,
+    p_min_y: number,
+    p_max_x: number,
+    p_max_y: number,
+    uv_min_xIn?: number,
+    uv_min_yIn?: number,
+    uv_max_xIn?: number,
+    uv_max_yIn?: number,
+    col_rgbaIn?: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_AddImageQuad(ImGui_DrawList draw_list, ImGui_Image image, number p1_x, number p1_y, number p2_x, number p2_y, number p3_x, number p3_y, number p4_x, number p4_y, optional number uv1_xIn, optional number uv1_yIn, optional number uv2_xIn, optional number uv2_yIn, optional number uv3_xIn, optional number uv3_yIn, optional number uv4_xIn, optional number uv4_yIn, optional integer col_rgbaIn)
    * ```
    */
-  function ImGui_DrawList_AddImageQuad(draw_list: ImGui_DrawList, image: ImGui_Image, p1_x: number, p1_y: number, p2_x: number, p2_y: number, p3_x: number, p3_y: number, p4_x: number, p4_y: number, uv1_xIn?: number, uv1_yIn?: number, uv2_xIn?: number, uv2_yIn?: number, uv3_xIn?: number, uv3_yIn?: number, uv4_xIn?: number, uv4_yIn?: number, col_rgbaIn?: number): void;
+  function ImGui_DrawList_AddImageQuad(
+    draw_list: ImGui_DrawList,
+    image: ImGui_Image,
+    p1_x: number,
+    p1_y: number,
+    p2_x: number,
+    p2_y: number,
+    p3_x: number,
+    p3_y: number,
+    p4_x: number,
+    p4_y: number,
+    uv1_xIn?: number,
+    uv1_yIn?: number,
+    uv2_xIn?: number,
+    uv2_yIn?: number,
+    uv3_xIn?: number,
+    uv3_yIn?: number,
+    uv4_xIn?: number,
+    uv4_yIn?: number,
+    col_rgbaIn?: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_AddImageRounded(ImGui_DrawList draw_list, ImGui_Image image, number p_min_x, number p_min_y, number p_max_x, number p_max_y, number uv_min_x, number uv_min_y, number uv_max_x, number uv_max_y, integer col_rgba, number rounding, optional integer flagsIn)
    * ```
    */
-  function ImGui_DrawList_AddImageRounded(draw_list: ImGui_DrawList, image: ImGui_Image, p_min_x: number, p_min_y: number, p_max_x: number, p_max_y: number, uv_min_x: number, uv_min_y: number, uv_max_x: number, uv_max_y: number, col_rgba: number, rounding: number, flagsIn?: number): void;
+  function ImGui_DrawList_AddImageRounded(
+    draw_list: ImGui_DrawList,
+    image: ImGui_Image,
+    p_min_x: number,
+    p_min_y: number,
+    p_max_x: number,
+    p_max_y: number,
+    uv_min_x: number,
+    uv_min_y: number,
+    uv_max_x: number,
+    uv_max_y: number,
+    col_rgba: number,
+    rounding: number,
+    flagsIn?: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_AddLine(ImGui_DrawList draw_list, number p1_x, number p1_y, number p2_x, number p2_y, integer col_rgba, optional number thicknessIn)
    * ```
    */
-  function ImGui_DrawList_AddLine(draw_list: ImGui_DrawList, p1_x: number, p1_y: number, p2_x: number, p2_y: number, col_rgba: number, thicknessIn?: number): void;
+  function ImGui_DrawList_AddLine(
+    draw_list: ImGui_DrawList,
+    p1_x: number,
+    p1_y: number,
+    p2_x: number,
+    p2_y: number,
+    col_rgba: number,
+    thicknessIn?: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_AddNgon(ImGui_DrawList draw_list, number center_x, number center_y, number radius, integer col_rgba, integer num_segments, optional number thicknessIn)
    * ```
    */
-  function ImGui_DrawList_AddNgon(draw_list: ImGui_DrawList, center_x: number, center_y: number, radius: number, col_rgba: number, num_segments: number, thicknessIn?: number): void;
+  function ImGui_DrawList_AddNgon(
+    draw_list: ImGui_DrawList,
+    center_x: number,
+    center_y: number,
+    radius: number,
+    col_rgba: number,
+    num_segments: number,
+    thicknessIn?: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_AddNgonFilled(ImGui_DrawList draw_list, number center_x, number center_y, number radius, integer col_rgba, integer num_segments)
    * ```
    */
-  function ImGui_DrawList_AddNgonFilled(draw_list: ImGui_DrawList, center_x: number, center_y: number, radius: number, col_rgba: number, num_segments: number): void;
+  function ImGui_DrawList_AddNgonFilled(
+    draw_list: ImGui_DrawList,
+    center_x: number,
+    center_y: number,
+    radius: number,
+    col_rgba: number,
+    num_segments: number,
+  ): void;
 
   /**
    * ```
@@ -12169,49 +14334,113 @@ declare namespace reaper {
    * ```
    * Points is a list of x,y coordinates.
    */
-  function ImGui_DrawList_AddPolyline(draw_list: ImGui_DrawList, points: reaper_array, col_rgba: number, flags: number, thickness: number): void;
+  function ImGui_DrawList_AddPolyline(
+    draw_list: ImGui_DrawList,
+    points: reaper_array,
+    col_rgba: number,
+    flags: number,
+    thickness: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_AddQuad(ImGui_DrawList draw_list, number p1_x, number p1_y, number p2_x, number p2_y, number p3_x, number p3_y, number p4_x, number p4_y, integer col_rgba, optional number thicknessIn)
    * ```
    */
-  function ImGui_DrawList_AddQuad(draw_list: ImGui_DrawList, p1_x: number, p1_y: number, p2_x: number, p2_y: number, p3_x: number, p3_y: number, p4_x: number, p4_y: number, col_rgba: number, thicknessIn?: number): void;
+  function ImGui_DrawList_AddQuad(
+    draw_list: ImGui_DrawList,
+    p1_x: number,
+    p1_y: number,
+    p2_x: number,
+    p2_y: number,
+    p3_x: number,
+    p3_y: number,
+    p4_x: number,
+    p4_y: number,
+    col_rgba: number,
+    thicknessIn?: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_AddQuadFilled(ImGui_DrawList draw_list, number p1_x, number p1_y, number p2_x, number p2_y, number p3_x, number p3_y, number p4_x, number p4_y, integer col_rgba)
    * ```
    */
-  function ImGui_DrawList_AddQuadFilled(draw_list: ImGui_DrawList, p1_x: number, p1_y: number, p2_x: number, p2_y: number, p3_x: number, p3_y: number, p4_x: number, p4_y: number, col_rgba: number): void;
+  function ImGui_DrawList_AddQuadFilled(
+    draw_list: ImGui_DrawList,
+    p1_x: number,
+    p1_y: number,
+    p2_x: number,
+    p2_y: number,
+    p3_x: number,
+    p3_y: number,
+    p4_x: number,
+    p4_y: number,
+    col_rgba: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_AddRect(ImGui_DrawList draw_list, number p_min_x, number p_min_y, number p_max_x, number p_max_y, integer col_rgba, optional number roundingIn, optional integer flagsIn, optional number thicknessIn)
    * ```
    */
-  function ImGui_DrawList_AddRect(draw_list: ImGui_DrawList, p_min_x: number, p_min_y: number, p_max_x: number, p_max_y: number, col_rgba: number, roundingIn?: number, flagsIn?: number, thicknessIn?: number): void;
+  function ImGui_DrawList_AddRect(
+    draw_list: ImGui_DrawList,
+    p_min_x: number,
+    p_min_y: number,
+    p_max_x: number,
+    p_max_y: number,
+    col_rgba: number,
+    roundingIn?: number,
+    flagsIn?: number,
+    thicknessIn?: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_AddRectFilled(ImGui_DrawList draw_list, number p_min_x, number p_min_y, number p_max_x, number p_max_y, integer col_rgba, optional number roundingIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_DrawList_AddRectFilled(draw_list: ImGui_DrawList, p_min_x: number, p_min_y: number, p_max_x: number, p_max_y: number, col_rgba: number, roundingIn?: number, flagsIn?: number): void;
+  function ImGui_DrawList_AddRectFilled(
+    draw_list: ImGui_DrawList,
+    p_min_x: number,
+    p_min_y: number,
+    p_max_x: number,
+    p_max_y: number,
+    col_rgba: number,
+    roundingIn?: number,
+    flagsIn?: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_AddRectFilledMultiColor(ImGui_DrawList draw_list, number p_min_x, number p_min_y, number p_max_x, number p_max_y, integer col_upr_left, integer col_upr_right, integer col_bot_right, integer col_bot_left)
    * ```
    */
-  function ImGui_DrawList_AddRectFilledMultiColor(draw_list: ImGui_DrawList, p_min_x: number, p_min_y: number, p_max_x: number, p_max_y: number, col_upr_left: number, col_upr_right: number, col_bot_right: number, col_bot_left: number): void;
+  function ImGui_DrawList_AddRectFilledMultiColor(
+    draw_list: ImGui_DrawList,
+    p_min_x: number,
+    p_min_y: number,
+    p_max_x: number,
+    p_max_y: number,
+    col_upr_left: number,
+    col_upr_right: number,
+    col_bot_right: number,
+    col_bot_left: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_AddText(ImGui_DrawList draw_list, number x, number y, integer col_rgba, string text)
    * ```
    */
-  function ImGui_DrawList_AddText(draw_list: ImGui_DrawList, x: number, y: number, col_rgba: number, text: string): void;
+  function ImGui_DrawList_AddText(
+    draw_list: ImGui_DrawList,
+    x: number,
+    y: number,
+    col_rgba: number,
+    text: string,
+  ): void;
 
   /**
    * ```
@@ -12223,28 +14452,68 @@ declare namespace reaper {
    *
    * cpu_fine_clip_rect_* only takes effect if all four are non-nil.
    */
-  function ImGui_DrawList_AddTextEx(draw_list: ImGui_DrawList, font: ImGui_Font, font_size: number, pos_x: number, pos_y: number, col_rgba: number, text: string, wrap_widthIn?: number, cpu_fine_clip_rect_min_xIn?: number, cpu_fine_clip_rect_min_yIn?: number, cpu_fine_clip_rect_max_xIn?: number, cpu_fine_clip_rect_max_yIn?: number): void;
+  function ImGui_DrawList_AddTextEx(
+    draw_list: ImGui_DrawList,
+    font: ImGui_Font,
+    font_size: number,
+    pos_x: number,
+    pos_y: number,
+    col_rgba: number,
+    text: string,
+    wrap_widthIn?: number,
+    cpu_fine_clip_rect_min_xIn?: number,
+    cpu_fine_clip_rect_min_yIn?: number,
+    cpu_fine_clip_rect_max_xIn?: number,
+    cpu_fine_clip_rect_max_yIn?: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_AddTriangle(ImGui_DrawList draw_list, number p1_x, number p1_y, number p2_x, number p2_y, number p3_x, number p3_y, integer col_rgba, optional number thicknessIn)
    * ```
    */
-  function ImGui_DrawList_AddTriangle(draw_list: ImGui_DrawList, p1_x: number, p1_y: number, p2_x: number, p2_y: number, p3_x: number, p3_y: number, col_rgba: number, thicknessIn?: number): void;
+  function ImGui_DrawList_AddTriangle(
+    draw_list: ImGui_DrawList,
+    p1_x: number,
+    p1_y: number,
+    p2_x: number,
+    p2_y: number,
+    p3_x: number,
+    p3_y: number,
+    col_rgba: number,
+    thicknessIn?: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_AddTriangleFilled(ImGui_DrawList draw_list, number p1_x, number p1_y, number p2_x, number p2_y, number p3_x, number p3_y, integer col_rgba)
    * ```
    */
-  function ImGui_DrawList_AddTriangleFilled(draw_list: ImGui_DrawList, p1_x: number, p1_y: number, p2_x: number, p2_y: number, p3_x: number, p3_y: number, col_rgba: number): void;
+  function ImGui_DrawList_AddTriangleFilled(
+    draw_list: ImGui_DrawList,
+    p1_x: number,
+    p1_y: number,
+    p2_x: number,
+    p2_y: number,
+    p3_x: number,
+    p3_y: number,
+    col_rgba: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_PathArcTo(ImGui_DrawList draw_list, number center_x, number center_y, number radius, number a_min, number a_max, optional integer num_segmentsIn)
    * ```
    */
-  function ImGui_DrawList_PathArcTo(draw_list: ImGui_DrawList, center_x: number, center_y: number, radius: number, a_min: number, a_max: number, num_segmentsIn?: number): void;
+  function ImGui_DrawList_PathArcTo(
+    draw_list: ImGui_DrawList,
+    center_x: number,
+    center_y: number,
+    radius: number,
+    a_min: number,
+    a_max: number,
+    num_segmentsIn?: number,
+  ): void;
 
   /**
    * ```
@@ -12252,7 +14521,14 @@ declare namespace reaper {
    * ```
    * Use precomputed angles for a 12 steps circle.
    */
-  function ImGui_DrawList_PathArcToFast(draw_list: ImGui_DrawList, center_x: number, center_y: number, radius: number, a_min_of_12: number, a_max_of_12: number): void;
+  function ImGui_DrawList_PathArcToFast(
+    draw_list: ImGui_DrawList,
+    center_x: number,
+    center_y: number,
+    radius: number,
+    a_min_of_12: number,
+    a_max_of_12: number,
+  ): void;
 
   /**
    * ```
@@ -12260,7 +14536,16 @@ declare namespace reaper {
    * ```
    * Cubic Bezier (4 control points)
    */
-  function ImGui_DrawList_PathBezierCubicCurveTo(draw_list: ImGui_DrawList, p2_x: number, p2_y: number, p3_x: number, p3_y: number, p4_x: number, p4_y: number, num_segmentsIn?: number): void;
+  function ImGui_DrawList_PathBezierCubicCurveTo(
+    draw_list: ImGui_DrawList,
+    p2_x: number,
+    p2_y: number,
+    p3_x: number,
+    p3_y: number,
+    p4_x: number,
+    p4_y: number,
+    num_segmentsIn?: number,
+  ): void;
 
   /**
    * ```
@@ -12268,7 +14553,14 @@ declare namespace reaper {
    * ```
    * Quadratic Bezier (3 control points)
    */
-  function ImGui_DrawList_PathBezierQuadraticCurveTo(draw_list: ImGui_DrawList, p2_x: number, p2_y: number, p3_x: number, p3_y: number, num_segmentsIn?: number): void;
+  function ImGui_DrawList_PathBezierQuadraticCurveTo(
+    draw_list: ImGui_DrawList,
+    p2_x: number,
+    p2_y: number,
+    p3_x: number,
+    p3_y: number,
+    num_segmentsIn?: number,
+  ): void;
 
   /**
    * ```
@@ -12283,42 +14575,75 @@ declare namespace reaper {
    * ```
    * Ellipse
    */
-  function ImGui_DrawList_PathEllipticalArcTo(draw_list: ImGui_DrawList, center_x: number, center_y: number, radius_x: number, radius_y: number, rot: number, a_min: number, a_max: number, num_segmentsIn?: number): void;
+  function ImGui_DrawList_PathEllipticalArcTo(
+    draw_list: ImGui_DrawList,
+    center_x: number,
+    center_y: number,
+    radius_x: number,
+    radius_y: number,
+    rot: number,
+    a_min: number,
+    a_max: number,
+    num_segmentsIn?: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_PathFillConcave(ImGui_DrawList draw_list, integer col_rgba)
    * ```
    */
-  function ImGui_DrawList_PathFillConcave(draw_list: ImGui_DrawList, col_rgba: number): void;
+  function ImGui_DrawList_PathFillConcave(
+    draw_list: ImGui_DrawList,
+    col_rgba: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_PathFillConvex(ImGui_DrawList draw_list, integer col_rgba)
    * ```
    */
-  function ImGui_DrawList_PathFillConvex(draw_list: ImGui_DrawList, col_rgba: number): void;
+  function ImGui_DrawList_PathFillConvex(
+    draw_list: ImGui_DrawList,
+    col_rgba: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_PathLineTo(ImGui_DrawList draw_list, number pos_x, number pos_y)
    * ```
    */
-  function ImGui_DrawList_PathLineTo(draw_list: ImGui_DrawList, pos_x: number, pos_y: number): void;
+  function ImGui_DrawList_PathLineTo(
+    draw_list: ImGui_DrawList,
+    pos_x: number,
+    pos_y: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_PathRect(ImGui_DrawList draw_list, number rect_min_x, number rect_min_y, number rect_max_x, number rect_max_y, optional number roundingIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_DrawList_PathRect(draw_list: ImGui_DrawList, rect_min_x: number, rect_min_y: number, rect_max_x: number, rect_max_y: number, roundingIn?: number, flagsIn?: number): void;
+  function ImGui_DrawList_PathRect(
+    draw_list: ImGui_DrawList,
+    rect_min_x: number,
+    rect_min_y: number,
+    rect_max_x: number,
+    rect_max_y: number,
+    roundingIn?: number,
+    flagsIn?: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_PathStroke(ImGui_DrawList draw_list, integer col_rgba, optional integer flagsIn, optional number thicknessIn)
    * ```
    */
-  function ImGui_DrawList_PathStroke(draw_list: ImGui_DrawList, col_rgba: number, flagsIn?: number, thicknessIn?: number): void;
+  function ImGui_DrawList_PathStroke(
+    draw_list: ImGui_DrawList,
+    col_rgba: number,
+    flagsIn?: number,
+    thicknessIn?: number,
+  ): void;
 
   /**
    * ```
@@ -12336,14 +14661,23 @@ declare namespace reaper {
    *
    * logic (hit-testing and widget culling).
    */
-  function ImGui_DrawList_PushClipRect(draw_list: ImGui_DrawList, clip_rect_min_x: number, clip_rect_min_y: number, clip_rect_max_x: number, clip_rect_max_y: number, intersect_with_current_clip_rectIn?: boolean): void;
+  function ImGui_DrawList_PushClipRect(
+    draw_list: ImGui_DrawList,
+    clip_rect_min_x: number,
+    clip_rect_min_y: number,
+    clip_rect_max_x: number,
+    clip_rect_max_y: number,
+    intersect_with_current_clip_rectIn?: boolean,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_DrawList_PushClipRectFullScreen(ImGui_DrawList draw_list)
    * ```
    */
-  function ImGui_DrawList_PushClipRectFullScreen(draw_list: ImGui_DrawList): void;
+  function ImGui_DrawList_PushClipRectFullScreen(
+    draw_list: ImGui_DrawList,
+  ): void;
 
   /**
    * ```
@@ -12353,7 +14687,11 @@ declare namespace reaper {
    *
    * mouse click or be navigable into.
    */
-  function ImGui_Dummy(ctx: ImGui_Context, size_w: number, size_h: number): void;
+  function ImGui_Dummy(
+    ctx: ImGui_Context,
+    size_w: number,
+    size_h: number,
+  ): void;
 
   /**
    * ```
@@ -12585,7 +14923,11 @@ declare namespace reaper {
    *
    * in the given variable into the array.
    */
-  function ImGui_Function_GetValue_Array(func: ImGui_Function, name: string, values: reaper_array): void;
+  function ImGui_Function_GetValue_Array(
+    func: ImGui_Function,
+    name: string,
+    values: reaper_array,
+  ): void;
 
   /**
    * ```
@@ -12593,14 +14935,21 @@ declare namespace reaper {
    * ```
    * Read from a string slot or a named string (when name starts with a `#`).
    */
-  function ImGui_Function_GetValue_String(func: ImGui_Function, name: string): string;
+  function ImGui_Function_GetValue_String(
+    func: ImGui_Function,
+    name: string,
+  ): string;
 
   /**
    * ```
    * reaper.ImGui_Function_SetValue(ImGui_Function func, string name, number value)
    * ```
    */
-  function ImGui_Function_SetValue(func: ImGui_Function, name: string, value: number): void;
+  function ImGui_Function_SetValue(
+    func: ImGui_Function,
+    name: string,
+    value: number,
+  ): void;
 
   /**
    * ```
@@ -12610,7 +14959,11 @@ declare namespace reaper {
    *
    * in the given variable.
    */
-  function ImGui_Function_SetValue_Array(func: ImGui_Function, name: string, values: reaper_array): void;
+  function ImGui_Function_SetValue_Array(
+    func: ImGui_Function,
+    name: string,
+    values: reaper_array,
+  ): void;
 
   /**
    * ```
@@ -12618,7 +14971,11 @@ declare namespace reaper {
    * ```
    * Write to a string slot or a named string (when name starts with a `#`).
    */
-  function ImGui_Function_SetValue_String(func: ImGui_Function, name: string, value: string): void;
+  function ImGui_Function_SetValue_String(
+    func: ImGui_Function,
+    name: string,
+    value: string,
+  ): void;
 
   /**
    * ```
@@ -12653,7 +15010,11 @@ declare namespace reaper {
    *
    * multiplier, packed as a 32-bit value (RGBA). See Col_* for available style colors.
    */
-  function ImGui_GetColor(ctx: ImGui_Context, idx: number, alpha_mulIn?: number): number;
+  function ImGui_GetColor(
+    ctx: ImGui_Context,
+    idx: number,
+    alpha_mulIn?: number,
+  ): number;
 
   /**
    * ```
@@ -12661,7 +15022,11 @@ declare namespace reaper {
    * ```
    * Retrieve given color with style alpha applied, packed as a 32-bit value (RGBA).
    */
-  function ImGui_GetColorEx(ctx: ImGui_Context, col_rgba: number, alpha_mulIn?: number): number;
+  function ImGui_GetColorEx(
+    ctx: ImGui_Context,
+    col_rgba: number,
+    alpha_mulIn?: number,
+  ): number;
 
   /**
    * ```
@@ -12676,7 +15041,9 @@ declare namespace reaper {
    * ```
    * == GetContentRegionMax() - GetCursorPos()
    */
-  function ImGui_GetContentRegionAvail(ctx: ImGui_Context): LuaMultiReturn<[number, number]>;
+  function ImGui_GetContentRegionAvail(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -12686,7 +15053,9 @@ declare namespace reaper {
    *
    * or current column boundaries), in windows coordinates.
    */
-  function ImGui_GetContentRegionMax(ctx: ImGui_Context): LuaMultiReturn<[number, number]>;
+  function ImGui_GetContentRegionMax(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -12694,7 +15063,9 @@ declare namespace reaper {
    * ```
    * Cursor position in window
    */
-  function ImGui_GetCursorPos(ctx: ImGui_Context): LuaMultiReturn<[number, number]>;
+  function ImGui_GetCursorPos(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -12718,7 +15089,9 @@ declare namespace reaper {
    * ```
    * Cursor position in absolute screen coordinates (useful to work with the DrawList API).
    */
-  function ImGui_GetCursorScreenPos(ctx: ImGui_Context): LuaMultiReturn<[number, number]>;
+  function ImGui_GetCursorScreenPos(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -12726,7 +15099,9 @@ declare namespace reaper {
    * ```
    * Initial cursor position in window coordinates.
    */
-  function ImGui_GetCursorStartPos(ctx: ImGui_Context): LuaMultiReturn<[number, number]>;
+  function ImGui_GetCursorStartPos(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -12744,7 +15119,9 @@ declare namespace reaper {
    *
    * Returns false when drag and drop is finished or inactive.
    */
-  function ImGui_GetDragDropPayload(ctx: ImGui_Context): LuaMultiReturn<[boolean, string, string, boolean, boolean]>;
+  function ImGui_GetDragDropPayload(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[boolean, string, string, boolean, boolean]>;
 
   /**
    * ```
@@ -12754,7 +15131,10 @@ declare namespace reaper {
    *
    * Returns false if index is out of bounds.
    */
-  function ImGui_GetDragDropPayloadFile(ctx: ImGui_Context, index: number): LuaMultiReturn<[boolean, string]>;
+  function ImGui_GetDragDropPayloadFile(
+    ctx: ImGui_Context,
+    index: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -12828,7 +15208,10 @@ declare namespace reaper {
    *
    * Call with increasing idx until false is returned.
    */
-  function ImGui_GetInputQueueCharacter(ctx: ImGui_Context, idx: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_GetInputQueueCharacter(
+    ctx: ImGui_Context,
+    idx: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
@@ -12836,7 +15219,9 @@ declare namespace reaper {
    * ```
    * Get lower-right bounding rectangle of the last item (screen space)
    */
-  function ImGui_GetItemRectMax(ctx: ImGui_Context): LuaMultiReturn<[number, number]>;
+  function ImGui_GetItemRectMax(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -12844,7 +15229,9 @@ declare namespace reaper {
    * ```
    * Get upper-left bounding rectangle of the last item (screen space)
    */
-  function ImGui_GetItemRectMin(ctx: ImGui_Context): LuaMultiReturn<[number, number]>;
+  function ImGui_GetItemRectMin(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -12852,7 +15239,9 @@ declare namespace reaper {
    * ```
    * Get size of last item
    */
-  function ImGui_GetItemRectSize(ctx: ImGui_Context): LuaMultiReturn<[number, number]>;
+  function ImGui_GetItemRectSize(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -12878,7 +15267,12 @@ declare namespace reaper {
    *
    * be >1 if ConfigVar_RepeatRate is small enough that GetDeltaTime > RepeatRate.
    */
-  function ImGui_GetKeyPressedAmount(ctx: ImGui_Context, key: number, repeat_delay: number, rate: number): number;
+  function ImGui_GetKeyPressedAmount(
+    ctx: ImGui_Context,
+    key: number,
+    repeat_delay: number,
+    rate: number,
+  ): number;
 
   /**
    * ```
@@ -12896,14 +15290,20 @@ declare namespace reaper {
    * ```
    * Return the number of successive mouse-clicks at the time where a click happen (otherwise 0).
    */
-  function ImGui_GetMouseClickedCount(ctx: ImGui_Context, button: number): number;
+  function ImGui_GetMouseClickedCount(
+    ctx: ImGui_Context,
+    button: number,
+  ): number;
 
   /**
    * ```
    * number x, number y = reaper.ImGui_GetMouseClickedPos(ImGui_Context ctx, integer button)
    * ```
    */
-  function ImGui_GetMouseClickedPos(ctx: ImGui_Context, button: number): LuaMultiReturn<[number, number]>;
+  function ImGui_GetMouseClickedPos(
+    ctx: ImGui_Context,
+    button: number,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -12923,7 +15323,9 @@ declare namespace reaper {
    *
    * a huge delta.
    */
-  function ImGui_GetMouseDelta(ctx: ImGui_Context): LuaMultiReturn<[number, number]>;
+  function ImGui_GetMouseDelta(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -12931,7 +15333,10 @@ declare namespace reaper {
    * ```
    * Duration the mouse button has been down (0.0 == just clicked)
    */
-  function ImGui_GetMouseDownDuration(ctx: ImGui_Context, button: number): number;
+  function ImGui_GetMouseDownDuration(
+    ctx: ImGui_Context,
+    button: number,
+  ): number;
 
   /**
    * ```
@@ -12945,14 +15350,22 @@ declare namespace reaper {
    *
    * if lock_threshold < 0.0).
    */
-  function ImGui_GetMouseDragDelta(ctx: ImGui_Context, x: number, y: number, buttonIn?: number, lock_thresholdIn?: number): LuaMultiReturn<[number, number]>;
+  function ImGui_GetMouseDragDelta(
+    ctx: ImGui_Context,
+    x: number,
+    y: number,
+    buttonIn?: number,
+    lock_thresholdIn?: number,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
    * number x, number y = reaper.ImGui_GetMousePos(ImGui_Context ctx)
    * ```
    */
-  function ImGui_GetMousePos(ctx: ImGui_Context): LuaMultiReturn<[number, number]>;
+  function ImGui_GetMousePos(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -12962,7 +15375,9 @@ declare namespace reaper {
    *
    * into (helper to avoid user backing that value themselves).
    */
-  function ImGui_GetMousePosOnOpeningCurrentPopup(ctx: ImGui_Context): LuaMultiReturn<[number, number]>;
+  function ImGui_GetMousePosOnOpeningCurrentPopup(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -12978,7 +15393,9 @@ declare namespace reaper {
    *
    * Most users don't have a mouse with a horizontal wheel.
    */
-  function ImGui_GetMouseWheel(ctx: ImGui_Context): LuaMultiReturn<[number, number]>;
+  function ImGui_GetMouseWheel(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -13029,7 +15446,10 @@ declare namespace reaper {
    * number val1, number val2 = reaper.ImGui_GetStyleVar(ImGui_Context ctx, integer var_idx)
    * ```
    */
-  function ImGui_GetStyleVar(ctx: ImGui_Context, var_idx: number): LuaMultiReturn<[number, number]>;
+  function ImGui_GetStyleVar(
+    ctx: ImGui_Context,
+    var_idx: number,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -13082,7 +15502,9 @@ declare namespace reaper {
    *
    * overridden with SetNextWindowContentSize, in window coordinates.
    */
-  function ImGui_GetWindowContentRegionMax(ctx: ImGui_Context): LuaMultiReturn<[number, number]>;
+  function ImGui_GetWindowContentRegionMax(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -13090,7 +15512,9 @@ declare namespace reaper {
    * ```
    * Content boundaries min (roughly (0,0)-Scroll), in window coordinates.
    */
-  function ImGui_GetWindowContentRegionMin(ctx: ImGui_Context): LuaMultiReturn<[number, number]>;
+  function ImGui_GetWindowContentRegionMin(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -13133,7 +15557,9 @@ declare namespace reaper {
    *
    * use this. Consider using current layout pos instead, GetCursorScreenPos()).
    */
-  function ImGui_GetWindowPos(ctx: ImGui_Context): LuaMultiReturn<[number, number]>;
+  function ImGui_GetWindowPos(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -13143,7 +15569,9 @@ declare namespace reaper {
    *
    * Consider using GetCursorScreenPos() and e.g. GetContentRegionAvail() instead)
    */
-  function ImGui_GetWindowSize(ctx: ImGui_Context): LuaMultiReturn<[number, number]>;
+  function ImGui_GetWindowSize(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -13375,7 +15803,18 @@ declare namespace reaper {
    * ```
    * Adds 2.0 to the provided size if a border is visible.
    */
-  function ImGui_Image(ctx: ImGui_Context, image: ImGui_Image, image_size_w: number, image_size_h: number, uv0_xIn?: number, uv0_yIn?: number, uv1_xIn?: number, uv1_yIn?: number, tint_col_rgbaIn?: number, border_col_rgbaIn?: number): void;
+  function ImGui_Image(
+    ctx: ImGui_Context,
+    image: ImGui_Image,
+    image_size_w: number,
+    image_size_h: number,
+    uv0_xIn?: number,
+    uv0_yIn?: number,
+    uv1_xIn?: number,
+    uv1_yIn?: number,
+    tint_col_rgbaIn?: number,
+    border_col_rgbaIn?: number,
+  ): void;
 
   /**
    * ```
@@ -13383,7 +15822,19 @@ declare namespace reaper {
    * ```
    * Adds StyleVar_FramePadding*2.0 to provided size.
    */
-  function ImGui_ImageButton(ctx: ImGui_Context, str_id: string, image: ImGui_Image, image_size_w: number, image_size_h: number, uv0_xIn?: number, uv0_yIn?: number, uv1_xIn?: number, uv1_yIn?: number, bg_col_rgbaIn?: number, tint_col_rgbaIn?: number): boolean;
+  function ImGui_ImageButton(
+    ctx: ImGui_Context,
+    str_id: string,
+    image: ImGui_Image,
+    image_size_w: number,
+    image_size_h: number,
+    uv0_xIn?: number,
+    uv0_yIn?: number,
+    uv1_xIn?: number,
+    uv1_yIn?: number,
+    bg_col_rgbaIn?: number,
+    tint_col_rgbaIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -13391,14 +15842,20 @@ declare namespace reaper {
    * ```
    * 'img' cannot be another ImageSet.
    */
-  function ImGui_ImageSet_Add(set: ImGui_ImageSet, scale: number, image: ImGui_Image): void;
+  function ImGui_ImageSet_Add(
+    set: ImGui_ImageSet,
+    scale: number,
+    image: ImGui_Image,
+  ): void;
 
   /**
    * ```
    * number w, number h = reaper.ImGui_Image_GetSize(ImGui_Image image)
    * ```
    */
-  function ImGui_Image_GetSize(image: ImGui_Image): LuaMultiReturn<[number, number]>;
+  function ImGui_Image_GetSize(
+    image: ImGui_Image,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -13415,35 +15872,75 @@ declare namespace reaper {
    * boolean retval, number v = reaper.ImGui_InputDouble(ImGui_Context ctx, string label, number v, optional number stepIn, optional number step_fastIn, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_InputDouble(ctx: ImGui_Context, label: string, v: number, stepIn?: number, step_fastIn?: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_InputDouble(
+    ctx: ImGui_Context,
+    label: string,
+    v: number,
+    stepIn?: number,
+    step_fastIn?: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
    * boolean retval, number v1, number v2 = reaper.ImGui_InputDouble2(ImGui_Context ctx, string label, number v1, number v2, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_InputDouble2(ctx: ImGui_Context, label: string, v1: number, v2: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number, number]>;
+  function ImGui_InputDouble2(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number]>;
 
   /**
    * ```
    * boolean retval, number v1, number v2, number v3 = reaper.ImGui_InputDouble3(ImGui_Context ctx, string label, number v1, number v2, number v3, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_InputDouble3(ctx: ImGui_Context, label: string, v1: number, v2: number, v3: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number, number, number]>;
+  function ImGui_InputDouble3(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    v3: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number, number]>;
 
   /**
    * ```
    * boolean retval, number v1, number v2, number v3, number v4 = reaper.ImGui_InputDouble4(ImGui_Context ctx, string label, number v1, number v2, number v3, number v4, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_InputDouble4(ctx: ImGui_Context, label: string, v1: number, v2: number, v3: number, v4: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number, number, number, number]>;
+  function ImGui_InputDouble4(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    v3: number,
+    v4: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number, number, number]>;
 
   /**
    * ```
    * boolean _ = reaper.ImGui_InputDoubleN(ImGui_Context ctx, string label, reaper_array values, optional number stepIn, optional number step_fastIn, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_InputDoubleN(ctx: ImGui_Context, label: string, values: reaper_array, stepIn?: number, step_fastIn?: number, formatIn?: string, flagsIn?: number): boolean;
+  function ImGui_InputDoubleN(
+    ctx: ImGui_Context,
+    label: string,
+    values: reaper_array,
+    stepIn?: number,
+    step_fastIn?: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -13549,35 +16046,69 @@ declare namespace reaper {
    * boolean retval, integer v = reaper.ImGui_InputInt(ImGui_Context ctx, string label, integer v, optional integer stepIn, optional integer step_fastIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_InputInt(ctx: ImGui_Context, label: string, v: number, stepIn?: number, step_fastIn?: number, flagsIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_InputInt(
+    ctx: ImGui_Context,
+    label: string,
+    v: number,
+    stepIn?: number,
+    step_fastIn?: number,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
    * boolean retval, integer v1, integer v2 = reaper.ImGui_InputInt2(ImGui_Context ctx, string label, integer v1, integer v2, optional integer flagsIn)
    * ```
    */
-  function ImGui_InputInt2(ctx: ImGui_Context, label: string, v1: number, v2: number, flagsIn?: number): LuaMultiReturn<[boolean, number, number]>;
+  function ImGui_InputInt2(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number]>;
 
   /**
    * ```
    * boolean retval, integer v1, integer v2, integer v3 = reaper.ImGui_InputInt3(ImGui_Context ctx, string label, integer v1, integer v2, integer v3, optional integer flagsIn)
    * ```
    */
-  function ImGui_InputInt3(ctx: ImGui_Context, label: string, v1: number, v2: number, v3: number, flagsIn?: number): LuaMultiReturn<[boolean, number, number, number]>;
+  function ImGui_InputInt3(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    v3: number,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number, number]>;
 
   /**
    * ```
    * boolean retval, integer v1, integer v2, integer v3, integer v4 = reaper.ImGui_InputInt4(ImGui_Context ctx, string label, integer v1, integer v2, integer v3, integer v4, optional integer flagsIn)
    * ```
    */
-  function ImGui_InputInt4(ctx: ImGui_Context, label: string, v1: number, v2: number, v3: number, v4: number, flagsIn?: number): LuaMultiReturn<[boolean, number, number, number, number]>;
+  function ImGui_InputInt4(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    v3: number,
+    v4: number,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number, number, number]>;
 
   /**
    * ```
    * boolean retval, string buf = reaper.ImGui_InputText(ImGui_Context ctx, string label, string buf, optional integer flagsIn, ImGui_Function callbackIn)
    * ```
    */
-  function ImGui_InputText(ctx: ImGui_Context, label: string, buf: string, flagsIn?: number, callbackIn: ImGui_Function): LuaMultiReturn<[boolean, string]>;
+  function ImGui_InputText(
+    ctx: ImGui_Context,
+    label: string,
+    buf: string,
+    flagsIn?: number,
+    callbackIn?: ImGui_Function,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -13781,14 +16312,29 @@ declare namespace reaper {
    * boolean retval, string buf = reaper.ImGui_InputTextMultiline(ImGui_Context ctx, string label, string buf, optional number size_wIn, optional number size_hIn, optional integer flagsIn, ImGui_Function callbackIn)
    * ```
    */
-  function ImGui_InputTextMultiline(ctx: ImGui_Context, label: string, buf: string, size_wIn?: number, size_hIn?: number, flagsIn?: number, callbackIn: ImGui_Function): LuaMultiReturn<[boolean, string]>;
+  function ImGui_InputTextMultiline(
+    ctx: ImGui_Context,
+    label: string,
+    buf: string,
+    size_wIn?: number,
+    size_hIn?: number,
+    flagsIn?: number,
+    callbackIn?: ImGui_Function,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
    * boolean retval, string buf = reaper.ImGui_InputTextWithHint(ImGui_Context ctx, string label, string hint, string buf, optional integer flagsIn, ImGui_Function callbackIn)
    * ```
    */
-  function ImGui_InputTextWithHint(ctx: ImGui_Context, label: string, hint: string, buf: string, flagsIn?: number, callbackIn: ImGui_Function): LuaMultiReturn<[boolean, string]>;
+  function ImGui_InputTextWithHint(
+    ctx: ImGui_Context,
+    label: string,
+    hint: string,
+    buf: string,
+    flagsIn?: number,
+    callbackIn?: ImGui_Function,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -13798,7 +16344,13 @@ declare namespace reaper {
    *
    * custom behaviors using the public api (along with IsItemActive, IsItemHovered, etc.).
    */
-  function ImGui_InvisibleButton(ctx: ImGui_Context, str_id: string, size_w: number, size_h: number, flagsIn?: number): boolean;
+  function ImGui_InvisibleButton(
+    ctx: ImGui_Context,
+    str_id: string,
+    size_w: number,
+    size_h: number,
+    flagsIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -13863,7 +16415,10 @@ declare namespace reaper {
    *
    * Most widgets have specific reactions based on mouse-up/down state, mouse position etc.
    */
-  function ImGui_IsItemClicked(ctx: ImGui_Context, mouse_buttonIn?: number): boolean;
+  function ImGui_IsItemClicked(
+    ctx: ImGui_Context,
+    mouse_buttonIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -13947,7 +16502,10 @@ declare namespace reaper {
    *
    * please consider using the Shortcut() function instead.
    */
-  function ImGui_IsKeyChordPressed(ctx: ImGui_Context, key_chord: number): boolean;
+  function ImGui_IsKeyChordPressed(
+    ctx: ImGui_Context,
+    key_chord: number,
+  ): boolean;
 
   /**
    * ```
@@ -13965,7 +16523,11 @@ declare namespace reaper {
    *
    * If repeat=true, uses ConfigVar_KeyRepeatDelay / ConfigVar_KeyRepeatRate.
    */
-  function ImGui_IsKeyPressed(ctx: ImGui_Context, key: number, repeatIn?: boolean): boolean;
+  function ImGui_IsKeyPressed(
+    ctx: ImGui_Context,
+    key: number,
+    repeatIn?: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -13983,7 +16545,11 @@ declare namespace reaper {
    *
    * Same as GetMouseClickedCount() == 1.
    */
-  function ImGui_IsMouseClicked(ctx: ImGui_Context, button: number, repeatIn?: boolean): boolean;
+  function ImGui_IsMouseClicked(
+    ctx: ImGui_Context,
+    button: number,
+    repeatIn?: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -13993,7 +16559,10 @@ declare namespace reaper {
    *
    * (Note that a double-click will also report IsMouseClicked() == true)
    */
-  function ImGui_IsMouseDoubleClicked(ctx: ImGui_Context, button: number): boolean;
+  function ImGui_IsMouseDoubleClicked(
+    ctx: ImGui_Context,
+    button: number,
+  ): boolean;
 
   /**
    * ```
@@ -14009,7 +16578,11 @@ declare namespace reaper {
    * ```
    * Is mouse dragging? (uses ConfigVar_MouseDragThreshold if lock_threshold < 0.0)
    */
-  function ImGui_IsMouseDragging(ctx: ImGui_Context, button: number, lock_thresholdIn?: number): boolean;
+  function ImGui_IsMouseDragging(
+    ctx: ImGui_Context,
+    button: number,
+    lock_thresholdIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -14021,14 +16594,25 @@ declare namespace reaper {
    *
    * of focus/window ordering/popup-block.
    */
-  function ImGui_IsMouseHoveringRect(ctx: ImGui_Context, r_min_x: number, r_min_y: number, r_max_x: number, r_max_y: number, clipIn?: boolean): boolean;
+  function ImGui_IsMouseHoveringRect(
+    ctx: ImGui_Context,
+    r_min_x: number,
+    r_min_y: number,
+    r_max_x: number,
+    r_max_y: number,
+    clipIn?: boolean,
+  ): boolean;
 
   /**
    * ```
    * boolean _ = reaper.ImGui_IsMousePosValid(ImGui_Context ctx, optional number mouse_pos_xIn, optional number mouse_pos_yIn)
    * ```
    */
-  function ImGui_IsMousePosValid(ctx: ImGui_Context, mouse_pos_xIn?: number, mouse_pos_yIn?: number): boolean;
+  function ImGui_IsMousePosValid(
+    ctx: ImGui_Context,
+    mouse_pos_xIn?: number,
+    mouse_pos_yIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -14056,7 +16640,11 @@ declare namespace reaper {
    *
    *   popup is open.
    */
-  function ImGui_IsPopupOpen(ctx: ImGui_Context, str_id: string, flagsIn?: number): boolean;
+  function ImGui_IsPopupOpen(
+    ctx: ImGui_Context,
+    str_id: string,
+    flagsIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -14066,7 +16654,11 @@ declare namespace reaper {
    *
    * visible / not clipped.
    */
-  function ImGui_IsRectVisible(ctx: ImGui_Context, size_w: number, size_h: number): boolean;
+  function ImGui_IsRectVisible(
+    ctx: ImGui_Context,
+    size_w: number,
+    size_h: number,
+  ): boolean;
 
   /**
    * ```
@@ -14076,7 +16668,13 @@ declare namespace reaper {
    *
    * coarse clipping on user's side.
    */
-  function ImGui_IsRectVisibleEx(ctx: ImGui_Context, rect_min_x: number, rect_min_y: number, rect_max_x: number, rect_max_y: number): boolean;
+  function ImGui_IsRectVisibleEx(
+    ctx: ImGui_Context,
+    rect_min_x: number,
+    rect_min_y: number,
+    rect_max_x: number,
+    rect_max_y: number,
+  ): boolean;
 
   /**
    * ```
@@ -15014,7 +17612,11 @@ declare namespace reaper {
    * ```
    * Display text+label aligned the same way as value+label widgets
    */
-  function ImGui_LabelText(ctx: ImGui_Context, label: string, text: string): void;
+  function ImGui_LabelText(
+    ctx: ImGui_Context,
+    label: string,
+    text: string,
+  ): void;
 
   /**
    * ```
@@ -15026,7 +17628,13 @@ declare namespace reaper {
    *
    * Each item must be null-terminated (requires REAPER v6.44 or newer for EEL and Lua).
    */
-  function ImGui_ListBox(ctx: ImGui_Context, label: string, current_item: number, items: string, height_in_itemsIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_ListBox(
+    ctx: ImGui_Context,
+    label: string,
+    current_item: number,
+    items: string,
+    height_in_itemsIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
@@ -15042,7 +17650,11 @@ declare namespace reaper {
    *
    *   GetTextLineHeightWithSpacing or GetFrameHeightWithSpacing.
    */
-  function ImGui_ListClipper_Begin(clipper: ImGui_ListClipper, items_count: number, items_heightIn?: number): void;
+  function ImGui_ListClipper_Begin(
+    clipper: ImGui_ListClipper,
+    items_count: number,
+    items_heightIn?: number,
+  ): void;
 
   /**
    * ```
@@ -15057,7 +17669,9 @@ declare namespace reaper {
    * integer display_start, integer display_end = reaper.ImGui_ListClipper_GetDisplayRange(ImGui_ListClipper clipper)
    * ```
    */
-  function ImGui_ListClipper_GetDisplayRange(clipper: ImGui_ListClipper): LuaMultiReturn<[number, number]>;
+  function ImGui_ListClipper_GetDisplayRange(
+    clipper: ImGui_ListClipper,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -15075,7 +17689,10 @@ declare namespace reaper {
    *
    * may be included on either end of the display range).
    */
-  function ImGui_ListClipper_IncludeItemByIndex(clipper: ImGui_ListClipper, item_index: number): void;
+  function ImGui_ListClipper_IncludeItemByIndex(
+    clipper: ImGui_ListClipper,
+    item_index: number,
+  ): void;
 
   /**
    * ```
@@ -15087,7 +17704,11 @@ declare namespace reaper {
    *
    * item_end is exclusive e.g. use (42, 42+1) to make item 42 never clipped.
    */
-  function ImGui_ListClipper_IncludeItemsByIndex(clipper: ImGui_ListClipper, item_begin: number, item_end: number): void;
+  function ImGui_ListClipper_IncludeItemsByIndex(
+    clipper: ImGui_ListClipper,
+    item_begin: number,
+    item_end: number,
+  ): void;
 
   /**
    * ```
@@ -15123,7 +17744,10 @@ declare namespace reaper {
    *
    * See also SetClipboardText.
    */
-  function ImGui_LogToClipboard(ctx: ImGui_Context, auto_open_depthIn?: number): void;
+  function ImGui_LogToClipboard(
+    ctx: ImGui_Context,
+    auto_open_depthIn?: number,
+  ): void;
 
   /**
    * ```
@@ -15133,7 +17757,11 @@ declare namespace reaper {
    *
    * The data is saved to $resource_path/imgui_log.txt if filename is nil.
    */
-  function ImGui_LogToFile(ctx: ImGui_Context, auto_open_depthIn?: number, filenameIn?: string): void;
+  function ImGui_LogToFile(
+    ctx: ImGui_Context,
+    auto_open_depthIn?: number,
+    filenameIn?: string,
+  ): void;
 
   /**
    * ```
@@ -15153,7 +17781,13 @@ declare namespace reaper {
    *
    * provided.
    */
-  function ImGui_MenuItem(ctx: ImGui_Context, label: string, shortcutIn?: string, p_selected?: boolean, enabledIn?: boolean): LuaMultiReturn<[boolean, boolean]>;
+  function ImGui_MenuItem(
+    ctx: ImGui_Context,
+    label: string,
+    shortcutIn?: string,
+    p_selected?: boolean,
+    enabledIn?: boolean,
+  ): LuaMultiReturn<[boolean, boolean]>;
 
   /**
    * ```
@@ -15343,7 +17977,11 @@ declare namespace reaper {
    *
    * already one at the same level.
    */
-  function ImGui_OpenPopup(ctx: ImGui_Context, str_id: string, popup_flagsIn?: number): void;
+  function ImGui_OpenPopup(
+    ctx: ImGui_Context,
+    str_id: string,
+    popup_flagsIn?: number,
+  ): void;
 
   /**
    * ```
@@ -15355,21 +17993,45 @@ declare namespace reaper {
    *
    * popup behaviors.)
    */
-  function ImGui_OpenPopupOnItemClick(ctx: ImGui_Context, str_idIn?: string, popup_flagsIn?: number): void;
+  function ImGui_OpenPopupOnItemClick(
+    ctx: ImGui_Context,
+    str_idIn?: string,
+    popup_flagsIn?: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_PlotHistogram(ImGui_Context ctx, string label, reaper_array values, optional integer values_offsetIn, optional string overlay_textIn, optional number scale_minIn, optional number scale_maxIn, optional number graph_size_wIn, optional number graph_size_hIn)
    * ```
    */
-  function ImGui_PlotHistogram(ctx: ImGui_Context, label: string, values: reaper_array, values_offsetIn?: number, overlay_textIn?: string, scale_minIn?: number, scale_maxIn?: number, graph_size_wIn?: number, graph_size_hIn?: number): void;
+  function ImGui_PlotHistogram(
+    ctx: ImGui_Context,
+    label: string,
+    values: reaper_array,
+    values_offsetIn?: number,
+    overlay_textIn?: string,
+    scale_minIn?: number,
+    scale_maxIn?: number,
+    graph_size_wIn?: number,
+    graph_size_hIn?: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_PlotLines(ImGui_Context ctx, string label, reaper_array values, optional integer values_offsetIn, optional string overlay_textIn, optional number scale_minIn, optional number scale_maxIn, optional number graph_size_wIn, optional number graph_size_hIn)
    * ```
    */
-  function ImGui_PlotLines(ctx: ImGui_Context, label: string, values: reaper_array, values_offsetIn?: number, overlay_textIn?: string, scale_minIn?: number, scale_maxIn?: number, graph_size_wIn?: number, graph_size_hIn?: number): void;
+  function ImGui_PlotLines(
+    ctx: ImGui_Context,
+    label: string,
+    values: reaper_array,
+    values_offsetIn?: number,
+    overlay_textIn?: string,
+    scale_minIn?: number,
+    scale_maxIn?: number,
+    graph_size_wIn?: number,
+    graph_size_hIn?: number,
+  ): void;
 
   /**
    * ```
@@ -15385,7 +18047,12 @@ declare namespace reaper {
    *
    * Windows and Linux.
    */
-  function ImGui_PointConvertNative(ctx: ImGui_Context, x: number, y: number, to_nativeIn?: boolean): LuaMultiReturn<[number, number]>;
+  function ImGui_PointConvertNative(
+    ctx: ImGui_Context,
+    x: number,
+    y: number,
+    to_nativeIn?: boolean,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -15554,7 +18221,13 @@ declare namespace reaper {
    *
    * The value must be animated along with time, for example `-1.0 * ImGui.GetTime()`.
    */
-  function ImGui_ProgressBar(ctx: ImGui_Context, fraction: number, size_arg_wIn?: number, size_arg_hIn?: number, overlayIn?: string): void;
+  function ImGui_ProgressBar(
+    ctx: ImGui_Context,
+    fraction: number,
+    size_arg_wIn?: number,
+    size_arg_hIn?: number,
+    overlayIn?: string,
+  ): void;
 
   /**
    * ```
@@ -15577,7 +18250,14 @@ declare namespace reaper {
    * reaper.ImGui_PushClipRect(ImGui_Context ctx, number clip_rect_min_x, number clip_rect_min_y, number clip_rect_max_x, number clip_rect_max_y, boolean intersect_with_current_clip_rect)
    * ```
    */
-  function ImGui_PushClipRect(ctx: ImGui_Context, clip_rect_min_x: number, clip_rect_min_y: number, clip_rect_max_x: number, clip_rect_max_y: number, intersect_with_current_clip_rect: boolean): void;
+  function ImGui_PushClipRect(
+    ctx: ImGui_Context,
+    clip_rect_min_x: number,
+    clip_rect_min_y: number,
+    clip_rect_max_x: number,
+    clip_rect_max_y: number,
+    intersect_with_current_clip_rect: boolean,
+  ): void;
 
   /**
    * ```
@@ -15625,7 +18305,11 @@ declare namespace reaper {
    *
    * See Col_* for available style colors.
    */
-  function ImGui_PushStyleColor(ctx: ImGui_Context, idx: number, col_rgba: number): void;
+  function ImGui_PushStyleColor(
+    ctx: ImGui_Context,
+    idx: number,
+    col_rgba: number,
+  ): void;
 
   /**
    * ```
@@ -15637,7 +18321,12 @@ declare namespace reaper {
    *
    * See StyleVar_* for possible values of 'var_idx'.
    */
-  function ImGui_PushStyleVar(ctx: ImGui_Context, var_idx: number, val1: number, val2In?: number): void;
+  function ImGui_PushStyleVar(
+    ctx: ImGui_Context,
+    var_idx: number,
+    val1: number,
+    val2In?: number,
+  ): void;
 
   /**
    * ```
@@ -15663,7 +18352,10 @@ declare namespace reaper {
    *
    * - \> 0.0: wrap at 'wrap_pos_x' position in window local space.
    */
-  function ImGui_PushTextWrapPos(ctx: ImGui_Context, wrap_local_pos_xIn?: number): void;
+  function ImGui_PushTextWrapPos(
+    ctx: ImGui_Context,
+    wrap_local_pos_xIn?: number,
+  ): void;
 
   /**
    * ```
@@ -15671,7 +18363,11 @@ declare namespace reaper {
    * ```
    * Use with e.g. if (RadioButton("one", my_value==1)) { my_value = 1; }
    */
-  function ImGui_RadioButton(ctx: ImGui_Context, label: string, active: boolean): boolean;
+  function ImGui_RadioButton(
+    ctx: ImGui_Context,
+    label: string,
+    active: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -15679,14 +18375,22 @@ declare namespace reaper {
    * ```
    * Shortcut to handle RadioButton's example pattern when value is an integer
    */
-  function ImGui_RadioButtonEx(ctx: ImGui_Context, label: string, v: number, v_button: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_RadioButtonEx(
+    ctx: ImGui_Context,
+    label: string,
+    v: number,
+    v_button: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
    * reaper.ImGui_ResetMouseDragDelta(ImGui_Context ctx, optional integer buttonIn)
    * ```
    */
-  function ImGui_ResetMouseDragDelta(ctx: ImGui_Context, buttonIn?: number): void;
+  function ImGui_ResetMouseDragDelta(
+    ctx: ImGui_Context,
+    buttonIn?: number,
+  ): void;
 
   /**
    * ```
@@ -15696,14 +18400,25 @@ declare namespace reaper {
    *
    * X position given in window coordinates.
    */
-  function ImGui_SameLine(ctx: ImGui_Context, offset_from_start_xIn?: number, spacingIn?: number): void;
+  function ImGui_SameLine(
+    ctx: ImGui_Context,
+    offset_from_start_xIn?: number,
+    spacingIn?: number,
+  ): void;
 
   /**
    * ```
    * boolean retval, optional boolean p_selected = reaper.ImGui_Selectable(ImGui_Context ctx, string label, optional boolean p_selected, optional integer flagsIn, optional number size_wIn, optional number size_hIn)
    * ```
    */
-  function ImGui_Selectable(ctx: ImGui_Context, label: string, p_selected?: boolean, flagsIn?: number, size_wIn?: number, size_hIn?: number): LuaMultiReturn<[boolean, boolean]>;
+  function ImGui_Selectable(
+    ctx: ImGui_Context,
+    label: string,
+    p_selected?: boolean,
+    flagsIn?: number,
+    size_wIn?: number,
+    size_hIn?: number,
+  ): LuaMultiReturn<[boolean, boolean]>;
 
   /**
    * ```
@@ -15795,7 +18510,11 @@ declare namespace reaper {
    * reaper.ImGui_SetConfigVar(ImGui_Context ctx, integer var_idx, number value)
    * ```
    */
-  function ImGui_SetConfigVar(ctx: ImGui_Context, var_idx: number, value: number): void;
+  function ImGui_SetConfigVar(
+    ctx: ImGui_Context,
+    var_idx: number,
+    value: number,
+  ): void;
 
   /**
    * ```
@@ -15803,7 +18522,11 @@ declare namespace reaper {
    * ```
    * Cursor position in window
    */
-  function ImGui_SetCursorPos(ctx: ImGui_Context, local_pos_x: number, local_pos_y: number): void;
+  function ImGui_SetCursorPos(
+    ctx: ImGui_Context,
+    local_pos_x: number,
+    local_pos_y: number,
+  ): void;
 
   /**
    * ```
@@ -15827,7 +18550,11 @@ declare namespace reaper {
    * ```
    * Cursor position in absolute screen coordinates.
    */
-  function ImGui_SetCursorScreenPos(ctx: ImGui_Context, pos_x: number, pos_y: number): void;
+  function ImGui_SetCursorScreenPos(
+    ctx: ImGui_Context,
+    pos_x: number,
+    pos_y: number,
+  ): void;
 
   /**
    * ```
@@ -15839,7 +18566,12 @@ declare namespace reaper {
    *
    * Data is copied and held by imgui.
    */
-  function ImGui_SetDragDropPayload(ctx: ImGui_Context, type: string, data: string, condIn?: number): boolean;
+  function ImGui_SetDragDropPayload(
+    ctx: ImGui_Context,
+    type: string,
+    data: string,
+    condIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -15869,7 +18601,10 @@ declare namespace reaper {
    *
    * components of a multiple component widget. Use -1 to access previous widget.
    */
-  function ImGui_SetKeyboardFocusHere(ctx: ImGui_Context, offsetIn?: number): void;
+  function ImGui_SetKeyboardFocusHere(
+    ctx: ImGui_Context,
+    offsetIn?: number,
+  ): void;
 
   /**
    * ```
@@ -15885,7 +18620,10 @@ declare namespace reaper {
    * ```
    * Request capture of keyboard shortcuts in REAPER's global scope for the next frame.
    */
-  function ImGui_SetNextFrameWantCaptureKeyboard(ctx: ImGui_Context, want_capture_keyboard: boolean): void;
+  function ImGui_SetNextFrameWantCaptureKeyboard(
+    ctx: ImGui_Context,
+    want_capture_keyboard: boolean,
+  ): void;
 
   /**
    * ```
@@ -15909,14 +18647,22 @@ declare namespace reaper {
    *
    * Can also be done with the TreeNodeFlags_DefaultOpen flag.
    */
-  function ImGui_SetNextItemOpen(ctx: ImGui_Context, is_open: boolean, condIn?: number): void;
+  function ImGui_SetNextItemOpen(
+    ctx: ImGui_Context,
+    is_open: boolean,
+    condIn?: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_SetNextItemShortcut(ImGui_Context ctx, integer key_chord, optional integer flagsIn)
    * ```
    */
-  function ImGui_SetNextItemShortcut(ctx: ImGui_Context, key_chord: number, flagsIn?: number): void;
+  function ImGui_SetNextItemShortcut(
+    ctx: ImGui_Context,
+    key_chord: number,
+    flagsIn?: number,
+  ): void;
 
   /**
    * ```
@@ -15952,7 +18698,11 @@ declare namespace reaper {
    * ```
    * Set next window collapsed state.
    */
-  function ImGui_SetNextWindowCollapsed(ctx: ImGui_Context, collapsed: boolean, condIn?: number): void;
+  function ImGui_SetNextWindowCollapsed(
+    ctx: ImGui_Context,
+    collapsed: boolean,
+    condIn?: number,
+  ): void;
 
   /**
    * ```
@@ -15964,14 +18714,22 @@ declare namespace reaper {
    *
    * etc.) nor StyleVar_WindowPadding. set an axis to 0.0 to leave it automatic.
    */
-  function ImGui_SetNextWindowContentSize(ctx: ImGui_Context, size_w: number, size_h: number): void;
+  function ImGui_SetNextWindowContentSize(
+    ctx: ImGui_Context,
+    size_w: number,
+    size_h: number,
+  ): void;
 
   /**
    * ```
    * reaper.ImGui_SetNextWindowDockID(ImGui_Context ctx, integer dock_id, optional integer condIn)
    * ```
    */
-  function ImGui_SetNextWindowDockID(ctx: ImGui_Context, dock_id: number, condIn?: number): void;
+  function ImGui_SetNextWindowDockID(
+    ctx: ImGui_Context,
+    dock_id: number,
+    condIn?: number,
+  ): void;
 
   /**
    * ```
@@ -15987,7 +18745,14 @@ declare namespace reaper {
    * ```
    * Set next window position. Use pivot=(0.5,0.5) to center on given point, etc.
    */
-  function ImGui_SetNextWindowPos(ctx: ImGui_Context, pos_x: number, pos_y: number, condIn?: number, pivot_xIn?: number, pivot_yIn?: number): void;
+  function ImGui_SetNextWindowPos(
+    ctx: ImGui_Context,
+    pos_x: number,
+    pos_y: number,
+    condIn?: number,
+    pivot_xIn?: number,
+    pivot_yIn?: number,
+  ): void;
 
   /**
    * ```
@@ -15995,7 +18760,11 @@ declare namespace reaper {
    * ```
    * Set next window scrolling value (use < 0.0 to not affect a given axis).
    */
-  function ImGui_SetNextWindowScroll(ctx: ImGui_Context, scroll_x: number, scroll_y: number): void;
+  function ImGui_SetNextWindowScroll(
+    ctx: ImGui_Context,
+    scroll_x: number,
+    scroll_y: number,
+  ): void;
 
   /**
    * ```
@@ -16003,7 +18772,12 @@ declare namespace reaper {
    * ```
    * Set next window size. set axis to 0.0 to force an auto-fit on this axis.
    */
-  function ImGui_SetNextWindowSize(ctx: ImGui_Context, size_w: number, size_h: number, condIn?: number): void;
+  function ImGui_SetNextWindowSize(
+    ctx: ImGui_Context,
+    size_w: number,
+    size_h: number,
+    condIn?: number,
+  ): void;
 
   /**
    * ```
@@ -16023,7 +18797,14 @@ declare namespace reaper {
    *
    * Use callback to apply non-trivial programmatic constraints.
    */
-  function ImGui_SetNextWindowSizeConstraints(ctx: ImGui_Context, size_min_w: number, size_min_h: number, size_max_w: number, size_max_h: number, custom_callbackIn: ImGui_Function): void;
+  function ImGui_SetNextWindowSizeConstraints(
+    ctx: ImGui_Context,
+    size_min_w: number,
+    size_min_h: number,
+    size_max_w: number,
+    size_max_h: number,
+    custom_callbackIn: ImGui_Function,
+  ): void;
 
   /**
    * ```
@@ -16033,7 +18814,11 @@ declare namespace reaper {
    *
    * Generally GetCursorStartPos() + offset to compute a valid position.
    */
-  function ImGui_SetScrollFromPosX(ctx: ImGui_Context, local_x: number, center_x_ratioIn?: number): void;
+  function ImGui_SetScrollFromPosX(
+    ctx: ImGui_Context,
+    local_x: number,
+    center_x_ratioIn?: number,
+  ): void;
 
   /**
    * ```
@@ -16043,7 +18828,11 @@ declare namespace reaper {
    *
    * Generally GetCursorStartPos() + offset to compute a valid position.
    */
-  function ImGui_SetScrollFromPosY(ctx: ImGui_Context, local_y: number, center_y_ratioIn?: number): void;
+  function ImGui_SetScrollFromPosY(
+    ctx: ImGui_Context,
+    local_y: number,
+    center_y_ratioIn?: number,
+  ): void;
 
   /**
    * ```
@@ -16057,7 +18846,10 @@ declare namespace reaper {
    *
    * consider using SetItemDefaultFocus instead.
    */
-  function ImGui_SetScrollHereX(ctx: ImGui_Context, center_x_ratioIn?: number): void;
+  function ImGui_SetScrollHereX(
+    ctx: ImGui_Context,
+    center_x_ratioIn?: number,
+  ): void;
 
   /**
    * ```
@@ -16071,7 +18863,10 @@ declare namespace reaper {
    *
    * consider using SetItemDefaultFocus instead.
    */
-  function ImGui_SetScrollHereY(ctx: ImGui_Context, center_y_ratioIn?: number): void;
+  function ImGui_SetScrollHereY(
+    ctx: ImGui_Context,
+    center_y_ratioIn?: number,
+  ): void;
 
   /**
    * ```
@@ -16101,7 +18896,10 @@ declare namespace reaper {
    *
    * Otherwise call with a window name.
    */
-  function ImGui_SetTabItemClosed(ctx: ImGui_Context, tab_or_docked_window_label: string): void;
+  function ImGui_SetTabItemClosed(
+    ctx: ImGui_Context,
+    tab_or_docked_window_label: string,
+  ): void;
 
   /**
    * ```
@@ -16125,7 +18923,11 @@ declare namespace reaper {
    *
    * Prefer using SetNextWindowCollapsed.
    */
-  function ImGui_SetWindowCollapsed(ctx: ImGui_Context, collapsed: boolean, condIn?: number): void;
+  function ImGui_SetWindowCollapsed(
+    ctx: ImGui_Context,
+    collapsed: boolean,
+    condIn?: number,
+  ): void;
 
   /**
    * ```
@@ -16133,7 +18935,12 @@ declare namespace reaper {
    * ```
    * Set named window collapsed state.
    */
-  function ImGui_SetWindowCollapsedEx(ctx: ImGui_Context, name: string, collapsed: boolean, condIn?: number): void;
+  function ImGui_SetWindowCollapsedEx(
+    ctx: ImGui_Context,
+    name: string,
+    collapsed: boolean,
+    condIn?: number,
+  ): void;
 
   /**
    * ```
@@ -16161,7 +18968,12 @@ declare namespace reaper {
    *
    * Prefer using SetNextWindowPos, as this may incur tearing and minor side-effects.
    */
-  function ImGui_SetWindowPos(ctx: ImGui_Context, pos_x: number, pos_y: number, condIn?: number): void;
+  function ImGui_SetWindowPos(
+    ctx: ImGui_Context,
+    pos_x: number,
+    pos_y: number,
+    condIn?: number,
+  ): void;
 
   /**
    * ```
@@ -16169,7 +18981,13 @@ declare namespace reaper {
    * ```
    * Set named window position.
    */
-  function ImGui_SetWindowPosEx(ctx: ImGui_Context, name: string, pos_x: number, pos_y: number, condIn?: number): void;
+  function ImGui_SetWindowPosEx(
+    ctx: ImGui_Context,
+    name: string,
+    pos_x: number,
+    pos_y: number,
+    condIn?: number,
+  ): void;
 
   /**
    * ```
@@ -16181,7 +18999,12 @@ declare namespace reaper {
    *
    * Prefer using SetNextWindowSize, as this may incur tearing and minor side-effects.
    */
-  function ImGui_SetWindowSize(ctx: ImGui_Context, size_w: number, size_h: number, condIn?: number): void;
+  function ImGui_SetWindowSize(
+    ctx: ImGui_Context,
+    size_w: number,
+    size_h: number,
+    condIn?: number,
+  ): void;
 
   /**
    * ```
@@ -16189,14 +19012,24 @@ declare namespace reaper {
    * ```
    * Set named window size. Set axis to 0.0 to force an auto-fit on this axis.
    */
-  function ImGui_SetWindowSizeEx(ctx: ImGui_Context, name: string, size_w: number, size_h: number, condIn?: number): void;
+  function ImGui_SetWindowSizeEx(
+    ctx: ImGui_Context,
+    name: string,
+    size_w: number,
+    size_h: number,
+    condIn?: number,
+  ): void;
 
   /**
    * ```
    * boolean _ = reaper.ImGui_Shortcut(ImGui_Context ctx, integer key_chord, optional integer flagsIn)
    * ```
    */
-  function ImGui_Shortcut(ctx: ImGui_Context, key_chord: number, flagsIn?: number): boolean;
+  function ImGui_Shortcut(
+    ctx: ImGui_Context,
+    key_chord: number,
+    flagsIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -16206,7 +19039,10 @@ declare namespace reaper {
    *
    * Display ReaImGui version, Dear ImGui version, credits and build/system information.
    */
-  function ImGui_ShowAboutWindow(ctx: ImGui_Context, p_open?: boolean): boolean | null;
+  function ImGui_ShowAboutWindow(
+    ctx: ImGui_Context,
+    p_open?: boolean,
+  ): boolean | null;
 
   /**
    * ```
@@ -16214,7 +19050,10 @@ declare namespace reaper {
    * ```
    * Create Debug Log window. display a simplified log of important dear imgui events.
    */
-  function ImGui_ShowDebugLogWindow(ctx: ImGui_Context, p_open?: boolean): boolean | null;
+  function ImGui_ShowDebugLogWindow(
+    ctx: ImGui_Context,
+    p_open?: boolean,
+  ): boolean | null;
 
   /**
    * ```
@@ -16224,7 +19063,10 @@ declare namespace reaper {
    *
    * the source of their unique ID.
    */
-  function ImGui_ShowIDStackToolWindow(ctx: ImGui_Context, p_open?: boolean): boolean | null;
+  function ImGui_ShowIDStackToolWindow(
+    ctx: ImGui_Context,
+    p_open?: boolean,
+  ): boolean | null;
 
   /**
    * ```
@@ -16234,49 +19076,106 @@ declare namespace reaper {
    *
    * Display Dear ImGui internals: windows, draw commands, various internal state, etc.
    */
-  function ImGui_ShowMetricsWindow(ctx: ImGui_Context, p_open?: boolean): boolean | null;
+  function ImGui_ShowMetricsWindow(
+    ctx: ImGui_Context,
+    p_open?: boolean,
+  ): boolean | null;
 
   /**
    * ```
    * boolean retval, number v_rad = reaper.ImGui_SliderAngle(ImGui_Context ctx, string label, number v_rad, optional number v_degrees_minIn, optional number v_degrees_maxIn, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_SliderAngle(ctx: ImGui_Context, label: string, v_rad: number, v_degrees_minIn?: number, v_degrees_maxIn?: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_SliderAngle(
+    ctx: ImGui_Context,
+    label: string,
+    v_rad: number,
+    v_degrees_minIn?: number,
+    v_degrees_maxIn?: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
    * boolean retval, number v = reaper.ImGui_SliderDouble(ImGui_Context ctx, string label, number v, number v_min, number v_max, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_SliderDouble(ctx: ImGui_Context, label: string, v: number, v_min: number, v_max: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_SliderDouble(
+    ctx: ImGui_Context,
+    label: string,
+    v: number,
+    v_min: number,
+    v_max: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
    * boolean retval, number v1, number v2 = reaper.ImGui_SliderDouble2(ImGui_Context ctx, string label, number v1, number v2, number v_min, number v_max, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_SliderDouble2(ctx: ImGui_Context, label: string, v1: number, v2: number, v_min: number, v_max: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number, number]>;
+  function ImGui_SliderDouble2(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    v_min: number,
+    v_max: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number]>;
 
   /**
    * ```
    * boolean retval, number v1, number v2, number v3 = reaper.ImGui_SliderDouble3(ImGui_Context ctx, string label, number v1, number v2, number v3, number v_min, number v_max, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_SliderDouble3(ctx: ImGui_Context, label: string, v1: number, v2: number, v3: number, v_min: number, v_max: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number, number, number]>;
+  function ImGui_SliderDouble3(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    v3: number,
+    v_min: number,
+    v_max: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number, number]>;
 
   /**
    * ```
    * boolean retval, number v1, number v2, number v3, number v4 = reaper.ImGui_SliderDouble4(ImGui_Context ctx, string label, number v1, number v2, number v3, number v4, number v_min, number v_max, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_SliderDouble4(ctx: ImGui_Context, label: string, v1: number, v2: number, v3: number, v4: number, v_min: number, v_max: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number, number, number, number]>;
+  function ImGui_SliderDouble4(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    v3: number,
+    v4: number,
+    v_min: number,
+    v_max: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number, number, number]>;
 
   /**
    * ```
    * boolean _ = reaper.ImGui_SliderDoubleN(ImGui_Context ctx, string label, reaper_array values, number v_min, number v_max, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_SliderDoubleN(ctx: ImGui_Context, label: string, values: reaper_array, v_min: number, v_max: number, formatIn?: string, flagsIn?: number): boolean;
+  function ImGui_SliderDoubleN(
+    ctx: ImGui_Context,
+    label: string,
+    values: reaper_array,
+    v_min: number,
+    v_max: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -16340,28 +19239,66 @@ declare namespace reaper {
    * boolean retval, integer v = reaper.ImGui_SliderInt(ImGui_Context ctx, string label, integer v, integer v_min, integer v_max, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_SliderInt(ctx: ImGui_Context, label: string, v: number, v_min: number, v_max: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_SliderInt(
+    ctx: ImGui_Context,
+    label: string,
+    v: number,
+    v_min: number,
+    v_max: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
    * boolean retval, integer v1, integer v2 = reaper.ImGui_SliderInt2(ImGui_Context ctx, string label, integer v1, integer v2, integer v_min, integer v_max, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_SliderInt2(ctx: ImGui_Context, label: string, v1: number, v2: number, v_min: number, v_max: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number, number]>;
+  function ImGui_SliderInt2(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    v_min: number,
+    v_max: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number]>;
 
   /**
    * ```
    * boolean retval, integer v1, integer v2, integer v3 = reaper.ImGui_SliderInt3(ImGui_Context ctx, string label, integer v1, integer v2, integer v3, integer v_min, integer v_max, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_SliderInt3(ctx: ImGui_Context, label: string, v1: number, v2: number, v3: number, v_min: number, v_max: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number, number, number]>;
+  function ImGui_SliderInt3(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    v3: number,
+    v_min: number,
+    v_max: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number, number]>;
 
   /**
    * ```
    * boolean retval, integer v1, integer v2, integer v3, integer v4 = reaper.ImGui_SliderInt4(ImGui_Context ctx, string label, integer v1, integer v2, integer v3, integer v4, integer v_min, integer v_max, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_SliderInt4(ctx: ImGui_Context, label: string, v1: number, v2: number, v3: number, v4: number, v_min: number, v_max: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number, number, number, number]>;
+  function ImGui_SliderInt4(
+    ctx: ImGui_Context,
+    label: string,
+    v1: number,
+    v2: number,
+    v3: number,
+    v4: number,
+    v_min: number,
+    v_max: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number, number, number, number]>;
 
   /**
    * ```
@@ -16791,7 +19728,11 @@ declare namespace reaper {
    *
    * Cannot be selected in the tab bar.
    */
-  function ImGui_TabItemButton(ctx: ImGui_Context, label: string, flagsIn?: number): boolean;
+  function ImGui_TabItemButton(
+    ctx: ImGui_Context,
+    label: string,
+    flagsIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -17477,7 +20418,10 @@ declare namespace reaper {
    *
    * status flags. Pass -1 to use current column.
    */
-  function ImGui_TableGetColumnFlags(ctx: ImGui_Context, column_nIn?: number): number;
+  function ImGui_TableGetColumnFlags(
+    ctx: ImGui_Context,
+    column_nIn?: number,
+  ): number;
 
   /**
    * ```
@@ -17495,7 +20439,10 @@ declare namespace reaper {
    *
    * Pass -1 to use current column.
    */
-  function ImGui_TableGetColumnName(ctx: ImGui_Context, column_nIn?: number): string;
+  function ImGui_TableGetColumnName(
+    ctx: ImGui_Context,
+    column_nIn?: number,
+  ): string;
 
   /**
    * ```
@@ -17521,7 +20468,10 @@ declare namespace reaper {
    *
    * See TableNeedSort.
    */
-  function ImGui_TableGetColumnSortSpecs(ctx: ImGui_Context, id: number): LuaMultiReturn<[boolean, number, number, number]>;
+  function ImGui_TableGetColumnSortSpecs(
+    ctx: ImGui_Context,
+    id: number,
+  ): LuaMultiReturn<[boolean, number, number, number]>;
 
   /**
    * ```
@@ -17575,7 +20525,9 @@ declare namespace reaper {
    *
    * See TableGetColumnSortSpecs.
    */
-  function ImGui_TableNeedSort(ctx: ImGui_Context): LuaMultiReturn<[boolean, boolean]>;
+  function ImGui_TableNeedSort(
+    ctx: ImGui_Context,
+  ): LuaMultiReturn<[boolean, boolean]>;
 
   /**
    * ```
@@ -17593,7 +20545,11 @@ declare namespace reaper {
    * ```
    * Append into the first cell of a new row.
    */
-  function ImGui_TableNextRow(ctx: ImGui_Context, row_flagsIn?: number, min_row_heightIn?: number): void;
+  function ImGui_TableNextRow(
+    ctx: ImGui_Context,
+    row_flagsIn?: number,
+    min_row_heightIn?: number,
+  ): void;
 
   /**
    * ```
@@ -17621,7 +20577,12 @@ declare namespace reaper {
    *
    * See TableBgTarget_* flags for details.
    */
-  function ImGui_TableSetBgColor(ctx: ImGui_Context, target: number, color_rgba: number, column_nIn?: number): void;
+  function ImGui_TableSetBgColor(
+    ctx: ImGui_Context,
+    target: number,
+    color_rgba: number,
+    column_nIn?: number,
+  ): void;
 
   /**
    * ```
@@ -17649,7 +20610,11 @@ declare namespace reaper {
    *
    *   (TableGetColumnFlags() & TableColumnFlags_IsEnabled) != 0.
    */
-  function ImGui_TableSetColumnEnabled(ctx: ImGui_Context, column_n: number, v: boolean): void;
+  function ImGui_TableSetColumnEnabled(
+    ctx: ImGui_Context,
+    column_n: number,
+    v: boolean,
+  ): void;
 
   /**
    * ```
@@ -17657,7 +20622,10 @@ declare namespace reaper {
    * ```
    * Append into the specified column. Return true when column is visible.
    */
-  function ImGui_TableSetColumnIndex(ctx: ImGui_Context, column_n: number): boolean;
+  function ImGui_TableSetColumnIndex(
+    ctx: ImGui_Context,
+    column_n: number,
+  ): boolean;
 
   /**
    * ```
@@ -17667,7 +20635,13 @@ declare namespace reaper {
    *
    * various other flags etc.
    */
-  function ImGui_TableSetupColumn(ctx: ImGui_Context, label: string, flagsIn?: number, init_width_or_weightIn?: number, user_idIn?: number): void;
+  function ImGui_TableSetupColumn(
+    ctx: ImGui_Context,
+    label: string,
+    flagsIn?: number,
+    init_width_or_weightIn?: number,
+    user_idIn?: number,
+  ): void;
 
   /**
    * ```
@@ -17675,7 +20649,11 @@ declare namespace reaper {
    * ```
    * Lock columns/rows so they stay visible when scrolled.
    */
-  function ImGui_TableSetupScrollFreeze(ctx: ImGui_Context, cols: number, rows: number): void;
+  function ImGui_TableSetupScrollFreeze(
+    ctx: ImGui_Context,
+    cols: number,
+    rows: number,
+  ): void;
 
   /**
    * ```
@@ -17690,7 +20668,11 @@ declare namespace reaper {
    * ```
    * Shortcut for PushStyleColor(Col_Text, color); Text(text); PopStyleColor();
    */
-  function ImGui_TextColored(ctx: ImGui_Context, col_rgba: number, text: string): void;
+  function ImGui_TextColored(
+    ctx: ImGui_Context,
+    col_rgba: number,
+    text: string,
+  ): void;
 
   /**
    * ```
@@ -17712,7 +20694,12 @@ declare namespace reaper {
    * ```
    * Helper calling InputText+TextFilter_Set
    */
-  function ImGui_TextFilter_Draw(filter: ImGui_TextFilter, ctx: ImGui_Context, labelIn?: string, widthIn?: number): boolean;
+  function ImGui_TextFilter_Draw(
+    filter: ImGui_TextFilter,
+    ctx: ImGui_Context,
+    labelIn?: string,
+    widthIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -17733,14 +20720,20 @@ declare namespace reaper {
    * boolean _ = reaper.ImGui_TextFilter_PassFilter(ImGui_TextFilter filter, string text)
    * ```
    */
-  function ImGui_TextFilter_PassFilter(filter: ImGui_TextFilter, text: string): boolean;
+  function ImGui_TextFilter_PassFilter(
+    filter: ImGui_TextFilter,
+    text: string,
+  ): boolean;
 
   /**
    * ```
    * reaper.ImGui_TextFilter_Set(ImGui_TextFilter filter, string filter_text)
    * ```
    */
-  function ImGui_TextFilter_Set(filter: ImGui_TextFilter, filter_text: string): void;
+  function ImGui_TextFilter_Set(
+    filter: ImGui_TextFilter,
+    filter_text: string,
+  ): void;
 
   /**
    * ```
@@ -17764,7 +20757,11 @@ declare namespace reaper {
    *
    * to also call TreePop when you are finished displaying the tree node contents.
    */
-  function ImGui_TreeNode(ctx: ImGui_Context, label: string, flagsIn?: number): boolean;
+  function ImGui_TreeNode(
+    ctx: ImGui_Context,
+    label: string,
+    flagsIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -17776,7 +20773,12 @@ declare namespace reaper {
    *
    * To align arbitrary text at the same level as a TreeNode you can use Bullet.
    */
-  function ImGui_TreeNodeEx(ctx: ImGui_Context, str_id: string, label: string, flagsIn?: number): boolean;
+  function ImGui_TreeNodeEx(
+    ctx: ImGui_Context,
+    str_id: string,
+    label: string,
+    flagsIn?: number,
+  ): boolean;
 
   /**
    * ```
@@ -17966,14 +20968,34 @@ declare namespace reaper {
    * boolean retval, number v = reaper.ImGui_VSliderDouble(ImGui_Context ctx, string label, number size_w, number size_h, number v, number v_min, number v_max, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_VSliderDouble(ctx: ImGui_Context, label: string, size_w: number, size_h: number, v: number, v_min: number, v_max: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_VSliderDouble(
+    ctx: ImGui_Context,
+    label: string,
+    size_w: number,
+    size_h: number,
+    v: number,
+    v_min: number,
+    v_max: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
    * boolean retval, integer v = reaper.ImGui_VSliderInt(ImGui_Context ctx, string label, number size_w, number size_h, integer v, integer v_min, integer v_max, optional string formatIn, optional integer flagsIn)
    * ```
    */
-  function ImGui_VSliderInt(ctx: ImGui_Context, label: string, size_w: number, size_h: number, v: number, v_min: number, v_max: number, formatIn?: string, flagsIn?: number): LuaMultiReturn<[boolean, number]>;
+  function ImGui_VSliderInt(
+    ctx: ImGui_Context,
+    label: string,
+    size_w: number,
+    size_h: number,
+    v: number,
+    v_min: number,
+    v_max: number,
+    formatIn?: string,
+    flagsIn?: number,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
@@ -18013,7 +21035,9 @@ declare namespace reaper {
    * ```
    * Center of the viewport.
    */
-  function ImGui_Viewport_GetCenter(viewport: ImGui_Viewport): LuaMultiReturn<[number, number]>;
+  function ImGui_Viewport_GetCenter(
+    viewport: ImGui_Viewport,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -18021,7 +21045,9 @@ declare namespace reaper {
    * ```
    * Main Area: Position of the viewport
    */
-  function ImGui_Viewport_GetPos(viewport: ImGui_Viewport): LuaMultiReturn<[number, number]>;
+  function ImGui_Viewport_GetPos(
+    viewport: ImGui_Viewport,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -18029,7 +21055,9 @@ declare namespace reaper {
    * ```
    * Main Area: Size of the viewport.
    */
-  function ImGui_Viewport_GetSize(viewport: ImGui_Viewport): LuaMultiReturn<[number, number]>;
+  function ImGui_Viewport_GetSize(
+    viewport: ImGui_Viewport,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -18037,7 +21065,9 @@ declare namespace reaper {
    * ```
    * Center of the viewport's work area.
    */
-  function ImGui_Viewport_GetWorkCenter(viewport: ImGui_Viewport): LuaMultiReturn<[number, number]>;
+  function ImGui_Viewport_GetWorkCenter(
+    viewport: ImGui_Viewport,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -18045,7 +21075,9 @@ declare namespace reaper {
    * ```
    * >= Viewport_GetPos
    */
-  function ImGui_Viewport_GetWorkPos(viewport: ImGui_Viewport): LuaMultiReturn<[number, number]>;
+  function ImGui_Viewport_GetWorkPos(
+    viewport: ImGui_Viewport,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -18053,7 +21085,9 @@ declare namespace reaper {
    * ```
    * <= Viewport_GetSize
    */
-  function ImGui_Viewport_GetWorkSize(viewport: ImGui_Viewport): LuaMultiReturn<[number, number]>;
+  function ImGui_Viewport_GetWorkSize(
+    viewport: ImGui_Viewport,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -18343,7 +21377,11 @@ declare namespace reaper {
    *
    * 0 = Main, 100 = Main (alt recording), 32060 = MIDI Editor, 32061 = MIDI Event List Editor, 32062 = MIDI Inline Editor, 32063 = Media Explorer.
    */
-  function JS_Actions_DeleteShortcut(section: number, cmdID: number, shortcutidx: number): boolean;
+  function JS_Actions_DeleteShortcut(
+    section: number,
+    cmdID: number,
+    shortcutidx: number,
+  ): boolean;
 
   /**
    * ```
@@ -18357,7 +21395,11 @@ declare namespace reaper {
    *
    * If the shortcut index is higher than the current number of shortcuts, it will add a new shortcut.
    */
-  function JS_Actions_DoShortcutDialog(section: number, cmdID: number, shortcutidx: number): boolean;
+  function JS_Actions_DoShortcutDialog(
+    section: number,
+    cmdID: number,
+    shortcutidx: number,
+  ): boolean;
 
   /**
    * ```
@@ -18367,7 +21409,11 @@ declare namespace reaper {
    *
    * 0 = Main, 100 = Main (alt recording), 32060 = MIDI Editor, 32061 = MIDI Event List Editor, 32062 = MIDI Inline Editor, 32063 = Media Explorer.
    */
-  function JS_Actions_GetShortcutDesc(section: number, cmdID: number, shortcutidx: number): LuaMultiReturn<[boolean, string]>;
+  function JS_Actions_GetShortcutDesc(
+    section: number,
+    cmdID: number,
+    shortcutidx: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -18421,7 +21467,19 @@ declare namespace reaper {
    *
    * 1 if successful, otherwise -1 = windowHWND is not a window, -3 = Could not obtain the original window process, -4 = sysBitmap is not a LICE bitmap, -5 = sysBitmap is not a system bitmap, -6 = Could not obtain the window HDC, -7 = Error when subclassing to new window process.
    */
-  function JS_Composite(windowHWND: identifier, dstx: number, dsty: number, dstw: number, dsth: number, sysBitmap: identifier, srcx: number, srcy: number, srcw: number, srch: number, autoUpdate: unsupported): number;
+  function JS_Composite(
+    windowHWND: identifier,
+    dstx: number,
+    dsty: number,
+    dstw: number,
+    dsth: number,
+    sysBitmap: identifier,
+    srcx: number,
+    srcy: number,
+    srcw: number,
+    srch: number,
+    autoUpdate: unsupported,
+  ): number;
 
   /**
    * ```
@@ -18445,7 +21503,12 @@ declare namespace reaper {
    *
    *  * If delay times have not previously been set for this window, prev time values are 0.
    */
-  function JS_Composite_Delay(windowHWND: identifier, minTime: number, maxTime: number, numBitmapsWhenMax: number): LuaMultiReturn<[number, number, number, number]>;
+  function JS_Composite_Delay(
+    windowHWND: identifier,
+    minTime: number,
+    maxTime: number,
+    numBitmapsWhenMax: number,
+  ): LuaMultiReturn<[number, number, number, number]>;
 
   /**
    * ```
@@ -18461,7 +21524,9 @@ declare namespace reaper {
    *
    * retval is the number of linked bitmaps found, or negative if an error occured.
    */
-  function JS_Composite_ListBitmaps(windowHWND: identifier): LuaMultiReturn<[number, string]>;
+  function JS_Composite_ListBitmaps(
+    windowHWND: identifier,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -18477,7 +21542,11 @@ declare namespace reaper {
    *
    * If no bitmap is specified, all bitmaps composited to the window will be unlinked -- even those by other scripts.
    */
-  function JS_Composite_Unlink(windowHWND: identifier, bitmap: identifier, autoUpdate: unsupported): void;
+  function JS_Composite_Unlink(
+    windowHWND: identifier,
+    bitmap: identifier,
+    autoUpdate: unsupported,
+  ): void;
 
   /**
    * ```
@@ -18485,7 +21554,10 @@ declare namespace reaper {
    * ```
    * retval is 1 if a file was selected, 0 if the user cancelled the dialog, and -1 if an error occurred.
    */
-  function JS_Dialog_BrowseForFolder(caption: string, initialFolder: string): LuaMultiReturn<[number, string]>;
+  function JS_Dialog_BrowseForFolder(
+    caption: string,
+    initialFolder: string,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -18525,7 +21597,13 @@ declare namespace reaper {
    *
    *  * REAPER's IDE and ShowConsoleMsg only display strings up to the first \0 byte. If multiple files were selected, only the first substring containing the path will be displayed. This is not a problem for Lua or EEL, which can access the full string beyond the first \0 byte as usual.
    */
-  function JS_Dialog_BrowseForOpenFiles(windowTitle: string, initialFolder: string, initialFile: string, extensionList: string, allowMultiple: boolean): LuaMultiReturn<[number, string]>;
+  function JS_Dialog_BrowseForOpenFiles(
+    windowTitle: string,
+    initialFolder: string,
+    initialFile: string,
+    extensionList: string,
+    allowMultiple: boolean,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -18537,7 +21615,12 @@ declare namespace reaper {
    *
    * extensionList is as described for JS_Dialog_BrowseForOpenFiles.
    */
-  function JS_Dialog_BrowseForSaveFile(windowTitle: string, initialFolder: string, initialFile: string, extensionList: string): LuaMultiReturn<[number, string]>;
+  function JS_Dialog_BrowseForSaveFile(
+    windowTitle: string,
+    initialFolder: string,
+    initialFile: string,
+    extensionList: string,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -18561,7 +21644,24 @@ declare namespace reaper {
    *
    * retval is 0 if successful, negative if not.
    */
-  function JS_File_Stat(filePath: string): LuaMultiReturn<[number, number, string, string, string, number, number, number, number, number, number, number]>;
+  function JS_File_Stat(
+    filePath: string,
+  ): LuaMultiReturn<
+    [
+      number,
+      number,
+      string,
+      string,
+      string,
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+    ]
+  >;
 
   /**
    * ```
@@ -18577,7 +21677,17 @@ declare namespace reaper {
    *
    * WARNING: On WindowsOS, GDI_Blit does not perform alpha multiplication of the source bitmap. For proper color rendering, a separate pre-multiplication step is therefore required, using either LICE_Blit or LICE_ProcessRect.
    */
-  function JS_GDI_Blit(destHDC: identifier, dstx: number, dsty: number, sourceHDC: identifier, srcx: number, srxy: number, width: number, height: number, mode?: string): void;
+  function JS_GDI_Blit(
+    destHDC: identifier,
+    dstx: number,
+    dsty: number,
+    sourceHDC: identifier,
+    srcx: number,
+    srxy: number,
+    width: number,
+    height: number,
+    mode?: string,
+  ): void;
 
   /**
    * ```
@@ -18602,7 +21712,15 @@ declare namespace reaper {
    *
    * Note: Text color must be set separately.
    */
-  function JS_GDI_CreateFont(height: number, weight: number, angle: number, italic: boolean, underline: boolean, strike: boolean, fontName: string): identifier;
+  function JS_GDI_CreateFont(
+    height: number,
+    weight: number,
+    angle: number,
+    italic: boolean,
+    underline: boolean,
+    strike: boolean,
+    fontName: string,
+  ): identifier;
 
   /**
    * ```
@@ -18626,14 +21744,29 @@ declare namespace reaper {
    *
    *  * align: Combination of: "TOP", "VCENTER", "LEFT", "HCENTER", "RIGHT", "BOTTOM", "WORDBREAK", "SINGLELINE", "NOCLIP", "CALCRECT", "NOPREFIX" or "ELLIPSIS"
    */
-  function JS_GDI_DrawText(deviceHDC: identifier, text: string, len: number, left: number, top: number, right: number, bottom: number, align: string): number;
+  function JS_GDI_DrawText(
+    deviceHDC: identifier,
+    text: string,
+    len: number,
+    left: number,
+    top: number,
+    right: number,
+    bottom: number,
+    align: string,
+  ): number;
 
   /**
    * ```
    * reaper.JS_GDI_FillEllipse(identifier deviceHDC, integer left, integer top, integer right, integer bottom)
    * ```
    */
-  function JS_GDI_FillEllipse(deviceHDC: identifier, left: number, top: number, right: number, bottom: number): void;
+  function JS_GDI_FillEllipse(
+    deviceHDC: identifier,
+    left: number,
+    top: number,
+    right: number,
+    bottom: number,
+  ): void;
 
   /**
    * ```
@@ -18641,21 +21774,40 @@ declare namespace reaper {
    * ```
    * packedX and packedY are strings of points, each packed as "<i4".
    */
-  function JS_GDI_FillPolygon(deviceHDC: identifier, packedX: string, packedY: string, numPoints: number): void;
+  function JS_GDI_FillPolygon(
+    deviceHDC: identifier,
+    packedX: string,
+    packedY: string,
+    numPoints: number,
+  ): void;
 
   /**
    * ```
    * reaper.JS_GDI_FillRect(identifier deviceHDC, integer left, integer top, integer right, integer bottom)
    * ```
    */
-  function JS_GDI_FillRect(deviceHDC: identifier, left: number, top: number, right: number, bottom: number): void;
+  function JS_GDI_FillRect(
+    deviceHDC: identifier,
+    left: number,
+    top: number,
+    right: number,
+    bottom: number,
+  ): void;
 
   /**
    * ```
    * reaper.JS_GDI_FillRoundRect(identifier deviceHDC, integer left, integer top, integer right, integer bottom, integer xrnd, integer yrnd)
    * ```
    */
-  function JS_GDI_FillRoundRect(deviceHDC: identifier, left: number, top: number, right: number, bottom: number, xrnd: number, yrnd: number): void;
+  function JS_GDI_FillRoundRect(
+    deviceHDC: identifier,
+    left: number,
+    top: number,
+    right: number,
+    bottom: number,
+    xrnd: number,
+    yrnd: number,
+  ): void;
 
   /**
    * ```
@@ -18704,7 +21856,13 @@ declare namespace reaper {
    * reaper.JS_GDI_Line(identifier deviceHDC, integer x1, integer y1, integer x2, integer y2)
    * ```
    */
-  function JS_GDI_Line(deviceHDC: identifier, x1: number, y1: number, x2: number, y2: number): void;
+  function JS_GDI_Line(
+    deviceHDC: identifier,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+  ): void;
 
   /**
    * ```
@@ -18712,7 +21870,12 @@ declare namespace reaper {
    * ```
    * packedX and packedY are strings of points, each packed as "<i4".
    */
-  function JS_GDI_Polyline(deviceHDC: identifier, packedX: string, packedY: string, numPoints: number): void;
+  function JS_GDI_Polyline(
+    deviceHDC: identifier,
+    packedX: string,
+    packedY: string,
+    numPoints: number,
+  ): void;
 
   /**
    * ```
@@ -18728,7 +21891,10 @@ declare namespace reaper {
    *
    * NOTE: Any GDI HDC should be released immediately after drawing, and deferred scripts should get and release new DCs in each cycle.
    */
-  function JS_GDI_ReleaseDC(deviceHDC: identifier, windowHWND: identifier): number;
+  function JS_GDI_ReleaseDC(
+    deviceHDC: identifier,
+    windowHWND: identifier,
+  ): number;
 
   /**
    * ```
@@ -18736,14 +21902,22 @@ declare namespace reaper {
    * ```
    * Activates a font, pen, or fill brush for subsequent drawing in the specified device context.
    */
-  function JS_GDI_SelectObject(deviceHDC: identifier, GDIObject: identifier): identifier;
+  function JS_GDI_SelectObject(
+    deviceHDC: identifier,
+    GDIObject: identifier,
+  ): identifier;
 
   /**
    * ```
    * reaper.JS_GDI_SetPixel(identifier deviceHDC, integer x, integer y, integer color)
    * ```
    */
-  function JS_GDI_SetPixel(deviceHDC: identifier, x: number, y: number, color: number): void;
+  function JS_GDI_SetPixel(
+    deviceHDC: identifier,
+    x: number,
+    y: number,
+    color: number,
+  ): void;
 
   /**
    * ```
@@ -18780,7 +21954,19 @@ declare namespace reaper {
    *
    * WARNING: On WindowsOS, GDI_Blit does not perform alpha multiplication of the source bitmap. For proper color rendering, a separate pre-multiplication step is therefore required, using either LICE_Blit or LICE_ProcessRect.
    */
-  function JS_GDI_StretchBlit(destHDC: identifier, dstx: number, dsty: number, dstw: number, dsth: number, sourceHDC: identifier, srcx: number, srxy: number, srcw: number, srch: number, mode?: string): void;
+  function JS_GDI_StretchBlit(
+    destHDC: identifier,
+    dstx: number,
+    dsty: number,
+    dstw: number,
+    dsth: number,
+    sourceHDC: identifier,
+    srcx: number,
+    srxy: number,
+    srcw: number,
+    srch: number,
+    mode?: string,
+  ): void;
 
   /**
    * ```
@@ -18803,7 +21989,12 @@ declare namespace reaper {
    * ```
    * Hue is rolled over, saturation and value are clamped, all 0..1. (Alpha remains unchanged.)
    */
-  function JS_LICE_AlterBitmapHSV(bitmap: identifier, hue: number, saturation: number, value: number): void;
+  function JS_LICE_AlterBitmapHSV(
+    bitmap: identifier,
+    hue: number,
+    saturation: number,
+    value: number,
+  ): void;
 
   /**
    * ```
@@ -18811,7 +22002,16 @@ declare namespace reaper {
    * ```
    * Hue is rolled over, saturation and value are clamped, all 0..1. (Alpha remains unchanged.)
    */
-  function JS_LICE_AlterRectHSV(bitmap: identifier, x: number, y: number, w: number, h: number, hue: number, saturation: number, value: number): void;
+  function JS_LICE_AlterRectHSV(
+    bitmap: identifier,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    hue: number,
+    saturation: number,
+    value: number,
+  ): void;
 
   /**
    * ```
@@ -18823,7 +22023,18 @@ declare namespace reaper {
    *
    * LICE color format: 0xAARRGGBB (AA is only used in ALPHA mode).
    */
-  function JS_LICE_Arc(bitmap: identifier, cx: number, cy: number, r: number, minAngle: number, maxAngle: number, color: number, alpha: number, mode: string, antialias: boolean): void;
+  function JS_LICE_Arc(
+    bitmap: identifier,
+    cx: number,
+    cy: number,
+    r: number,
+    minAngle: number,
+    maxAngle: number,
+    color: number,
+    alpha: number,
+    mode: string,
+    antialias: boolean,
+  ): void;
 
   /**
    * ```
@@ -18842,7 +22053,22 @@ declare namespace reaper {
    *
    * LICE color format: 0xAARRGGBB (AA is only used in ALPHA mode).
    */
-  function JS_LICE_Bezier(bitmap: identifier, xstart: number, ystart: number, xctl1: number, yctl1: number, xctl2: number, yctl2: number, xend: number, yend: number, tol: number, color: number, alpha: number, mode: string, antialias: boolean): void;
+  function JS_LICE_Bezier(
+    bitmap: identifier,
+    xstart: number,
+    ystart: number,
+    xctl1: number,
+    yctl1: number,
+    xctl2: number,
+    yctl2: number,
+    xend: number,
+    yend: number,
+    tol: number,
+    color: number,
+    alpha: number,
+    mode: string,
+    antialias: boolean,
+  ): void;
 
   /**
    * ```
@@ -18860,7 +22086,18 @@ declare namespace reaper {
    *
    *  * "ALPHAMUL", which overwrites the destination with a per-pixel alpha-multiplied copy of the source. (Similar to first clearing the destination with 0x00000000 and then blitting with "COPY,ALPHA".)
    */
-  function JS_LICE_Blit(destBitmap: identifier, dstx: number, dsty: number, sourceBitmap: identifier, srcx: number, srcy: number, width: number, height: number, alpha: number, mode: string): void;
+  function JS_LICE_Blit(
+    destBitmap: identifier,
+    dstx: number,
+    dsty: number,
+    sourceBitmap: identifier,
+    srcx: number,
+    srcy: number,
+    width: number,
+    height: number,
+    alpha: number,
+    mode: string,
+  ): void;
 
   /**
    * ```
@@ -18872,7 +22109,16 @@ declare namespace reaper {
    *
    * LICE color format: 0xAARRGGBB (AA is only used in ALPHA mode).
    */
-  function JS_LICE_Circle(bitmap: identifier, cx: number, cy: number, r: number, color: number, alpha: number, mode: string, antialias: boolean): void;
+  function JS_LICE_Circle(
+    bitmap: identifier,
+    cx: number,
+    cy: number,
+    r: number,
+    color: number,
+    alpha: number,
+    mode: string,
+    antialias: boolean,
+  ): void;
 
   /**
    * ```
@@ -18886,7 +22132,11 @@ declare namespace reaper {
    * identifier _ = reaper.JS_LICE_CreateBitmap(boolean isSysBitmap, integer width, integer height)
    * ```
    */
-  function JS_LICE_CreateBitmap(isSysBitmap: boolean, width: number, height: number): identifier;
+  function JS_LICE_CreateBitmap(
+    isSysBitmap: boolean,
+    width: number,
+    height: number,
+  ): identifier;
 
   /**
    * ```
@@ -18915,14 +22165,31 @@ declare namespace reaper {
    * reaper.JS_LICE_DrawChar(identifier bitmap, integer x, integer y, integer c, integer color, number alpha, integer mode)
    * ```
    */
-  function JS_LICE_DrawChar(bitmap: identifier, x: number, y: number, c: number, color: number, alpha: number, mode: number): void;
+  function JS_LICE_DrawChar(
+    bitmap: identifier,
+    x: number,
+    y: number,
+    c: number,
+    color: number,
+    alpha: number,
+    mode: number,
+  ): void;
 
   /**
    * ```
    * integer _ = reaper.JS_LICE_DrawText(identifier bitmap, identifier LICEFont, string text, integer textLen, integer x1, integer y1, integer x2, integer y2)
    * ```
    */
-  function JS_LICE_DrawText(bitmap: identifier, LICEFont: identifier, text: string, textLen: number, x1: number, y1: number, x2: number, y2: number): number;
+  function JS_LICE_DrawText(
+    bitmap: identifier,
+    LICEFont: identifier,
+    text: string,
+    textLen: number,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+  ): number;
 
   /**
    * ```
@@ -18934,7 +22201,16 @@ declare namespace reaper {
    *
    * LICE color format: 0xAARRGGBB (AA is only used in ALPHA mode).
    */
-  function JS_LICE_FillCircle(bitmap: identifier, cx: number, cy: number, r: number, color: number, alpha: number, mode: string, antialias: boolean): void;
+  function JS_LICE_FillCircle(
+    bitmap: identifier,
+    cx: number,
+    cy: number,
+    r: number,
+    color: number,
+    alpha: number,
+    mode: string,
+    antialias: boolean,
+  ): void;
 
   /**
    * ```
@@ -18950,7 +22226,15 @@ declare namespace reaper {
    *
    * LICE color format: 0xAARRGGBB (AA is only used in ALPHA mode).
    */
-  function JS_LICE_FillPolygon(bitmap: identifier, packedX: string, packedY: string, numPoints: number, color: number, alpha: number, mode: string): void;
+  function JS_LICE_FillPolygon(
+    bitmap: identifier,
+    packedX: string,
+    packedY: string,
+    numPoints: number,
+    color: number,
+    alpha: number,
+    mode: string,
+  ): void;
 
   /**
    * ```
@@ -18962,7 +22246,16 @@ declare namespace reaper {
    *
    * LICE color format: 0xAARRGGBB (AA is only used in ALPHA mode).
    */
-  function JS_LICE_FillRect(bitmap: identifier, x: number, y: number, w: number, h: number, color: number, alpha: number, mode: string): void;
+  function JS_LICE_FillRect(
+    bitmap: identifier,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    color: number,
+    alpha: number,
+    mode: string,
+  ): void;
 
   /**
    * ```
@@ -18974,7 +22267,18 @@ declare namespace reaper {
    *
    * LICE color format: 0xAARRGGBB (AA is only used in ALPHA mode).
    */
-  function JS_LICE_FillTriangle(bitmap: identifier, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, color: number, alpha: number, mode: string): void;
+  function JS_LICE_FillTriangle(
+    bitmap: identifier,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    x3: number,
+    y3: number,
+    color: number,
+    alpha: number,
+    mode: string,
+  ): void;
 
   /**
    * ```
@@ -19010,7 +22314,26 @@ declare namespace reaper {
    * reaper.JS_LICE_GradRect(identifier bitmap, integer dstx, integer dsty, integer dstw, integer dsth, number ir, number ig, number ib, number ia, number drdx, number dgdx, number dbdx, number dadx, number drdy, number dgdy, number dbdy, number dady, string mode)
    * ```
    */
-  function JS_LICE_GradRect(bitmap: identifier, dstx: number, dsty: number, dstw: number, dsth: number, ir: number, ig: number, ib: number, ia: number, drdx: number, dgdx: number, dbdx: number, dadx: number, drdy: number, dgdy: number, dbdy: number, dady: number, mode: string): void;
+  function JS_LICE_GradRect(
+    bitmap: identifier,
+    dstx: number,
+    dsty: number,
+    dstw: number,
+    dsth: number,
+    ir: number,
+    ig: number,
+    ib: number,
+    ia: number,
+    drdx: number,
+    dgdx: number,
+    dbdx: number,
+    dadx: number,
+    drdy: number,
+    dgdy: number,
+    dbdy: number,
+    dady: number,
+    mode: string,
+  ): void;
 
   /**
    * ```
@@ -19029,7 +22352,17 @@ declare namespace reaper {
    *
    * LICE color format: 0xAARRGGBB (AA is only used in ALPHA mode).
    */
-  function JS_LICE_Line(bitmap: identifier, x1: number, y1: number, x2: number, y2: number, color: number, alpha: number, mode: string, antialias: boolean): void;
+  function JS_LICE_Line(
+    bitmap: identifier,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    color: number,
+    alpha: number,
+    mode: string,
+    antialias: boolean,
+  ): void;
 
   /**
    * ```
@@ -19052,7 +22385,10 @@ declare namespace reaper {
    * ```
    * Returns a system LICE bitmap containing the JPEG.
    */
-  function JS_LICE_LoadJPGFromMemory(buffer: string, bufsize: number): identifier;
+  function JS_LICE_LoadJPGFromMemory(
+    buffer: string,
+    bufsize: number,
+  ): identifier;
 
   /**
    * ```
@@ -19068,7 +22404,10 @@ declare namespace reaper {
    * ```
    * Returns a system LICE bitmap containing the PNG.
    */
-  function JS_LICE_LoadPNGFromMemory(buffer: string, bufsize: number): identifier;
+  function JS_LICE_LoadPNGFromMemory(
+    buffer: string,
+    bufsize: number,
+  ): identifier;
 
   /**
    * ```
@@ -19105,7 +22444,15 @@ declare namespace reaper {
    *
    * reaper.JS_LICE_Blit(bitmap, x, y, bitmap, x, y, w, h, 0.5, "ADD").
    */
-  function JS_LICE_ProcessRect(bitmap: identifier, x: number, y: number, w: number, h: number, mode: string, operand: number): boolean;
+  function JS_LICE_ProcessRect(
+    bitmap: identifier,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    mode: string,
+    operand: number,
+  ): boolean;
 
   /**
    * ```
@@ -19117,14 +22464,25 @@ declare namespace reaper {
    *
    * LICE color format: 0xAARRGGBB (AA is only used in ALPHA mode).
    */
-  function JS_LICE_PutPixel(bitmap: identifier, x: number, y: number, color: number, alpha: number, mode: string): void;
+  function JS_LICE_PutPixel(
+    bitmap: identifier,
+    x: number,
+    y: number,
+    color: number,
+    alpha: number,
+    mode: string,
+  ): void;
 
   /**
    * ```
    * reaper.JS_LICE_Resize(identifier bitmap, integer width, integer height)
    * ```
    */
-  function JS_LICE_Resize(bitmap: identifier, width: number, height: number): void;
+  function JS_LICE_Resize(
+    bitmap: identifier,
+    width: number,
+    height: number,
+  ): void;
 
   /**
    * ```
@@ -19132,7 +22490,24 @@ declare namespace reaper {
    * ```
    * LICE modes: "COPY" (default if empty string), "MASK", "ADD", "DODGE", "MUL", "OVERLAY" or "HSVADJ", any of which may be combined with "ALPHA" to enable per-pixel alpha blending.
    */
-  function JS_LICE_RotatedBlit(destBitmap: identifier, dstx: number, dsty: number, dstw: number, dsth: number, sourceBitmap: identifier, srcx: number, srcy: number, srcw: number, srch: number, angle: number, rotxcent: number, rotycent: number, cliptosourcerect: boolean, alpha: number, mode: string): void;
+  function JS_LICE_RotatedBlit(
+    destBitmap: identifier,
+    dstx: number,
+    dsty: number,
+    dstw: number,
+    dsth: number,
+    sourceBitmap: identifier,
+    srcx: number,
+    srcy: number,
+    srcw: number,
+    srch: number,
+    angle: number,
+    rotxcent: number,
+    rotycent: number,
+    cliptosourcerect: boolean,
+    alpha: number,
+    mode: string,
+  ): void;
 
   /**
    * ```
@@ -19144,7 +22519,18 @@ declare namespace reaper {
    *
    * LICE color format: 0xAARRGGBB (AA is only used in ALPHA mode).
    */
-  function JS_LICE_RoundRect(bitmap: identifier, x: number, y: number, w: number, h: number, cornerradius: number, color: number, alpha: number, mode: string, antialias: boolean): void;
+  function JS_LICE_RoundRect(
+    bitmap: identifier,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    cornerradius: number,
+    color: number,
+    alpha: number,
+    mode: string,
+    antialias: boolean,
+  ): void;
 
   /**
    * ```
@@ -19152,7 +22538,20 @@ declare namespace reaper {
    * ```
    * LICE modes: "COPY" (default if empty string), "MASK", "ADD", "DODGE", "MUL", "OVERLAY" or "HSVADJ", any of which may be combined with "ALPHA" to enable per-pixel alpha blending.
    */
-  function JS_LICE_ScaledBlit(destBitmap: identifier, dstx: number, dsty: number, dstw: number, dsth: number, srcBitmap: identifier, srcx: number, srcy: number, srcw: number, srch: number, alpha: number, mode: string): void;
+  function JS_LICE_ScaledBlit(
+    destBitmap: identifier,
+    dstx: number,
+    dsty: number,
+    dstw: number,
+    dsth: number,
+    srcBitmap: identifier,
+    srcx: number,
+    srcy: number,
+    srcw: number,
+    srch: number,
+    alpha: number,
+    mode: string,
+  ): void;
 
   /**
    * ```
@@ -19160,7 +22559,10 @@ declare namespace reaper {
    * ```
    * Sets all pixels that match the given color's RGB values to fully transparent, and all other pixels to fully opaque.  (All pixels' RGB values remain unchanged.)
    */
-  function JS_LICE_SetAlphaFromColorMask(bitmap: identifier, colorRGB: number): void;
+  function JS_LICE_SetAlphaFromColorMask(
+    bitmap: identifier,
+    colorRGB: number,
+  ): void;
 
   /**
    * ```
@@ -19197,7 +22599,11 @@ declare namespace reaper {
    *
    * "VERTICAL", "BOTTOMUP", "NATIVE", "BLUR", "INVERT", "MONO", "SHADOW" or "OUTLINE".
    */
-  function JS_LICE_SetFontFromGDI(LICEFont: identifier, GDIFont: identifier, moreFormats: string): void;
+  function JS_LICE_SetFontFromGDI(
+    LICEFont: identifier,
+    GDIFont: identifier,
+    moreFormats: string,
+  ): void;
 
   /**
    * ```
@@ -19211,21 +22617,34 @@ declare namespace reaper {
    *
    *  * forceBaseline is an optional boolean parameter that ensures compatibility with all JPEG viewers by preventing too low quality, "cubist" settings.
    */
-  function JS_LICE_WriteJPG(filename: string, bitmap: identifier, quality: number, forceBaseline: unsupported): boolean;
+  function JS_LICE_WriteJPG(
+    filename: string,
+    bitmap: identifier,
+    quality: number,
+    forceBaseline: unsupported,
+  ): boolean;
 
   /**
    * ```
    * boolean _ = reaper.JS_LICE_WritePNG(string filename, identifier bitmap, boolean wantAlpha)
    * ```
    */
-  function JS_LICE_WritePNG(filename: string, bitmap: identifier, wantAlpha: boolean): boolean;
+  function JS_LICE_WritePNG(
+    filename: string,
+    bitmap: identifier,
+    wantAlpha: boolean,
+  ): boolean;
 
   /**
    * ```
    * reaper.JS_ListView_EnsureVisible(identifier listviewHWND, integer index, boolean partialOK)
    * ```
    */
-  function JS_ListView_EnsureVisible(listviewHWND: identifier, index: number, partialOK: boolean): void;
+  function JS_ListView_EnsureVisible(
+    listviewHWND: identifier,
+    index: number,
+    partialOK: boolean,
+  ): void;
 
   /**
    * ```
@@ -19233,7 +22652,10 @@ declare namespace reaper {
    * ```
    * Returns the index of the next selected list item with index greater that the specified number. Returns -1 if no selected items left.
    */
-  function JS_ListView_EnumSelItems(listviewHWND: identifier, index: number): number;
+  function JS_ListView_EnumSelItems(
+    listviewHWND: identifier,
+    index: number,
+  ): number;
 
   /**
    * ```
@@ -19241,7 +22663,9 @@ declare namespace reaper {
    * ```
    * Returns the index and text of the focused item, if any.
    */
-  function JS_ListView_GetFocusedItem(listviewHWND: identifier): LuaMultiReturn<[number, string]>;
+  function JS_ListView_GetFocusedItem(
+    listviewHWND: identifier,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -19256,7 +22680,11 @@ declare namespace reaper {
    * ```
    * Returns the text and state of specified item.
    */
-  function JS_ListView_GetItem(listviewHWND: identifier, index: number, subItem: number): LuaMultiReturn<[string, number]>;
+  function JS_ListView_GetItem(
+    listviewHWND: identifier,
+    index: number,
+    subItem: number,
+  ): LuaMultiReturn<[string, number]>;
 
   /**
    * ```
@@ -19271,7 +22699,10 @@ declare namespace reaper {
    * ```
    * Returns client coordinates of the item.
    */
-  function JS_ListView_GetItemRect(listviewHWND: identifier, index: number): LuaMultiReturn<[boolean, number, number, number, number]>;
+  function JS_ListView_GetItemRect(
+    listviewHWND: identifier,
+    index: number,
+  ): LuaMultiReturn<[boolean, number, number, number, number]>;
 
   /**
    * ```
@@ -19285,14 +22716,21 @@ declare namespace reaper {
    *
    * Warning: this function uses the Win32 bitmask values, which differ from the values used by WDL/swell.
    */
-  function JS_ListView_GetItemState(listviewHWND: identifier, index: number): number;
+  function JS_ListView_GetItemState(
+    listviewHWND: identifier,
+    index: number,
+  ): number;
 
   /**
    * ```
    * string text = reaper.JS_ListView_GetItemText(identifier listviewHWND, integer index, integer subItem)
    * ```
    */
-  function JS_ListView_GetItemText(listviewHWND: identifier, index: number, subItem: number): string;
+  function JS_ListView_GetItemText(
+    listviewHWND: identifier,
+    index: number,
+    subItem: number,
+  ): string;
 
   /**
    * ```
@@ -19313,7 +22751,11 @@ declare namespace reaper {
    * integer index, integer subItem, integer flags = reaper.JS_ListView_HitTest(identifier listviewHWND, integer clientX, integer clientY)
    * ```
    */
-  function JS_ListView_HitTest(listviewHWND: identifier, clientX: number, clientY: number): LuaMultiReturn<[number, number, number]>;
+  function JS_ListView_HitTest(
+    listviewHWND: identifier,
+    clientX: number,
+    clientY: number,
+  ): LuaMultiReturn<[number, number, number]>;
 
   /**
    * ```
@@ -19325,7 +22767,9 @@ declare namespace reaper {
    *
    *  * retval: Number of selected items found; negative or zero if an error occured.
    */
-  function JS_ListView_ListAllSelItems(listviewHWND: identifier): LuaMultiReturn<[number, string]>;
+  function JS_ListView_ListAllSelItems(
+    listviewHWND: identifier,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -19341,7 +22785,12 @@ declare namespace reaper {
    *
    * Warning: this function uses the Win32 bitmask values, which differ from the values used by WDL/swell.
    */
-  function JS_ListView_SetItemState(listviewHWND: identifier, index: number, state: number, mask: number): void;
+  function JS_ListView_SetItemState(
+    listviewHWND: identifier,
+    index: number,
+    state: number,
+    mask: number,
+  ): void;
 
   /**
    * ```
@@ -19349,7 +22798,12 @@ declare namespace reaper {
    * ```
    * Currently, this fuction only accepts ASCII text.
    */
-  function JS_ListView_SetItemText(listviewHWND: identifier, index: number, subItem: number, text: string): void;
+  function JS_ListView_SetItemText(
+    listviewHWND: identifier,
+    index: number,
+    subItem: number,
+    text: string,
+  ): void;
 
   /**
    * ```
@@ -19425,7 +22879,12 @@ declare namespace reaper {
    * ```
    * Copies a packed string into a memory buffer.
    */
-  function JS_Mem_FromString(mallocPointer: identifier, offset: number, packedString: string, stringLength: number): boolean;
+  function JS_Mem_FromString(
+    mallocPointer: identifier,
+    offset: number,
+    packedString: string,
+    stringLength: number,
+  ): boolean;
 
   /**
    * ```
@@ -19487,7 +22946,10 @@ declare namespace reaper {
    *
    * If successful, returns a handle to the cursor, which can be used in JS_Mouse_SetCursor.
    */
-  function JS_Mouse_LoadCursorFromFile(pathAndFileName: string, forceNewLoad: unsupported): identifier;
+  function JS_Mouse_LoadCursorFromFile(
+    pathAndFileName: string,
+    forceNewLoad: unsupported,
+  ): identifier;
 
   /**
    * ```
@@ -19527,7 +22989,11 @@ declare namespace reaper {
    * ```
    * Returns the memory contents starting at address[offset] as a packed string. Offset is added as steps of 1 byte (char) each.
    */
-  function JS_String(pointer: identifier, offset: number, lengthChars: number): LuaMultiReturn<[boolean, string]>;
+  function JS_String(
+    pointer: identifier,
+    offset: number,
+    lengthChars: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -19647,7 +23113,11 @@ declare namespace reaper {
    *
    * Keyboard events are usually *not* received by any individual window. To intercept keyboard events, use the VKey functions.
    */
-  function JS_WindowMessage_Intercept(windowHWND: identifier, message: string, passThrough: boolean): number;
+  function JS_WindowMessage_Intercept(
+    windowHWND: identifier,
+    message: string,
+    passThrough: boolean,
+  ): number;
 
   /**
    * ```
@@ -19691,7 +23161,10 @@ declare namespace reaper {
    *
    *  * To check whether a message type is being blocked or passed through, Peek the message type, or retrieve the entire List of intercepts.
    */
-  function JS_WindowMessage_InterceptList(windowHWND: identifier, messages: string): number;
+  function JS_WindowMessage_InterceptList(
+    windowHWND: identifier,
+    messages: string,
+  ): number;
 
   /**
    * ```
@@ -19699,7 +23172,9 @@ declare namespace reaper {
    * ```
    * Returns a string with a list of all message types currently being intercepted for the specified window.
    */
-  function JS_WindowMessage_ListIntercepts(windowHWND: identifier): LuaMultiReturn<[boolean, string]>;
+  function JS_WindowMessage_ListIntercepts(
+    windowHWND: identifier,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -19711,7 +23186,11 @@ declare namespace reaper {
    *
    * Returns 1 if successful, 0 if the message type is not yet being intercepted, or -2 if the argument could not be parsed.
    */
-  function JS_WindowMessage_PassThrough(windowHWND: identifier, message: string, passThrough: boolean): number;
+  function JS_WindowMessage_PassThrough(
+    windowHWND: identifier,
+    message: string,
+    passThrough: boolean,
+  ): number;
 
   /**
    * ```
@@ -19741,7 +23220,10 @@ declare namespace reaper {
    *
    *  * wParamHigh, lParamLow and lParamHigh are signed, whereas wParamLow is unsigned.
    */
-  function JS_WindowMessage_Peek(windowHWND: identifier, message: string): LuaMultiReturn<[boolean, boolean, number, number, number, number, number]>;
+  function JS_WindowMessage_Peek(
+    windowHWND: identifier,
+    message: string,
+  ): LuaMultiReturn<[boolean, boolean, number, number, number, number, number]>;
 
   /**
    * ```
@@ -19775,7 +23257,14 @@ declare namespace reaper {
    *
    *  * Useful for simulating mouse clicks and calling mouse modifier actions from scripts.
    */
-  function JS_WindowMessage_Post(windowHWND: identifier, message: string, wParam: number, wParamHighWord: number, lParam: number, lParamHighWord: number): boolean;
+  function JS_WindowMessage_Post(
+    windowHWND: identifier,
+    message: string,
+    wParam: number,
+    wParamHighWord: number,
+    lParam: number,
+    lParamHighWord: number,
+  ): boolean;
 
   /**
    * ```
@@ -19789,7 +23278,10 @@ declare namespace reaper {
    *
    *  * messages: "WM_SETCURSOR,WM_MOUSEHWHEEL" or "0x0020,0x020E", for example.
    */
-  function JS_WindowMessage_Release(windowHWND: identifier, messages: string): number;
+  function JS_WindowMessage_Release(
+    windowHWND: identifier,
+    messages: string,
+  ): number;
 
   /**
    * ```
@@ -19835,7 +23327,14 @@ declare namespace reaper {
    *
    *  * Useful for simulating mouse clicks and calling mouse modifier actions from scripts.
    */
-  function JS_WindowMessage_Send(windowHWND: identifier, message: string, wParam: number, wParamHighWord: number, lParam: number, lParamHighWord: number): number;
+  function JS_WindowMessage_Send(
+    windowHWND: identifier,
+    message: string,
+    wParam: number,
+    wParamHighWord: number,
+    lParam: number,
+    lParamHighWord: number,
+  ): number;
 
   /**
    * ```
@@ -19858,7 +23357,10 @@ declare namespace reaper {
    *
    *  * The addresses are stored in the provided reaper.array, and can be converted to REAPER objects (HWNDs) by the function JS_Window_HandleFromAddress.
    */
-  function JS_Window_ArrayAllChild(parentHWND: identifier, reaperarray: identifier): number;
+  function JS_Window_ArrayAllChild(
+    parentHWND: identifier,
+    reaperarray: identifier,
+  ): number;
 
   /**
    * ```
@@ -19896,7 +23398,11 @@ declare namespace reaper {
    *
    *  * exact: Match entire title exactly, or match substring of title.
    */
-  function JS_Window_ArrayFind(title: string, exact: boolean, reaperarray: identifier): number;
+  function JS_Window_ArrayFind(
+    title: string,
+    exact: boolean,
+    reaperarray: identifier,
+  ): number;
 
   /**
    * ```
@@ -19933,7 +23439,11 @@ declare namespace reaper {
    *
    *  * On all platforms, client coordinates are relative to the upper left corner of the client area.
    */
-  function JS_Window_ClientToScreen(windowHWND: identifier, x: number, y: number): LuaMultiReturn<[number, number]>;
+  function JS_Window_ClientToScreen(
+    windowHWND: identifier,
+    x: number,
+    y: number,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -19961,7 +23471,16 @@ declare namespace reaper {
    *
    * NOTE: On Linux and macOS, the window contents are only updated *between* defer cycles, so the window cannot be animated by for/while loops within a single defer cycle.
    */
-  function JS_Window_Create(title: string, className: string, x: number, y: number, w: number, h: number, style?: string, ownerHWND: identifier): LuaMultiReturn<[identifier, string]>;
+  function JS_Window_Create(
+    title: string,
+    className: string,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    style?: string,
+    ownerHWND?: identifier,
+  ): LuaMultiReturn<[identifier, string]>;
 
   /**
    * ```
@@ -20033,7 +23552,11 @@ declare namespace reaper {
    *
    *  * exact: Match entire title length, or match substring of title. In both cases, matching is not case sensitive.
    */
-  function JS_Window_FindChild(parentHWND: identifier, title: string, exact: boolean): identifier;
+  function JS_Window_FindChild(
+    parentHWND: identifier,
+    title: string,
+    exact: boolean,
+  ): identifier;
 
   /**
    * ```
@@ -20045,7 +23568,10 @@ declare namespace reaper {
    *
    * (The ID of a window may be retrieved by JS_Window_GetLongPtr.)
    */
-  function JS_Window_FindChildByID(parentHWND: identifier, ID: number): identifier;
+  function JS_Window_FindChildByID(
+    parentHWND: identifier,
+    ID: number,
+  ): identifier;
 
   /**
    * ```
@@ -20059,7 +23585,12 @@ declare namespace reaper {
    *
    *  * title: An empty string, "", will match all windows. (Search is not case sensitive.)
    */
-  function JS_Window_FindEx(parentHWND: identifier, childHWND: identifier, className: string, title: string): identifier;
+  function JS_Window_FindEx(
+    parentHWND: identifier,
+    childHWND: identifier,
+    className: string,
+    title: string,
+  ): identifier;
 
   /**
    * ```
@@ -20117,14 +23648,18 @@ declare namespace reaper {
    *
    *  * On macOS, screen coordinates are relative to the *bottom* left corner of the primary display, and the positive Y-axis points upward.
    */
-  function JS_Window_GetClientRect(windowHWND: identifier): LuaMultiReturn<[boolean, number, number, number, number]>;
+  function JS_Window_GetClientRect(
+    windowHWND: identifier,
+  ): LuaMultiReturn<[boolean, number, number, number, number]>;
 
   /**
    * ```
    * boolean retval, integer width, integer height = reaper.JS_Window_GetClientSize(identifier windowHWND)
    * ```
    */
-  function JS_Window_GetClientSize(windowHWND: identifier): LuaMultiReturn<[boolean, number, number]>;
+  function JS_Window_GetClientSize(
+    windowHWND: identifier,
+  ): LuaMultiReturn<[boolean, number, number]>;
 
   /**
    * ```
@@ -20180,7 +23715,10 @@ declare namespace reaper {
    *
    * If the function fails, a null pointer is returned.
    */
-  function JS_Window_GetLongPtr(windowHWND: identifier, info: string): identifier;
+  function JS_Window_GetLongPtr(
+    windowHWND: identifier,
+    info: string,
+  ): identifier;
 
   /**
    * ```
@@ -20208,7 +23746,9 @@ declare namespace reaper {
    *
    *  * The pixel at (right, bottom) lies immediately outside the rectangle.
    */
-  function JS_Window_GetRect(windowHWND: identifier): LuaMultiReturn<[boolean, number, number, number, number]>;
+  function JS_Window_GetRect(
+    windowHWND: identifier,
+  ): LuaMultiReturn<[boolean, number, number, number, number]>;
 
   /**
    * ```
@@ -20220,7 +23760,10 @@ declare namespace reaper {
    *
    * (Refer to documentation for Win32 C++ function GetWindow.)
    */
-  function JS_Window_GetRelated(windowHWND: identifier, relation: string): identifier;
+  function JS_Window_GetRelated(
+    windowHWND: identifier,
+    relation: string,
+  ): identifier;
 
   /**
    * ```
@@ -20242,7 +23785,10 @@ declare namespace reaper {
    *
    *  * Leftmost or topmost visible pixel position, as well as the visible page size, the range minimum and maximum, and scroll box tracking position.
    */
-  function JS_Window_GetScrollInfo(windowHWND: identifier, scrollbar: string): LuaMultiReturn<[boolean, number, number, number, number, number]>;
+  function JS_Window_GetScrollInfo(
+    windowHWND: identifier,
+    scrollbar: string,
+  ): LuaMultiReturn<[boolean, number, number, number, number, number]>;
 
   /**
    * ```
@@ -20266,7 +23812,13 @@ declare namespace reaper {
    *
    * wantWork: Returns the work area of the display, which excludes the system taskbar or application desktop toolbars.
    */
-  function JS_Window_GetViewportFromRect(x1: number, y1: number, x2: number, y2: number, wantWork: boolean): LuaMultiReturn<[number, number, number, number]>;
+  function JS_Window_GetViewportFromRect(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    wantWork: boolean,
+  ): LuaMultiReturn<[number, number, number, number]>;
 
   /**
    * ```
@@ -20282,7 +23834,14 @@ declare namespace reaper {
    * ```
    * Similar to the Win32 function InvalidateRect.
    */
-  function JS_Window_InvalidateRect(windowHWND: identifier, left: number, top: number, right: number, bottom: number, eraseBackground: boolean): boolean;
+  function JS_Window_InvalidateRect(
+    windowHWND: identifier,
+    left: number,
+    top: number,
+    right: number,
+    bottom: number,
+    eraseBackground: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -20290,7 +23849,10 @@ declare namespace reaper {
    * ```
    * Determines whether a window is a child window or descendant window of a specified parent window.
    */
-  function JS_Window_IsChild(parentHWND: identifier, childHWND: identifier): boolean;
+  function JS_Window_IsChild(
+    parentHWND: identifier,
+    childHWND: identifier,
+  ): boolean;
 
   /**
    * ```
@@ -20332,7 +23894,9 @@ declare namespace reaper {
    *
    * Each value is an address that can be converted to a HWND by the function Window_HandleFromAddress.
    */
-  function JS_Window_ListAllChild(parentHWND: identifier): LuaMultiReturn<[number, string]>;
+  function JS_Window_ListAllChild(
+    parentHWND: identifier,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -20370,7 +23934,10 @@ declare namespace reaper {
    *
    *  * exact: Match entire title exactly, or match substring of title.
    */
-  function JS_Window_ListFind(title: string, exact: boolean): LuaMultiReturn<[number, string]>;
+  function JS_Window_ListFind(
+    title: string,
+    exact: boolean,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -20379,7 +23946,13 @@ declare namespace reaper {
    * Deprecated - use GetViewportFromRect instead.
    * @deprecated
    */
-  function JS_Window_MonitorFromRect(x1: number, y1: number, x2: number, y2: number, wantWork: boolean): LuaMultiReturn<[number, number, number, number]>;
+  function JS_Window_MonitorFromRect(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    wantWork: boolean,
+  ): LuaMultiReturn<[number, number, number, number]>;
 
   /**
    * ```
@@ -20401,7 +23974,11 @@ declare namespace reaper {
    *
    *  * Equivalent to calling JS_Window_SetPosition with NOSIZE, NOZORDER, NOACTIVATE and NOOWNERZORDER flags set.
    */
-  function JS_Window_Move(windowHWND: identifier, left: number, top: number): void;
+  function JS_Window_Move(
+    windowHWND: identifier,
+    left: number,
+    top: number,
+  ): void;
 
   /**
    * ```
@@ -20417,7 +23994,10 @@ declare namespace reaper {
    *
    * In the case of windows that are listed among the Action list's contexts (such as the Media Explorer), the commandIDs of the actions in the Actions list may be used.
    */
-  function JS_Window_OnCommand(windowHWND: identifier, commandID: number): boolean;
+  function JS_Window_OnCommand(
+    windowHWND: identifier,
+    commandID: number,
+  ): boolean;
 
   /**
    * ```
@@ -20429,7 +24009,11 @@ declare namespace reaper {
    *
    * * Equivalent to calling JS_Window_SetPosition with NOMOVE, NOZORDER, NOACTIVATE and NOOWNERZORDER flags set.
    */
-  function JS_Window_Resize(windowHWND: identifier, width: number, height: number): void;
+  function JS_Window_Resize(
+    windowHWND: identifier,
+    width: number,
+    height: number,
+  ): void;
 
   /**
    * ```
@@ -20447,7 +24031,11 @@ declare namespace reaper {
    *
    *  * On all platforms, client coordinates are relative to the upper left corner of the client area.
    */
-  function JS_Window_ScreenToClient(windowHWND: identifier, x: number, y: number): LuaMultiReturn<[number, number]>;
+  function JS_Window_ScreenToClient(
+    windowHWND: identifier,
+    x: number,
+    y: number,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -20475,7 +24063,11 @@ declare namespace reaper {
    *
    * info: "USERDATA", "WNDPROC", "DLGPROC", "ID", "EXSTYLE" or "STYLE", and only on WindowOS, "INSTANCE" and "PARENT".
    */
-  function JS_Window_SetLong(windowHWND: identifier, info: string, value: number): number;
+  function JS_Window_SetLong(
+    windowHWND: identifier,
+    info: string,
+    value: number,
+  ): number;
 
   /**
    * ```
@@ -20499,7 +24091,11 @@ declare namespace reaper {
    *
    * Transparency can only be applied to top-level windows. If windowHWND refers to a child window, the entire top-level window that contains windowHWND will be made transparent.
    */
-  function JS_Window_SetOpacity(windowHWND: identifier, mode: string, value: number): boolean;
+  function JS_Window_SetOpacity(
+    windowHWND: identifier,
+    mode: string,
+    value: number,
+  ): boolean;
 
   /**
    * ```
@@ -20511,7 +24107,10 @@ declare namespace reaper {
    *
    * Only on WindowsOS: If parentHWND is not specified, the desktop window becomes the new parent window.
    */
-  function JS_Window_SetParent(childHWND: identifier, parentHWND: identifier): identifier;
+  function JS_Window_SetParent(
+    childHWND: identifier,
+    parentHWND: identifier,
+  ): identifier;
 
   /**
    * ```
@@ -20527,7 +24126,15 @@ declare namespace reaper {
    *
    *  * flags: Any combination of the standard flags, of which "NOMOVE", "NOSIZE", "NOZORDER", "NOACTIVATE", "SHOWWINDOW", "FRAMECHANGED" and "NOCOPYBITS" should be valid cross-platform.
    */
-  function JS_Window_SetPosition(windowHWND: identifier, left: number, top: number, width: number, height: number, ZOrder?: string, flags?: string): LuaMultiReturn<[boolean, string, string]>;
+  function JS_Window_SetPosition(
+    windowHWND: identifier,
+    left: number,
+    top: number,
+    width: number,
+    height: number,
+    ZOrder?: string,
+    flags?: string,
+  ): LuaMultiReturn<[boolean, string, string]>;
 
   /**
    * ```
@@ -20541,7 +24148,11 @@ declare namespace reaper {
    *
    * NOTE: API functions can scroll REAPER's windows, but cannot zoom them.  Instead, use actions such as "View: Zoom to one loop iteration".
    */
-  function JS_Window_SetScrollPos(windowHWND: identifier, scrollbar: string, position: number): boolean;
+  function JS_Window_SetScrollPos(
+    windowHWND: identifier,
+    scrollbar: string,
+    position: number,
+  ): boolean;
 
   /**
    * ```
@@ -20557,7 +24168,10 @@ declare namespace reaper {
    *
    * On Linux and macOS, "MAXIMIZE" has not yet been implmented, and the remaining styles may appear slightly different from their WindowsOS counterparts.
    */
-  function JS_Window_SetStyle(windowHWND: identifier, style: string): LuaMultiReturn<[boolean, string]>;
+  function JS_Window_SetStyle(
+    windowHWND: identifier,
+    style: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -20587,7 +24201,11 @@ declare namespace reaper {
    *
    * * InsertAfterHWND: For compatibility with older versions, this parameter is still available, and is optional. If ZOrder is "INSERTAFTER", insertAfterHWND must be a handle to the window behind which windowHWND will be placed in the Z order, equivalent to setting ZOrder to this HWND; otherwise, insertAfterHWND is ignored and can be left out (or it can simply be set to the same value as windowHWND).
    */
-  function JS_Window_SetZOrder(windowHWND: identifier, ZOrder: string, insertAfterHWND: identifier): boolean;
+  function JS_Window_SetZOrder(
+    windowHWND: identifier,
+    ZOrder: string,
+    insertAfterHWND: identifier,
+  ): boolean;
 
   /**
    * ```
@@ -20640,7 +24258,11 @@ declare namespace reaper {
    *
    * Returns the number of deleted entries on success, negative number (< 0) on error.
    */
-  function JS_Zip_DeleteEntries(zipHandle: identifier, entryNames: string, entryNamesStrLen: number): number;
+  function JS_Zip_DeleteEntries(
+    zipHandle: identifier,
+    entryNames: string,
+    entryNamesStrLen: number,
+  ): number;
 
   /**
    * ```
@@ -20664,7 +24286,10 @@ declare namespace reaper {
    *
    * Returns 0 on success, negative number (< 0) on error.
    */
-  function JS_Zip_Entry_CompressFile(zipHandle: identifier, inputFile: string): number;
+  function JS_Zip_Entry_CompressFile(
+    zipHandle: identifier,
+    inputFile: string,
+  ): number;
 
   /**
    * ```
@@ -20676,7 +24301,11 @@ declare namespace reaper {
    *
    * Returns 0 on success, negative number (< 0) on error.
    */
-  function JS_Zip_Entry_CompressMemory(zipHandle: identifier, buf: string, buf_size: number): number;
+  function JS_Zip_Entry_CompressMemory(
+    zipHandle: identifier,
+    buf: string,
+    buf_size: number,
+  ): number;
 
   /**
    * ```
@@ -20688,7 +24317,10 @@ declare namespace reaper {
    *
    * Returns 0 on success, negative number (< 0) on error.
    */
-  function JS_Zip_Entry_ExtractToFile(zipHandle: identifier, outputFile: string): number;
+  function JS_Zip_Entry_ExtractToFile(
+    zipHandle: identifier,
+    outputFile: string,
+  ): number;
 
   /**
    * ```
@@ -20700,7 +24332,9 @@ declare namespace reaper {
    *
    * Returns the number of bytes extracted on success, negative number (< 0) on error.
    */
-  function JS_Zip_Entry_ExtractToMemory(zipHandle: identifier): LuaMultiReturn<[number, string]>;
+  function JS_Zip_Entry_ExtractToMemory(
+    zipHandle: identifier,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -20708,7 +24342,9 @@ declare namespace reaper {
    * ```
    * Returns information about the zip archive's open entry.
    */
-  function JS_Zip_Entry_Info(zipHandle: identifier): LuaMultiReturn<[number, string, number, number, number, number]>;
+  function JS_Zip_Entry_Info(
+    zipHandle: identifier,
+  ): LuaMultiReturn<[number, string, number, number, number, number]>;
 
   /**
    * ```
@@ -20724,7 +24360,10 @@ declare namespace reaper {
    *
    * Returns 0 on success, negative number on error.
    */
-  function JS_Zip_Entry_OpenByIndex(zipHandle: identifier, index: number): number;
+  function JS_Zip_Entry_OpenByIndex(
+    zipHandle: identifier,
+    index: number,
+  ): number;
 
   /**
    * ```
@@ -20740,7 +24379,10 @@ declare namespace reaper {
    *
    * Returns 0 on success, negative number (< 0) on error.
    */
-  function JS_Zip_Entry_OpenByName(zipHandle: identifier, entryName: string): number;
+  function JS_Zip_Entry_OpenByName(
+    zipHandle: identifier,
+    entryName: string,
+  ): number;
 
   /**
    * ```
@@ -20772,7 +24414,9 @@ declare namespace reaper {
    *
    * On error, returns a negative number (< 0).
    */
-  function JS_Zip_ListAllEntries(zipHandle: identifier): LuaMultiReturn<[number, string]>;
+  function JS_Zip_ListAllEntries(
+    zipHandle: identifier,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -20802,7 +24446,11 @@ declare namespace reaper {
    *
    *  * The original zip specification did not support Unicode. Some applications still use this outdated specification by default, or try to use the local code page. This may lead to incompatibility and incorrect retrieval of file or entry names.
    */
-  function JS_Zip_Open(zipFile: string, mode: string, compressionLevel: number): LuaMultiReturn<[identifier, number]>;
+  function JS_Zip_Open(
+    zipFile: string,
+    mode: string,
+    compressionLevel: number,
+  ): LuaMultiReturn<[identifier, number]>;
 
   /**
    * ```
@@ -20810,7 +24458,14 @@ declare namespace reaper {
    * ```
    * This function combines all other NF_Peak/RMS functions in a single one and additionally returns peak RMS positions. Lua example code here. Note: It's recommended to use this function with ReaScript/Lua as it provides reaper.array objects. If using this function with other scripting languages, you must provide arrays in the reaper.array format.
    */
-  function NF_AnalyzeMediaItemPeakAndRMS(item: MediaItem, windowSize: number, reaper_array_peaks: identifier, reaper_array_peakpositions: identifier, reaper_array_RMSs: identifier, reaper_array_RMSpositions: identifier): boolean;
+  function NF_AnalyzeMediaItemPeakAndRMS(
+    item: MediaItem,
+    windowSize: number,
+    reaper_array_peaks: identifier,
+    reaper_array_peakpositions: identifier,
+    reaper_array_RMSs: identifier,
+    reaper_array_RMSpositions: identifier,
+  ): boolean;
 
   /**
    * ```
@@ -20818,7 +24473,10 @@ declare namespace reaper {
    * ```
    * Full loudness analysis. retval: returns true on successful analysis, false on MIDI take or when analysis failed for some reason. analyzeTruePeak=true: Also do true peak analysis. Returns true peak value in dBTP and true peak position (relative to item position). Considerably slower than without true peak analysis (since it uses oversampling). Note: Short term uses a time window of 3 sec. for calculation. So for items shorter than this shortTermMaxOut can't be calculated correctly. Momentary uses a time window of 0.4 sec.
    */
-  function NF_AnalyzeTakeLoudness(take: MediaItem_Take, analyzeTruePeak: boolean): LuaMultiReturn<[boolean, number, number, number, number, number, number]>;
+  function NF_AnalyzeTakeLoudness(
+    take: MediaItem_Take,
+    analyzeTruePeak: boolean,
+  ): LuaMultiReturn<[boolean, number, number, number, number, number, number]>;
 
   /**
    * ```
@@ -20826,7 +24484,12 @@ declare namespace reaper {
    * ```
    * Same as NF_AnalyzeTakeLoudness but additionally returns shortTermMaxPos and momentaryMaxPos (in absolute project time). Note: shortTermMaxPos and momentaryMaxPos indicate the beginning of time intervalls, (3 sec. and 0.4 sec. resp.).
    */
-  function NF_AnalyzeTakeLoudness2(take: MediaItem_Take, analyzeTruePeak: boolean): LuaMultiReturn<[boolean, number, number, number, number, number, number, number, number]>;
+  function NF_AnalyzeTakeLoudness2(
+    take: MediaItem_Take,
+    analyzeTruePeak: boolean,
+  ): LuaMultiReturn<
+    [boolean, number, number, number, number, number, number, number, number]
+  >;
 
   /**
    * ```
@@ -20834,7 +24497,9 @@ declare namespace reaper {
    * ```
    * Does LUFS integrated analysis only. Faster than full loudness analysis (NF_AnalyzeTakeLoudness) . Use this if only LUFS integrated is required. Take vol. env. is taken into account. See: Signal flow
    */
-  function NF_AnalyzeTakeLoudness_IntegratedOnly(take: MediaItem_Take): LuaMultiReturn<[boolean, number]>;
+  function NF_AnalyzeTakeLoudness_IntegratedOnly(
+    take: MediaItem_Take,
+  ): LuaMultiReturn<[boolean, number]>;
 
   /**
    * ```
@@ -20842,7 +24507,9 @@ declare namespace reaper {
    * ```
    * Returns true on success.
    */
-  function NF_Base64_Decode(base64Str: string): LuaMultiReturn<[boolean, string]>;
+  function NF_Base64_Decode(
+    base64Str: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -20890,7 +24557,9 @@ declare namespace reaper {
    * ```
    * Gets action description and command ID number (for native actions) or named command IDs / identifier strings (for extension actions /ReaScripts) if global startup action is set, otherwise empty string. Returns false on failure.
    */
-  function NF_GetGlobalStartupAction(): LuaMultiReturn<[boolean, string, string]>;
+  function NF_GetGlobalStartupAction(): LuaMultiReturn<
+    [boolean, string, string]
+  >;
 
   /**
    * ```
@@ -20918,7 +24587,9 @@ declare namespace reaper {
    * ```
    * See NF_GetMediaItemMaxPeak, additionally returns maxPeakPos (relative to item position).
    */
-  function NF_GetMediaItemMaxPeakAndMaxPeakPos(item: MediaItem): LuaMultiReturn<[number, number]>;
+  function NF_GetMediaItemMaxPeakAndMaxPeakPos(
+    item: MediaItem,
+  ): LuaMultiReturn<[number, number]>;
 
   /**
    * ```
@@ -20946,7 +24617,9 @@ declare namespace reaper {
    * ```
    * Gets action description and command ID number (for native actions) or named command IDs / identifier strings (for extension actions /ReaScripts) if project startup action is set, otherwise empty string. Returns false on failure.
    */
-  function NF_GetProjectStartupAction(): LuaMultiReturn<[boolean, string, string]>;
+  function NF_GetProjectStartupAction(): LuaMultiReturn<
+    [boolean, string, string]
+  >;
 
   /**
    * ```
@@ -20954,7 +24627,9 @@ declare namespace reaper {
    * ```
    * Gets action description and command ID number (for native actions) or named command IDs / identifier strings (for extension actions /ReaScripts) if project track selection action is set, otherwise empty string. Returns false on failure.
    */
-  function NF_GetProjectTrackSelectionAction(): LuaMultiReturn<[boolean, string, string]>;
+  function NF_GetProjectTrackSelectionAction(): LuaMultiReturn<
+    [boolean, string, string]
+  >;
 
   /**
    * ```
@@ -20984,7 +24659,9 @@ declare namespace reaper {
    * integer supercollapsed, integer collapsed, integer small, integer recarm = reaper.NF_GetThemeDefaultTCPHeights()
    * ```
    */
-  function NF_GetThemeDefaultTCPHeights(): LuaMultiReturn<[number, number, number, number]>;
+  function NF_GetThemeDefaultTCPHeights(): LuaMultiReturn<
+    [number, number, number, number]
+  >;
 
   /**
    * ```
@@ -21044,7 +24721,10 @@ declare namespace reaper {
    * ```
    * Set SWS/S&M marker/region subtitle. markerRegionIdx: Refers to index that can be passed to EnumProjectMarkers (not displayed marker/region index). Returns true if subtitle is set successfully (i.e. marker/region with specified index is present in project). Lua code example here.
    */
-  function NF_SetSWSMarkerRegionSub(markerRegionSub: string, markerRegionIdx: number): boolean;
+  function NF_SetSWSMarkerRegionSub(
+    markerRegionSub: string,
+    markerRegionIdx: number,
+  ): boolean;
 
   /**
    * ```
@@ -21059,7 +24739,10 @@ declare namespace reaper {
    * ```
    * Set SWS analysis/normalize options (same as running action 'SWS: Set RMS analysis/normalize options'). targetLevel: target RMS normalize level (dB), windowSize: window size for peak RMS (sec.)
    */
-  function NF_SetSWS_RMSoptions(targetLevel: number, windowSize: number): boolean;
+  function NF_SetSWS_RMSoptions(
+    targetLevel: number,
+    windowSize: number,
+  ): boolean;
 
   /**
    * ```
@@ -21068,7 +24751,10 @@ declare namespace reaper {
    * Deprecated, see TakeFX_GetNamedConfigParm/'fx_ident' (v6.37+). See BR_TrackFX_GetFXModuleName. fx: counted consecutively across all takes (zero-based).
    * @deprecated
    */
-  function NF_TakeFX_GetFXModuleName(item: MediaItem, fx: number): LuaMultiReturn<[boolean, string]>;
+  function NF_TakeFX_GetFXModuleName(
+    item: MediaItem,
+    fx: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -21116,7 +24802,12 @@ declare namespace reaper {
    *
    * autoInstall: usually set to 2 (obey user setting).
    */
-  function ReaPack_AddSetRepository(name: string, url: string, enable: boolean, autoInstall: number): LuaMultiReturn<[boolean, string]>;
+  function ReaPack_AddSetRepository(
+    name: string,
+    url: string,
+    enable: boolean,
+    autoInstall: number,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -21132,7 +24823,10 @@ declare namespace reaper {
    * ```
    * Returns 0 if both versions are equal, a positive value if ver1 is higher than ver2 and a negative value otherwise.
    */
-  function ReaPack_CompareVersions(ver1: string, ver2: string): LuaMultiReturn<[number, string]>;
+  function ReaPack_CompareVersions(
+    ver1: string,
+    ver2: string,
+  ): LuaMultiReturn<[number, string]>;
 
   /**
    * ```
@@ -21146,7 +24840,10 @@ declare namespace reaper {
    *
    * type: see ReaPack_GetEntryInfo.
    */
-  function ReaPack_EnumOwnedFiles(entry: PackageEntry, index: number): LuaMultiReturn<[boolean, string, number, number]>;
+  function ReaPack_EnumOwnedFiles(
+    entry: PackageEntry,
+    index: number,
+  ): LuaMultiReturn<[boolean, string, number, number]>;
 
   /**
    * ```
@@ -21166,7 +24863,22 @@ declare namespace reaper {
    *
    * type: 1=script, 2=extension, 3=effect, 4=data, 5=theme, 6=langpack, 7=webinterface
    */
-  function ReaPack_GetEntryInfo(entry: PackageEntry): LuaMultiReturn<[boolean, string, string, string, string, number, string, string, number, number]>;
+  function ReaPack_GetEntryInfo(
+    entry: PackageEntry,
+  ): LuaMultiReturn<
+    [
+      boolean,
+      string,
+      string,
+      string,
+      string,
+      number,
+      string,
+      string,
+      number,
+      number,
+    ]
+  >;
 
   /**
    * ```
@@ -21188,7 +24900,9 @@ declare namespace reaper {
    *
    * autoInstall: 0=manual, 1=when sychronizing, 2=obey user setting
    */
-  function ReaPack_GetRepositoryInfo(name: string): LuaMultiReturn<[boolean, string, boolean, number]>;
+  function ReaPack_GetRepositoryInfo(
+    name: string,
+  ): LuaMultiReturn<[boolean, string, boolean, number]>;
 
   /**
    * ```
@@ -21209,7 +24923,11 @@ declare namespace reaper {
    * Note: obeys default sends preferences, supports frozen tracks, etc..
    * @deprecated
    */
-  function SNM_AddReceive(src: MediaTrack, dest: MediaTrack, type: number): boolean;
+  function SNM_AddReceive(
+    src: MediaTrack,
+    dest: MediaTrack,
+    type: number,
+  ): boolean;
 
   /**
    * ```
@@ -21217,7 +24935,11 @@ declare namespace reaper {
    * ```
    * [S&M] Add an FX parameter knob in the TCP. Returns false if nothing updated (invalid parameters, knob already present, etc..)
    */
-  function SNM_AddTCPFXParm(tr: MediaTrack, fxId: number, prmId: number): boolean;
+  function SNM_AddTCPFXParm(
+    tr: MediaTrack,
+    fxId: number,
+    prmId: number,
+  ): boolean;
 
   /**
    * ```
@@ -21249,7 +24971,11 @@ declare namespace reaper {
    * ```
    * [S&M] See SNM_GetDoubleConfigVar.
    */
-  function SNM_GetDoubleConfigVarEx(proj: ReaProject, varname: string, errvalue: number): number;
+  function SNM_GetDoubleConfigVarEx(
+    proj: ReaProject,
+    varname: string,
+    errvalue: number,
+  ): number;
 
   /**
    * ```
@@ -21281,7 +25007,11 @@ declare namespace reaper {
    * ```
    * [S&M] See SNM_GetIntConfigVar.
    */
-  function SNM_GetIntConfigVarEx(proj: ReaProject, varname: string, errvalue: number): number;
+  function SNM_GetIntConfigVarEx(
+    proj: ReaProject,
+    varname: string,
+    errvalue: number,
+  ): number;
 
   /**
    * ```
@@ -21289,7 +25019,9 @@ declare namespace reaper {
    * ```
    * [S&M] Reads a 64-bit integer preference split in two 32-bit integers (look in project prefs first, then in general prefs). Returns false if failed (e.g. varname not found).
    */
-  function SNM_GetLongConfigVar(varname: string): LuaMultiReturn<[boolean, number, number]>;
+  function SNM_GetLongConfigVar(
+    varname: string,
+  ): LuaMultiReturn<[boolean, number, number]>;
 
   /**
    * ```
@@ -21297,7 +25029,10 @@ declare namespace reaper {
    * ```
    * [S&M] See SNM_GetLongConfigVar.
    */
-  function SNM_GetLongConfigVarEx(proj: ReaProject, varname: string): LuaMultiReturn<[boolean, number, number]>;
+  function SNM_GetLongConfigVarEx(
+    proj: ReaProject,
+    varname: string,
+  ): LuaMultiReturn<[boolean, number, number]>;
 
   /**
    * ```
@@ -21305,7 +25040,10 @@ declare namespace reaper {
    * ```
    * [S&M] Gets a take by GUID as string. The GUID must be enclosed in braces {}. To get take GUID as string, see BR_GetMediaItemTakeGUID
    */
-  function SNM_GetMediaItemTakeByGUID(project: ReaProject, guid: string): MediaItem_Take;
+  function SNM_GetMediaItemTakeByGUID(
+    project: ReaProject,
+    guid: string,
+  ): MediaItem_Take;
 
   /**
    * ```
@@ -21313,7 +25051,12 @@ declare namespace reaper {
    * ```
    * [S&M] Gets a marker/region name. Returns true if marker/region found.
    */
-  function SNM_GetProjectMarkerName(proj: ReaProject, num: number, isrgn: boolean, name: WDL_FastString): boolean;
+  function SNM_GetProjectMarkerName(
+    proj: ReaProject,
+    num: number,
+    isrgn: boolean,
+    name: WDL_FastString,
+  ): boolean;
 
   /**
    * ```
@@ -21325,7 +25068,12 @@ declare namespace reaper {
    *
    * Note: unlike the native GetSetObjectState, calling to FreeHeapPtr() is not required.
    */
-  function SNM_GetSetObjectState(obj: identifier, state: WDL_FastString, setnewvalue: boolean, wantminimalstate: boolean): boolean;
+  function SNM_GetSetObjectState(
+    obj: identifier,
+    state: WDL_FastString,
+    setnewvalue: boolean,
+    wantminimalstate: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -21335,7 +25083,12 @@ declare namespace reaper {
    *
    * Note: this function does not use a MediaItem_Take* param in order to manage empty takes (i.e. takes with MediaItem_Take*==NULL), see SNM_GetSetSourceState2.
    */
-  function SNM_GetSetSourceState(item: MediaItem, takeidx: number, state: WDL_FastString, setnewvalue: boolean): boolean;
+  function SNM_GetSetSourceState(
+    item: MediaItem,
+    takeidx: number,
+    state: WDL_FastString,
+    setnewvalue: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -21345,7 +25098,11 @@ declare namespace reaper {
    *
    * Note: this function cannot deal with empty takes, see SNM_GetSetSourceState.
    */
-  function SNM_GetSetSourceState2(take: MediaItem_Take, state: WDL_FastString, setnewvalue: boolean): boolean;
+  function SNM_GetSetSourceState2(
+    take: MediaItem_Take,
+    state: WDL_FastString,
+    setnewvalue: boolean,
+  ): boolean;
 
   /**
    * ```
@@ -21354,7 +25111,10 @@ declare namespace reaper {
    * [S&M] Deprecated, see GetMediaSourceType. Gets the source type of a take. Returns false if failed (e.g. take with empty source, etc..)
    * @deprecated
    */
-  function SNM_GetSourceType(take: MediaItem_Take, type: WDL_FastString): boolean;
+  function SNM_GetSourceType(
+    take: MediaItem_Take,
+    type: WDL_FastString,
+  ): boolean;
 
   /**
    * ```
@@ -21365,7 +25125,11 @@ declare namespace reaper {
    * fxId: fx index in chain or -1 for the selected fx. what: 0 to remove, -1 to move fx up in chain, 1 to move fx down in chain.
    * @deprecated
    */
-  function SNM_MoveOrRemoveTrackFX(tr: MediaTrack, fxId: number, what: number): boolean;
+  function SNM_MoveOrRemoveTrackFX(
+    tr: MediaTrack,
+    fxId: number,
+    what: number,
+  ): boolean;
 
   /**
    * ```
@@ -21373,7 +25137,10 @@ declare namespace reaper {
    * ```
    * [S&M] Reads a media file tag. Supported tags: "artist", "album", "genre", "comment", "title", "track" (track number) or "year". Returns false if tag was not found. See SNM_TagMediaFile.
    */
-  function SNM_ReadMediaFileTag(fn: string, tag: string): LuaMultiReturn<[boolean, string]>;
+  function SNM_ReadMediaFileTag(
+    fn: string,
+    tag: string,
+  ): LuaMultiReturn<[boolean, string]>;
 
   /**
    * ```
@@ -21414,7 +25181,11 @@ declare namespace reaper {
    * ```
    * [S&M] See SNM_SetDoubleConfigVar.
    */
-  function SNM_SetDoubleConfigVarEx(proj: ReaProject, varname: string, newvalue: number): boolean;
+  function SNM_SetDoubleConfigVarEx(
+    proj: ReaProject,
+    varname: string,
+    newvalue: number,
+  ): boolean;
 
   /**
    * ```
@@ -21422,7 +25193,10 @@ declare namespace reaper {
    * ```
    * [S&M] Sets the "fast string" content. Returns str for facility.
    */
-  function SNM_SetFastString(str: WDL_FastString, newstr: string): WDL_FastString;
+  function SNM_SetFastString(
+    str: WDL_FastString,
+    newstr: string,
+  ): WDL_FastString;
 
   /**
    * ```
@@ -21438,7 +25212,11 @@ declare namespace reaper {
    * ```
    * [S&M] See SNM_SetIntConfigVar.
    */
-  function SNM_SetIntConfigVarEx(proj: ReaProject, varname: string, newvalue: number): boolean;
+  function SNM_SetIntConfigVarEx(
+    proj: ReaProject,
+    varname: string,
+    newvalue: number,
+  ): boolean;
 
   /**
    * ```
@@ -21446,7 +25224,11 @@ declare namespace reaper {
    * ```
    * [S&M] Sets a 64-bit integer preference from two 32-bit integers (look in project prefs first, then in general prefs). Returns false if failed (e.g. varname not found).
    */
-  function SNM_SetLongConfigVar(varname: string, newHighValue: number, newLowValue: number): boolean;
+  function SNM_SetLongConfigVar(
+    varname: string,
+    newHighValue: number,
+    newLowValue: number,
+  ): boolean;
 
   /**
    * ```
@@ -21454,7 +25236,12 @@ declare namespace reaper {
    * ```
    * [S&M] SNM_SetLongConfigVar.
    */
-  function SNM_SetLongConfigVarEx(proj: ReaProject, varname: string, newHighValue: number, newLowValue: number): boolean;
+  function SNM_SetLongConfigVarEx(
+    proj: ReaProject,
+    varname: string,
+    newHighValue: number,
+    newLowValue: number,
+  ): boolean;
 
   /**
    * ```
@@ -21463,7 +25250,15 @@ declare namespace reaper {
    * [S&M] Deprecated, see SetProjectMarker4 -- Same function as SetProjectMarker3() except it can set empty names "".
    * @deprecated
    */
-  function SNM_SetProjectMarker(proj: ReaProject, num: number, isrgn: boolean, pos: number, rgnend: number, name: string, color: number): boolean;
+  function SNM_SetProjectMarker(
+    proj: ReaProject,
+    num: number,
+    isrgn: boolean,
+    pos: number,
+    rgnend: number,
+    name: string,
+    color: number,
+  ): boolean;
 
   /**
    * ```
@@ -21521,7 +25316,11 @@ declare namespace reaper {
    * ```
    * Creates writer for 32 bit floating point WAV
    */
-  function Xen_AudioWriter_Create(filename: string, numchans: number, samplerate: number): AudioWriter;
+  function Xen_AudioWriter_Create(
+    filename: string,
+    numchans: number,
+    samplerate: number,
+  ): AudioWriter;
 
   /**
    * ```
@@ -21537,7 +25336,12 @@ declare namespace reaper {
    * ```
    * Write interleaved audio data to disk
    */
-  function Xen_AudioWriter_Write(writer: AudioWriter, numframes: number, data: identifier, offset: number): number;
+  function Xen_AudioWriter_Write(
+    writer: AudioWriter,
+    numframes: number,
+    data: identifier,
+    offset: number,
+  ): number;
 
   /**
    * ```
@@ -21545,7 +25349,15 @@ declare namespace reaper {
    * ```
    * Get interleaved audio data from media source
    */
-  function Xen_GetMediaSourceSamples(src: PCM_source, destbuf: identifier, destbufoffset: number, numframes: number, numchans: number, samplerate: number, sourceposition: number): number;
+  function Xen_GetMediaSourceSamples(
+    src: PCM_source,
+    destbuf: identifier,
+    destbufoffset: number,
+    numframes: number,
+    numchans: number,
+    samplerate: number,
+    sourceposition: number,
+  ): number;
 
   /**
    * ```
@@ -21555,7 +25367,12 @@ declare namespace reaper {
    *
    * If the given PCM_source does not belong to an existing MediaItem/Take, it will be deleted by the preview system when the preview is stopped.
    */
-  function Xen_StartSourcePreview(source: PCM_source, gain: number, loop: boolean, outputchanindexIn?: number): number;
+  function Xen_StartSourcePreview(
+    source: PCM_source,
+    gain: number,
+    loop: boolean,
+    outputchanindexIn?: number,
+  ): number;
 
   /**
    * ```
@@ -21596,6 +25413,16 @@ declare namespace reaper {
    * Adds code to be called back by REAPER. Used to create persistent ReaScripts that continue to run and respond to input, while the user does other tasks. Identical to defer().Note that no undo point will be automatically created when the script finishes, unless you create it explicitly.
    */
   function runloop(fun: Function): void;
+
+  class array {
+    /**
+     * ```
+     * reaper.array.get_alloc()
+     * ```
+     * Returns the maximum (allocated) size of the array.
+     */
+    get_alloc(): void;
+  }
 }
 
 declare namespace gfx {
@@ -21630,14 +25457,4 @@ declare namespace gfx {
    * Updates the graphics display, if opened
    */
   function update(): void;
-}
-
-declare class reaper.array {
-  /**
-   * ```
-   * reaper.array.get_alloc()
-   * ```
-   * Returns the maximum (allocated) size of the array.
-   */
-  get_alloc(): void;
 }
