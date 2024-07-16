@@ -83,8 +83,13 @@ export class Track {
     return result;
   }
 
-  getParentSendInfo() {
-    return TrackRouting.getParentInfo(this.obj);
+  getParentSendInfo(): ReturnType<Track["getSends"]>[number] {
+    const parentTrack = reaper.GetMediaTrackInfo_Value(this.obj, "P_PARTRACK");
+    return {
+      ...TrackRouting.getParentInfo(this.obj),
+      src: this.obj,
+      dst: parentTrack,
+    };
   }
 
   static getSelected() {
