@@ -7,6 +7,46 @@ export class Track {
     this.obj = track;
   }
 
+  static getMaster() {
+    return new Track(reaper.GetMasterTrack(0));
+  }
+
+  static count() {
+    return reaper.CountTracks(0);
+  }
+
+  static getByIdx(idx: number) {
+    return new Track(reaper.GetTrack(0, idx));
+  }
+
+  static getSelected() {
+    const tracks = [];
+    let i = 0;
+    while (true) {
+      const t = reaper.GetSelectedTrack2(0, i, true);
+      if (t === null) return tracks;
+
+      tracks.push(new Track(t));
+      i += 1;
+    }
+  }
+
+  static *iterAll() {
+    const count = Track.count();
+    for (let i = 0; i < count; i++) {
+      yield Track.getByIdx(i);
+    }
+  }
+
+  static getAll() {
+    const count = Track.count();
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      result.push(Track.getByIdx(i));
+    }
+    return result;
+  }
+
   getFxCount() {
     return reaper.TrackFX_GetCount(this.obj);
   }
@@ -92,16 +132,8 @@ export class Track {
     };
   }
 
-  static getSelected() {
-    const tracks = [];
-    let i = 0;
-    while (true) {
-      const t = reaper.GetSelectedTrack2(0, i, true);
-      if (t === null) return tracks;
-
-      tracks.push(new Track(t));
-      i += 1;
-    }
+  delete() {
+    reaper.DeleteTrack(this.obj);
   }
 }
 

@@ -464,7 +464,7 @@ declare namespace reaper {
    * ```
    * count the number of tracks in the project (proj=0 for active project)
    */
-  function CountTracks(proj: ReaProject): number;
+  function CountTracks(proj: ReaProject | number): number;
 
   /**
    * ```
