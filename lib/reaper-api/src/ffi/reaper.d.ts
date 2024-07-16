@@ -3674,36 +3674,29 @@ declare namespace reaper {
    *
    * parameter names:
    *
-   * B_MUTE : bool *
-   *
-   * B_PHASE : bool * : true to flip phase
-   *
-   * B_MONO : bool *
-   *
-   * D_VOL : double * : 1.0 = +0dB etc
-   *
-   * D_PAN : double * : -1..+1
-   *
-   * D_PANLAW : double * : 1.0=+0.0db, 0.5=-6dB, -1.0 = projdef etc
-   *
-   * I_SENDMODE : int * : 0=post-fader, 1=pre-fx, 2=post-fx (deprecated), 3=post-fx
-   *
-   * I_AUTOMODE : int * : automation mode (-1=use track automode, 0=trim/off, 1=read, 2=touch, 3=write, 4=latch)
-   *
-   * I_SRCCHAN : int * : -1 for no audio send. Low 10 bits specify channel offset, and higher bits specify channel count. (srcchan>>10) == 0 for stereo, 1 for mono, 2 for 4 channel, 3 for 6 channel, etc.
-   *
-   * I_DSTCHAN : int * : low 10 bits are destination index, &1024 set to mix to mono.
-   *
-   * I_MIDIFLAGS : int * : low 5 bits=source channel 0=all, 1-16, 31=MIDI send disabled, next 5 bits=dest channel, 0=orig, 1-16=chan. &1024 for faders-send MIDI vol/pan. (>>14)&255 = src bus (0 for all, 1 for normal, 2+). (>>22)&255=destination bus (0 for all, 1 for normal, 2+)
-   *
-   * P_DESTTRACK : MediaTrack * : destination track, only applies for sends/recvs (read-only)
-   *
-   * P_SRCTRACK : MediaTrack * : source track, only applies for sends/recvs (read-only)
-   *
-   * P_ENV:<envchunkname : TrackEnvelope * : call with :<VOLENV, :<PANENV, etc appended (read-only)
+   * - `B_MUTE` : bool *
+   * - `B_PHASE` : bool * : true to flip phase
+   * - `B_MONO` : bool *
+   * - `D_VOL` : double * : 1.0 = +0dB etc
+   * - `D_PAN` : double * : -1..+1
+   * - `D_PANLAW` : double * : 1.0=+0.0db, 0.5=-6dB, -1.0 = projdef etc
+   * - `I_SENDMODE` : int * : 0=post-fader, 1=pre-fx, 2=post-fx (deprecated), 3=post-fx
+   * - `I_AUTOMODE` : int * : automation mode (-1=use track automode, 0=trim/off, 1=read, 2=touch, 3=write, 4=latch)
+   * - `I_SRCCHAN` : int * : -1 for no audio send. Low 10 bits specify channel offset, and higher bits specify channel count. (srcchan>>10) == 0 for stereo, 1 for mono, 2 for 4 channel, 3 for 6 channel, etc.
+   * - `I_DSTCHAN` : int * : low 10 bits are destination index, &1024 set to mix to mono.
+   * - `I_MIDIFLAGS` : int * : low 5 bits=source channel 0=all, 1-16, 31=MIDI send disabled, next 5 bits=dest channel, 0=orig, 1-16=chan. &1024 for faders-send MIDI vol/pan. (>>14)&255 = src bus (0 for all, 1 for normal, 2+). (>>22)&255=destination bus (0 for all, 1 for normal, 2+)
+   * - `P_DESTTRACK` : MediaTrack * : destination track, only applies for sends/recvs (read-only)
+   * - `P_SRCTRACK` : MediaTrack * : source track, only applies for sends/recvs (read-only)
+   * - `P_ENV:<envchunkname` : TrackEnvelope * : call with :<VOLENV, :<PANENV, etc appended (read-only)
    *
    * See CreateTrackSend, RemoveTrackSend, GetTrackNumSends.
    */
+  function GetTrackSendInfo_Value(
+    tr: MediaTrack,
+    category: number,
+    sendidx: number,
+    parmname: "P_DESTTRACK" | "P_SRCTRACK",
+  ): MediaTrack;
   function GetTrackSendInfo_Value(
     tr: MediaTrack,
     category: number,
