@@ -13341,6 +13341,8 @@ declare namespace reaper {
     flagsIn?: number,
   ): ImGui_Image;
 
+  function ImGui_CreateImageSet(): ImGui_ImageSet;
+
   /**
    * ```
    * ImGui_ListClipper _ = reaper.ImGui_CreateListClipper(ImGui_Context ctx)
@@ -25193,6 +25195,18 @@ declare namespace reaper {
    * Adds code to be called back by REAPER. Used to create persistent ReaScripts that continue to run and respond to input, while the user does other tasks. Identical to defer().Note that no undo point will be automatically created when the script finishes, unless you create it explicitly.
    */
   function runloop(fun: Function): void;
+
+  /**
+   * ```
+   * reaper.set_action_options(flag)
+   * ```
+   * Sets action options for the script.
+   * - flag&1: script will auto-terminate if re-launched while already running
+   * - flag&2: if (flag&1) is set, script will re-launch after auto-terminating
+   * - flag&4: set script toggle state on
+   * - flag&8: set script toggle state off
+   */
+  function set_action_options(flag: number): void;
 
   class array {
     /**
