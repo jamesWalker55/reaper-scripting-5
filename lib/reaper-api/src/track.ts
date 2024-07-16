@@ -83,16 +83,8 @@ export class Track {
     return result;
   }
 
-  sendsAudioToParent() {
-    return reaper.GetMediaTrackInfo_Value(this.obj, "B_MAINSEND") === 1;
-  }
-
-  getParentSendChannelOffset() {
-    return reaper.GetMediaTrackInfo_Value(this.obj, "C_MAINSEND_OFFS");
-  }
-
-  getParentSendChannelCount() {
-    return reaper.GetMediaTrackInfo_Value(this.obj, "C_MAINSEND_NCH");
+  getParentSendInfo() {
+    return TrackRouting.getParentInfo(this.obj);
   }
 
   static getSelected() {
@@ -192,31 +184,30 @@ module TrackRouting {
     const I_DSTCHAN = GTSI_V("I_DSTCHAN");
     const dstChannelOffset = I_DSTCHAN & 0b01111111111;
     // idk what this is
-    const mixToMono = I_DSTCHAN & 0b10000000000;
+    const mixToMono = (I_DSTCHAN & 0b10000000000) !== 0;
 
-    const B_MUTE = GTSI_V("B_MUTE") === 1;
-    const B_PHASE = GTSI_V("B_PHASE") === 1;
-    const B_MONO = GTSI_V("B_MONO") === 1;
-    const D_VOL = GTSI_V("D_VOL");
-    const D_PAN = GTSI_V("D_PAN");
+    const muted = GTSI_V("B_MUTE") === 1;
+    const phaseInverted = GTSI_V("B_PHASE") === 1;
+    const mono = GTSI_V("B_MONO") === 1;
+    const volume = GTSI_V("D_VOL");
+    const pan = GTSI_V("D_PAN");
     const D_PANLAW = GTSI_V("D_PANLAW");
-    const I_SENDMODE = GTSI_V("I_SENDMODE") as TrackSendMode;
-    const I_AUTOMODE = GTSI_V("I_AUTOMODE") as TrackSendAutomationMode;
-    // const P_DESTTRACK = GTSI_V("P_DESTTRACK") as unknown as MediaTrack;
-    // const P_SRCTRACK = GTSI_V("P_SRCTRACK") as unknown as MediaTrack;
+    const panLaw = D_PANLAW === -1 ? null : D_PANLAW;
+    const sendMode = GTSI_V("I_SENDMODE") as TrackSendMode;
+    const automationMode = GTSI_V("I_AUTOMODE") as TrackSendAutomationMode;
 
     return {
       channelCount,
       srcChannelOffset,
       dstChannelOffset,
-      muted: B_MUTE,
-      phaseInverted: B_PHASE,
-      mono: B_MONO,
-      volume: D_VOL,
-      pan: D_PAN,
-      panLaw: D_PANLAW === -1 ? null : D_PANLAW,
-      sendMode: I_SENDMODE,
-      automationMode: I_AUTOMODE,
+      muted,
+      phaseInverted,
+      mono,
+      volume,
+      pan,
+      panLaw,
+      sendMode,
+      automationMode,
       mixToMono,
     };
   }
@@ -257,5 +248,100 @@ module TrackRouting {
       "P_SRCTRACK",
     );
     return { dst, src };
+  }
+
+  export function getParentAudioInfo(
+    track: MediaTrack,
+  ): ReturnType<typeof getAudioInfo> {
+    const sendsAudioToParent =
+      reaper.GetMediaTrackInfo_Value(track, "B_MAINSEND") === 1;
+
+    if (!sendsAudioToParent) return null;
+
+    const trackChannelCount = reaper.GetMediaTrackInfo_Value(track, "I_NCHAN");
+    const dstChannelOffset = reaper.GetMediaTrackInfo_Value(
+      track,
+      "C_MAINSEND_OFFS",
+    );
+    const rawSendChannelCount = reaper.GetMediaTrackInfo_Value(
+      track,
+      "C_MAINSEND_NCH",
+    );
+    const sendChannelCount =
+      rawSendChannelCount === 0 ? trackChannelCount : rawSendChannelCount;
+
+    const muted = reaper.GetMediaTrackInfo_Value(track, "B_MUTE") === 1;
+    const phaseInverted =
+      reaper.GetMediaTrackInfo_Value(track, "B_PHASE") === 1;
+
+    const panmode = reaper.GetMediaTrackInfo_Value(track, "I_PANMODE");
+    if (panmode === 6) {
+      // dual pan mode, pan value is ignored in this track
+      // i don't want to deal with this now
+      error("dual-panned tracks are not supported by this script");
+    }
+
+    const volume = reaper.GetMediaTrackInfo_Value(track, "D_VOL");
+    const pan = reaper.GetMediaTrackInfo_Value(track, "D_PAN");
+    const width = reaper.GetMediaTrackInfo_Value(track, "D_WIDTH");
+    const panLaw = reaper.GetMediaTrackInfo_Value(track, "D_PANLAW");
+
+    return {
+      channelCount: sendChannelCount,
+      srcChannelOffset: 0, // always 0, no way to send with src offset
+      dstChannelOffset: dstChannelOffset,
+      muted,
+      phaseInverted,
+      mono: width === 0,
+      volume,
+      pan,
+      panLaw,
+      sendMode: TrackSendMode.PostFader, // post fader is the default
+      automationMode: TrackSendAutomationMode.TrackDefault, // i'm lazy so i'll just set this as default for now
+      mixToMono: false, // no idea what this is
+    };
+  }
+
+  export function getParentMidiInfo(
+    track: MediaTrack,
+  ): ReturnType<typeof parseMidiFlags> {
+    const sendsAudioToParent =
+      reaper.GetMediaTrackInfo_Value(track, "B_MAINSEND") === 1;
+
+    // this also includes midi I think
+    if (!sendsAudioToParent) return null;
+
+    const I_MIDI_CTL_CHAN = reaper.GetMediaTrackInfo_Value(
+      track,
+      "I_MIDI_CTL_CHAN",
+    );
+    let faderLinkedChannel: number | "all" | null;
+    switch (I_MIDI_CTL_CHAN) {
+      case 16:
+        faderLinkedChannel = "all" as const;
+        break;
+      case -1:
+        faderLinkedChannel = null;
+        break;
+      default:
+        faderLinkedChannel = I_MIDI_CTL_CHAN + 1;
+        break;
+    }
+
+    return {
+      // there's no documentation on how to get these
+      // so i'll assume all are send
+      srcChannel: "all",
+      dstChannel: "all",
+      srcBus: "all",
+      dstBus: "all",
+      fadersSendMidiVolPan: faderLinkedChannel !== null,
+    };
+  }
+
+  export function getParentInfo(track: MediaTrack): ReturnType<typeof getInfo> {
+    const audio = TrackRouting.getParentAudioInfo(track);
+    const midi = TrackRouting.getParentMidiInfo(track);
+    return { audio, midi };
   }
 }
