@@ -453,6 +453,157 @@ declare namespace reaper {
    * Return the index of the next selected effect in the given FX chain. Start index should be -1. Returns -1 if there are no more selected effects.
    */
   function CF_EnumSelectedFX(hwnd: FxChain, index: number): number;
+
+  /**
+   * Get track numerical-value attributes.
+   *
+   * ```
+   * B_MUTE : bool * : muted
+   * B_PHASE : bool * : track phase inverted
+   * B_RECMON_IN_EFFECT : bool * : record monitoring in effect (current audio-thread playback state, read-only)
+   * IP_TRACKNUMBER : int : track number 1-based, 0=not found, -1=master track (read-only, returns the int directly)
+   * I_SOLO : int * : soloed, 0=not soloed, 1=soloed, 2=soloed in place, 5=safe soloed, 6=safe soloed in place
+   * B_SOLO_DEFEAT : bool * : when set, if anything else is soloed and this track is not muted, this track acts soloed
+   * I_FXEN : int * : fx enabled, 0=bypassed, !0=fx active
+   * I_RECARM : int * : record armed, 0=not record armed, 1=record armed
+   * I_RECINPUT : int * : record input, <0=no input. if 4096 set, input is MIDI and low 5 bits represent channel (0=all, 1-16=only chan), next 6 bits represent physical input (63=all, 62=VKB). If 4096 is not set, low 10 bits (0..1023) are input start channel (ReaRoute/Loopback start at 512). If 2048 is set, input is multichannel input (using track channel count), or if 1024 is set, input is stereo input, otherwise input is mono.
+   * I_RECMODE : int * : record mode, 0=input, 1=stereo out, 2=none, 3=stereo out w/latency compensation, 4=midi output, 5=mono out, 6=mono out w/ latency compensation, 7=midi overdub, 8=midi replace
+   * I_RECMODE_FLAGS : int * : record mode flags, &3=output recording mode (0=post fader, 1=pre-fx, 2=post-fx/pre-fader)
+   * I_RECMON : int * : record monitoring, 0=off, 1=normal, 2=not when playing (tape style)
+   * I_RECMONITEMS : int * : monitor items while recording, 0=off, 1=on
+   * B_AUTO_RECARM : bool * : automatically set record arm when selected (does not immediately affect recarm state, script should set directly if desired)
+   * I_VUMODE : int * : track vu mode, &1:disabled, &30==0:stereo peaks, &30==2:multichannel peaks, &30==4:stereo RMS, &30==8:combined RMS, &30==12:LUFS-M, &30==16:LUFS-S (readout=max), &30==20:LUFS-S (readout=current), &32:LUFS calculation on channels 1+2 only
+   * I_AUTOMODE : int * : track automation mode, 0=trim/off, 1=read, 2=touch, 3=write, 4=latch
+   * I_NCHAN : int * : number of track channels, 2-128, even numbers only
+   * I_SELECTED : int * : track selected, 0=unselected, 1=selected
+   * I_WNDH : int * : current TCP window height in pixels including envelopes (read-only)
+   * I_TCPH : int * : current TCP window height in pixels not including envelopes (read-only)
+   * I_TCPY : int * : current TCP window Y-position in pixels relative to top of arrange view (read-only)
+   * I_MCPX : int * : current MCP X-position in pixels relative to mixer container (read-only)
+   * I_MCPY : int * : current MCP Y-position in pixels relative to mixer container (read-only)
+   * I_MCPW : int * : current MCP width in pixels (read-only)
+   * I_MCPH : int * : current MCP height in pixels (read-only)
+   * I_FOLDERDEPTH : int * : folder depth change, 0=normal, 1=track is a folder parent, -1=track is the last in the innermost folder, -2=track is the last in the innermost and next-innermost folders, etc
+   * I_FOLDERCOMPACT : int * : folder collapsed state (only valid on folders), 0=normal, 1=collapsed, 2=fully collapsed
+   * I_MIDIHWOUT : int * : track midi hardware output index, <0=disabled, low 5 bits are which channels (0=all, 1-16), next 5 bits are output device index (0-31)
+   * I_MIDI_INPUT_CHANMAP : int * : -1 maps to source channel, otherwise 1-16 to map to MIDI channel
+   * I_MIDI_CTL_CHAN : int * : -1 no link, 0-15 link to MIDI volume/pan on channel, 16 link to MIDI volume/pan on all channels
+   * I_MIDI_TRACKSEL_FLAG : int * : MIDI editor track list options: &1=expand media items, &2=exclude from list, &4=auto-pruned
+   * I_PERFFLAGS : int * : track performance flags, &1=no media buffering, &2=no anticipative FX
+   * I_CUSTOMCOLOR : int * : custom color, OS dependent color|0x1000000 (i.e. ColorToNative(r,g,b)|0x1000000). If you do not |0x1000000, then it will not be used, but will store the color
+   * I_HEIGHTOVERRIDE : int * : custom height override for TCP window, 0 for none, otherwise size in pixels
+   * I_SPACER : int * : 1=TCP track spacer above this trackB_HEIGHTLOCK : bool * : track height lock (must set I_HEIGHTOVERRIDE before locking)
+   * D_VOL : double * : trim volume of track, 0=-inf, 0.5=-6dB, 1=+0dB, 2=+6dB, etc
+   * D_PAN : double * : trim pan of track, -1..1
+   * D_WIDTH : double * : width of track, -1..1
+   * D_DUALPANL : double * : dualpan position 1, -1..1, only if I_PANMODE==6
+   * D_DUALPANR : double * : dualpan position 2, -1..1, only if I_PANMODE==6
+   * I_PANMODE : int * : pan mode, 0=classic 3.x, 3=new balance, 5=stereo pan, 6=dual pan
+   * D_PANLAW : double * : pan law of track, <0=project default, 0.5=-6dB, 0.707..=-3dB, 1=+0dB, 1.414..=-3dB with gain compensation, 2=-6dB with gain compensation, etc
+   * I_PANLAW_FLAGS : int * : pan law flags, 0=sine taper, 1=hybrid taper with deprecated behavior when gain compensation enabled, 2=linear taper, 3=hybrid taper
+   * P_ENV:<envchunkname or P_ENV:{GUID... : TrackEnvelope * : (read-only) chunkname can be <VOLENV, <PANENV, etc; GUID is the stringified envelope GUID.
+   * B_SHOWINMIXER : bool * : track control panel visible in mixer (do not use on master track)
+   * B_SHOWINTCP : bool * : track control panel visible in arrange view (do not use on master track)
+   * B_MAINSEND : bool * : track sends audio to parent
+   * C_MAINSEND_OFFS : char * : channel offset of track send to parent
+   * C_MAINSEND_NCH : char * : channel count of track send to parent (0=use all child track channels, 1=use one channel only)
+   * I_FREEMODE : int * : 1=track free item positioning enabled, 2=track fixed lanes enabled (call UpdateTimeline() after changing)
+   * I_NUMFIXEDLANES : int * : number of track fixed lanes (fine to call with setNewValue, but returned value is read-only)
+   * C_LANESCOLLAPSED : char * : fixed lane collapse state (1=lanes collapsed, 2=track displays as non-fixed-lanes but hidden lanes exist)
+   * C_LANESETTINGS : char * : fixed lane settings (&1=auto-remove empty lanes at bottom, &2=do not auto-comp new recording, &4=newly recorded lanes play exclusively (else add lanes in layers), &8=big lanes (else small lanes), &16=add new recording at bottom (else record into first available lane), &32=hide lane buttons
+   * C_LANEPLAYS:N : char * : on fixed lane tracks, 0=lane N does not play, 1=lane N plays exclusively, 2=lane N plays and other lanes also play (fine to call with setNewValue, but returned value is read-only)
+   * C_ALLLANESPLAY : char * : on fixed lane tracks, 0=no lanes play, 1=all lanes play, 2=some lanes play (fine to call with setNewValue 0 or 1, but returned value is read-only)
+   * C_BEATATTACHMODE : char * : track timebase, -1=project default, 0=time, 1=beats (position, length, rate), 2=beats (position only)
+   * F_MCP_FXSEND_SCALE : float * : scale of fx+send area in MCP (0=minimum allowed, 1=maximum allowed)
+   * F_MCP_FXPARM_SCALE : float * : scale of fx parameter area in MCP (0=minimum allowed, 1=maximum allowed)
+   * F_MCP_SENDRGN_SCALE : float * : scale of send area as proportion of the fx+send total area (0=minimum allowed, 1=maximum allowed)
+   * F_TCP_FXPARM_SCALE : float * : scale of TCP parameter area when TCP FX are embedded (0=min allowed, default, 1=max allowed)
+   * I_PLAY_OFFSET_FLAG : int * : track media playback offset state, &1=bypassed, &2=offset value is measured in samples (otherwise measured in seconds)
+   * D_PLAY_OFFSET : double * : track media playback offset, units depend on I_PLAY_OFFSET_FLAG
+   * P_PARTRACK : MediaTrack * : parent track (read-only)
+   * P_PROJECT : ReaProject * : parent project (read-only)
+   * ```
+   */
+  function GetMediaTrackInfo_Value(tr: MediaTrack, parmname: string): number;
+  function GetMediaTrackInfo_Value(
+    tr: MediaTrack,
+    parmname: "P_PARTRACK",
+  ): MediaTrack;
+  function GetMediaTrackInfo_Value(
+    tr: MediaTrack,
+    parmname: "P_PROJECT",
+  ): ReaProject;
+
+  /**
+   * Set track numerical-value attributes.
+   * B_MUTE : bool * : muted
+   * B_PHASE : bool * : track phase inverted
+   * B_RECMON_IN_EFFECT : bool * : record monitoring in effect (current audio-thread playback state, read-only)
+   * IP_TRACKNUMBER : int : track number 1-based, 0=not found, -1=master track (read-only, returns the int directly)
+   * I_SOLO : int * : soloed, 0=not soloed, 1=soloed, 2=soloed in place, 5=safe soloed, 6=safe soloed in place
+   * B_SOLO_DEFEAT : bool * : when set, if anything else is soloed and this track is not muted, this track acts soloed
+   * I_FXEN : int * : fx enabled, 0=bypassed, !0=fx active
+   * I_RECARM : int * : record armed, 0=not record armed, 1=record armed
+   * I_RECINPUT : int * : record input, <0=no input. if 4096 set, input is MIDI and low 5 bits represent channel (0=all, 1-16=only chan), next 6 bits represent physical input (63=all, 62=VKB). If 4096 is not set, low 10 bits (0..1023) are input start channel (ReaRoute/Loopback start at 512). If 2048 is set, input is multichannel input (using track channel count), or if 1024 is set, input is stereo input, otherwise input is mono.
+   * I_RECMODE : int * : record mode, 0=input, 1=stereo out, 2=none, 3=stereo out w/latency compensation, 4=midi output, 5=mono out, 6=mono out w/ latency compensation, 7=midi overdub, 8=midi replace
+   * I_RECMODE_FLAGS : int * : record mode flags, &3=output recording mode (0=post fader, 1=pre-fx, 2=post-fx/pre-fader)
+   * I_RECMON : int * : record monitoring, 0=off, 1=normal, 2=not when playing (tape style)
+   * I_RECMONITEMS : int * : monitor items while recording, 0=off, 1=on
+   * B_AUTO_RECARM : bool * : automatically set record arm when selected (does not immediately affect recarm state, script should set directly if desired)
+   * I_VUMODE : int * : track vu mode, &1:disabled, &30==0:stereo peaks, &30==2:multichannel peaks, &30==4:stereo RMS, &30==8:combined RMS, &30==12:LUFS-M, &30==16:LUFS-S (readout=max), &30==20:LUFS-S (readout=current), &32:LUFS calculation on channels 1+2 only
+   * I_AUTOMODE : int * : track automation mode, 0=trim/off, 1=read, 2=touch, 3=write, 4=latch
+   * I_NCHAN : int * : number of track channels, 2-128, even numbers only
+   * I_SELECTED : int * : track selected, 0=unselected, 1=selected
+   * I_WNDH : int * : current TCP window height in pixels including envelopes (read-only)
+   * I_TCPH : int * : current TCP window height in pixels not including envelopes (read-only)
+   * I_TCPY : int * : current TCP window Y-position in pixels relative to top of arrange view (read-only)
+   * I_MCPX : int * : current MCP X-position in pixels relative to mixer container (read-only)
+   * I_MCPY : int * : current MCP Y-position in pixels relative to mixer container (read-only)
+   * I_MCPW : int * : current MCP width in pixels (read-only)
+   * I_MCPH : int * : current MCP height in pixels (read-only)
+   * I_FOLDERDEPTH : int * : folder depth change, 0=normal, 1=track is a folder parent, -1=track is the last in the innermost folder, -2=track is the last in the innermost and next-innermost folders, etc
+   * I_FOLDERCOMPACT : int * : folder collapsed state (only valid on folders), 0=normal, 1=collapsed, 2=fully collapsed
+   * I_MIDIHWOUT : int * : track midi hardware output index, <0=disabled, low 5 bits are which channels (0=all, 1-16), next 5 bits are output device index (0-31)
+   * I_MIDI_INPUT_CHANMAP : int * : -1 maps to source channel, otherwise 1-16 to map to MIDI channel
+   * I_MIDI_CTL_CHAN : int * : -1 no link, 0-15 link to MIDI volume/pan on channel, 16 link to MIDI volume/pan on all channels
+   * I_MIDI_TRACKSEL_FLAG : int * : MIDI editor track list options: &1=expand media items, &2=exclude from list, &4=auto-pruned
+   * I_PERFFLAGS : int * : track performance flags, &1=no media buffering, &2=no anticipative FX
+   * I_CUSTOMCOLOR : int * : custom color, OS dependent color|0x1000000 (i.e. ColorToNative(r,g,b)|0x1000000). If you do not |0x1000000, then it will not be used, but will store the color
+   * I_HEIGHTOVERRIDE : int * : custom height override for TCP window, 0 for none, otherwise size in pixels
+   * I_SPACER : int * : 1=TCP track spacer above this trackB_HEIGHTLOCK : bool * : track height lock (must set I_HEIGHTOVERRIDE before locking)
+   * D_VOL : double * : trim volume of track, 0=-inf, 0.5=-6dB, 1=+0dB, 2=+6dB, etc
+   * D_PAN : double * : trim pan of track, -1..1
+   * D_WIDTH : double * : width of track, -1..1
+   * D_DUALPANL : double * : dualpan position 1, -1..1, only if I_PANMODE==6
+   * D_DUALPANR : double * : dualpan position 2, -1..1, only if I_PANMODE==6
+   * I_PANMODE : int * : pan mode, 0=classic 3.x, 3=new balance, 5=stereo pan, 6=dual pan
+   * D_PANLAW : double * : pan law of track, <0=project default, 0.5=-6dB, 0.707..=-3dB, 1=+0dB, 1.414..=-3dB with gain compensation, 2=-6dB with gain compensation, etc
+   * I_PANLAW_FLAGS : int * : pan law flags, 0=sine taper, 1=hybrid taper with deprecated behavior when gain compensation enabled, 2=linear taper, 3=hybrid taper
+   * P_ENV:<envchunkname or P_ENV:{GUID... : TrackEnvelope * : (read-only) chunkname can be <VOLENV, <PANENV, etc; GUID is the stringified envelope GUID.
+   * B_SHOWINMIXER : bool * : track control panel visible in mixer (do not use on master track)
+   * B_SHOWINTCP : bool * : track control panel visible in arrange view (do not use on master track)
+   * B_MAINSEND : bool * : track sends audio to parent
+   * C_MAINSEND_OFFS : char * : channel offset of track send to parent
+   * C_MAINSEND_NCH : char * : channel count of track send to parent (0=use all child track channels, 1=use one channel only)
+   * I_FREEMODE : int * : 1=track free item positioning enabled, 2=track fixed lanes enabled (call UpdateTimeline() after changing)
+   * I_NUMFIXEDLANES : int * : number of track fixed lanes (fine to call with setNewValue, but returned value is read-only)
+   * C_LANESCOLLAPSED : char * : fixed lane collapse state (1=lanes collapsed, 2=track displays as non-fixed-lanes but hidden lanes exist)
+   * C_LANESETTINGS : char * : fixed lane settings (&1=auto-remove empty lanes at bottom, &2=do not auto-comp new recording, &4=newly recorded lanes play exclusively (else add lanes in layers), &8=big lanes (else small lanes), &16=add new recording at bottom (else record into first available lane), &32=hide lane buttons
+   * C_LANEPLAYS:N : char * : on fixed lane tracks, 0=lane N does not play, 1=lane N plays exclusively, 2=lane N plays and other lanes also play (fine to call with setNewValue, but returned value is read-only)
+   * C_ALLLANESPLAY : char * : on fixed lane tracks, 0=no lanes play, 1=all lanes play, 2=some lanes play (fine to call with setNewValue 0 or 1, but returned value is read-only)
+   * C_BEATATTACHMODE : char * : track timebase, -1=project default, 0=time, 1=beats (position, length, rate), 2=beats (position only)
+   * F_MCP_FXSEND_SCALE : float * : scale of fx+send area in MCP (0=minimum allowed, 1=maximum allowed)
+   * F_MCP_FXPARM_SCALE : float * : scale of fx parameter area in MCP (0=minimum allowed, 1=maximum allowed)
+   * F_MCP_SENDRGN_SCALE : float * : scale of send area as proportion of the fx+send total area (0=minimum allowed, 1=maximum allowed)
+   * F_TCP_FXPARM_SCALE : float * : scale of TCP parameter area when TCP FX are embedded (0=min allowed, default, 1=max allowed)
+   * I_PLAY_OFFSET_FLAG : int * : track media playback offset state, &1=bypassed, &2=offset value is measured in samples (otherwise measured in seconds)
+   * D_PLAY_OFFSET : double * : track media playback offset, units depend on I_PLAY_OFFSET_FLAG
+   */
+  function SetMediaTrackInfo_Value(
+    tr: MediaTrack,
+    parmname: string,
+    newvalue: number,
+  ): boolean;
 }
 
 /** @noSelf */
