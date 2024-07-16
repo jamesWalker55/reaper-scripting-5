@@ -123,10 +123,13 @@ export class Track {
     return result;
   }
 
-  getParentSendInfo(): ReturnType<Track["getSends"]>[number] {
+  getParentSendInfo(): ReturnType<Track["getSends"]>[number] | null {
+    const info = TrackRouting.getParentInfo(this.obj);
+    if (info.audio === null && info.midi === null) return null;
+
     const parentTrack = reaper.GetMediaTrackInfo_Value(this.obj, "P_PARTRACK");
     return {
-      ...TrackRouting.getParentInfo(this.obj),
+      ...info,
       src: this.obj,
       dst: parentTrack,
     };
