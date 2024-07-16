@@ -3192,7 +3192,6 @@ declare namespace reaper {
    *
    *
    * Note: REAPER v6.11 and earlier used _MASTER and _SLAVE rather than _LEAD and _FOLLOW, which is deprecated but still supported (scripts that must support v6.11 and earlier can use the deprecated strings).
-   * @deprecated
    */
   function GetSetTrackGroupMembership(
     tr: MediaTrack,
@@ -3260,7 +3259,6 @@ declare namespace reaper {
    *
    *
    * Note: REAPER v6.11 and earlier used _MASTER and _SLAVE rather than _LEAD and _FOLLOW, which is deprecated but still supported (scripts that must support v6.11 and earlier can use the deprecated strings).
-   * @deprecated
    */
   function GetSetTrackGroupMembershipHigh(
     tr: MediaTrack,
@@ -3705,7 +3703,6 @@ declare namespace reaper {
    * P_ENV:<envchunkname : TrackEnvelope * : call with :<VOLENV, :<PANENV, etc appended (read-only)
    *
    * See CreateTrackSend, RemoveTrackSend, GetTrackNumSends.
-   * @deprecated
    */
   function GetTrackSendInfo_Value(
     tr: MediaTrack,
@@ -7757,7 +7754,6 @@ declare namespace reaper {
    * I_MIDIFLAGS : int * : low 5 bits=source channel 0=all, 1-16, 31=MIDI send disabled, next 5 bits=dest channel, 0=orig, 1-16=chan. &1024 for faders-send MIDI vol/pan. (>>14)&255 = src bus (0 for all, 1 for normal, 2+). (>>22)&255=destination bus (0 for all, 1 for normal, 2+)
    *
    * See CreateTrackSend, RemoveTrackSend, GetTrackNumSends.
-   * @deprecated
    */
   function SetTrackSendInfo_Value(
     tr: MediaTrack,
@@ -10204,7 +10200,6 @@ declare namespace reaper {
    *
    *
    * Note: To get or set other send attributes, see BR_GetMediaTrackSendInfo_Envelope and BR_GetMediaTrackSendInfo_Track.
-   * @deprecated
    */
   function BR_GetSetTrackSendInfo(
     track: MediaTrack,
