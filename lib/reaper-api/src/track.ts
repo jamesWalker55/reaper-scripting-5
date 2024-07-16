@@ -272,7 +272,15 @@ module TrackRouting {
     category: TrackRoutingCategory.Send | TrackRoutingCategory.Receive,
     idx: number,
   ) {
-    const dst: MediaTrack = reaper.GetTrackSendInfo_Value(
+    // I'm adding '0' here because *parent* folder routing uses a number 0 to
+    // indicate sending to master.
+    //
+    // Note this only happens for `Track.getParentSendInfo()`. This function
+    // will always return a MediaTrack because 'track sends' can't target
+    // the master track.
+    //
+    // I'm using TypeScript's `ReturnType<...>` bullshit so I have to add it here.
+    const dst: MediaTrack | 0 = reaper.GetTrackSendInfo_Value(
       track,
       category,
       idx,
