@@ -19,6 +19,7 @@ export type AddFxParams =
   | { au: string }
   | { js: string }
   | { dx: string }
+  | { clap: string }
   | { browser: true | { max: number } | { exactly: number } }
   | string;
 
@@ -39,6 +40,8 @@ export function stringifyAddFxParams(params: AddFxParams): string {
     return `JS: ${params.js}`;
   } else if ("dx" in params) {
     return `DX: ${params.dx}`;
+  } else if ("clap" in params) {
+    return `CLAP: ${params.clap}`;
   } else if ("browser" in params) {
     const browser = params.browser;
     if (browser === true) {
