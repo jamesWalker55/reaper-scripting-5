@@ -106,7 +106,7 @@ function getMappedChannels(fx: TrackFX) {
 
 class CStripFx {
   static FX_IDENT = "utility/volume_pan_sample_accurate_auto";
-  static FX_NAME = "#CSTRIP [AIRWINDOWS CONSOLE]";
+  static FX_NAME = "AWC: #CSTRIP";
   static FX_ADD: AddFxParams = { js: CStripFx.FX_IDENT };
 
   fx: TrackFX;
@@ -153,12 +153,35 @@ class CStripFx {
     return strip;
   }
 
-  static findAll(track: Track): CStripFx | null {
+  static find(track: Track): CStripFx | null {
     for (const fx of track.getAllFx().reverse()) {
       const channel = CStripFx.fromFx(fx);
       if (channel !== null) return channel;
     }
     return null;
+  }
+
+  // move to second-last position
+  moveToSecondLast() {
+    const tr = this.fx.track;
+    const fxcount = reaper.TrackFX_GetCount(tr);
+    const oldIdx = this.fx.fxidx;
+    const newIdx = fxcount - 2;
+
+    // do nothing if already at end
+    if (oldIdx === newIdx) return;
+
+    // move the fx
+    reaper.TrackFX_CopyToTrack(tr, oldIdx, tr, newIdx, true);
+    // update the FX object to point to the correct index
+    this.fx.fxidx = newIdx;
+
+    // make sure it actually worked
+    const channel = CStripFx.fromFx(this.fx);
+    if (channel === null)
+      error(
+        `fatal error: something went wrong while moving cstrip fx from ${oldIdx} to ${newIdx}`,
+      );
   }
 
   /** Gain amount in dB */
@@ -186,7 +209,7 @@ class CStripFx {
 
 class ChannelFx {
   static FX_IDENT = "com.airwindows.consolidated";
-  static FX_NAME = "#CHANNEL [AIRWINDOWS CONSOLE]";
+  static FX_NAME = "AWC: #CHANNEL";
   static FX_ADD: AddFxParams = { clap: ChannelFx.FX_IDENT };
   static FX_PRESET = "ConsoleLAChannel";
 
@@ -260,6 +283,28 @@ class ChannelFx {
       if (channel !== null) return channel;
     }
     return null;
+  }
+
+  moveToEnd() {
+    const tr = this.fx.track;
+    const fxcount = reaper.TrackFX_GetCount(tr);
+    const oldIdx = this.fx.fxidx;
+    const newIdx = fxcount - 1;
+
+    // do nothing if already at end
+    if (oldIdx === newIdx) return;
+
+    // move the fx
+    reaper.TrackFX_CopyToTrack(tr, oldIdx, tr, newIdx, true);
+    // update the FX object to point to the correct index
+    this.fx.fxidx = newIdx;
+
+    // make sure it actually worked
+    const channel = ChannelFx.fromFx(this.fx);
+    if (channel === null)
+      error(
+        `fatal error: something went wrong while moving channel fx from ${oldIdx} to ${newIdx}`,
+      );
   }
 
   /** Gain amount in dB */
