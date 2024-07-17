@@ -4,6 +4,7 @@ import {
   stringifyAddFxParams,
   TrackFX,
 } from "./fx";
+import { Item } from "./item";
 
 export class Track {
   obj: MediaTrack;
@@ -21,7 +22,9 @@ export class Track {
   }
 
   static getByIdx(idx: number) {
-    return new Track(reaper.GetTrack(0, idx));
+    const obj = reaper.GetTrack(0, idx);
+    if (obj === null) error(`failed to get track with index ${idx}`);
+    return new Track(obj);
   }
 
   static getSelected() {
@@ -108,11 +111,31 @@ export class Track {
     return reaper.GetMediaTrackInfo_Value(this.obj, "I_FOLDERDEPTH");
   }
 
-  getSends() {
+  getSends(includeParent: boolean = false) {
     const category = TrackRoutingCategory.Send;
 
     const count = reaper.GetTrackNumSends(this.obj, category);
     const result = [];
+
+    if (includeParent) {
+      const info = TrackRouting.getParentInfo(this.obj);
+      if (info.audio !== null || info.midi !== null) {
+        let parentTrack = reaper.GetMediaTrackInfo_Value(
+          this.obj,
+          "P_PARTRACK",
+        ) as MediaTrack | 0;
+        // for some reason, 'P_PARTRACK' will just return a 0 (number) for the master track
+        if (parentTrack === 0) {
+          parentTrack = reaper.GetMasterTrack(0);
+        }
+
+        result.push({
+          ...info,
+          src: new Track(this.obj),
+          dst: new Track(parentTrack),
+        });
+      }
+    }
 
     for (let i = 0; i < count; i++) {
       const info = TrackRouting.getInfo(this.obj, category, i);
@@ -121,6 +144,66 @@ export class Track {
     }
 
     return result;
+  }
+
+  /** Return value is scalar, 0..1..inf */
+  getVolume() {
+    return reaper.GetMediaTrackInfo_Value(this.obj, "D_VOL");
+  }
+  /** Value is scalar, 0..1..inf */
+  setVolume(val: number) {
+    const ok = reaper.SetMediaTrackInfo_Value(this.obj, "D_VOL", val);
+    if (!ok) error("failed to set volume");
+  }
+  /** Return value in range -1..0..1 */
+  getPan() {
+    return reaper.GetMediaTrackInfo_Value(this.obj, "D_PAN");
+  }
+  /** Value in range -1..0..1 */
+  setPan(val: number) {
+    const ok = reaper.SetMediaTrackInfo_Value(this.obj, "D_PAN", val);
+    if (!ok) error("failed to set pan");
+  }
+  /** Return value in range -1..0..1 */
+  getWidth() {
+    return reaper.GetMediaTrackInfo_Value(this.obj, "D_WIDTH");
+  }
+  /** Value in range -1..0..1 */
+  setWidth(val: number) {
+    const ok = reaper.SetMediaTrackInfo_Value(this.obj, "D_WIDTH", val);
+    if (!ok) error("failed to set width");
+  }
+  /** pan law of track, <0=project default, 0.5=-6dB, 0.707..=-3dB, 1=+0dB, 1.414..=-3dB with gain compensation, 2=-6dB with gain compensation, etc */
+  getPanLaw() {
+    return reaper.GetMediaTrackInfo_Value(this.obj, "D_PANLAW");
+  }
+  /** pan law of track, <0=project default, 0.5=-6dB, 0.707..=-3dB, 1=+0dB, 1.414..=-3dB with gain compensation, 2=-6dB with gain compensation, etc */
+  setPanLaw(val: number) {
+    const ok = reaper.SetMediaTrackInfo_Value(this.obj, "D_PANLAW", val);
+    if (!ok) error("failed to set pan law");
+  }
+  getMuted() {
+    return reaper.GetMediaTrackInfo_Value(this.obj, "B_MUTE") === 1;
+  }
+  setMuted(val: boolean) {
+    const ok = reaper.SetMediaTrackInfo_Value(this.obj, "B_MUTE", val ? 1 : 0);
+    if (!ok) error("failed to set muted");
+  }
+  getPhaseInverted() {
+    return reaper.GetMediaTrackInfo_Value(this.obj, "B_PHASE") === 1;
+  }
+  setPhaseInverted(val: boolean) {
+    const ok = reaper.SetMediaTrackInfo_Value(this.obj, "B_PHASE", val ? 1 : 0);
+    if (!ok) error("failed to set phase inverted");
+  }
+  /** pan mode, 0=classic 3.x, 3=new balance, 5=stereo pan, 6=dual pan */
+  getPanmode() {
+    return reaper.GetMediaTrackInfo_Value(this.obj, "I_PANMODE");
+  }
+  /** pan mode, 0=classic 3.x, 3=new balance, 5=stereo pan, 6=dual pan */
+  setPanmode(val: number) {
+    const ok = reaper.SetMediaTrackInfo_Value(this.obj, "I_PANMODE", val);
+    if (!ok) error("failed to set panmode");
   }
 
   getReceives() {
@@ -152,20 +235,39 @@ export class Track {
     return result;
   }
 
-  getParentSendInfo(): ReturnType<Track["getSends"]>[number] | null {
-    const info = TrackRouting.getParentInfo(this.obj);
-    if (info.audio === null && info.midi === null) return null;
-
-    const parentTrack = reaper.GetMediaTrackInfo_Value(this.obj, "P_PARTRACK");
-    return {
-      ...info,
-      src: this.obj,
-      dst: parentTrack,
-    };
+  getName() {
+    const [ok, val] = reaper.GetSetMediaTrackInfo_String(
+      this.obj,
+      "P_NAME",
+      "",
+      false,
+    );
+    if (!ok) error("failed to get track name");
+    return val;
   }
 
   delete() {
     reaper.DeleteTrack(this.obj);
+  }
+
+  /** Returns 0-based index of track. Master track returns -1. */
+  getIdx() {
+    const tracknumber = reaper.GetMediaTrackInfo_Value(
+      this.obj,
+      "IP_TRACKNUMBER",
+    );
+    if (tracknumber === 0) error("failed to get track number");
+    if (tracknumber === -1) return -1;
+
+    return tracknumber - 1;
+  }
+
+  *iterItems() {
+    const count = reaper.CountTrackMediaItems(this.obj);
+    for (let i = 0; i < count; i++) {
+      const item = reaper.GetTrackMediaItem(this.obj, i);
+      yield new Item(item);
+    }
   }
 }
 
@@ -304,27 +406,19 @@ module TrackRouting {
     category: TrackRoutingCategory.Send | TrackRoutingCategory.Receive,
     idx: number,
   ) {
-    // I'm adding '0' here because *parent* folder routing uses a number 0 to
-    // indicate sending to master.
-    //
-    // Note this only happens for `Track.getParentSendInfo()`. This function
-    // will always return a MediaTrack because 'track sends' can't target
-    // the master track.
-    //
-    // I'm using TypeScript's `ReturnType<...>` bullshit so I have to add it here.
-    const dst: MediaTrack | 0 = reaper.GetTrackSendInfo_Value(
+    const dst: MediaTrack = reaper.GetTrackSendInfo_Value(
       track,
       category,
       idx,
       "P_DESTTRACK",
-    ) as MediaTrack | 0;
+    );
     const src: MediaTrack = reaper.GetTrackSendInfo_Value(
       track,
       category,
       idx,
       "P_SRCTRACK",
     );
-    return { dst, src };
+    return { dst: new Track(dst), src: new Track(src) };
   }
 
   export function getParentAudioInfo(
@@ -347,32 +441,31 @@ module TrackRouting {
     const sendChannelCount =
       rawSendChannelCount === 0 ? trackChannelCount : rawSendChannelCount;
 
-    const muted = reaper.GetMediaTrackInfo_Value(track, "B_MUTE") === 1;
-    const phaseInverted =
-      reaper.GetMediaTrackInfo_Value(track, "B_PHASE") === 1;
-
-    const panmode = reaper.GetMediaTrackInfo_Value(track, "I_PANMODE");
-    if (panmode === 6) {
-      // dual pan mode, pan value is ignored in this track
-      // i don't want to deal with this now
-      error("dual-panned tracks are not supported by this script");
-    }
-
-    const volume = reaper.GetMediaTrackInfo_Value(track, "D_VOL");
-    const pan = reaper.GetMediaTrackInfo_Value(track, "D_PAN");
-    const width = reaper.GetMediaTrackInfo_Value(track, "D_WIDTH");
-    const panLaw = reaper.GetMediaTrackInfo_Value(track, "D_PANLAW");
-
     return {
       channelCount: sendChannelCount,
       srcChannelOffset: 0, // always 0, no way to send with src offset
       dstChannelOffset: dstChannelOffset,
-      muted,
-      phaseInverted,
-      mono: width === 0,
-      volume,
-      pan,
-      panLaw,
+      // Hard-code values here instead of actually using fader values.
+      // Because this should be in line with how the other sends behave.
+      //
+      // Imagine the fx audio flow looks like this:
+      //
+      //              +->Info-->Track1 (post-fade send)
+      //              |
+      //  FX-+->Fader-+->XXXX-->Parent
+      //     |
+      //     +->Info-->Track2 (pre-fade send)
+      //
+      // The 'Fader' is where the volume slider, pan, etc actually happens.
+      // The 'Info' is what's being returned by these routing functions.
+      // The 'XXXX' is what this function returns. It doesn't really exist
+      // in Reaper's audio chain but this is a useful abstraction for me.
+      muted: false,
+      phaseInverted: false,
+      mono: false,
+      volume: 1,
+      pan: 0,
+      panLaw: null, // null means project default
       sendMode: TrackSendMode.PostFader, // post fader is the default
       automationMode: TrackSendAutomationMode.TrackDefault, // i'm lazy so i'll just set this as default for now
       mixToMono: false, // no idea what this is

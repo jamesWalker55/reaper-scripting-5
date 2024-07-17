@@ -3484,7 +3484,7 @@ declare namespace reaper {
   ): LuaMultiReturn<[boolean, number, number, number, number, number]>;
 
   /** get a track from a project by track count (zero-based) (proj=0 for active project) */
-  function GetTrack(proj: ReaProject | number, trackidx: number): MediaTrack;
+  function GetTrack(proj: ReaProject | number, trackidx: number): MediaTrack | null;
 
   /**
    * ```
