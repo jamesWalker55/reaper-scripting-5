@@ -569,8 +569,13 @@ class ChannelTrack {
       if (!this.strip) {
         // create a strip
         this.strip = CStripFx.create(this.track);
+        this.strip.moveToSecondLast();
         // fix fx index of channel plugin
-        this.channel.fx.fxidx += 1;
+        const newChannel = ChannelFx.find(this.track);
+        if (!newChannel) {
+          error("failed to find channel FX after creating gain plugin");
+        }
+        this.channel = newChannel;
       }
 
       this.strip.setGain(stripDb);
