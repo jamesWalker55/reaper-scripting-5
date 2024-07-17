@@ -514,47 +514,28 @@ function audioRoutingInfo() {
   return { sends: srcTracks, receives: dstTracks, errors };
 }
 
-class ConsoleTrack {
+class ChannelTrack {
   track: Track;
-  buss: BussFx;
   channel: ChannelFx;
   strip?: CStripFx;
 
   private constructor(
     track: Track,
-    buss: BussFx,
     channel: ChannelFx,
     strip?: CStripFx,
   ) {
     this.track = track;
-    this.buss = buss;
     this.channel = channel;
     this.strip = strip;
   }
 
-  static fromTrack(tr: Track): ConsoleTrack | null {
-    const buss = BussFx.find(tr);
-    if (!buss) return null;
-    const channel = ChannelFx.find(tr);
-    if (!channel) return null;
-    const strip = CStripFx.find(tr);
-
-    buss.moveToTop();
-    channel.moveToEnd();
-    if (strip) strip.moveToSecondLast();
-
-    return new ConsoleTrack(tr, buss, channel, strip || undefined);
-  }
-
-  static setup(tr: Track): ConsoleTrack {
-    const buss = BussFx.find(tr) || BussFx.create(tr);
-    buss.moveToTop();
+  static setup(tr: Track): ChannelTrack {
     const channel = ChannelFx.find(tr) || ChannelFx.create(tr);
     channel.moveToEnd();
     const strip = CStripFx.find(tr);
     if (strip) strip.moveToSecondLast();
 
-    return new ConsoleTrack(tr, buss, channel, strip || undefined);
+    return new ChannelTrack(tr, channel, strip || undefined);
   }
 
   /** Return the gain applied by all the plugins, minus the track fader. Unit is dB */
@@ -603,6 +584,17 @@ class ConsoleTrack {
   setFxpan(pan: number) {
     this.channel.setPan(pan);
   }
+
+  /** Unit is dB */
+  trackgain(): number {
+    return scalarToDb(this.track.getFaderInfo().volume);
+  }
+
+  /** Range is -100..100 */
+  trackpan(): number {
+    // convert range -1..1 to -100..100
+    return this.track.getFaderInfo().pan * 100;
+  }
 }
 
 function log(msg: string) {
@@ -610,24 +602,7 @@ function log(msg: string) {
   reaper.ShowConsoleMsg("\n");
 }
 
-function asd() {
-  const routing = audioRoutingInfo();
-
-  routing.errors;
-}
-
 function main() {
-  // undoBlock(() => {
-  //   const result = Track.getSelected().map((tr) => {
-  //     const ct = ConsoleTrack.setup(tr);
-  //     ct.setFxgain(6);
-  //     ct.setFxpan(-50);
-  //     log("ok!");
-  //   });
-
-  //   return { desc: "testing script", flags: 0 };
-  // });
-
   const result = audioRoutingInfo();
 
   // show errors with message box
@@ -694,76 +669,34 @@ function main() {
     }
   }
 
-  log(inspect(result.errors));
-  // copy(encode(result.errors));
+  undoBlock(() => {
+    // process sends
+    for (const _ in result.sends) {
+      const srcIdx = _ as unknown as number;
+      const sendInfo = result.sends[srcIdx];
 
-  for (const srcIdx in result.sends) {
-    const sendInfo = result.sends[srcIdx];
+      const track = Track.getByIdx(srcIdx as unknown as number);
 
-    const track = Track.getByIdx(srcIdx as unknown as number);
-    const name = track.getName();
+      const channel = ChannelTrack.setup(track);
+      channel.setTrackgain(0);
+      channel.setTrackpan(0);
+      channel.setFxgain(sendInfo.volume);
+      channel.setFxpan(sendInfo.pan);
+    }
 
-    const idk = { volume: sendInfo.volume, pan: sendInfo.pan };
+    // process receives
+    for (const _ in result.receives) {
+      const dstIdx = _ as unknown as number;
+      const receiveInfo = result.receives[dstIdx];
 
-    log(`${srcIdx}: ${encode(name)} ${encode(idk)} ${encode(sendInfo.dst)}`);
-  }
+      const track = dstIdx === -1 ? Track.getMaster() : Track.getByIdx(dstIdx);
+      const name = dstIdx === -1 ? "MASTER" : track.getName();
 
-  for (const _ in result.receives) {
-    const dstIdx = _ as unknown as number;
-    const receiveInfo = result.receives[dstIdx];
+      log(`${dstIdx}: ${encode(name)} ${encode(receiveInfo)}`);
+    }
 
-    const track = dstIdx === -1 ? Track.getMaster() : Track.getByIdx(dstIdx);
-    const name = dstIdx === -1 ? "MASTER" : track.getName();
-
-    log(`${dstIdx}: ${encode(name)} ${encode(receiveInfo)}`);
-  }
-  // log(inspect(result.sends));
-  // copy(encode(result.sends));
-
-  // // map from raw track to track obj
-  // const trackMap: LuaTable<MediaTrack, Track> = new LuaTable();
-  // function store(obj: MediaTrack, track: Track) {
-  //   trackMap.set(obj, track);
-  // }
-  // function get(obj: MediaTrack): Track {
-  //   return trackMap.get(obj);
-  // }
-
-  // for (const track of Track.iterAll()) {
-  //   store(track.obj, track);
-  // }
-
-  // const allSends = [];
-  // for (const track of Track.iterAll()) {
-  //   const sends = track.getSends();
-  //   const parentSend = track.getParentSendInfo();
-  //   if (parentSend !== null) {
-  //     sends.push(parentSend);
-  //   }
-  //   allSends.push(sends);
-  // }
-
-  // log(inspect(allSends));
-
-  // const userdataMap: Record<any, number> = {};
-  // allSends.forEach((sends, i) => {
-  //   for (const send of sends) {
-  //     if (type(send.src) === "userdata") {
-  //       userdataMap[send.src as any] = i + 1;
-  //     }
-  //   }
-  // });
-  // allSends.forEach((sends, i) => {
-  //   for (const send of sends) {
-  //     if (userdataMap[send.src as any] !== undefined) {
-  //       send.src = `track ${userdataMap[send.src as any]}` as any;
-  //     }
-  //     if (userdataMap[send.dst as any] !== undefined) {
-  //       send.dst = `track ${userdataMap[send.dst as any]}` as any;
-  //     }
-  //   }
-  // });
-  // copy(encode(allSends));
+    return { desc: "testing script", flags: -1 };
+  });
 }
 
 main();
