@@ -5,6 +5,7 @@ import { inspect } from "reaper-api/inspect";
 import { Track } from "reaper-api/track";
 import { copy } from "reaper-api/clipboard";
 import { FXParam, TrackFX, AddFxParams } from "reaper-api/fx";
+import { undoBlock } from "reaper-api/utils";
 
 /** Converts 0.5 => -6.02dB */
 function scalarToDb(value: number) {
@@ -454,12 +455,22 @@ function log(msg: string) {
 }
 
 function main() {
-  const result = Track.getSelected().map((tr) => ({
-    // cstrips: CStripFx.findAll(tr),
-    channels: ChannelFx.find(tr),
-  }));
-  log(inspect(result));
-  copy(encode(result));
+  undoBlock(() => {
+    const result = Track.getSelected().map((tr) => {
+      const buss = BussFx.find(tr) || BussFx.create(tr);
+      buss.moveToTop();
+      const strip = CStripFx.find(tr) || CStripFx.create(tr);
+      strip.moveToSecondLast();
+      const channel = ChannelFx.find(tr) || ChannelFx.create(tr);
+      channel.moveToEnd();
+      log("success");
+    });
+
+    return { desc: "testing script", flags: 0 };
+  });
+  // log(inspect(result));
+  // copy(encode(result));
+
   // // map from raw track to track obj
   // const trackMap: LuaTable<MediaTrack, Track> = new LuaTable();
   // function store(obj: MediaTrack, track: Track) {
