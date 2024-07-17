@@ -494,7 +494,7 @@ function audioRoutingInfo() {
     }
   }
 
-  return { src: srcTracks, dst: dstTracks, errors };
+  return { sends: srcTracks, receives: dstTracks, errors };
 }
 
 class ConsoleTrack {
@@ -606,8 +606,33 @@ function main() {
   // });
 
   const result = audioRoutingInfo();
-  log(inspect(result));
-  copy(encode(result));
+
+  log(inspect(result.errors));
+  // copy(encode(result.errors));
+
+  for (const srcIdx in result.sends) {
+    const sendInfo = result.sends[srcIdx];
+
+    const track = Track.getByIdx(srcIdx as unknown as number);
+    const name = track.getName();
+
+    const idk = { volume: sendInfo.volume, pan: sendInfo.pan };
+
+    log(`${srcIdx}: ${encode(name)} ${encode(idk)} ${encode(sendInfo.dst)}`);
+  }
+
+  for (const _ in result.receives) {
+    const dstIdx = _ as unknown as number;
+    const receiveInfo = result.receives[dstIdx];
+
+    log("track get by index " + dstIdx);
+    const track = dstIdx === -1 ? Track.getMaster() : Track.getByIdx(dstIdx);
+    const name = dstIdx === -1 ? "MASTER" : track.getName();
+
+    log(`${dstIdx}: ${encode(name)} ${encode(receiveInfo)}`);
+  }
+  // log(inspect(result.sends));
+  // copy(encode(result.sends));
 
   // // map from raw track to track obj
   // const trackMap: LuaTable<MediaTrack, Track> = new LuaTable();

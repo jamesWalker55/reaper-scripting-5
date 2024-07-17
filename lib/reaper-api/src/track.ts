@@ -195,6 +195,17 @@ export class Track {
     return result;
   }
 
+  getName() {
+    const [ok, val] = reaper.GetSetMediaTrackInfo_String(
+      this.obj,
+      "P_NAME",
+      "",
+      false,
+    );
+    if (!ok) error("failed to get track name");
+    return val;
+  }
+
   delete() {
     reaper.DeleteTrack(this.obj);
   }
