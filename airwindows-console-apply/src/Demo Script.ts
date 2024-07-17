@@ -5,7 +5,7 @@ import { inspect } from "reaper-api/inspect";
 import { Track, TrackSendMode } from "reaper-api/track";
 import { copy } from "reaper-api/clipboard";
 import { FXParam, TrackFX, AddFxParams } from "reaper-api/fx";
-import { undoBlock } from "reaper-api/utils";
+import { msgBox, undoBlock } from "reaper-api/utils";
 
 const PLUGIN_PREFIX = "_AWC_: ";
 
@@ -441,13 +441,14 @@ function trackHasAudioItems(tr: Track) {
 }
 
 function audioRoutingInfo() {
-  type Idx = number | "master";
+  type Idx = number;
 
   const count = Track.count();
   const errors = {
     unsupportedSendMode: [] as Idx[],
     nonUnityGain: [] as Idx[],
     nonUnityPan: [] as Idx[],
+    bussWithAudioItems: [] as Idx[],
   };
 
   const srcTracks: Record<number, { volume: number; pan: number; dst: Idx[] }> =
@@ -491,6 +492,22 @@ function audioRoutingInfo() {
 
       dstTracks[dstIdx] ||= [];
       dstTracks[dstIdx].push(srcIdx);
+    }
+  }
+
+  // for receives, check that they don't have audio items
+  for (const _ in dstTracks) {
+    const dstIdx = _ as unknown as number;
+
+    // skip master track
+    if (dstIdx === -1) continue;
+
+    const track = Track.getByIdx(dstIdx);
+    const hasAudioItems = trackHasAudioItems(track);
+
+    if (hasAudioItems) {
+      delete dstTracks[dstIdx];
+      errors.bussWithAudioItems.push(dstIdx);
     }
   }
 
@@ -593,6 +610,12 @@ function log(msg: string) {
   reaper.ShowConsoleMsg("\n");
 }
 
+function asd() {
+  const routing = audioRoutingInfo();
+
+  routing.errors;
+}
+
 function main() {
   // undoBlock(() => {
   //   const result = Track.getSelected().map((tr) => {
@@ -606,6 +629,70 @@ function main() {
   // });
 
   const result = audioRoutingInfo();
+
+  // show errors with message box
+  {
+    if (result.errors.nonUnityGain.length > 0) {
+      msgBox(
+        "Error",
+        "Some tracks have sends with gain set to a non-zero value. Please set the gain of these tracks' sends to 0dB. (The tracks will be shown in the console output window)",
+      );
+      log("Please set the gain of the following tracks' sends to 0dB:");
+      for (const idx of result.errors.nonUnityGain) {
+        const track = Track.getByIdx(idx as unknown as number);
+        const name = track.getName();
+        log(`- Track ${idx}: ${encode(name)}`);
+      }
+    }
+    if (result.errors.nonUnityPan.length > 0) {
+      msgBox(
+        "Error",
+        "Some tracks have sends with pan set to a non-zero value. Please set the pan of these tracks' sends to center. (The tracks will be shown in the console output window)",
+      );
+      log("Please set the pan of the following tracks' sends to center:");
+      for (const idx of result.errors.nonUnityPan) {
+        const track = Track.getByIdx(idx as unknown as number);
+        const name = track.getName();
+        log(`- Track ${idx}: ${encode(name)}`);
+      }
+    }
+    if (result.errors.unsupportedSendMode.length > 0) {
+      msgBox(
+        "Error",
+        "Some tracks have sends with mode set to an unsupported mode. Please set the mode of these tracks' sends to 'Post-Fader (Post-Pan)'. (The tracks will be shown in the console output window)",
+      );
+      log(
+        "Please set the mode of the following tracks' sends to 'Post-Fader (Post-Pan)':",
+      );
+      for (const idx of result.errors.unsupportedSendMode) {
+        const track = Track.getByIdx(idx as unknown as number);
+        const name = track.getName();
+        log(`- Track ${idx}: ${encode(name)}`);
+      }
+    }
+    if (result.errors.bussWithAudioItems.length > 0) {
+      msgBox(
+        "Error",
+        "Some tracks receive audio from other tracks, and also receives audio from audio items. Please reorganise the tracks to avoid tracks that have both audio items and receives from other tracks. (The tracks will be shown in the console output window)",
+      );
+      log(
+        "Please reorganise these tracks to avoid tracks with both audio items and receives from other tracks:",
+      );
+      for (const idx of result.errors.bussWithAudioItems) {
+        const track = Track.getByIdx(idx as unknown as number);
+        const name = track.getName();
+        log(`- Track ${idx}: ${encode(name)}`);
+      }
+    }
+    if (
+      result.errors.nonUnityGain.length > 0 ||
+      result.errors.nonUnityPan.length > 0 ||
+      result.errors.unsupportedSendMode.length > 0 ||
+      result.errors.bussWithAudioItems.length > 0
+    ) {
+      return;
+    }
+  }
 
   log(inspect(result.errors));
   // copy(encode(result.errors));
@@ -625,7 +712,6 @@ function main() {
     const dstIdx = _ as unknown as number;
     const receiveInfo = result.receives[dstIdx];
 
-    log("track get by index " + dstIdx);
     const track = dstIdx === -1 ? Track.getMaster() : Track.getByIdx(dstIdx);
     const name = dstIdx === -1 ? "MASTER" : track.getName();
 

@@ -857,6 +857,10 @@ export function getLastTouchedFx() {
   const track = isMaster
     ? reaper.GetMasterTrack(0)
     : reaper.GetTrack(0, trackidx);
+  if (track === null)
+    error(
+      `failed to get track belonging to last-touched fx: track ${trackidx}`,
+    );
 
   if (itemidx === -1) {
     return new TrackFX(track, fxidx);

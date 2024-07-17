@@ -22,7 +22,9 @@ export class Track {
   }
 
   static getByIdx(idx: number) {
-    return new Track(reaper.GetTrack(0, idx));
+    const obj = reaper.GetTrack(0, idx);
+    if (obj === null) error(`failed to get track with index ${idx}`);
+    return new Track(obj);
   }
 
   static getSelected() {
