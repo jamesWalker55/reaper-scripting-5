@@ -166,6 +166,10 @@ class CStripFx {
     if (strip === null)
       error("created gain plugin, but its configuration is invalid");
 
+    // reset gain to 0
+    strip.setGain(0);
+    strip.setPan(0);
+
     return strip;
   }
 
@@ -290,6 +294,10 @@ class ChannelFx {
     const channel = ChannelFx.fromFx(fx);
     if (channel === null)
       error("created channel plugin, but its config is invalid");
+
+    // reset gain to 0
+    channel.setGain(0);
+    channel.setPan(0);
 
     return channel;
   }
@@ -592,6 +600,10 @@ class ChannelTrack {
     }
   }
 
+  addFxgain(db: number) {
+    this.setFxgain(this.fxgain() + db);
+  }
+
   /** Range is -100..100 */
   fxpan(): number {
     return this.channel.pan();
@@ -600,6 +612,10 @@ class ChannelTrack {
   /** Range is -100..100 */
   setFxpan(pan: number) {
     this.channel.setPan(pan);
+  }
+
+  addFxpan(pan: number) {
+    this.setFxpan(this.fxpan() + pan);
   }
 
   /** Unit is dB */
@@ -723,8 +739,8 @@ function main() {
       const channel = ChannelTrack.setup(track);
       channel.setTrackgain(0);
       channel.setTrackpan(0);
-      channel.setFxgain(sendInfo.volume);
-      channel.setFxpan(sendInfo.pan);
+      channel.addFxgain(sendInfo.volume);
+      channel.addFxpan(sendInfo.pan);
     }
 
     // process receives
