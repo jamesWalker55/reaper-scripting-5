@@ -21,12 +21,14 @@ function dbToScalar(db: number) {
 
 /** Converts airwindow's 0.5 => 0dB */
 function awcScalarToDb(value: number) {
-  return scalarToDb(value * 2);
+  // HACK: Airwindows' console is fucking quiet, so I'm adding 3dB because fuck
+  return scalarToDb(value * 2) - 3;
 }
 
 /** Converts airwindow's -6dB => 0.25 */
 function awcDbToScalar(db: number) {
-  return dbToScalar(db) / 2;
+  // HACK: Airwindows' console is fucking quiet, so I'm adding 3dB because fuck
+  return dbToScalar(db + 3) / 2;
 }
 
 /**
