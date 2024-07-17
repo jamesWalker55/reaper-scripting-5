@@ -259,7 +259,7 @@ class ChannelFx {
     return new ChannelFx(fx, gainParam, panParam);
   }
 
-  static create(track: Track) {
+  static create(track: Track): ChannelFx {
     const newPos = track.addFx(ChannelFx.FX_ADD);
     if (newPos === null) error("failed to create channel plugin");
 
@@ -279,7 +279,7 @@ class ChannelFx {
     if (channel === null)
       error("created channel plugin, but its config is invalid");
 
-    return ChannelFx.fromFx(fx);
+    return channel;
   }
 
   static find(track: Track): ChannelFx | null {
@@ -389,7 +389,7 @@ class BussFx {
     if (channel === null)
       error("created channel plugin, but its config is invalid");
 
-    return BussFx.fromFx(fx);
+    return channel;
   }
 
   static find(track: Track): BussFx | null {
