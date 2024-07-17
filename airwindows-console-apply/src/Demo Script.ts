@@ -440,75 +440,61 @@ function trackHasAudioItems(tr: Track) {
   return false;
 }
 
-function trackAudioRoutingMatrix() {
+function audioRoutingInfo() {
+  type Idx = number | "master";
+
   const count = Track.count();
   const errors = {
-    unsupportedSendMode: [] as (number | "master")[],
-    nonUnityGainSend: [] as (number | "master")[],
+    unsupportedSendMode: [] as Idx[],
+    nonUnityGain: [] as Idx[],
+    nonUnityPan: [] as Idx[],
   };
 
-  // map from [src][dst] => volume
-  type Idx = number | "master";
-  type T = number;
-  const result: LuaTable<Idx, LuaTable<Idx, T>> = new LuaTable();
-  function set(src: Idx, dst: Idx, val: T) {
-    if (!result.has(src)) {
-      result.set(src, new LuaTable());
-    }
-    const dstTable = result.get(src);
-    dstTable.set(dst, val);
-  }
+  const srcTracks: Record<number, { volume: number; pan: number; dst: Idx[] }> =
+    {};
+  const dstTracks: Record<number, Idx[]> = {};
 
-  for (let i = 0; i < count; i++) {
-    const track = Track.getByIdx(i);
-    const srcIdx = track.getIdx();
+  for (let srcIdx = 0; srcIdx < count; srcIdx++) {
+    const track = Track.getByIdx(srcIdx);
+    const faderInfo = track.getFaderInfo();
 
-    const sends = track.getSends().filter((x) => {
-      if (!x.audio) return false;
-      if (x.audio.volume !== 1) {
-        errors.nonUnityGainSend.push(srcIdx);
-        return false;
-      }
-      if (x.audio.sendMode !== TrackSendMode.PostFader) {
+    for (const send of track.getSends(true)) {
+      const audio = send.audio;
+      if (!audio) continue;
+
+      // i can potentially support 2 types of tracks:
+      // - **all** sends are post-fader, routing to parent folder is optional
+      // - **all** sends are pre-fader, and no routing to parent folder
+      // i'm running out of time so i'll only support the first type of send
+      if (audio.sendMode !== TrackSendMode.PostFader) {
         errors.unsupportedSendMode.push(srcIdx);
-        return false;
+        continue;
       }
-      return true;
-    });
-    const parentSend = track.getParentSendInfo();
 
-    if (sends.length === 0) {
-      if (parentSend?.audio) {
-        const dstIdx = parentSend.dst.getIdx();
-        set(srcIdx, dstIdx, parentSend.audio.volume);
+      if (audio.volume !== 1) {
+        errors.nonUnityGain.push(srcIdx);
+        continue;
       }
-    } else {
-      // has sends
-      const targetVolumes = [];
-      const parentSendVolume = reaper.GetMediaTrackInfo_Value(
-        track.obj,
-        "D_VOL",
-      );
-      if (parentSend?.audio) {
-        targetVolumes.push(parentSendVolume);
+      if (audio.pan !== 0) {
+        errors.nonUnityPan.push(srcIdx);
+        continue;
       }
-      for (const send of sends) {
-        const audio = send.audio!;
-        if (audio.sendMode === TrackSendMode.PostFader) {
-          targetVolumes.push(audio.volume * parentSendVolume);
-        } else {
-          // pre-fader
-          targetVolumes.push(audio.volume);
-        }
-      }
-      const finalVolume = targetVolumes[0];
-      // THINKING HOW TO DO THIS
+
+      const dstIdx = send.dst.getIdx();
+
+      srcTracks[srcIdx] ||= {
+        volume: faderInfo.volume,
+        pan: faderInfo.pan,
+        dst: [],
+      };
+      srcTracks[srcIdx].dst.push(dstIdx);
+
+      dstTracks[dstIdx] ||= [];
+      dstTracks[dstIdx].push(srcIdx);
     }
-
-    sends.map((x) => x.audio!.volume);
-
-    sends.every((x) => x.audio!.sendMode === TrackSendMode.PostFader);
   }
+
+  return { src: srcTracks, dst: dstTracks, errors };
 }
 
 class ConsoleTrack {
@@ -608,18 +594,20 @@ function log(msg: string) {
 }
 
 function main() {
-  undoBlock(() => {
-    const result = Track.getSelected().map((tr) => {
-      const ct = ConsoleTrack.setup(tr);
-      ct.setFxgain(6);
-      ct.setFxpan(-50);
-      log("ok!");
-    });
+  // undoBlock(() => {
+  //   const result = Track.getSelected().map((tr) => {
+  //     const ct = ConsoleTrack.setup(tr);
+  //     ct.setFxgain(6);
+  //     ct.setFxpan(-50);
+  //     log("ok!");
+  //   });
 
-    return { desc: "testing script", flags: 0 };
-  });
-  // log(inspect(result));
-  // copy(encode(result));
+  //   return { desc: "testing script", flags: 0 };
+  // });
+
+  const result = audioRoutingInfo();
+  log(inspect(result));
+  copy(encode(result));
 
   // // map from raw track to track obj
   // const trackMap: LuaTable<MediaTrack, Track> = new LuaTable();
