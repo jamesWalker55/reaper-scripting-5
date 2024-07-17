@@ -515,3 +515,46 @@ module TrackRouting {
     return { audio, midi };
   }
 }
+
+/**
+ * Iterates through all tracks in the project, then returns maps for sending and receiving
+ * tracks. This includes the default routing to folder parents.
+ *
+ * - `sends`: Maps from `trackIdx` to a list of `trackIdx` which this track sends to
+ * - `receives`: Maps from `trackIdx` to a list of `trackIdx` sends to this track
+ *
+ * Note: The `receives` map contains `-1` which represent the master track.
+ *
+ * @param opt Specify what kind of routing to filter for. E.g. If you only care about audio
+ *            routing, specify `{ audio: true }`
+ */
+export function getProjectRoutingInfo(
+  opt: {
+    audio?: boolean;
+    midi?: boolean;
+  } = { audio: true, midi: true },
+) {
+  const count = Track.count();
+
+  const sends: LuaTable<number, number[]> = new LuaTable();
+  const receives: LuaTable<number, number[]> = new LuaTable();
+
+  for (let srcIdx = 0; srcIdx < count; srcIdx++) {
+    const track = Track.getByIdx(srcIdx);
+
+    for (const send of track.getSends(true)) {
+      if (opt.audio && !send.audio) continue;
+      if (opt.midi && !send.midi) continue;
+
+      const dstIdx = send.dst.getIdx();
+
+      if (!sends.has(srcIdx)) sends.set(srcIdx, []);
+      sends.get(srcIdx).push(dstIdx);
+
+      if (!receives.has(dstIdx)) receives.set(dstIdx, []);
+      receives.get(dstIdx).push(srcIdx);
+    }
+  }
+
+  return { sends, receives };
+}
