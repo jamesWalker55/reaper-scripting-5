@@ -105,9 +105,12 @@ function getMappedChannels(fx: TrackFX) {
 }
 
 class CStripFx {
-  static FX_IDENT = "utility/volume_pan_sample_accurate_auto";
+  static FX_IDENTS = [
+    "utility/volume_pan_sample_accurate_auto",
+    "utility\\volume_pan_sample_accurate_auto",
+  ];
   static FX_NAME = "AWC: #CSTRIP";
-  static FX_ADD: AddFxParams = { js: CStripFx.FX_IDENT };
+  static FX_ADD: AddFxParams = { js: CStripFx.FX_IDENTS[0] };
 
   fx: TrackFX;
   gainParam: FXParam;
@@ -124,7 +127,9 @@ class CStripFx {
   static fromFx(fx: TrackFX): CStripFx | null {
     const fxName = fx.getName();
     const fxIdent = fx.getIdent();
-    if (!(fxName === CStripFx.FX_NAME && fxIdent === CStripFx.FX_IDENT)) {
+    if (
+      !(fxName === CStripFx.FX_NAME && CStripFx.FX_IDENTS.includes(fxIdent))
+    ) {
       return null;
     }
 
