@@ -342,6 +342,81 @@ class ChannelFx {
   }
 }
 
+class BussFx {
+  static FX_IDENT = "com.airwindows.consolidated";
+  static FX_NAME = "AWC: #BUSS";
+  static FX_ADD: AddFxParams = { clap: BussFx.FX_IDENT };
+  static FX_PRESET = "ConsoleLABuss";
+
+  fx: TrackFX;
+
+  private constructor(fx: TrackFX) {
+    this.fx = fx;
+  }
+
+  static fromFx(fx: TrackFX): BussFx | null {
+    const fxName = fx.getName();
+    const fxIdent = fx.getIdent();
+    if (!(fxName === BussFx.FX_NAME && fxIdent === BussFx.FX_IDENT)) {
+      return null;
+    }
+
+    const [ok, preset] = reaper.TrackFX_GetPreset(fx.track, fx.fxidx);
+    if (!ok) return null;
+    if (preset !== BussFx.FX_PRESET) return null;
+
+    return new BussFx(fx);
+  }
+
+  static create(track: Track) {
+    const newPos = track.addFx(BussFx.FX_ADD);
+    if (newPos === null) error("failed to create channel plugin");
+
+    const fx = track.getFx(newPos);
+    fx.rename(BussFx.FX_NAME);
+    const ok = reaper.TrackFX_SetPreset(fx.track, fx.fxidx, BussFx.FX_PRESET);
+    if (!ok)
+      error(
+        `created channel plugin, but failed to set preset to ${BussFx.FX_PRESET}`,
+      );
+
+    const channel = BussFx.fromFx(fx);
+    if (channel === null)
+      error("created channel plugin, but its config is invalid");
+
+    return BussFx.fromFx(fx);
+  }
+
+  static find(track: Track): BussFx | null {
+    for (const fx of track.getAllFx().reverse()) {
+      const channel = BussFx.fromFx(fx);
+      if (channel !== null) return channel;
+    }
+    return null;
+  }
+
+  moveToTop() {
+    const tr = this.fx.track;
+    const oldIdx = this.fx.fxidx;
+    const newIdx = 0;
+
+    // do nothing if already at target pos
+    if (oldIdx === newIdx) return;
+
+    // move the fx
+    reaper.TrackFX_CopyToTrack(tr, oldIdx, tr, newIdx, true);
+    // update the FX object to point to the correct index
+    this.fx.fxidx = newIdx;
+
+    // make sure it actually worked
+    const channel = BussFx.fromFx(this.fx);
+    if (channel === null)
+      error(
+        `fatal error: something went wrong while moving buss fx from ${oldIdx} to ${newIdx}`,
+      );
+  }
+}
+
 // class ConsoleTrack {
 //   track: Track;
 
