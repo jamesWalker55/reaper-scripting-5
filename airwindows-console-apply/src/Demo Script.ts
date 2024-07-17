@@ -604,6 +604,22 @@ class ChannelTrack {
   }
 }
 
+class BussTrack {
+  track: Track;
+  buss: BussFx;
+
+  private constructor(track: Track, buss: BussFx) {
+    this.track = track;
+    this.buss = buss;
+  }
+
+  static setup(tr: Track): BussTrack {
+    const buss = BussFx.find(tr) || BussFx.create(tr);
+    buss.moveToTop();
+    return new BussTrack(tr, buss);
+  }
+}
+
 function log(msg: string) {
   reaper.ShowConsoleMsg(msg);
   reaper.ShowConsoleMsg("\n");
@@ -695,11 +711,9 @@ function main() {
     for (const _ in result.receives) {
       const dstIdx = _ as unknown as number;
       const receiveInfo = result.receives[dstIdx];
-
       const track = dstIdx === -1 ? Track.getMaster() : Track.getByIdx(dstIdx);
-      const name = dstIdx === -1 ? "MASTER" : track.getName();
 
-      log(`${dstIdx}: ${encode(name)} ${encode(receiveInfo)}`);
+      const buss = BussTrack.setup(track);
     }
 
     return { desc: "testing script", flags: -1 };
