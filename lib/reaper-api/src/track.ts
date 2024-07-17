@@ -146,26 +146,64 @@ export class Track {
     return result;
   }
 
-  getFaderInfo() {
-    const volume = reaper.GetMediaTrackInfo_Value(this.obj, "D_VOL");
-    const pan = reaper.GetMediaTrackInfo_Value(this.obj, "D_PAN");
-    const width = reaper.GetMediaTrackInfo_Value(this.obj, "D_WIDTH");
-    const panLaw = reaper.GetMediaTrackInfo_Value(this.obj, "D_PANLAW");
-    const muted = reaper.GetMediaTrackInfo_Value(this.obj, "B_MUTE") === 1;
-    const phaseInverted =
-      reaper.GetMediaTrackInfo_Value(this.obj, "B_PHASE") === 1;
-
-    const panmode = reaper.GetMediaTrackInfo_Value(this.obj, "I_PANMODE");
-
-    return {
-      volume,
-      pan,
-      width,
-      panLaw,
-      muted,
-      phaseInverted,
-      panmode,
-    };
+  /** Return value is scalar, 0..1..inf */
+  getVolume() {
+    return reaper.GetMediaTrackInfo_Value(this.obj, "D_VOL");
+  }
+  /** Value is scalar, 0..1..inf */
+  setVolume(val: number) {
+    const ok = reaper.SetMediaTrackInfo_Value(this.obj, "D_VOL", val);
+    if (!ok) error("failed to set volume");
+  }
+  /** Return value in range -1..0..1 */
+  getPan() {
+    return reaper.GetMediaTrackInfo_Value(this.obj, "D_PAN");
+  }
+  /** Value in range -1..0..1 */
+  setPan(val: number) {
+    const ok = reaper.SetMediaTrackInfo_Value(this.obj, "D_PAN", val);
+    if (!ok) error("failed to set pan");
+  }
+  /** Return value in range -1..0..1 */
+  getWidth() {
+    return reaper.GetMediaTrackInfo_Value(this.obj, "D_WIDTH");
+  }
+  /** Value in range -1..0..1 */
+  setWidth(val: number) {
+    const ok = reaper.SetMediaTrackInfo_Value(this.obj, "D_WIDTH", val);
+    if (!ok) error("failed to set width");
+  }
+  /** pan law of track, <0=project default, 0.5=-6dB, 0.707..=-3dB, 1=+0dB, 1.414..=-3dB with gain compensation, 2=-6dB with gain compensation, etc */
+  getPanLaw() {
+    return reaper.GetMediaTrackInfo_Value(this.obj, "D_PANLAW");
+  }
+  /** pan law of track, <0=project default, 0.5=-6dB, 0.707..=-3dB, 1=+0dB, 1.414..=-3dB with gain compensation, 2=-6dB with gain compensation, etc */
+  setPanLaw(val: number) {
+    const ok = reaper.SetMediaTrackInfo_Value(this.obj, "D_PANLAW", val);
+    if (!ok) error("failed to set pan law");
+  }
+  getMuted() {
+    return reaper.GetMediaTrackInfo_Value(this.obj, "B_MUTE") === 1;
+  }
+  setMuted(val: boolean) {
+    const ok = reaper.SetMediaTrackInfo_Value(this.obj, "B_MUTE", val ? 1 : 0);
+    if (!ok) error("failed to set muted");
+  }
+  getPhaseInverted() {
+    return reaper.GetMediaTrackInfo_Value(this.obj, "B_PHASE") === 1;
+  }
+  setPhaseInverted(val: boolean) {
+    const ok = reaper.SetMediaTrackInfo_Value(this.obj, "B_PHASE", val ? 1 : 0);
+    if (!ok) error("failed to set phase inverted");
+  }
+  /** pan mode, 0=classic 3.x, 3=new balance, 5=stereo pan, 6=dual pan */
+  getPanmode() {
+    return reaper.GetMediaTrackInfo_Value(this.obj, "I_PANMODE");
+  }
+  /** pan mode, 0=classic 3.x, 3=new balance, 5=stereo pan, 6=dual pan */
+  setPanmode(val: number) {
+    const ok = reaper.SetMediaTrackInfo_Value(this.obj, "I_PANMODE", val);
+    if (!ok) error("failed to set panmode");
   }
 
   getReceives() {

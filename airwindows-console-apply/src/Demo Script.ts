@@ -457,7 +457,8 @@ function audioRoutingInfo() {
 
   for (let srcIdx = 0; srcIdx < count; srcIdx++) {
     const track = Track.getByIdx(srcIdx);
-    const faderInfo = track.getFaderInfo();
+    const trackVolume = track.getVolume();
+    const trackPan = track.getPan();
 
     for (const send of track.getSends(true)) {
       const audio = send.audio;
@@ -484,8 +485,8 @@ function audioRoutingInfo() {
       const dstIdx = send.dst.getIdx();
 
       srcTracks[srcIdx] ||= {
-        volume: faderInfo.volume,
-        pan: faderInfo.pan,
+        volume: trackVolume,
+        pan: trackPan,
         dst: [],
       };
       srcTracks[srcIdx].dst.push(dstIdx);
@@ -519,11 +520,7 @@ class ChannelTrack {
   channel: ChannelFx;
   strip?: CStripFx;
 
-  private constructor(
-    track: Track,
-    channel: ChannelFx,
-    strip?: CStripFx,
-  ) {
+  private constructor(track: Track, channel: ChannelFx, strip?: CStripFx) {
     this.track = track;
     this.channel = channel;
     this.strip = strip;
@@ -587,13 +584,23 @@ class ChannelTrack {
 
   /** Unit is dB */
   trackgain(): number {
-    return scalarToDb(this.track.getFaderInfo().volume);
+    return scalarToDb(this.track.getVolume());
   }
 
   /** Range is -100..100 */
   trackpan(): number {
     // convert range -1..1 to -100..100
-    return this.track.getFaderInfo().pan * 100;
+    return this.track.getPan() * 100;
+  }
+
+  /** Unit is dB */
+  setTrackgain(db: number) {
+    this.track.setVolume(dbToScalar(db));
+  }
+
+  /** Range is -100..100 */
+  setTrackpan(pan: number) {
+    this.track.setPan(pan / 100);
   }
 }
 
