@@ -132,6 +132,8 @@ abstract class BaseFX {
   protected abstract GetNumParams(): number;
   abstract GetParamIdent(param: number): string | null;
   abstract GetParamName(param: number): string | null;
+  abstract GetParamEx(param: number): [number, number, number, number];
+  abstract SetParam(param: number, value: number): boolean;
   protected abstract GetFXGUID(): string | null;
   protected abstract GetOffline(): boolean;
 
@@ -154,6 +156,8 @@ abstract class BaseFX {
 
   /** Return the plugin name as seen by the user, might be renamed by the user */
   abstract getName(): string;
+
+  abstract rename(name: string): void;
 
   /** Return the "true" plugin name, ignoring the user renamed title */
   getOriginalName() {
@@ -433,6 +437,20 @@ export class TrackFX extends BaseFX {
     return ok ? value : null;
   }
 
+  GetParamEx(param: number) {
+    const [rv, min, max, mid] = reaper.TrackFX_GetParamEx(
+      this.track,
+      this.fxidx,
+      param,
+    );
+    if (min === null) error("failed to get param value");
+    return [rv, min, max, mid] as [number, number, number, number];
+  }
+
+  SetParam(param: number, value: number) {
+    return reaper.TrackFX_SetParam(this.track, this.fxidx, param, value);
+  }
+
   protected GetFXGUID() {
     return reaper.TrackFX_GetFXGUID(this.track, this.fxidx);
   }
@@ -449,6 +467,15 @@ export class TrackFX extends BaseFX {
     const [ok, value] = reaper.TrackFX_GetFXName(this.track, this.fxidx);
     if (!ok) error("failed to get FX name");
     return value;
+  }
+
+  rename(name: string) {
+    reaper.TrackFX_SetNamedConfigParm(
+      this.track,
+      this.fxidx,
+      "renamed_name",
+      name,
+    );
   }
 
   protected getArrChunk(): ArrChunk.ArrChunk {
@@ -551,6 +578,20 @@ export class TakeFX extends BaseFX {
     return ok ? value : null;
   }
 
+  GetParamEx(param: number) {
+    const [rv, min, max, mid] = reaper.TakeFX_GetParamEx(
+      this.take,
+      this.fxidx,
+      param,
+    );
+    if (min === null) error("failed to get param value");
+    return [rv, min, max, mid] as [number, number, number, number];
+  }
+
+  SetParam(param: number, value: number) {
+    return reaper.TakeFX_SetParam(this.take, this.fxidx, param, value);
+  }
+
   protected GetFXGUID() {
     return reaper.TakeFX_GetFXGUID(this.take, this.fxidx);
   }
@@ -567,6 +608,15 @@ export class TakeFX extends BaseFX {
     const [ok, value] = reaper.TakeFX_GetFXName(this.take, this.fxidx);
     if (!ok) error("failed to get FX name");
     return value;
+  }
+
+  rename(name: string) {
+    reaper.TakeFX_SetNamedConfigParm(
+      this.take,
+      this.fxidx,
+      "renamed_name",
+      name,
+    );
   }
 
   protected getArrChunk(): ArrChunk.ArrChunk {
@@ -625,6 +675,15 @@ export class FXParam {
     const rv = this.fx.GetParamName(this.param);
     if (!rv) error("param object is no longer valid");
     return rv;
+  }
+
+  getValue() {
+    const [cur, min, max, mid] = this.fx.GetParamEx(this.param);
+    return { cur, min, max, mid };
+  }
+
+  setValue(value: number) {
+    return this.fx.SetParam(this.param, value);
   }
 
   modulationActive(): boolean {

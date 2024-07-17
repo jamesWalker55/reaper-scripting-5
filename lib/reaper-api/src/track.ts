@@ -85,6 +85,10 @@ export class Track {
     return result;
   }
 
+  getFx(idx: number) {
+    return new TrackFX(this.obj, idx);
+  }
+
   /**
    * Raw folder depth value from Reaper's API. Value indicates the change
    * in depth in folder structure. E.g. '1' means next track will be a folder
