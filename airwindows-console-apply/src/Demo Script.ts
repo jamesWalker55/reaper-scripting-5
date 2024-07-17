@@ -114,6 +114,7 @@ class CStripFx {
   ];
   static FX_NAME = `${PLUGIN_PREFIX}#CSTRIP`;
   static FX_ADD: AddFxParams = { js: CStripFx.FX_IDENTS[0] };
+  static GAIN_PARAM_NAME = "Volume (dB)";
 
   fx: TrackFX;
   gainParam: FXParam;
@@ -139,6 +140,13 @@ class CStripFx {
     // values are awc scalar 0 - 1
     const gainParam = fx.getParameter(0);
     if (!gainParam) return null;
+
+    assert(
+      gainParam.getName() === CStripFx.GAIN_PARAM_NAME,
+      `expected first parameter to be volume control ${encode(
+        CStripFx.GAIN_PARAM_NAME,
+      )}: ${encode(gainParam.getName())}`,
+    );
 
     // values are 0 - 1
     const panParam = fx.getParameter(1);
@@ -457,8 +465,8 @@ function audioRoutingInfo() {
 
   for (let srcIdx = 0; srcIdx < count; srcIdx++) {
     const track = Track.getByIdx(srcIdx);
-    const trackVolume = track.getVolume();
-    const trackPan = track.getPan();
+    const trackVolume = scalarToDb(track.getVolume());
+    const trackPan = track.getPan() * 100;
 
     for (const send of track.getSends(true)) {
       const audio = send.audio;
@@ -527,10 +535,17 @@ class ChannelTrack {
   }
 
   static setup(tr: Track): ChannelTrack {
-    const channel = ChannelFx.find(tr) || ChannelFx.create(tr);
+    let channel = ChannelFx.find(tr) || ChannelFx.create(tr);
     channel.moveToEnd();
     const strip = CStripFx.find(tr);
-    if (strip) strip.moveToSecondLast();
+    if (strip) {
+      strip.moveToSecondLast();
+      let _;
+      [channel, _] = assert(
+        ChannelFx.find(tr),
+        "failed to find channel FX after moving gain plugin",
+      );
+    }
 
     return new ChannelTrack(tr, channel, strip || undefined);
   }
@@ -639,7 +654,7 @@ function main() {
       for (const idx of result.errors.nonUnityGain) {
         const track = Track.getByIdx(idx as unknown as number);
         const name = track.getName();
-        log(`- Track ${idx}: ${encode(name)}`);
+        log(`- Track ${idx + 1}: ${encode(name)}`);
       }
     }
     if (result.errors.nonUnityPan.length > 0) {
@@ -651,7 +666,7 @@ function main() {
       for (const idx of result.errors.nonUnityPan) {
         const track = Track.getByIdx(idx as unknown as number);
         const name = track.getName();
-        log(`- Track ${idx}: ${encode(name)}`);
+        log(`- Track ${idx + 1}: ${encode(name)}`);
       }
     }
     if (result.errors.unsupportedSendMode.length > 0) {
@@ -665,7 +680,7 @@ function main() {
       for (const idx of result.errors.unsupportedSendMode) {
         const track = Track.getByIdx(idx as unknown as number);
         const name = track.getName();
-        log(`- Track ${idx}: ${encode(name)}`);
+        log(`- Track ${idx + 1}: ${encode(name)}`);
       }
     }
     if (result.errors.bussWithAudioItems.length > 0) {
@@ -679,7 +694,7 @@ function main() {
       for (const idx of result.errors.bussWithAudioItems) {
         const track = Track.getByIdx(idx as unknown as number);
         const name = track.getName();
-        log(`- Track ${idx}: ${encode(name)}`);
+        log(`- Track ${idx + 1}: ${encode(name)}`);
       }
     }
     if (
