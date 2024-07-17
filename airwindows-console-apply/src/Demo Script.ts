@@ -7,6 +7,8 @@ import { copy } from "reaper-api/clipboard";
 import { FXParam, TrackFX, AddFxParams } from "reaper-api/fx";
 import { undoBlock } from "reaper-api/utils";
 
+const PLUGIN_PREFIX = "_AWC_: ";
+
 /** Converts 0.5 => -6.02dB */
 function scalarToDb(value: number) {
   return 20 * Math.log10(value);
@@ -110,7 +112,7 @@ class CStripFx {
     "utility/volume_pan_sample_accurate_auto",
     "utility\\volume_pan_sample_accurate_auto",
   ];
-  static FX_NAME = "AWC: #CSTRIP";
+  static FX_NAME = `${PLUGIN_PREFIX}#CSTRIP`;
   static FX_ADD: AddFxParams = { js: CStripFx.FX_IDENTS[0] };
 
   fx: TrackFX;
@@ -215,7 +217,7 @@ class CStripFx {
 
 class ChannelFx {
   static FX_IDENT = "com.airwindows.consolidated";
-  static FX_NAME = "AWC: #CHANNEL";
+  static FX_NAME = `${PLUGIN_PREFIX}#CHANNEL`;
   static FX_ADD: AddFxParams = { clap: ChannelFx.FX_IDENT };
   static FX_PRESET = "ConsoleLAChannel";
 
@@ -350,7 +352,7 @@ class ChannelFx {
 
 class BussFx {
   static FX_IDENT = "com.airwindows.consolidated";
-  static FX_NAME = "AWC: #BUSS";
+  static FX_NAME = `${PLUGIN_PREFIX}#BUSS`;
   static FX_ADD: AddFxParams = { clap: BussFx.FX_IDENT };
   static FX_PRESET = "ConsoleLABuss";
 
@@ -423,31 +425,96 @@ class BussFx {
   }
 }
 
-// class ConsoleTrack {
-//   track: Track;
+class ConsoleTrack {
+  track: Track;
+  buss: BussFx;
+  channel: ChannelFx;
+  strip?: CStripFx;
 
-//   constructor(track: Track) {
-//     this.track = track;
-//   }
+  private constructor(
+    track: Track,
+    buss: BussFx,
+    channel: ChannelFx,
+    strip?: CStripFx,
+  ) {
+    this.track = track;
+    this.buss = buss;
+    this.channel = channel;
+    this.strip = strip;
+  }
 
-//   setup() {
-//     for (const fx of this.track.getAllFx()) {
-//       // // ensure fx is at end of chain
-//       // const fxcount = track.getFxCount();
-//       // if (fx.fxidx !== fxcount - 1) {
-//       //   reaper.TrackFX_CopyToTrack(
-//       //     track.obj,
-//       //     fx.fxidx,
-//       //     track.obj,
-//       //     fxcount - 1,
-//       //     true,
-//       //   );
-//       // }
-//     }
-//     reaper.TrackFX_SetNamedConfigParm;
-//     // this.track.addFx({js: 'utility/volume'});
-//   }
-// }
+  static fromTrack(tr: Track): ConsoleTrack | null {
+    const buss = BussFx.find(tr);
+    if (!buss) return null;
+    const channel = ChannelFx.find(tr);
+    if (!channel) return null;
+    const strip = CStripFx.find(tr);
+
+    buss.moveToTop();
+    channel.moveToEnd();
+    if (strip) strip.moveToSecondLast();
+
+    return new ConsoleTrack(tr, buss, channel, strip || undefined);
+  }
+
+  static setup(tr: Track): ConsoleTrack {
+    const buss = BussFx.find(tr) || BussFx.create(tr);
+    buss.moveToTop();
+    const channel = ChannelFx.find(tr) || ChannelFx.create(tr);
+    channel.moveToEnd();
+    const strip = CStripFx.find(tr);
+    if (strip) strip.moveToSecondLast();
+
+    return new ConsoleTrack(tr, buss, channel, strip || undefined);
+  }
+
+  /** Return the gain applied by all the plugins, minus the track fader. Unit is dB */
+  fxgain(): number {
+    if (this.strip) {
+      return this.channel.gain() + this.strip.gain();
+    } else {
+      return this.channel.gain();
+    }
+  }
+
+  /** Set the gain applied by all the plugins, minus the track fader. Unit is dB */
+  setFxgain(db: number) {
+    if (db > ChannelFx.GAIN_DB_MAX) {
+      const channelDb = ChannelFx.GAIN_DB_MAX;
+      const stripDb = db - ChannelFx.GAIN_DB_MAX;
+      this.channel.setGain(channelDb);
+
+      if (!this.strip) {
+        // create a strip
+        this.strip = CStripFx.create(this.track);
+        // fix fx index of channel plugin
+        this.channel.fx.fxidx += 1;
+      }
+
+      this.strip.setGain(stripDb);
+    } else {
+      this.channel.setGain(db);
+      if (this.strip) {
+        // delete the strip
+        reaper.TrackFX_Delete(this.track.obj, this.strip.fx.fxidx);
+        this.strip = undefined;
+
+        // fix fx index of channel plugin
+        this.channel.fx.fxidx -= 1;
+      }
+    }
+  }
+
+  /** Range is -100..100 */
+  fxpan(): number {
+    return this.channel.pan();
+  }
+
+  /** Range is -100..100 */
+  setFxpan(pan: number) {
+    this.channel.setPan(pan);
+  }
+}
 
 function log(msg: string) {
   reaper.ShowConsoleMsg(msg);
@@ -457,13 +524,10 @@ function log(msg: string) {
 function main() {
   undoBlock(() => {
     const result = Track.getSelected().map((tr) => {
-      const buss = BussFx.find(tr) || BussFx.create(tr);
-      buss.moveToTop();
-      const channel = ChannelFx.find(tr) || ChannelFx.create(tr);
-      channel.moveToEnd();
-      const strip = CStripFx.find(tr) || CStripFx.create(tr);
-      strip.moveToSecondLast();
-      log("success");
+      const ct = ConsoleTrack.setup(tr);
+      ct.setFxgain(6);
+      ct.setFxpan(-50);
+      log("ok!");
     });
 
     return { desc: "testing script", flags: 0 };
