@@ -4,6 +4,7 @@ import {
   stringifyAddFxParams,
   TrackFX,
 } from "./fx";
+import { Item } from "./item";
 
 export class Track {
   obj: MediaTrack;
@@ -156,16 +157,41 @@ export class Track {
     const info = TrackRouting.getParentInfo(this.obj);
     if (info.audio === null && info.midi === null) return null;
 
-    const parentTrack = reaper.GetMediaTrackInfo_Value(this.obj, "P_PARTRACK");
+    let parentTrack = reaper.GetMediaTrackInfo_Value(this.obj, "P_PARTRACK") as
+      | MediaTrack
+      | 0;
+    if (parentTrack === 0) {
+      parentTrack = reaper.GetMasterTrack(0);
+    }
+
     return {
       ...info,
-      src: this.obj,
-      dst: parentTrack,
+      src: new Track(this.obj),
+      dst: new Track(parentTrack),
     };
   }
 
   delete() {
     reaper.DeleteTrack(this.obj);
+  }
+
+  getIdx() {
+    const tracknumber = reaper.GetMediaTrackInfo_Value(
+      this.obj,
+      "IP_TRACKNUMBER",
+    );
+    if (tracknumber === 0) error("failed to get track number");
+    if (tracknumber === -1) return "master" as const;
+
+    return tracknumber - 1;
+  }
+
+  *iterItems() {
+    const count = reaper.CountTrackMediaItems(this.obj);
+    for (let i = 0; i < count; i++) {
+      const item = reaper.GetTrackMediaItem(this.obj, i);
+      yield new Item(item);
+    }
   }
 }
 
@@ -304,27 +330,19 @@ module TrackRouting {
     category: TrackRoutingCategory.Send | TrackRoutingCategory.Receive,
     idx: number,
   ) {
-    // I'm adding '0' here because *parent* folder routing uses a number 0 to
-    // indicate sending to master.
-    //
-    // Note this only happens for `Track.getParentSendInfo()`. This function
-    // will always return a MediaTrack because 'track sends' can't target
-    // the master track.
-    //
-    // I'm using TypeScript's `ReturnType<...>` bullshit so I have to add it here.
-    const dst: MediaTrack | 0 = reaper.GetTrackSendInfo_Value(
+    const dst: MediaTrack = reaper.GetTrackSendInfo_Value(
       track,
       category,
       idx,
       "P_DESTTRACK",
-    ) as MediaTrack | 0;
+    );
     const src: MediaTrack = reaper.GetTrackSendInfo_Value(
       track,
       category,
       idx,
       "P_SRCTRACK",
     );
-    return { dst, src };
+    return { dst: new Track(dst), src: new Track(src) };
   }
 
   export function getParentAudioInfo(

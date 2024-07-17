@@ -2,7 +2,7 @@ AddCwdToImportPaths();
 
 import { encode } from "json";
 import { inspect } from "reaper-api/inspect";
-import { Track } from "reaper-api/track";
+import { Track, TrackSendMode } from "reaper-api/track";
 import { copy } from "reaper-api/clipboard";
 import { FXParam, TrackFX, AddFxParams } from "reaper-api/fx";
 import { undoBlock } from "reaper-api/utils";
@@ -175,6 +175,7 @@ class CStripFx {
     const fxcount = reaper.TrackFX_GetCount(tr);
     const oldIdx = this.fx.fxidx;
     const newIdx = fxcount - 2;
+    log(`cstrip: move ${oldIdx} -> ${newIdx}`);
 
     // do nothing if already at end
     if (oldIdx === newIdx) return;
@@ -298,6 +299,7 @@ class ChannelFx {
     const fxcount = reaper.TrackFX_GetCount(tr);
     const oldIdx = this.fx.fxidx;
     const newIdx = fxcount - 1;
+    log(`channel: move ${oldIdx} -> ${newIdx}`);
 
     // do nothing if already at end
     if (oldIdx === newIdx) return;
@@ -407,6 +409,7 @@ class BussFx {
     const tr = this.fx.track;
     const oldIdx = this.fx.fxidx;
     const newIdx = 0;
+    log(`buss: move ${oldIdx} -> ${newIdx}`);
 
     // do nothing if already at target pos
     if (oldIdx === newIdx) return;
@@ -422,6 +425,89 @@ class BussFx {
       error(
         `fatal error: something went wrong while moving buss fx from ${oldIdx} to ${newIdx}`,
       );
+  }
+}
+
+function trackHasAudioItems(tr: Track) {
+  for (const item of tr.iterItems()) {
+    for (const take of item.iterTakes()) {
+      // assume non-midi take is audio
+      if (!take.isMidi()) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function trackAudioRoutingMatrix() {
+  const count = Track.count();
+  const errors = {
+    unsupportedSendMode: [] as (number | "master")[],
+    nonUnityGainSend: [] as (number | "master")[],
+  };
+
+  // map from [src][dst] => volume
+  type Idx = number | "master";
+  type T = number;
+  const result: LuaTable<Idx, LuaTable<Idx, T>> = new LuaTable();
+  function set(src: Idx, dst: Idx, val: T) {
+    if (!result.has(src)) {
+      result.set(src, new LuaTable());
+    }
+    const dstTable = result.get(src);
+    dstTable.set(dst, val);
+  }
+
+  for (let i = 0; i < count; i++) {
+    const track = Track.getByIdx(i);
+    const srcIdx = track.getIdx();
+
+    const sends = track.getSends().filter((x) => {
+      if (!x.audio) return false;
+      if (x.audio.volume !== 1) {
+        errors.nonUnityGainSend.push(srcIdx);
+        return false;
+      }
+      if (x.audio.sendMode !== TrackSendMode.PostFader) {
+        errors.unsupportedSendMode.push(srcIdx);
+        return false;
+      }
+      return true;
+    });
+    const parentSend = track.getParentSendInfo();
+
+    if (sends.length === 0) {
+      if (parentSend?.audio) {
+        const dstIdx = parentSend.dst.getIdx();
+        set(srcIdx, dstIdx, parentSend.audio.volume);
+      }
+    } else {
+      // has sends
+      const targetVolumes = [];
+      const parentSendVolume = reaper.GetMediaTrackInfo_Value(
+        track.obj,
+        "D_VOL",
+      );
+      if (parentSend?.audio) {
+        targetVolumes.push(parentSendVolume);
+      }
+      for (const send of sends) {
+        const audio = send.audio!;
+        if (audio.sendMode === TrackSendMode.PostFader) {
+          targetVolumes.push(audio.volume * parentSendVolume);
+        } else {
+          // pre-fader
+          targetVolumes.push(audio.volume);
+        }
+      }
+      const finalVolume = targetVolumes[0];
+      // THINKING HOW TO DO THIS
+    }
+
+    sends.map((x) => x.audio!.volume);
+
+    sends.every((x) => x.audio!.sendMode === TrackSendMode.PostFader);
   }
 }
 
