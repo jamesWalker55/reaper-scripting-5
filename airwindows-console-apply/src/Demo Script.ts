@@ -147,7 +147,7 @@ class CStripFx {
 
   static create(track: Track): CStripFx {
     const count = track.getFxCount();
-    const newPos = track.addFx(CStripFx.FX_ADD, count);
+    const newPos = track.addFx(CStripFx.FX_ADD, count - 1);
     if (newPos === null) error("failed to create gain plugin");
 
     const fx = track.getFx(newPos);
@@ -459,10 +459,10 @@ function main() {
     const result = Track.getSelected().map((tr) => {
       const buss = BussFx.find(tr) || BussFx.create(tr);
       buss.moveToTop();
-      const strip = CStripFx.find(tr) || CStripFx.create(tr);
-      strip.moveToSecondLast();
       const channel = ChannelFx.find(tr) || ChannelFx.create(tr);
       channel.moveToEnd();
+      const strip = CStripFx.find(tr) || CStripFx.create(tr);
+      strip.moveToSecondLast();
       log("success");
     });
 
