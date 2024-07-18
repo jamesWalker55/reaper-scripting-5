@@ -543,8 +543,13 @@ export function getProjectRoutingInfo(
     const track = Track.getByIdx(srcIdx);
 
     for (const send of track.getSends(true)) {
-      if (opt.audio && !send.audio) continue;
-      if (opt.midi && !send.midi) continue;
+      if (opt.audio && opt.midi) {
+        if (!(send.audio || send.midi)) continue;
+      } else if (opt.audio) {
+        if (!send.audio) continue;
+      } else if (opt.midi) {
+        if (!send.midi) continue;
+      }
 
       const dstIdx = send.dst.getIdx();
 
