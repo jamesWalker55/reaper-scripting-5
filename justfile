@@ -38,3 +38,6 @@ rebuild:
 
 publish package path:
   {{REAPER_INDEXER}} publish --repo "{{INDEX_REPOSITORY}}" --identifier "{{package}}" "{{path}}"
+
+publish-new package path:
+  {{REAPER_INDEXER}} publish --repo "{{INDEX_REPOSITORY}}" --identifier "{{package}}" "{{path}}" --new
