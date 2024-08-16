@@ -107,7 +107,8 @@ export function generateContainerFxidx(
   track: MediaTrack,
   allidx: number[],
 ): number {
-  assert(allidx.length > 0, "container index must be at least length 1");
+  if (allidx.length <= 0)
+    throw new Error("container index must be at least length 1");
   let sc = reaper.TrackFX_GetCount(track) + 1;
   let rv = 0x2000000 + allidx[0] + 1;
   for (let i = 1; i < allidx.length; i++) {
@@ -298,10 +299,9 @@ abstract class BaseFX {
 
       const fxdataStart = i;
 
-      assert(
-        fxdataStart + fxdataLength < alldata.length,
-        "fxdata exceeds actual chunk size",
-      );
+      if (!(fxdataStart + fxdataLength < alldata.length)) {
+        throw new Error("fxdata exceeds actual chunk size");
+      }
       const headerdata = alldata.slice(0, fxdataStart);
       const fxdata = alldata.slice(fxdataStart, fxdataStart + fxdataLength);
       const footerdata = alldata.slice(
@@ -501,10 +501,11 @@ export class TrackFX extends BaseFX {
       }
     } else {
       const totalFxCount = reaper.TrackFX_GetCount(this.track);
-      assert(
-        decipher.actualIdx < totalFxCount,
-        `FX index of ${decipher.actualIdx} exceeds track FX count of ${totalFxCount}`,
-      );
+      if (decipher.actualIdx >= totalFxCount)
+        throw new Error(
+          `FX index of ${decipher.actualIdx} exceeds track FX count of ${totalFxCount}`,
+        );
+
       fxchainTag = "FXCHAIN";
     }
 

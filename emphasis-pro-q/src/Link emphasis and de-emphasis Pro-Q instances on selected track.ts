@@ -3,7 +3,7 @@ AddCwdToImportPaths();
 import { encode } from "json";
 import { FX, FXParam, TrackFX } from "reaper-api/fx";
 import { getSelectedTracks } from "reaper-api/track";
-import { msgBox } from "reaper-api/utils";
+import { errorHandler, msgBox } from "reaper-api/utils";
 
 const identsToLink: { ident: string; inv?: true }[] = [
   { ident: "0:0" }, // Band 1 Used
@@ -330,4 +330,4 @@ function main() {
   msgBox("Success", "Linked EQs together!");
 }
 
-main();
+errorHandler(main);
