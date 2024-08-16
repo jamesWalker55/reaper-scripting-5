@@ -8,15 +8,23 @@ export function ensureAPI(source: string, functionName: string) {
   error(msg);
 }
 
-export function log(msg: any) {
-  if (typeof msg !== "string") {
-    msg = inspect(msg);
-  }
+export function log(...args: any[]) {
+  for (let i = 0; i < args.length; i++) {
+    if (i !== 0) {
+      reaper.ShowConsoleMsg("\t");
+    }
 
-  if (msg === "") {
-    // do nothing, just print the newline below
-  } else {
-    reaper.ShowConsoleMsg(msg);
+    let msg = args[i];
+
+    if (typeof msg !== "string") {
+      msg = inspect(msg);
+    }
+
+    if (msg === "") {
+      // do nothing, just print the newline below
+    } else {
+      reaper.ShowConsoleMsg(msg);
+    }
   }
 
   reaper.ShowConsoleMsg("\n");
