@@ -7,16 +7,7 @@ import { copy } from "./clipboard";
 import { Item } from "./item";
 import * as Chunk from "./chunk";
 import * as ArrChunk from "./arrchunk";
-import { errorHandler } from "./utils";
-
-function log(msg: string, end?: string) {
-  if (msg !== "") {
-    reaper.ShowConsoleMsg(msg);
-  }
-  if (end !== "") {
-    reaper.ShowConsoleMsg(end === undefined ? "\n" : end);
-  }
-}
+import { errorHandler, log } from "./utils";
 
 function main() {
   const track = Track.getSelected()[0];
@@ -28,17 +19,18 @@ function main() {
       if (typeof child === "string") continue;
       const tag = child[0];
       if (typeof tag !== "string") continue;
-      if (tag !== "SOURCE WAVE") continue;
+      if (!tag.startsWith("SOURCE ")) continue;
       const file = child[1];
       if (typeof file !== "string") continue;
       if (!file.startsWith("FILE")) continue;
       source = file;
     }
-    if (source === null) error("SOURCE not found in item");
+    if (source === null) throw new Error("SOURCE not found in item");
 
     allSource.push(source);
   }
-  copy(allSource.join("\n"));
+  log(allSource);
+  // copy(allSource.join("\n"));
 
   // const allVolpan = [];
   // for (const item of track.iterItems()) {

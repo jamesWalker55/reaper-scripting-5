@@ -9,7 +9,10 @@ export function ensureAPI(source: string, functionName: string) {
 }
 
 export function log(msg: any) {
-  msg = tostring(msg);
+  if (typeof msg !== "string") {
+    msg = inspect(msg);
+  }
+
   if (msg === "") {
     // do nothing, just print the newline below
   } else {
