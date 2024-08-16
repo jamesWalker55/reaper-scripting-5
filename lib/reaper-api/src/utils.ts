@@ -61,9 +61,24 @@ export function msgBox(title: string, msg: string) {
 export function undoBlock(func: () => { desc: string; flags: number }) {
   reaper.Undo_BeginBlock2(0);
   reaper.PreventUIRefresh(1);
-  const config = func();
+
+  let desc;
+  let flags;
+  let error = null;
+  try {
+    const config = func();
+    desc = config.desc;
+    flags = config.flags;
+  } catch (e) {
+    desc = "";
+    flags = -1;
+    error = e;
+  }
+
   reaper.PreventUIRefresh(-1);
-  reaper.Undo_EndBlock2(0, config.desc, config.flags);
+  reaper.Undo_EndBlock2(0, desc, flags);
+
+  if (error !== null) throw error;
 }
 
 /**
