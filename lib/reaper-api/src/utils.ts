@@ -42,6 +42,10 @@ export function deferLoop(func: (stop: () => void) => void) {
   inner();
 }
 
+export function deferAsync() {
+  return new Promise((resolve) => reaper.defer(() => resolve(undefined)));
+}
+
 export function msgBox(title: string, msg: string) {
   return reaper.ShowMessageBox(msg, title, 0);
 }
@@ -102,7 +106,7 @@ export function assertUnreachable(x: never): never {
   throw new Error("Didn't expect to get here");
 }
 
-export function errorHandler(func: () => void) {
+export function errorHandler(func: () => void | Promise<void>) {
   function stringOrInspect(obj: unknown): string {
     if (typeof obj === "string") {
       return obj;
@@ -112,7 +116,37 @@ export function errorHandler(func: () => void) {
   }
 
   try {
-    func();
+    const rv = func();
+    if (rv) {
+      rv.catch((e) => {
+        let name = "error";
+        let msg: string | null = null;
+        let stack: string | null = null;
+        if (typeof e === "object" && e !== null) {
+          if ("message" in e) msg = stringOrInspect(e.message);
+          if ("name" in e) name = stringOrInspect(e.name);
+          if ("stack" in e) stack = stringOrInspect(e.stack);
+        } else {
+          msg = stringOrInspect(e);
+        }
+
+        if (msg === null) {
+          log(`error: ${name}`);
+        } else {
+          log(`${name}: ${msg}`);
+        }
+
+        if (stack !== null) {
+          log(stack);
+        }
+
+        if (msg === null) {
+          error(`error: ${name}`);
+        } else {
+          error(`${name}: ${msg}`);
+        }
+      });
+    }
   } catch (e) {
     let name = "error";
     let msg: string | null = null;
