@@ -1,3 +1,5 @@
+import { inspect } from "./inspect";
+
 export function ensureAPI(source: string, functionName: string) {
   if (reaper.APIExists(functionName)) return;
 
@@ -80,4 +82,45 @@ export function absPath(relPath?: string) {
 
 export function assertUnreachable(x: never): never {
   throw new Error("Didn't expect to get here");
+}
+
+export function errorHandler(func: () => void) {
+  function stringOrInspect(obj: unknown): string {
+    if (typeof obj === "string") {
+      return obj;
+    } else {
+      return inspect(obj);
+    }
+  }
+
+  try {
+    func();
+  } catch (e) {
+    let name = "error";
+    let msg: string | null = null;
+    let stack: string | null = null;
+    if (typeof e === "object" && e !== null) {
+      if ("message" in e) msg = stringOrInspect(e.message);
+      if ("name" in e) name = stringOrInspect(e.name);
+      if ("stack" in e) stack = stringOrInspect(e.stack);
+    } else {
+      msg = stringOrInspect(e);
+    }
+
+    if (msg === null) {
+      log(`error: ${name}`);
+    } else {
+      log(`${name}: ${msg}`);
+    }
+
+    if (stack !== null) {
+      log(stack);
+    }
+
+    if (msg === null) {
+      error(`error: ${name}`);
+    } else {
+      error(`${name}: ${msg}`);
+    }
+  }
 }
