@@ -257,8 +257,8 @@ export function quotedString(rest: Span): Result {
     ok: true,
     out: {
       source: rest.source,
-      start: originalStart,
-      end: rest.start,
+      start: originalStart + 1,
+      end: rest.start - 1,
     },
     rest,
   };
