@@ -416,3 +416,95 @@ export function parseElement(input: string): Element<string> {
   // convert element span to strings
   return spanElementToStringElement(result.out);
 }
+
+export function serialiseTerm(text: string): string {
+  if (text.length === 0) {
+    return '""';
+  }
+
+  // backticks are not allowed in .rpp files, they are always replaced with single quotes
+  text = text.replaceAll("`", "'");
+
+  const firstChar = text.charAt(0);
+  let needsToBeQuoted = firstChar == "'" || firstChar == '"';
+
+  let hasDblQuote = false;
+  let hasSglQuote = false;
+  for (const [x] of string.gmatch(text, ".")) {
+    if (x === " ") {
+      needsToBeQuoted = true;
+    } else if (x === "'") {
+      hasSglQuote = true;
+    } else if (x === '"') {
+      hasDblQuote = true;
+    }
+  }
+
+  if (!needsToBeQuoted) {
+    return text;
+  }
+
+  let quoteChar: string;
+  if (hasDblQuote && hasSglQuote) {
+    quoteChar = "`";
+  } else if (hasDblQuote) {
+    quoteChar = "'";
+  } else {
+    quoteChar = '"';
+  }
+
+  return `${quoteChar}${text}${quoteChar}`;
+}
+
+/// Serialise an element back to a [String] following the RPP format.
+export function serializeToString(element: Element<string>): string {
+  let buf: string[] = [];
+  serializeToStringSub(buf, element, 0);
+  return buf.join("");
+}
+
+function serializeToStringSub(
+  buf: string[],
+  element: Element<string>,
+  indentLevel: number,
+) {
+  // first line
+  for (let i = 0; i < indentLevel; i++) {
+    buf.push("  ");
+  }
+  buf.push("<");
+  buf.push(element.tag);
+  for (const x of element.attr) {
+    buf.push(" ");
+    buf.push(serialiseTerm(x));
+  }
+  buf.push("\n");
+  for (const child of element.children) {
+    if ("tag" in child) {
+      // element
+      serializeToStringSub(buf, child, indentLevel + 1);
+      buf.push("\n");
+    } else {
+      // string list
+      for (let i = 0; i < indentLevel + 1; i++) {
+        buf.push("  ");
+      }
+      let isFirst = true;
+      for (let x of child) {
+        x = serialiseTerm(x);
+        if (isFirst) {
+          isFirst = false;
+        } else {
+          buf.push(" ");
+        }
+        buf.push(x);
+      }
+      buf.push("\n");
+    }
+  }
+  // last line
+  for (let i = 0; i < indentLevel; i++) {
+    buf.push("  ");
+  }
+  buf.push(">");
+}
