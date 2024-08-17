@@ -184,3 +184,20 @@ export function errorHandler(func: () => void | Promise<void>) {
     }
   }
 }
+
+export function readFile(path: string) {
+  const [f, err] = io.open(path, "rb");
+  if (f === undefined) throw new Error(err);
+  const content = f.read("*all" as any);
+  f.close();
+  if (typeof content !== "string")
+    throw new Error("file read returned nonstring value");
+  return content;
+}
+
+export function writeFile(path: string, text: string) {
+  const [f, err] = io.open(path, "w");
+  if (f === undefined) throw new Error(err);
+  f.write(text);
+  f.close();
+}
