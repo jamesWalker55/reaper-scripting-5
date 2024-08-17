@@ -1,6 +1,7 @@
-import * as ArrChunk from "./arrchunk";
 import * as Base64 from "./base64";
 import * as Chunk from "./chunk";
+import { Element, parseElement } from "./element";
+import { inspect } from "./inspect";
 import { assertUnreachable, msgBox } from "./utils";
 
 function parseLittleEndianInteger(bytes: string): number {
@@ -210,25 +211,28 @@ abstract class BaseFX {
     }
   }
 
-  protected abstract getArrChunk(): ArrChunk.ArrChunk;
+  protected abstract getElement(): Element;
 
   /** NOTE: This returns raw byte strings! Please encode with base64 before copying to clipboard */
-  private parseArrChunk(arr: ArrChunk.ArrChunk) {
-    // first line should be tag line
-    const tagLine = arr.shift();
-    if (typeof tagLine !== "string") error("fx chunk is missing header line");
-    if (!tagLine) error("fx chunk is missing header line");
-
+  private parseElement(element: Element) {
     // find the base64 array
-    if (tagLine.startsWith("VST")) {
+    if (element.tag.startsWith("VST")) {
       // vst, rest of the array must be strings
-      for (const x of arr) {
-        if (typeof x !== "string")
-          error(
-            `fx chunk should not contain sub-elements, but found an element: ${x[0]}`,
+      for (const x of element.children) {
+        if ("tag" in x)
+          throw new Error(
+            `fx chunk should not contain sub-elements, but found an element: ${inspect(
+              x,
+            )}`,
+          );
+        if (x.length !== 1)
+          throw new Error(
+            `fx chunk line should only have 1 element: ${inspect(x)}`,
           );
       }
-      const b64arr = arr as string[];
+      const b64arr = element.children.map(
+        (x) => (x as string[])[0],
+      ) as string[];
 
       // rest of 'arr' only contains base64 data
       // but it may be separated into "blocks", detect and separate these blocks first
@@ -319,26 +323,27 @@ abstract class BaseFX {
         vstid,
         magic,
       };
-    } else if (tagLine.startsWith("CLAP")) {
+    } else if (element.tag.startsWith("CLAP")) {
       // clap, find the subelement <STATE ...>
       const b64arr = (() => {
-        for (const x of arr) {
-          if (typeof x !== "string") {
-            const stateTag = x[0];
-            if (typeof stateTag !== "string")
-              error("clap state chunk is missing header line");
-            if (stateTag !== "STATE") continue;
-            const state = x.slice(1, x.length);
-            for (const x of state) {
-              if (typeof x !== "string")
-                error(
-                  `clap state element should not contain sub-elements, but found an element: ${x[0]}`,
+        for (const x of element.children) {
+          if ("tag" in x && x.tag === "STATE") {
+            for (const y of x.children) {
+              if ("tag" in y)
+                throw new Error(
+                  `clap state element should not contain sub-elements, but found an element: ${inspect(
+                    y,
+                  )}`,
+                );
+              if (y.length !== 1)
+                throw new Error(
+                  `fx chunk line should only have 1 element: ${inspect(y)}`,
                 );
             }
-            return state as string[];
+            return x.children.map((x) => (x as string[])[0]) as string[];
           }
         }
-        error(`failed to get CLAP plugin state: ${tagLine}`);
+        error(`failed to get CLAP plugin state: ${inspect(element)}`);
       })();
 
       // join the arr and decode it
@@ -346,7 +351,7 @@ abstract class BaseFX {
 
       return { fxdata };
     } else {
-      error(`this kind of fx chunk is not supported: ${tagLine}`);
+      error(`this kind of fx chunk is not supported: ${inspect(element)}`);
     }
   }
 
@@ -364,8 +369,8 @@ abstract class BaseFX {
     }
     // failsafe testing
     if (chunk !== null) {
-      const arrchunk = this.getArrChunk();
-      const { fxdata } = this.parseArrChunk(arrchunk);
+      const arrchunk = this.getElement();
+      const { fxdata } = this.parseElement(arrchunk);
       const testchunk = Base64.encode(fxdata);
       if (chunk !== testchunk) {
         msgBox(
@@ -377,8 +382,8 @@ abstract class BaseFX {
     // if null, plugin supports chunks, but we can't get it for some reason
     // try getting it manually
     if (chunk === null) {
-      const arrchunk = this.getArrChunk();
-      const { fxdata } = this.parseArrChunk(arrchunk);
+      const arrchunk = this.getElement();
+      const { fxdata } = this.parseElement(arrchunk);
       chunk = Base64.encode(fxdata);
     }
     return chunk;
@@ -481,7 +486,7 @@ export class TrackFX extends BaseFX {
     );
   }
 
-  protected getArrChunk(): ArrChunk.ArrChunk {
+  protected getElement(): Element {
     const decipher = this.decipherFxidx();
     // fuck containers
     if (decipher.isInContainer)
@@ -510,15 +515,12 @@ export class TrackFX extends BaseFX {
     }
 
     const chunk = Chunk.track(this.track);
-    if (!ArrChunk._testChunk(chunk))
-      error("failsafe - error when parsing track chunk data");
-    const arrchunk = ArrChunk.fromChunk(chunk);
-    let fxchainarr: ArrChunk.ArrChunk | null = null;
-    for (const child of arrchunk) {
-      if (typeof child === "string") continue;
+    const element = parseElement(chunk);
+    let fxchainarr: Element | null = null;
+    for (const child of element.children) {
+      if (!("tag" in child)) continue;
 
-      const tag = child[0];
-      if (tag === fxchainTag) {
+      if (child.tag === fxchainTag) {
         fxchainarr = child;
         break;
       }
@@ -526,7 +528,7 @@ export class TrackFX extends BaseFX {
     if (fxchainarr === null)
       error(`failed to find <${fxchainTag}> element in track chunk data`);
 
-    const fxchunks = fxchainarr.filter((x) => typeof x !== "string");
+    const fxchunks = fxchainarr.children.filter((x) => "tag" in x);
 
     // TODO: There is extra data added to the beginning and end of the chunk data
     // Find a way to remove it
@@ -623,7 +625,7 @@ export class TakeFX extends BaseFX {
     );
   }
 
-  protected getArrChunk(): ArrChunk.ArrChunk {
+  protected getElement(): Element {
     error("TODO: Implement parsing chunk data of items");
   }
 }

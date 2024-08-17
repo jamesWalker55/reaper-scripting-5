@@ -330,13 +330,16 @@ export function elementEnd(rest: Span): Result<null> {
 
 const elementTag = unquotedString;
 
-export type Element<T> = {
+type RawElement<T> = {
   tag: T;
   attr: T[];
-  children: (T[] | Element<T>)[];
+  children: (T[] | RawElement<T>)[];
 };
 
-export function element(rest: Span): Result<Element<Span>> {
+type SpanElement = RawElement<Span>;
+export type Element = RawElement<string>;
+
+export function element(rest: Span): Result<SpanElement> {
   // line starts with '<TAG'
   const startChar = elementStart(rest);
   if (!startChar.ok) return Err;
@@ -366,7 +369,7 @@ export function element(rest: Span): Result<Element<Span>> {
   const children = manyTill(
     delimited(
       space0,
-      alt<Element<Span>, Span[]>(element, stringList),
+      alt<SpanElement, Span[]>(element, stringList),
       preceded(space0, lineEnding),
     ),
     preceded(space0, elementEnd),
@@ -374,7 +377,7 @@ export function element(rest: Span): Result<Element<Span>> {
   if (!children.ok) return Err;
   rest = children.rest;
 
-  const out: Element<Span> = {
+  const out: SpanElement = {
     tag: tag.out,
     attr: attr.out,
     children: children.out[0],
@@ -391,7 +394,7 @@ function spanToString(x: Span): string {
   return x.source.slice(x.start, x.end);
 }
 
-function spanElementToStringElement(ele: Element<Span>): Element<string> {
+function spanElementToStringElement(ele: SpanElement): Element {
   return {
     tag: spanToString(ele.tag),
     attr: ele.attr.map((x) => spanToString(x)),
@@ -405,7 +408,7 @@ function spanElementToStringElement(ele: Element<Span>): Element<string> {
   };
 }
 
-export function parseElement(input: string): Element<string> {
+export function parseElement(input: string): Element {
   let rest: Span = { source: input, start: 0, end: input.length };
   const result = delimited(multispace0, element, multispace0)(rest);
   if (!result.ok) throw new Error("Failed to parse element");
@@ -457,7 +460,7 @@ export function serialiseTerm(text: string): string {
 }
 
 /// Serialise an element back to a [String] following the RPP format.
-export function serializeToString(element: Element<string>): string {
+export function serializeToString(element: Element): string {
   let buf: string[] = [];
   serializeToStringSub(buf, element, 0);
   return buf.join("");
@@ -465,7 +468,7 @@ export function serializeToString(element: Element<string>): string {
 
 function serializeToStringSub(
   buf: string[],
-  element: Element<string>,
+  element: Element,
   indentLevel: number,
 ) {
   // first line
