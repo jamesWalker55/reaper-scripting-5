@@ -6,7 +6,7 @@ import { getProjectRoutingInfo, Track } from "./track";
 import { copy } from "./clipboard";
 import { Item } from "./item";
 import * as Chunk from "./chunk";
-import * as ArrChunk from "./element";
+import * as Element from "./element";
 import { errorHandler, log, readFile, writeFile } from "./utils";
 
 function measureTime<T>(func: () => T): [number, T] {
@@ -17,23 +17,29 @@ function measureTime<T>(func: () => T): [number, T] {
 }
 
 function main() {
-  const [track] = assert(Track.getSelected()[0], "no track selected");
-  const [elapsed, send] = measureTime(() =>
-    track
-      .getSends(true)
-      .map((x) => ({
-        audio: x.audio,
-        midi: x.midi,
-        src: x.src.getIdx(),
-        dst: x.dst.getIdx(),
-      })),
-  );
-  log("elapsed", elapsed);
+  for (const track of Track.getSelected()) {
+    for (const item of track.iterItems()) {
+      const element = Element.parse(Chunk.item(item.obj));
+      copy(encode(element));
+      break;
+    }
+  }
+  // const [elapsed, send] = measureTime(() =>
+  //   track
+  //     .getSends(true)
+  //     .map((x) => ({
+  //       audio: x.audio,
+  //       midi: x.midi,
+  //       src: x.src.getIdx(),
+  //       dst: x.dst.getIdx(),
+  //     })),
+  // );
+  // log("elapsed", elapsed);
 
-  writeFile(
-    "D:\\Programming\\reaper-scripting-5\\lua_output.json",
-    encode(send),
-  );
+  // writeFile(
+  //   "D:\\Programming\\reaper-scripting-5\\lua_output.json",
+  //   encode(send),
+  // );
 
   // const allVolpan = [];
   // for (const item of track.iterItems()) {

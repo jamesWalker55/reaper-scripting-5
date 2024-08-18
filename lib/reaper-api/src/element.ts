@@ -109,7 +109,7 @@ function manyTill<A, B>(
   };
 }
 
-export function space0(rest: Span): Result {
+function space0(rest: Span): Result {
   const originalStart = rest.start;
   rest = clone(rest);
 
@@ -132,7 +132,7 @@ export function space0(rest: Span): Result {
   };
 }
 
-export function space1(rest: Span): Result {
+function space1(rest: Span): Result {
   const originalStart = rest.start;
   rest = clone(rest);
 
@@ -157,7 +157,7 @@ export function space1(rest: Span): Result {
   };
 }
 
-export function multispace0(rest: Span): Result {
+function multispace0(rest: Span): Result {
   const originalStart = rest.start;
   rest = clone(rest);
 
@@ -189,7 +189,7 @@ export function multispace0(rest: Span): Result {
  * Matches '\n' or '\r\n'.
  * @param rest
  */
-export function lineEnding(rest: Span): Result {
+function lineEnding(rest: Span): Result {
   const firstChar = rest.source.charAt(rest.start);
   if (firstChar === "\n") {
     return {
@@ -227,7 +227,7 @@ export function lineEnding(rest: Span): Result {
   return { ok: false };
 }
 
-export function quotedString(rest: Span): Result {
+function quotedString(rest: Span): Result {
   // one_of("\"'`")
   const quoteChar = rest.source.charAt(rest.start);
   if (!"\"'`".includes(quoteChar)) return Err;
@@ -264,7 +264,7 @@ export function quotedString(rest: Span): Result {
   };
 }
 
-export function unquotedString(rest: Span): Result {
+function unquotedString(rest: Span): Result {
   // none_of("\"'`")
   const quoteChar = rest.source.charAt(rest.start);
   if ("\"'`".includes(quoteChar)) return Err;
@@ -294,11 +294,11 @@ export function unquotedString(rest: Span): Result {
   };
 }
 
-export function parseString(rest: Span): Result {
+function parseString(rest: Span): Result {
   return alt(unquotedString, quotedString)(rest);
 }
 
-export function stringList(rest: Span): Result<Span[]> {
+function stringList(rest: Span): Result<Span[]> {
   const firstElement = parseString(rest);
   if (!firstElement.ok) return Err;
   const result = [firstElement.out];
@@ -312,7 +312,7 @@ export function stringList(rest: Span): Result<Span[]> {
   }
 }
 
-export function elementStart(rest: Span): Result<null> {
+function elementStart(rest: Span): Result<null> {
   const firstChar = rest.source.charAt(rest.start);
   if (firstChar !== "<") return Err;
   rest = clone(rest);
@@ -320,7 +320,7 @@ export function elementStart(rest: Span): Result<null> {
   return { ok: true, out: null, rest };
 }
 
-export function elementEnd(rest: Span): Result<null> {
+function elementEnd(rest: Span): Result<null> {
   const firstChar = rest.source.charAt(rest.start);
   if (firstChar !== ">") return Err;
   rest = clone(rest);
@@ -339,7 +339,7 @@ type RawElement<T> = {
 type SpanElement = RawElement<Span>;
 export type Element = RawElement<string>;
 
-export function element(rest: Span): Result<SpanElement> {
+function element(rest: Span): Result<SpanElement> {
   // line starts with '<TAG'
   const startChar = elementStart(rest);
   if (!startChar.ok) return Err;
@@ -408,7 +408,7 @@ function spanElementToStringElement(ele: SpanElement): Element {
   };
 }
 
-export function parseElement(input: string): Element {
+export function parse(input: string): Element {
   let rest: Span = { source: input, start: 0, end: input.length };
   const result = delimited(multispace0, element, multispace0)(rest);
   if (!result.ok) throw new Error("Failed to parse element");
@@ -420,7 +420,7 @@ export function parseElement(input: string): Element {
   return spanElementToStringElement(result.out);
 }
 
-export function serialiseTerm(text: string): string {
+function serialiseTerm(text: string): string {
   if (text.length === 0) {
     return '""';
   }
@@ -460,7 +460,7 @@ export function serialiseTerm(text: string): string {
 }
 
 /// Serialise an element back to a [String] following the RPP format.
-export function serializeToString(element: Element): string {
+export function serialize(element: Element): string {
   let buf: string[] = [];
   serializeToStringSub(buf, element, 0);
   return buf.join("");

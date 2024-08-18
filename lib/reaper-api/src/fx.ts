@@ -1,6 +1,6 @@
 import * as Base64 from "./base64";
 import * as Chunk from "./chunk";
-import { Element, parseElement } from "./element";
+import { Element, parse } from "./element";
 import { inspect } from "./inspect";
 import { assertUnreachable, msgBox } from "./utils";
 
@@ -214,7 +214,7 @@ abstract class BaseFX {
   protected abstract getElement(): Element;
 
   /** NOTE: This returns raw byte strings! Please encode with base64 before copying to clipboard */
-  private parseElement(element: Element) {
+  private parse(element: Element) {
     // find the base64 array
     if (element.tag.startsWith("VST")) {
       // vst, rest of the array must be strings
@@ -370,7 +370,7 @@ abstract class BaseFX {
     // failsafe testing
     if (chunk !== null) {
       const arrchunk = this.getElement();
-      const { fxdata } = this.parseElement(arrchunk);
+      const { fxdata } = this.parse(arrchunk);
       const testchunk = Base64.encode(fxdata);
       if (chunk !== testchunk) {
         msgBox(
@@ -383,7 +383,7 @@ abstract class BaseFX {
     // try getting it manually
     if (chunk === null) {
       const arrchunk = this.getElement();
-      const { fxdata } = this.parseElement(arrchunk);
+      const { fxdata } = this.parse(arrchunk);
       chunk = Base64.encode(fxdata);
     }
     return chunk;
@@ -515,7 +515,7 @@ export class TrackFX extends BaseFX {
     }
 
     const chunk = Chunk.track(this.track);
-    const element = parseElement(chunk);
+    const element = parse(chunk);
     let fxchainarr: Element | null = null;
     for (const child of element.children) {
       if (!("tag" in child)) continue;
