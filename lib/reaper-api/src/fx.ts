@@ -129,30 +129,25 @@ export function generateContainerFxidx(
   return rv;
 }
 
-export class FX {
-  readonly fxidx: number;
+class ReaperFXChain {
   readonly obj:
     | { type: "track"; track: MediaTrack }
     | { type: "take"; take: MediaItem_Take };
 
-  constructor(
-    params: { track: MediaTrack } | { take: MediaItem_Take },
-    fxidx: number,
-  ) {
+  constructor(params: { track: MediaTrack } | { take: MediaItem_Take }) {
     if ("track" in params) {
       this.obj = { type: "track", track: params.track };
     } else {
       this.obj = { type: "take", take: params.take };
     }
-    this.fxidx = fxidx;
   }
 
-  GetNamedConfigParm(name: string): string | null {
+  GetNamedConfigParm(fxidx: number, name: string): string | null {
     switch (this.obj.type) {
       case "track": {
         const [ok, value] = reaper.TrackFX_GetNamedConfigParm(
           this.obj.track,
-          this.fxidx,
+          fxidx,
           name,
         );
         return ok ? value : null;
@@ -160,7 +155,7 @@ export class FX {
       case "take": {
         const [ok, value] = reaper.TakeFX_GetNamedConfigParm(
           this.obj.take,
-          this.fxidx,
+          fxidx,
           name,
         );
         return ok ? value : null;
@@ -170,12 +165,12 @@ export class FX {
     }
   }
 
-  SetNamedConfigParm(name: string, value: string): boolean {
+  SetNamedConfigParm(fxidx: number, name: string, value: string): boolean {
     switch (this.obj.type) {
       case "track": {
         return reaper.TrackFX_SetNamedConfigParm(
           this.obj.track,
-          this.fxidx,
+          fxidx,
           name,
           value,
         );
@@ -183,7 +178,7 @@ export class FX {
       case "take": {
         return reaper.TakeFX_SetNamedConfigParm(
           this.obj.take,
-          this.fxidx,
+          fxidx,
           name,
           value,
         );
@@ -193,25 +188,25 @@ export class FX {
     }
   }
 
-  private GetNumParams(): number {
+  GetNumParams(fxidx: number): number {
     switch (this.obj.type) {
       case "track": {
-        return reaper.TrackFX_GetNumParams(this.obj.track, this.fxidx);
+        return reaper.TrackFX_GetNumParams(this.obj.track, fxidx);
       }
       case "take": {
-        return reaper.TakeFX_GetNumParams(this.obj.take, this.fxidx);
+        return reaper.TakeFX_GetNumParams(this.obj.take, fxidx);
       }
       default:
         assertUnreachable(this.obj);
     }
   }
 
-  GetParamIdent(param: number): string | null {
+  GetParamIdent(fxidx: number, param: number): string | null {
     switch (this.obj.type) {
       case "track": {
         const [ok, value] = reaper.TrackFX_GetParamIdent(
           this.obj.track,
-          this.fxidx,
+          fxidx,
           param,
         );
         return ok ? value : null;
@@ -219,7 +214,7 @@ export class FX {
       case "take": {
         const [ok, value] = reaper.TakeFX_GetParamIdent(
           this.obj.take,
-          this.fxidx,
+          fxidx,
           param,
         );
         return ok ? value : null;
@@ -229,12 +224,12 @@ export class FX {
     }
   }
 
-  GetParamName(param: number): string | null {
+  GetParamName(fxidx: number, param: number): string | null {
     switch (this.obj.type) {
       case "track": {
         const [ok, value] = reaper.TrackFX_GetParamName(
           this.obj.track,
-          this.fxidx,
+          fxidx,
           param,
         );
         return ok ? value : null;
@@ -242,7 +237,7 @@ export class FX {
       case "take": {
         const [ok, value] = reaper.TakeFX_GetParamName(
           this.obj.take,
-          this.fxidx,
+          fxidx,
           param,
         );
         return ok ? value : null;
@@ -252,12 +247,12 @@ export class FX {
     }
   }
 
-  GetParamEx(param: number): [number, number, number, number] {
+  GetParamEx(fxidx: number, param: number): [number, number, number, number] {
     switch (this.obj.type) {
       case "track": {
         const [rv, min, max, mid] = reaper.TrackFX_GetParamEx(
           this.obj.track,
-          this.fxidx,
+          fxidx,
           param,
         );
         if (min === null) error("failed to get param value");
@@ -266,7 +261,7 @@ export class FX {
       case "take": {
         const [rv, min, max, mid] = reaper.TakeFX_GetParamEx(
           this.obj.take,
-          this.fxidx,
+          fxidx,
           param,
         );
         if (min === null) error("failed to get param value");
@@ -277,52 +272,69 @@ export class FX {
     }
   }
 
-  SetParam(param: number, value: number): boolean {
+  SetParam(fxidx: number, param: number, value: number): boolean {
     switch (this.obj.type) {
       case "track": {
-        return reaper.TrackFX_SetParam(
-          this.obj.track,
-          this.fxidx,
-          param,
-          value,
-        );
+        return reaper.TrackFX_SetParam(this.obj.track, fxidx, param, value);
       }
       case "take": {
-        return reaper.TakeFX_SetParam(this.obj.take, this.fxidx, param, value);
+        return reaper.TakeFX_SetParam(this.obj.take, fxidx, param, value);
       }
       default:
         assertUnreachable(this.obj);
     }
   }
 
-  private GetFXGUID(): string | null {
+  GetFXGUID(fxidx: number): string | null {
     switch (this.obj.type) {
       case "track": {
-        return reaper.TrackFX_GetFXGUID(this.obj.track, this.fxidx);
+        return reaper.TrackFX_GetFXGUID(this.obj.track, fxidx);
       }
       case "take": {
-        return reaper.TakeFX_GetFXGUID(this.obj.take, this.fxidx);
+        return reaper.TakeFX_GetFXGUID(this.obj.take, fxidx);
       }
       default:
         assertUnreachable(this.obj);
     }
   }
 
-  protected GetOffline(): boolean {
+  GetOffline(fxidx: number): boolean {
     switch (this.obj.type) {
       case "track": {
-        return reaper.TrackFX_GetOffline(this.obj.track, this.fxidx);
+        return reaper.TrackFX_GetOffline(this.obj.track, fxidx);
       }
       case "take": {
-        return reaper.TakeFX_GetOffline(this.obj.take, this.fxidx);
+        return reaper.TakeFX_GetOffline(this.obj.take, fxidx);
       }
       default:
         assertUnreachable(this.obj);
     }
+  }
+}
+
+export class FX {
+  readonly fxidx: number;
+  readonly obj:
+    | { type: "track"; track: MediaTrack }
+    | { type: "take"; take: MediaItem_Take };
+  readonly chain: ReaperFXChain;
+
+  constructor(
+    params: { track: MediaTrack } | { take: MediaItem_Take },
+    fxidx: number,
+  ) {
+    if ("track" in params) {
+      this.obj = { type: "track", track: params.track };
+      this.chain = new ReaperFXChain({ track: params.track });
+    } else {
+      this.obj = { type: "take", take: params.take };
+      this.chain = new ReaperFXChain({ take: params.take });
+    }
+    this.fxidx = fxidx;
   }
 
   guid() {
-    const guid = this.GetFXGUID();
+    const guid = this.chain.GetFXGUID(this.fxidx);
     if (!guid) error("failed to get FX GUID");
     return guid;
   }
@@ -341,7 +353,7 @@ export class FX {
   }
 
   getParameters() {
-    const totalCount = this.GetNumParams();
+    const totalCount = this.chain.GetNumParams(this.fxidx);
     const result = [];
     for (let i = 0; i < totalCount; i++) {
       result.push(this.getParameter(i));
@@ -397,25 +409,25 @@ export class FX {
 
   /** Return the "true" plugin name, ignoring the user renamed title */
   getOriginalName() {
-    const name = this.GetNamedConfigParm("fx_name");
+    const name = this.chain.GetNamedConfigParm(this.fxidx, "fx_name");
     if (!name) error("failed to get FX name");
     return name;
   }
 
   getIdent() {
-    const ident = this.GetNamedConfigParm("fx_ident");
+    const ident = this.chain.GetNamedConfigParm(this.fxidx, "fx_ident");
     if (!ident) error("failed to get FX ident");
     return ident;
   }
 
   getType() {
-    const type = this.GetNamedConfigParm("fx_type");
+    const type = this.chain.GetNamedConfigParm(this.fxidx, "fx_type");
     if (!type) error("failed to get FX type");
     return type;
   }
 
   getPDCLatency() {
-    const pdc = this.GetNamedConfigParm("pdc");
+    const pdc = this.chain.GetNamedConfigParm(this.fxidx, "pdc");
     if (!pdc) error("failed to get FX pdc");
     return pdc;
   }
@@ -651,9 +663,9 @@ export class FX {
     const type = this.getType().toUpperCase();
     let chunk: string | null = null;
     if (type.includes("VST")) {
-      chunk = this.GetNamedConfigParm("vst_chunk");
+      chunk = this.chain.GetNamedConfigParm(this.fxidx, "vst_chunk");
     } else if (type.includes("CLAP")) {
-      chunk = this.GetNamedConfigParm("clap_chunk");
+      chunk = this.chain.GetNamedConfigParm(this.fxidx, "clap_chunk");
     } else {
       // plugin type doesn't support chunks
       return null;
@@ -681,13 +693,14 @@ export class FX {
   }
 
   isOffline() {
-    return this.GetOffline();
+    return this.chain.GetOffline(this.fxidx);
   }
 }
 
 export class FXParam {
-  fx: FX;
-  param: number;
+  readonly fxidx: number;
+  readonly param: number;
+  readonly chain: ReaperFXChain;
 
   constructor(
     target: { track: MediaTrack } | { take: MediaItem_Take },
@@ -695,16 +708,20 @@ export class FXParam {
     param: number,
   ) {
     if ("track" in target) {
-      this.fx = new FX({ track: target.track }, fxidx);
+      this.chain = new ReaperFXChain({ track: target.track });
     } else {
-      this.fx = new FX({ take: target.take }, fxidx);
+      this.chain = new ReaperFXChain({ take: target.take });
     }
+    this.fxidx = fxidx;
     this.param = param;
   }
 
   /** A wrapper for the FX's GetNamedConfigParm() to parse it as a number. */
   private _parseParamConfig(name: string, fallback: number) {
-    const text = this.fx.GetNamedConfigParm(`param.${this.param}.${name}`);
+    const text = this.chain.GetNamedConfigParm(
+      this.fxidx,
+      `param.${this.param}.${name}`,
+    );
     if (!text) return fallback;
 
     const result = tonumber(text);
@@ -718,31 +735,31 @@ export class FXParam {
   private _setParamConfig(name: string, value: number | boolean) {
     const key = `param.${this.param}.${name}`;
     if (typeof value === "number") {
-      this.fx.SetNamedConfigParm(key, value.toString());
+      this.chain.SetNamedConfigParm(this.fxidx, key, value.toString());
     } else {
-      this.fx.SetNamedConfigParm(key, value ? "1" : "0");
+      this.chain.SetNamedConfigParm(this.fxidx, key, value ? "1" : "0");
     }
   }
 
   getIdent() {
-    const rv = this.fx.GetParamIdent(this.param);
+    const rv = this.chain.GetParamIdent(this.fxidx, this.param);
     if (!rv) error("param object is no longer valid");
     return rv;
   }
 
   getName() {
-    const rv = this.fx.GetParamName(this.param);
+    const rv = this.chain.GetParamName(this.fxidx, this.param);
     if (!rv) error("param object is no longer valid");
     return rv;
   }
 
   getValue() {
-    const [cur, min, max, mid] = this.fx.GetParamEx(this.param);
+    const [cur, min, max, mid] = this.chain.GetParamEx(this.fxidx, this.param);
     return { cur, min, max, mid };
   }
 
   setValue(value: number) {
-    return this.fx.SetParam(this.param, value);
+    return this.chain.SetParam(this.fxidx, this.param, value);
   }
 
   modulationActive(): boolean {
