@@ -129,18 +129,197 @@ export function generateContainerFxidx(
   return rv;
 }
 
-abstract class BaseFX {
-  abstract readonly type: "track" | "take";
-  abstract readonly fxidx: number;
-  abstract GetNamedConfigParm(name: string): string | null;
-  abstract SetNamedConfigParm(name: string, value: string): boolean;
-  protected abstract GetNumParams(): number;
-  abstract GetParamIdent(param: number): string | null;
-  abstract GetParamName(param: number): string | null;
-  abstract GetParamEx(param: number): [number, number, number, number];
-  abstract SetParam(param: number, value: number): boolean;
-  protected abstract GetFXGUID(): string | null;
-  protected abstract GetOffline(): boolean;
+export class FX {
+  readonly fxidx: number;
+  readonly obj:
+    | { type: "track"; track: MediaTrack }
+    | { type: "take"; take: MediaItem_Take };
+
+  constructor(
+    params: { track: MediaTrack } | { take: MediaItem_Take },
+    fxidx: number,
+  ) {
+    if ("track" in params) {
+      this.obj = { type: "track", track: params.track };
+    } else {
+      this.obj = { type: "take", take: params.take };
+    }
+    this.fxidx = fxidx;
+  }
+
+  GetNamedConfigParm(name: string): string | null {
+    switch (this.obj.type) {
+      case "track": {
+        const [ok, value] = reaper.TrackFX_GetNamedConfigParm(
+          this.obj.track,
+          this.fxidx,
+          name,
+        );
+        return ok ? value : null;
+      }
+      case "take": {
+        const [ok, value] = reaper.TakeFX_GetNamedConfigParm(
+          this.obj.take,
+          this.fxidx,
+          name,
+        );
+        return ok ? value : null;
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
+
+  SetNamedConfigParm(name: string, value: string): boolean {
+    switch (this.obj.type) {
+      case "track": {
+        return reaper.TrackFX_SetNamedConfigParm(
+          this.obj.track,
+          this.fxidx,
+          name,
+          value,
+        );
+      }
+      case "take": {
+        return reaper.TakeFX_SetNamedConfigParm(
+          this.obj.take,
+          this.fxidx,
+          name,
+          value,
+        );
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
+
+  private GetNumParams(): number {
+    switch (this.obj.type) {
+      case "track": {
+        return reaper.TrackFX_GetNumParams(this.obj.track, this.fxidx);
+      }
+      case "take": {
+        return reaper.TakeFX_GetNumParams(this.obj.take, this.fxidx);
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
+
+  GetParamIdent(param: number): string | null {
+    switch (this.obj.type) {
+      case "track": {
+        const [ok, value] = reaper.TrackFX_GetParamIdent(
+          this.obj.track,
+          this.fxidx,
+          param,
+        );
+        return ok ? value : null;
+      }
+      case "take": {
+        const [ok, value] = reaper.TakeFX_GetParamIdent(
+          this.obj.take,
+          this.fxidx,
+          param,
+        );
+        return ok ? value : null;
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
+
+  GetParamName(param: number): string | null {
+    switch (this.obj.type) {
+      case "track": {
+        const [ok, value] = reaper.TrackFX_GetParamName(
+          this.obj.track,
+          this.fxidx,
+          param,
+        );
+        return ok ? value : null;
+      }
+      case "take": {
+        const [ok, value] = reaper.TakeFX_GetParamName(
+          this.obj.take,
+          this.fxidx,
+          param,
+        );
+        return ok ? value : null;
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
+
+  GetParamEx(param: number): [number, number, number, number] {
+    switch (this.obj.type) {
+      case "track": {
+        const [rv, min, max, mid] = reaper.TrackFX_GetParamEx(
+          this.obj.track,
+          this.fxidx,
+          param,
+        );
+        if (min === null) error("failed to get param value");
+        return [rv, min, max, mid] as [number, number, number, number];
+      }
+      case "take": {
+        const [rv, min, max, mid] = reaper.TakeFX_GetParamEx(
+          this.obj.take,
+          this.fxidx,
+          param,
+        );
+        if (min === null) error("failed to get param value");
+        return [rv, min, max, mid] as [number, number, number, number];
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
+
+  SetParam(param: number, value: number): boolean {
+    switch (this.obj.type) {
+      case "track": {
+        return reaper.TrackFX_SetParam(
+          this.obj.track,
+          this.fxidx,
+          param,
+          value,
+        );
+      }
+      case "take": {
+        return reaper.TakeFX_SetParam(this.obj.take, this.fxidx, param, value);
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
+
+  private GetFXGUID(): string | null {
+    switch (this.obj.type) {
+      case "track": {
+        return reaper.TrackFX_GetFXGUID(this.obj.track, this.fxidx);
+      }
+      case "take": {
+        return reaper.TakeFX_GetFXGUID(this.obj.take, this.fxidx);
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
+
+  protected GetOffline(): boolean {
+    switch (this.obj.type) {
+      case "track": {
+        return reaper.TrackFX_GetOffline(this.obj.track, this.fxidx);
+      }
+      case "take": {
+        return reaper.TakeFX_GetOffline(this.obj.take, this.fxidx);
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
 
   guid() {
     const guid = this.GetFXGUID();
@@ -148,7 +327,18 @@ abstract class BaseFX {
     return guid;
   }
 
-  abstract getParameter(param: number): FXParam;
+  private getParameter(param: number): FXParam {
+    switch (this.obj.type) {
+      case "track": {
+        return new FXParam({ track: this.obj.track }, this.fxidx, param);
+      }
+      case "take": {
+        return new FXParam({ take: this.obj.take }, this.fxidx, param);
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
 
   getParameters() {
     const totalCount = this.GetNumParams();
@@ -160,9 +350,50 @@ abstract class BaseFX {
   }
 
   /** Return the plugin name as seen by the user, might be renamed by the user */
-  abstract getName(): string;
+  getName(): string {
+    switch (this.obj.type) {
+      case "track": {
+        const [ok, value] = reaper.TrackFX_GetFXName(
+          this.obj.track,
+          this.fxidx,
+        );
+        if (!ok) error("failed to get FX name");
+        return value;
+      }
+      case "take": {
+        const [ok, value] = reaper.TakeFX_GetFXName(this.obj.take, this.fxidx);
+        if (!ok) error("failed to get FX name");
+        return value;
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
 
-  abstract rename(name: string): void;
+  rename(name: string): void {
+    switch (this.obj.type) {
+      case "track": {
+        reaper.TrackFX_SetNamedConfigParm(
+          this.obj.track,
+          this.fxidx,
+          "renamed_name",
+          name,
+        );
+        break;
+      }
+      case "take": {
+        reaper.TakeFX_SetNamedConfigParm(
+          this.obj.take,
+          this.fxidx,
+          "renamed_name",
+          name,
+        );
+        break;
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
 
   /** Return the "true" plugin name, ignoring the user renamed title */
   getOriginalName() {
@@ -211,7 +442,67 @@ abstract class BaseFX {
     }
   }
 
-  protected abstract getElement(): Element;
+  protected getElement(): Element {
+    switch (this.obj.type) {
+      case "track": {
+        const track = this.obj.track;
+
+        const decipher = this.decipherFxidx();
+        // fuck containers
+        if (decipher.isInContainer)
+          error("unable to get chunk data from FX in containers");
+
+        let fxchainTag: string;
+        if (decipher.isRecInputOrHardwareOutput) {
+          const masterTrack = reaper.GetMasterTrack(0);
+          const isMasterTrack = track === masterTrack;
+          if (isMasterTrack) {
+            // is hardware output
+            // TODO: no idea where to find this
+            error("unable to get chunk data from FX in monitor FX");
+          } else {
+            // is rec input fx
+            fxchainTag = "FXCHAIN_REC";
+          }
+        } else {
+          const totalFxCount = reaper.TrackFX_GetCount(track);
+          if (decipher.actualIdx >= totalFxCount)
+            throw new Error(
+              `FX index of ${decipher.actualIdx} exceeds track FX count of ${totalFxCount}`,
+            );
+
+          fxchainTag = "FXCHAIN";
+        }
+
+        const chunk = Chunk.track(track);
+        const element = parse(chunk);
+        let fxchainarr: Element | null = null;
+        for (const child of element.children) {
+          if (!("tag" in child)) continue;
+
+          if (child.tag === fxchainTag) {
+            fxchainarr = child;
+            break;
+          }
+        }
+        if (fxchainarr === null)
+          error(`failed to find <${fxchainTag}> element in track chunk data`);
+
+        const fxchunks = fxchainarr.children.filter((x) => "tag" in x);
+
+        // TODO: There is extra data added to the beginning and end of the chunk data
+        // Find a way to remove it
+        // https://forum.cockos.com/showthread.php?t=292773
+
+        return fxchunks[decipher.actualIdx];
+      }
+      case "take": {
+        throw new Error("TODO: Implement parsing chunk data of items");
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
 
   /** NOTE: This returns raw byte strings! Please encode with base64 before copying to clipboard */
   private parse(element: Element) {
@@ -394,244 +685,6 @@ abstract class BaseFX {
   }
 }
 
-export class TrackFX extends BaseFX {
-  type = "track" as const;
-  track: MediaTrack;
-  fxidx: number;
-
-  constructor(track: MediaTrack, fxidx: number) {
-    super();
-    this.track = track;
-    this.fxidx = fxidx;
-  }
-
-  GetNamedConfigParm(name: string) {
-    const [ok, value] = reaper.TrackFX_GetNamedConfigParm(
-      this.track,
-      this.fxidx,
-      name,
-    );
-    return ok ? value : null;
-  }
-
-  SetNamedConfigParm(name: string, value: string) {
-    return reaper.TrackFX_SetNamedConfigParm(
-      this.track,
-      this.fxidx,
-      name,
-      value,
-    );
-  }
-
-  protected GetNumParams() {
-    return reaper.TrackFX_GetNumParams(this.track, this.fxidx);
-  }
-
-  GetParamIdent(param: number) {
-    const [ok, value] = reaper.TrackFX_GetParamIdent(
-      this.track,
-      this.fxidx,
-      param,
-    );
-    return ok ? value : null;
-  }
-
-  GetParamName(param: number) {
-    const [ok, value] = reaper.TrackFX_GetParamName(
-      this.track,
-      this.fxidx,
-      param,
-    );
-    return ok ? value : null;
-  }
-
-  GetParamEx(param: number) {
-    const [rv, min, max, mid] = reaper.TrackFX_GetParamEx(
-      this.track,
-      this.fxidx,
-      param,
-    );
-    if (min === null) error("failed to get param value");
-    return [rv, min, max, mid] as [number, number, number, number];
-  }
-
-  SetParam(param: number, value: number) {
-    return reaper.TrackFX_SetParam(this.track, this.fxidx, param, value);
-  }
-
-  protected GetFXGUID() {
-    return reaper.TrackFX_GetFXGUID(this.track, this.fxidx);
-  }
-
-  protected GetOffline() {
-    return reaper.TrackFX_GetOffline(this.track, this.fxidx);
-  }
-
-  getParameter(param: number): FXParam {
-    return new FXParam({ track: this.track }, this.fxidx, param);
-  }
-
-  getName() {
-    const [ok, value] = reaper.TrackFX_GetFXName(this.track, this.fxidx);
-    if (!ok) error("failed to get FX name");
-    return value;
-  }
-
-  rename(name: string) {
-    reaper.TrackFX_SetNamedConfigParm(
-      this.track,
-      this.fxidx,
-      "renamed_name",
-      name,
-    );
-  }
-
-  protected getElement(): Element {
-    const decipher = this.decipherFxidx();
-    // fuck containers
-    if (decipher.isInContainer)
-      error("unable to get chunk data from FX in containers");
-
-    let fxchainTag: string;
-    if (decipher.isRecInputOrHardwareOutput) {
-      const masterTrack = reaper.GetMasterTrack(0);
-      const isMasterTrack = this.track === masterTrack;
-      if (isMasterTrack) {
-        // is hardware output
-        // TODO: no idea where to find this
-        error("unable to get chunk data from FX in monitor FX");
-      } else {
-        // is rec input fx
-        fxchainTag = "FXCHAIN_REC";
-      }
-    } else {
-      const totalFxCount = reaper.TrackFX_GetCount(this.track);
-      if (decipher.actualIdx >= totalFxCount)
-        throw new Error(
-          `FX index of ${decipher.actualIdx} exceeds track FX count of ${totalFxCount}`,
-        );
-
-      fxchainTag = "FXCHAIN";
-    }
-
-    const chunk = Chunk.track(this.track);
-    const element = parse(chunk);
-    let fxchainarr: Element | null = null;
-    for (const child of element.children) {
-      if (!("tag" in child)) continue;
-
-      if (child.tag === fxchainTag) {
-        fxchainarr = child;
-        break;
-      }
-    }
-    if (fxchainarr === null)
-      error(`failed to find <${fxchainTag}> element in track chunk data`);
-
-    const fxchunks = fxchainarr.children.filter((x) => "tag" in x);
-
-    // TODO: There is extra data added to the beginning and end of the chunk data
-    // Find a way to remove it
-    // https://forum.cockos.com/showthread.php?t=292773
-
-    return fxchunks[decipher.actualIdx];
-  }
-}
-
-export class TakeFX extends BaseFX {
-  type = "take" as const;
-  take: MediaItem_Take;
-  fxidx: number;
-
-  constructor(take: MediaItem_Take, fxidx: number) {
-    super();
-    this.take = take;
-    this.fxidx = fxidx;
-  }
-
-  GetNamedConfigParm(name: string) {
-    const [ok, value] = reaper.TakeFX_GetNamedConfigParm(
-      this.take,
-      this.fxidx,
-      name,
-    );
-    return ok ? value : null;
-  }
-
-  SetNamedConfigParm(name: string, value: string) {
-    return reaper.TakeFX_SetNamedConfigParm(this.take, this.fxidx, name, value);
-  }
-
-  protected GetNumParams() {
-    return reaper.TakeFX_GetNumParams(this.take, this.fxidx);
-  }
-
-  GetParamIdent(param: number) {
-    const [ok, value] = reaper.TakeFX_GetParamIdent(
-      this.take,
-      this.fxidx,
-      param,
-    );
-    return ok ? value : null;
-  }
-
-  GetParamName(param: number) {
-    const [ok, value] = reaper.TakeFX_GetParamName(
-      this.take,
-      this.fxidx,
-      param,
-    );
-    return ok ? value : null;
-  }
-
-  GetParamEx(param: number) {
-    const [rv, min, max, mid] = reaper.TakeFX_GetParamEx(
-      this.take,
-      this.fxidx,
-      param,
-    );
-    if (min === null) error("failed to get param value");
-    return [rv, min, max, mid] as [number, number, number, number];
-  }
-
-  SetParam(param: number, value: number) {
-    return reaper.TakeFX_SetParam(this.take, this.fxidx, param, value);
-  }
-
-  protected GetFXGUID() {
-    return reaper.TakeFX_GetFXGUID(this.take, this.fxidx);
-  }
-
-  protected GetOffline() {
-    return reaper.TakeFX_GetOffline(this.take, this.fxidx);
-  }
-
-  getParameter(param: number): FXParam {
-    return new FXParam({ take: this.take }, this.fxidx, param);
-  }
-
-  getName() {
-    const [ok, value] = reaper.TakeFX_GetFXName(this.take, this.fxidx);
-    if (!ok) error("failed to get FX name");
-    return value;
-  }
-
-  rename(name: string) {
-    reaper.TakeFX_SetNamedConfigParm(
-      this.take,
-      this.fxidx,
-      "renamed_name",
-      name,
-    );
-  }
-
-  protected getElement(): Element {
-    error("TODO: Implement parsing chunk data of items");
-  }
-}
-
-export type FX = TrackFX | TakeFX;
-
 export class FXParam {
   fx: FX;
   param: number;
@@ -642,9 +695,9 @@ export class FXParam {
     param: number,
   ) {
     if ("track" in target) {
-      this.fx = new TrackFX(target.track, fxidx);
+      this.fx = new FX({ track: target.track }, fxidx);
     } else {
-      this.fx = new TakeFX(target.take, fxidx);
+      this.fx = new FX({ take: target.take }, fxidx);
     }
     this.param = param;
   }
@@ -866,10 +919,10 @@ export function getLastTouchedFx() {
     );
 
   if (itemidx === -1) {
-    return new TrackFX(track, fxidx);
+    return new FX({ track }, fxidx);
   } else {
     const item = reaper.GetTrackMediaItem(track, itemidx);
     const take = reaper.GetTake(item, takeidx);
-    return new TakeFX(take, fxidx);
+    return new FX({ take }, fxidx);
   }
 }
