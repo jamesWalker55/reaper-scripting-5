@@ -32,7 +32,8 @@ export class Take {
   }
 
   isMidi() {
-    return this.type() === "MIDI";
+    const type = this.type();
+    return type === "MIDI" || type === "MIDIPOOL";
   }
 
   source() {
