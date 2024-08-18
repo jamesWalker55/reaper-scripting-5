@@ -4,10 +4,10 @@ import { encode } from "json";
 import { inspect } from "./inspect";
 import { getProjectRoutingInfo, Track } from "./track";
 import { copy } from "./clipboard";
-import { Item } from "./item";
+import { Item, MidiTake } from "./item";
 import * as Chunk from "./chunk";
 import * as Element from "./element";
-import { errorHandler, log, readFile, writeFile } from "./utils";
+import { deferAsync, errorHandler, log, readFile, writeFile } from "./utils";
 
 function measureTime<T>(func: () => T): [number, T] {
   const startTime = os.clock();
@@ -16,14 +16,26 @@ function measureTime<T>(func: () => T): [number, T] {
   return [endTime - startTime, rv];
 }
 
-function main() {
-  for (const track of Track.getSelected()) {
-    for (const item of track.iterItems()) {
-      const element = Element.parse(Chunk.item(item.obj));
-      copy(encode(element));
-      break;
-    }
+async function main() {
+  while (true) {
+    await deferAsync();
+
+    const take = MidiTake.active();
+    log("take", take);
+    if (take === null) continue;
+
+    const grid = take.grid();
+    log("  grid", grid);
   }
+
+  // for (const track of Track.getSelected()) {
+  //   for (const item of track.iterItems()) {
+  //     const element = Element.parse(Chunk.item(item.obj));
+  //     copy(encode(element));
+  //     break;
+  //   }
+  // }
+
   // const [elapsed, send] = measureTime(() =>
   //   track
   //     .getSends(true)
