@@ -1,5 +1,6 @@
 {
   "name": "reaper-api",
+  "type": "module",
   "version": "0.0.1",
   "types": "./index.d.ts",
   "main": "./index",
