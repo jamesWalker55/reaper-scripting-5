@@ -1,9 +1,9 @@
 import { encode } from "json";
+import { copy } from "./clipboard";
 import { parseIni } from "./ini";
 import { inspect } from "./inspect";
-import { log } from "./utils";
-import { copy } from "./clipboard";
 import { abspath } from "./path/path";
+import { log } from "./utils";
 
 /**
  * NOTE: Only works on Windows (because the filename contains "win64.ini")
