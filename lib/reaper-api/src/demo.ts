@@ -8,7 +8,7 @@ import { Item, MidiTake } from "./item";
 import * as Chunk from "./chunk";
 import * as Element from "./element";
 import { deferAsync, errorHandler, log, readFile, writeFile } from "./utils";
-import { MenuItem, MenuItemKind, showMenu, showPlainTextMenu } from "./menu";
+import { MenuItemKind, showMenu, showPlainTextMenu } from "./menu";
 
 function measureTime<T>(func: () => T): [number, T] {
   const startTime = os.clock();
@@ -16,44 +16,6 @@ function measureTime<T>(func: () => T): [number, T] {
   const endTime = os.clock();
   return [endTime - startTime, rv];
 }
-
-const asd = `# Freeze selected tracks
-To mono [40901]
-To stereo [41223]
-To multichannel [40877]
-Unfreeze [41644]
-Show details... [41654]
----
-# Move to subproject
-Selected items [41996]
-Selected tracks [41997]
-# Subproject...
-Select all subproject items [_BR_SEL_ALL_ITEMS_PIP]
-Options:
-  Defer rendering of subprojects (render on tab switch rather than save) [41998]
-  Synchronize any parent projects when playing back subproject [41994]
-  Prompt before automatic render of subprojects [42334]
-  Leave subprojects open in tab after automatic open and render [42012]
----
-# Render tracks to stem tracks (SWS)
-To mono, obeying time selection [_SWS_AWRENDERMONOSMART]
-To stereo, obeying time selection [_SWS_AWRENDERSTEREOSMART]
-More...:
-  # Render selected tracks to stems (Post-fader)
-  To mono [40537]
-  To stereo [40405]
-  To multichannel [40892]
-  # Limit to selected area
-  To mono (limit to selected area) [41718]
-  To stereo (limit to selected area) [41716]
-  To multichannel (limit to selected area) [41717]
-  # Use 2nd pass render
-  To mono (2nd pass render) [42415]
-  To stereo (2nd pass render) [42413]
-  To multichannel (2nd pass render) [42414]
----
-# Render selected items (KAWA)
-To stereo, obeying time selection [_kawa_MAIN2_Render_SelectedItems_ToNewTrack]`;
 
 function main() {
   // const menu: MenuItem[] = [
@@ -76,6 +38,7 @@ function main() {
   // const selectedItem = showMenu(menu);
   // log(selectedItem);
 
+  const asd = readFile("D:\\Programming\\reaper-scripting-5\\test-menu.txt");
   log(os.time());
   const [
     is_new_value,

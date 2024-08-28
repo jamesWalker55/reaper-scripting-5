@@ -1,5 +1,5 @@
 import { inspect } from "./inspect";
-import { assertUnreachable } from "./utils";
+import { assertUnreachable, log } from "./utils";
 
 export enum MenuItemKind {
   Normal,
@@ -8,31 +8,36 @@ export enum MenuItemKind {
   Submenu,
 }
 
-interface NormalItem {
+type NormalItem = {
   kind: MenuItemKind.Normal;
   name: string;
   checked?: boolean;
-}
+};
 
-interface MutedItem {
+type MutedItem = {
   kind: MenuItemKind.Muted;
   name: string;
   checked?: boolean;
-}
+};
 
-interface SeparatorItem {
+type SeparatorItem = {
   kind: MenuItemKind.Separator;
-}
+};
 
-interface SubMenu {
+type SubMenu<T extends object> = {
   kind: MenuItemKind.Submenu;
   name: string;
   checked?: boolean;
-  children: MenuItem[];
-}
+  children: MenuItem<T>[];
+};
 
-export type MenuItem = NormalItem | MutedItem | SeparatorItem | SubMenu;
-type FlattenedMenuItem = NormalItem | MutedItem;
+type MenuItem<T extends object> =
+  | (NormalItem & T)
+  | (MutedItem & T)
+  | SeparatorItem
+  | SubMenu<T>;
+
+type SelectableMenuItem<T extends object> = (NormalItem & T) | (MutedItem & T);
 
 // These characters cannot appear at the start of an item name
 const MODIFIER_CHARS = ["#", "!", ">", "<", "|"];
@@ -68,7 +73,7 @@ function sanitizeItemName(name: string): string {
   return replaceModifierCharacters(prefix) + suffix;
 }
 
-function parseSameLevelItems(revLines: string[]) {
+function parseSameLevelItems(revLines: string[]): MenuItem<{ cmd: number }>[] {
   // if list is empty, return immediately
   if (revLines.length === 0) return [];
 
@@ -78,14 +83,7 @@ function parseSameLevelItems(revLines: string[]) {
     "^ *",
   )[0].length;
 
-  // export type MenuItem = NormalItem | MutedItem | SeparatorItem | SubMenu;
-  type NormalCommandItem = NormalItem & { cmd: number };
-  type CommandMenuItem =
-    | NormalCommandItem
-    | MutedItem
-    | SeparatorItem
-    | SubMenu;
-  const result: CommandMenuItem[] = [];
+  const result: MenuItem<{ cmd: number }>[] = [];
 
   while (true) {
     let line = revLines.pop();
@@ -123,7 +121,7 @@ function parseSameLevelItems(revLines: string[]) {
     if (commentPrefix.length > 0) {
       // is a comment (muted items)
       const name = line.slice(commentPrefix[0].length, line.length).trim();
-      result.push({ kind: MenuItemKind.Muted, name });
+      result.push({ kind: MenuItemKind.Muted, name, cmd: -1 });
       continue;
     }
 
@@ -201,9 +199,13 @@ function parsePlainTextMenu(lines: string[]) {
   return parseSameLevelItems(lines);
 }
 
-function buildMenu<T extends MenuItem>(items: T[]) {
+/**
+ * Given a list of MenuItems, construct a string to be used in `gfx.showmenu`, and
+ * a list of MenuItems that can be indexed with `gfx.showmenu`'s return value.
+ */
+function buildMenu<T extends object>(items: MenuItem<T>[]) {
   // list of items that will be indexed using `gfx.showmenu`'s return value
-  const flatItems: T[] = [];
+  const flatItems: SelectableMenuItem<T>[] = [];
   // list of strings to be joined with '|'
   const flatNames: string[] = [];
 
@@ -244,7 +246,7 @@ function buildMenu<T extends MenuItem>(items: T[]) {
           lastSubname = `<${lastSubname}`;
           rv.names[rv.names.length - 1] = lastSubname;
         }
-        flatItems.push(...(rv.items as any[]));
+        flatItems.push(...rv.items);
         flatNames.push(...rv.names);
         break;
       }
@@ -259,7 +261,9 @@ function buildMenu<T extends MenuItem>(items: T[]) {
   };
 }
 
-export function showMenu<T extends MenuItem>(items: T[]): T | null {
+export function showMenu<T extends object>(
+  items: MenuItem<T>[],
+): SelectableMenuItem<T> | null {
   const menu = buildMenu(items);
   const menustring = menu.names.join("|");
 
