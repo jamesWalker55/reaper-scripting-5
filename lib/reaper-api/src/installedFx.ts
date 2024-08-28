@@ -1,14 +1,15 @@
 import { encode } from "json";
 import { parseIni } from "./ini";
 import { inspect } from "./inspect";
-import { absPath, log } from "./utils";
+import { log } from "./utils";
 import { copy } from "./clipboard";
+import { abspath } from "./path/path";
 
 /**
  * NOTE: Only works on Windows (because the filename contains "win64.ini")
  */
 function loadCLAPPlugins() {
-  const [ini, msg] = parseIni(absPath("reaper-clap-win64.ini"));
+  const [ini, msg] = parseIni(abspath("reaper-clap-win64.ini"));
   if (ini === null) {
     if (msg.startsWith("Given path does not exist")) {
       // assume no CLAP plugins are installed, hence INI is missing
@@ -43,7 +44,7 @@ function loadCLAPPlugins() {
  * NOTE: Only works on Windows (because the filename contains "64.ini")
  */
 function loadVSTPlugins() {
-  const [ini, msg] = parseIni(absPath("reaper-vstplugins64.ini"));
+  const [ini, msg] = parseIni(abspath("reaper-vstplugins64.ini"));
   if (ini === null) {
     if (msg.startsWith("Given path does not exist")) {
       // assume no VST plugins are installed, hence INI is missing
@@ -120,15 +121,15 @@ export function main() {
 function temp() {
   let temp;
   // // list of known CLAP plugins
-  // temp = parseIni(absPath("reaper-clap-win64.ini"));
+  // temp = parseIni(abspath("reaper-clap-win64.ini"));
   // CLAP renames
-  temp = parseIni(absPath("reaper-clap-rename-win64.ini"));
+  temp = parseIni(abspath("reaper-clap-rename-win64.ini"));
   // fx favourites folder
-  temp = parseIni(absPath("reaper-fxfolders.ini"));
+  temp = parseIni(abspath("reaper-fxfolders.ini"));
   // (not INI format) list of known JSFX plugins
-  temp = absPath("reaper-jsfx.ini");
+  temp = abspath("reaper-jsfx.ini");
   // // list of known VST plugins
-  // temp = parseIni(absPath("reaper-vstplugins64.ini"));
+  // temp = parseIni(abspath("reaper-vstplugins64.ini"));
   // vst renames
-  temp = parseIni(absPath("reaper-vstrenames64.ini"));
+  temp = parseIni(abspath("reaper-vstrenames64.ini"));
 }

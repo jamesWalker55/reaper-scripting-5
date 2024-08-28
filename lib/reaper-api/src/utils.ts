@@ -93,23 +93,6 @@ export function undoBlock(func: () => { desc: string; flags: number }) {
   if (error !== null) throw error;
 }
 
-/**
- * return a path relative to the current Reaper data folder. Example:
- * ```
- * absPath("reaper-fxfolders.ini")
- * // C:\Users\Bob\AppData\Roaming\REAPER\reaper-fxfolders.ini
- * ```
- * @param relPath
- */
-export function absPath(relPath?: string) {
-  if (relPath?.length === 0) relPath = undefined;
-
-  const reaperIniPath = reaper.get_ini_file();
-  // assume base dir is parent directory of ini path
-  const reaperBaseDir = string.match(reaperIniPath, `^(.+[\\/])`)[0];
-  return `${reaperBaseDir}${relPath}`;
-}
-
 export function assertUnreachable(x: never): never {
   throw new Error("Didn't expect to get here");
 }

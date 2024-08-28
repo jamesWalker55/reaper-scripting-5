@@ -15,4 +15,5 @@
 /// <reference path="./ffi/enums.d.ts" />
 /// <reference path="./ffi/index.d.ts" />
 /// <reference path="./ffi/reaper.d.ts" />
+/// <reference path="./path/path.d.ts" />
 /// <reference path="./plugins/importFixPlugin.d.ts" />

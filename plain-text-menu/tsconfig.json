@@ -21,6 +21,8 @@
     "strict": true
   },
   "tstl": {
+    "luaBundle": "plain-text-menu.lua",
+    "luaBundleEntry": "src/index.ts",
     "luaPlugins": [{ "name": "reaper-api/plugins/importFixPlugin.js" }],
     "luaTarget": "5.4",
     "luaLibImport": "require-minimal",
