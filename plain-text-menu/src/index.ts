@@ -6,6 +6,7 @@ import {
   assertUnreachable,
   errorHandler,
   log,
+  msgBox,
   readFile,
 } from "reaper-api/utils";
 import { splitlines } from "reaper-api/utilsLua";
@@ -232,6 +233,16 @@ function main() {
 
   const menuPath = path.splitext(filename)[0] + ".txt";
   if (!reaper.file_exists(menuPath)) {
+    msgBox(
+      "Usage",
+      `To use this script, create a new text file with the same name as this script but with a '.txt' extension.\nThe text file should be located at: ${menuPath}`,
+    );
+    log("Usage:");
+    log(
+      "To use this script, create a new text file with the same name as this script but with a '.txt' extension.",
+    );
+    log(`The text file should be located at: ${menuPath}`);
+    log();
     throw new Error(
       `Menu definition file cannot be found, please create a file at: ${menuPath}`,
     );
