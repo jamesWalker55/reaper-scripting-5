@@ -1,5 +1,5 @@
 import { inspect } from "./inspect";
-import { assertUnreachable, log } from "./utils";
+import { assertUnreachable } from "./utils";
 
 export enum MenuItemKind {
   Normal,
@@ -123,7 +123,6 @@ function parseSameLevelItems(revLines: string[]) {
     if (commentPrefix.length > 0) {
       // is a comment (muted items)
       const name = line.slice(commentPrefix[0].length, line.length).trim();
-      log(inspect(line), inspect(commentPrefix), inspect(name));
       result.push({ kind: MenuItemKind.Muted, name });
       continue;
     }
@@ -245,7 +244,7 @@ function buildMenu<T extends MenuItem>(items: T[]) {
           lastSubname = `<${lastSubname}`;
           rv.names[rv.names.length - 1] = lastSubname;
         }
-        flatItems.push(...(rv.items as any));
+        flatItems.push(...(rv.items as any[]));
         flatNames.push(...rv.names);
         break;
       }
