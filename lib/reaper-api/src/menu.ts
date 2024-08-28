@@ -1,5 +1,4 @@
-import { inspect } from "./inspect";
-import { assertUnreachable, log } from "./utils";
+import { assertUnreachable, getReaperVersion } from "./utils";
 
 export enum MenuItemKind {
   Normal,
@@ -136,19 +135,36 @@ function buildMenu<T extends object>(items: MenuItem<T>[]) {
   };
 }
 
+function supportsShowMenuWithoutInit() {
+  // supported since v6.82
+  const ver = getReaperVersion();
+  if (ver === null) return false;
+  if (ver.major > 6) return true;
+  if (ver.major === 6) {
+    return ver.minor >= 82;
+  }
+  return false;
+}
+
 export function showMenu<T extends object>(
   items: MenuItem<T>[],
 ): SelectableMenuItem<T> | null {
   const menu = buildMenu(items);
   const menustring = menu.names.join("|");
 
-  gfx.init("", 0, 0);
-  gfx.x = gfx.mouse_x;
-  gfx.y = gfx.mouse_y;
+  const needInit = !supportsShowMenuWithoutInit();
+
+  if (needInit) {
+    gfx.init("", 0, 0);
+    gfx.x = gfx.mouse_x;
+    gfx.y = gfx.mouse_y;
+  }
 
   const selectedIdx = gfx.showmenu(menustring) - 1;
 
-  gfx.quit();
+  if (needInit) {
+    gfx.quit();
+  }
 
   if (selectedIdx === -1) return null;
   if (selectedIdx >= menu.items.length)

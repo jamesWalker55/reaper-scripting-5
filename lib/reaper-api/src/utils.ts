@@ -184,3 +184,11 @@ export function writeFile(path: string, text: string) {
   f.write(text);
   f.close();
 }
+
+export function getReaperVersion() {
+  const match = string.match(reaper.GetAppVersion(), "^(%d+).(%d+)");
+  if (match.length === 0) return null;
+
+  const [major, minor] = match;
+  return { major: parseInt(major), minor: parseInt(minor) };
+}
