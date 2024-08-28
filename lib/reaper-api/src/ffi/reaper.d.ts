@@ -4201,7 +4201,7 @@ declare namespace reaper {
   function Main_OnCommandEx(
     command: number,
     flag: number,
-    proj: ReaProject,
+    proj: ReaProject | number,
   ): void;
 
   /**
