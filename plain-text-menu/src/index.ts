@@ -60,7 +60,10 @@ function classifySection(sectionId: number): SectionGroup {
   }
 }
 
-function parseSameLevelItems(revLines: string[]): MenuItem<{ cmd: number }>[] {
+function parseSameLevelItems(
+  sectionId: number,
+  revLines: string[],
+): MenuItem<{ cmd: number }>[] {
   // if list is empty, return immediately
   if (revLines.length === 0) return [];
 
@@ -95,7 +98,7 @@ function parseSameLevelItems(revLines: string[]): MenuItem<{ cmd: number }>[] {
           throw new Error(
             `indented item must be preceded by a submenu item: ${line}`,
           );
-        const childItems = parseSameLevelItems(revLines);
+        const childItems = parseSameLevelItems(sectionId, revLines);
         prevMenuItem.children = childItems;
         continue;
       }
@@ -159,8 +162,7 @@ function parseSameLevelItems(revLines: string[]): MenuItem<{ cmd: number }>[] {
       }
 
       // command state
-      // TODO: Should I use `GetToggleCommandState` or `GetToggleCommandStateEx`?
-      const state = reaper.GetToggleCommandState(commandId);
+      const state = reaper.GetToggleCommandStateEx(sectionId, commandId);
       if (state === 1) {
         commandState = true;
       } else if (state === 0) {
@@ -181,16 +183,16 @@ function parseSameLevelItems(revLines: string[]): MenuItem<{ cmd: number }>[] {
   }
 }
 
-function parsePlainTextMenu(lines: string[]) {
+function parsePlainTextMenu(sectionId: number, lines: string[]) {
   lines.reverse();
-  return parseSameLevelItems(lines);
+  return parseSameLevelItems(sectionId, lines);
 }
 
 /**
  * NOTE: This consumes the `lines` object
  */
 export function showPlainTextMenu(sectionId: number, lines: string[]) {
-  const items = parsePlainTextMenu(lines);
+  const items = parsePlainTextMenu(sectionId, lines);
   const selectedItem = showMenu(items);
   if (selectedItem !== null && selectedItem.kind === MenuItemKind.Normal) {
     const sectionGroup = classifySection(sectionId);
