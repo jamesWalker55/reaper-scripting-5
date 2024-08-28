@@ -56,14 +56,12 @@ function modifierPrefixLength(name: string) {
 
 /** Replace all modifier characters with unicode lookalikes */
 function replaceModifierCharacters(name: string): string {
-  const [result] = string.gsub(name, "%S+", {
-    "#": "＃",
-    "!": "ǃ",
-    ">": "＞",
-    "<": "＜",
-    "|": "ǀ",
-  });
-  return result;
+  return name
+    .replaceAll("#", "＃")
+    .replaceAll("!", "ǃ")
+    .replaceAll(">", "＞")
+    .replaceAll("<", "＜")
+    .replaceAll("|", "ǀ");
 }
 
 /** Given a name, replace any prefix chars with unicode lookalikes */
