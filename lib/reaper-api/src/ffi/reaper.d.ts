@@ -2994,7 +2994,7 @@ declare namespace reaper {
    * Get or set the arrange view grid division. 0.25=quarter note, 1.0/3.0=half note triplet, etc. swingmode can be 1 for swing enabled, swingamt is -1..1. swingmode can be 3 for measure-grid. Returns grid configuration flags
    */
   function GetSetProjectGrid(
-    project: ReaProject,
+    project: ReaProject | 0,
     set: boolean,
     division?: number,
     swingmode?: number,
@@ -4201,7 +4201,7 @@ declare namespace reaper {
   function Main_OnCommandEx(
     command: number,
     flag: number,
-    proj: ReaProject,
+    proj: ReaProject | number,
   ): void;
 
   /**
@@ -4867,7 +4867,7 @@ declare namespace reaper {
    *
    * see MIDIEditor_GetMode, MIDIEditor_OnCommand
    */
-  function MIDIEditor_GetActive(): HWND;
+  function MIDIEditor_GetActive(): HWND | null;
 
   /**
    * ```

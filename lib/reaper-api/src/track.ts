@@ -2,7 +2,7 @@ import {
   AddFxParams,
   generateContainerFxidx,
   stringifyAddFxParams,
-  TrackFX,
+  FX,
 } from "./fx";
 import { Item } from "./item";
 
@@ -83,13 +83,13 @@ export class Track {
     const count = this.getFxCount();
     const result = [];
     for (let i = 0; i < count; i++) {
-      result.push(new TrackFX(this.obj, i));
+      result.push(new FX({ track: this.obj }, i));
     }
     return result;
   }
 
   getFx(idx: number) {
-    return new TrackFX(this.obj, idx);
+    return new FX({ track: this.obj }, idx);
   }
 
   /**

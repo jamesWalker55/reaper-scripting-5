@@ -4,33 +4,60 @@ import { encode } from "json";
 import { inspect } from "./inspect";
 import { getProjectRoutingInfo, Track } from "./track";
 import { copy } from "./clipboard";
-import { Item } from "./item";
+import { Item, MidiTake } from "./item";
 import * as Chunk from "./chunk";
-import * as ArrChunk from "./arrchunk";
-import { errorHandler, log } from "./utils";
+import * as Element from "./element";
+import { deferAsync, errorHandler, log, readFile, writeFile } from "./utils";
+import * as path from "./path/path";
+import { splitlines } from "./utilsLua";
 
-function main() {
-  const track = Track.getSelected()[0];
-  const allSource = [];
-  for (const item of track.iterItems()) {
-    const children = ArrChunk.fromChunk(Chunk.item(item.obj));
-    let source: string | null = null;
-    for (const child of children) {
-      if (typeof child === "string") continue;
-      const tag = child[0];
-      if (typeof tag !== "string") continue;
-      if (!tag.startsWith("SOURCE ")) continue;
-      const file = child[1];
-      if (typeof file !== "string") continue;
-      if (!file.startsWith("FILE")) continue;
-      source = file;
-    }
-    if (source === null) throw new Error("SOURCE not found in item");
+function measureTime<T>(func: () => T): [number, T] {
+  const startTime = os.clock();
+  const rv = func();
+  const endTime = os.clock();
+  return [endTime - startTime, rv];
+}
 
-    allSource.push(source);
-  }
-  log(allSource);
-  // copy(allSource.join("\n"));
+async function main() {
+  // while (true) {
+  //   await deferAsync();
+
+  //   const take = MidiTake.active();
+  //   log("take", take);
+  //   if (take === null) continue;
+
+  //   const grid = take.grid();
+  //   log("  grid", grid);
+  // }
+
+  splitlines("apple")
+  log(path.abspath("Hello, world.txt"));
+  log(`path.join("/", "apple", "foo", "a/")`);
+  log(path.join("/", "apple", "foo", "a/"));
+  // for (const track of Track.getSelected()) {
+  //   for (const item of track.iterItems()) {
+  //     const element = Element.parse(Chunk.item(item.obj));
+  //     copy(encode(element));
+  //     break;
+  //   }
+  // }
+
+  // const [elapsed, send] = measureTime(() =>
+  //   track
+  //     .getSends(true)
+  //     .map((x) => ({
+  //       audio: x.audio,
+  //       midi: x.midi,
+  //       src: x.src.getIdx(),
+  //       dst: x.dst.getIdx(),
+  //     })),
+  // );
+  // log("elapsed", elapsed);
+
+  // writeFile(
+  //   "D:\\Programming\\reaper-scripting-5\\lua_output.json",
+  //   encode(send),
+  // );
 
   // const allVolpan = [];
   // for (const item of track.iterItems()) {

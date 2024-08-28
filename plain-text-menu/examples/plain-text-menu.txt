@@ -1,0 +1,6 @@
+# Example Menu
+---
+# Ripple
+Off [40309]
+Single track [40310]
+All tracks [40311]

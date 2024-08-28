@@ -4,11 +4,7 @@
     "target": "ESNext",
     "lib": ["ESNext"],
     "moduleResolution": "Node",
-    "types": [
-      "lua-types/5.4",
-      "reaper-api/ffi/reaper",
-      "reaper-api/plugins/importFixPlugin"
-    ],
+    "types": ["lua-types/5.4", "reaper-api", "json"],
     // output settings
     // "declaration": true,
     "rootDir": "src",

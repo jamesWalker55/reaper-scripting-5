@@ -2,11 +2,7 @@ AddCwdToImportPaths();
 
 import { encode } from "json";
 import { OSType } from "reaper-api/ffi";
-
-function log(msg: string) {
-  reaper.ShowConsoleMsg(msg);
-  reaper.ShowConsoleMsg("\n");
-}
+import { errorHandler, log } from "reaper-api/utils";
 
 function main() {
   log("Hello, world!");
@@ -26,4 +22,4 @@ function main() {
   log(`reaper.get_action_context() = ${encode(info)}`);
 }
 
-main();
+errorHandler(main);

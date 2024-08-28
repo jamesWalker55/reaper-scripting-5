@@ -1,5 +1,6 @@
 {
   "name": "reaper-microui",
+  "type": "module",
   "version": "0.3.0",
   "files": [
     "build/**/*.lua",

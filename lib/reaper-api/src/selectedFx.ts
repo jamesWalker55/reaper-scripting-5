@@ -1,4 +1,4 @@
-import { FX, getLastTouchedFx, TakeFX, TrackFX } from "./fx";
+import { FX, getLastTouchedFx } from "./fx";
 import { assertUnreachable, ensureAPI } from "./utils";
 
 ensureAPI("SWS Extensions", "CF_GetTakeFXChain");
@@ -17,9 +17,9 @@ export function getSelectedFx(): FX[] {
 
   let chain: FxChain;
   let isInputChain = false;
-  switch (fx.type) {
+  switch (fx.obj.type) {
     case "take": {
-      chain = reaper.CF_GetTakeFXChain(fx.take);
+      chain = reaper.CF_GetTakeFXChain(fx.obj.take);
       break;
     }
     case "track": {
@@ -27,11 +27,11 @@ export function getSelectedFx(): FX[] {
       // 1. record input FX (normal tracks)
       // 2. hardware output FX (master track)
       isInputChain = (fx.fxidx & 0x1000000) !== 0;
-      chain = reaper.CF_GetTrackFXChainEx(0, fx.track, isInputChain);
+      chain = reaper.CF_GetTrackFXChainEx(0, fx.obj.track, isInputChain);
       break;
     }
     default:
-      assertUnreachable(fx);
+      assertUnreachable(fx.obj);
   }
 
   let idx = -1;
@@ -45,19 +45,19 @@ export function getSelectedFx(): FX[] {
   }
 
   return selectedIdx.map((idx) => {
-    switch (fx.type) {
+    switch (fx.obj.type) {
       case "take": {
-        return new TakeFX(fx.take, idx);
+        return new FX({ take: fx.obj.take }, idx);
       }
       case "track": {
         if (isInputChain) {
-          return new TrackFX(fx.track, idx + 0x1000000);
+          return new FX({ track: fx.obj.track }, idx + 0x1000000);
         } else {
-          return new TrackFX(fx.track, idx);
+          return new FX({ track: fx.obj.track }, idx);
         }
       }
       default:
-        assertUnreachable(fx);
+        assertUnreachable(fx.obj);
     }
   });
 }
