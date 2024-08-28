@@ -12,6 +12,7 @@
 /// <reference path="./selectedFx.d.ts" />
 /// <reference path="./track.d.ts" />
 /// <reference path="./utils.d.ts" />
+/// <reference path="./utilsLua.d.ts" />
 /// <reference path="./ffi/enums.d.ts" />
 /// <reference path="./ffi/index.d.ts" />
 /// <reference path="./ffi/reaper.d.ts" />

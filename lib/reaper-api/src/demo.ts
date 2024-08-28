@@ -9,6 +9,7 @@ import * as Chunk from "./chunk";
 import * as Element from "./element";
 import { deferAsync, errorHandler, log, readFile, writeFile } from "./utils";
 import * as path from "./path/path";
+import { splitlines } from "./utilsLua";
 
 function measureTime<T>(func: () => T): [number, T] {
   const startTime = os.clock();
@@ -29,6 +30,7 @@ async function main() {
   //   log("  grid", grid);
   // }
 
+  splitlines("apple")
   log(path.abspath("Hello, world.txt"));
   log(`path.join("/", "apple", "foo", "a/")`);
   log(path.join("/", "apple", "foo", "a/"));

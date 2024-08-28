@@ -1,9 +1,14 @@
 AddCwdToImportPaths();
 
-import { encode } from "json";
-import { OSType } from "reaper-api/ffi";
 import { MenuItem, MenuItemKind, showMenu } from "reaper-api/menu";
-import { assertUnreachable, errorHandler, log } from "reaper-api/utils";
+import * as path from "reaper-api/path/path";
+import {
+  assertUnreachable,
+  errorHandler,
+  log,
+  readFile,
+} from "reaper-api/utils";
+import { splitlines } from "reaper-api/utilsLua";
 
 enum SectionId {
   // main
@@ -225,11 +230,16 @@ function main() {
     contextstr,
   ] = reaper.get_action_context();
 
-  // filename => "D:\\Programming\\reaper-scripting-5\\plain-text-menu\\dist\\plain-text-menu.lua"
+  const menuPath = path.splitext(filename)[0] + ".txt";
+  if (!reaper.file_exists(menuPath)) {
+    throw new Error(
+      `Menu definition file cannot be found, please create a file at: ${menuPath}`,
+    );
+  }
 
-  // log({ filename, sectionID });
-  log(reaper.GetExePath());
-  reaper.GetOS()
+  const menuText = readFile(menuPath);
+
+  showPlainTextMenu(sectionID, splitlines(menuText));
 }
 
 errorHandler(main);
