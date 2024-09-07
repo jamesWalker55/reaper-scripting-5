@@ -157,15 +157,17 @@ function main() {
         );
 
         ctx.layoutRow([-1], 0);
-        checkItemEnds = ctx.checkbox("Check item ends", checkItemEnds);
-        checkItemSnapOffset = ctx.checkbox(
-          "Account for item snap offset",
-          checkItemSnapOffset,
-        );
         thresholdInclusive = ctx.checkbox(
           "Inclusive range",
           thresholdInclusive,
         );
+        checkItemEnds = ctx.checkbox("Check item ends", checkItemEnds);
+        if (!checkItemEnds) {
+          checkItemSnapOffset = ctx.checkbox(
+            "Account for item snap offset",
+            checkItemSnapOffset,
+          );
+        }
 
         if (ctx.header("Detected offset positions", Option.Expanded)) {
           for (const x of posDiffs) {
