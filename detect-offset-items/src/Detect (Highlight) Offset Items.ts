@@ -1,8 +1,27 @@
 AddCwdToImportPaths();
 
+import * as path from "reaper-api/path/path";
 import { Track } from "reaper-api/track";
 import { errorHandler } from "reaper-api/utils";
 import { createContext, microUILoop, Option } from "reaper-microui";
+
+function getScriptName() {
+  const [
+    is_new_value,
+    fullpath,
+    sectionID,
+    cmdID,
+    mode,
+    resolution,
+    val,
+    contextstr,
+  ] = reaper.get_action_context();
+
+  const [parent, filename] = path.split(fullpath);
+  const [stem, ext] = path.splitext(filename);
+
+  return stem;
+}
 
 type Color = { r: number; g: number; b: number };
 
@@ -14,14 +33,14 @@ function colorsEqual(a: Color, b: Color) {
 
 function main() {
   // UI setup
-  gfx.init("My Window", 345, 150);
+  gfx.init(getScriptName(), 360, 150);
   gfx.setfont(1, "Arial", 14);
   const ctx = createContext();
 
   // Logic
   const originalItemColors: LuaTable<MediaItem, Color | null> = new LuaTable();
   const THRESHOLD_MIN = 0.0;
-  const THRESHOLD_MAX = 100.0;
+  const THRESHOLD_MAX = 1000.0;
   let thresholdLow = 0.0;
   let thresholdHigh = 20.0;
   let thresholdInclusive = false;
@@ -40,8 +59,10 @@ function main() {
           const color = item.getColor();
 
           const inThreshold = thresholdInclusive
-            ? thresholdLow * 1000 <= posDiff && posDiff <= thresholdHigh * 1000
-            : thresholdLow * 1000 < posDiff && posDiff < thresholdHigh * 1000;
+            ? thresholdLow * 1000000 <= posDiff &&
+              posDiff <= thresholdHigh * 1000000
+            : thresholdLow * 1000000 < posDiff &&
+              posDiff < thresholdHigh * 1000000;
 
           if (inThreshold) {
             // if position is within threshold...
@@ -87,7 +108,7 @@ function main() {
         // create sliders for the threshold
         ctx.layoutRow([-1], 0);
         ctx.text(
-          "Highlight items that are NOT on gridlines. The threshold controls how far the item should be from a gridline. (Unit is in milliseconds)",
+          "Highlight items that are NOT on gridlines. The threshold controls how far the item should be from a gridline. (Unit is in microseconds)",
         );
         ctx.label("Threshold range:");
 
@@ -99,7 +120,7 @@ function main() {
           THRESHOLD_MIN,
           thresholdHigh,
           undefined,
-          "%.2f ms",
+          "%.2f μs",
         );
         ctx.label("High:");
         thresholdHigh = ctx.slider(
@@ -108,7 +129,7 @@ function main() {
           thresholdLow,
           THRESHOLD_MAX,
           undefined,
-          "%.2f ms",
+          "%.2f μs",
         );
 
         ctx.layoutRow([-1], 0);
