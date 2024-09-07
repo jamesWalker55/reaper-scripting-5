@@ -54,7 +54,7 @@ function main() {
   let thresholdHigh = HIGH_THRESHOLD_MAX;
   let thresholdInclusive = false;
   let checkItemEnds = false;
-  let checkItemSnapOffset = false;
+  let checkItemSnapOffset = true;
 
   microUILoop(
     ctx,
