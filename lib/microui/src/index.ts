@@ -1,5 +1,5 @@
-import * as log from "./log";
 import { DrawStrFlags, MouseCap } from "reaper-api/ffi";
+import { deferLoop, log } from "reaper-api/utils";
 import {
   ColorId,
   CommandType,
@@ -14,21 +14,258 @@ import {
 
 export * from "./ui";
 
-function deferLoop(func: (stop: () => void) => void) {
-  let shouldStop = false;
-  function stop() {
-    shouldStop = true;
-  }
+// /**
+//  * Create a new MicroUI wrapper object.
+//  *
+//  * You must run gfx.init and gfx.setfont before calling this. E.g.:
+//  *
+//  *     gfx.init("My window", 260, 450);
+//  *     gfx.setfont(1, "Arial", 12);
+//  *
+//  * Note: This does not work with async / Promises, use `deferLoop` instead of `deferAsync`
+//  */
+// class MicroUI {
+//   /** The MicroUI context object */
+//   ctx: Context;
+//   /** State to keep track of keys that are currently down */
+//   downKeys: {
+//     // mouse
+//     left: boolean;
+//     middle: boolean;
+//     right: boolean;
 
-  function inner(this: void) {
-    func(stop);
+//     // keyboard
+//     shift: boolean;
+//     ctrl: boolean;
+//     alt: boolean;
+//     backspace: boolean;
+//     return: boolean;
+//   };
+//   /** State to keep track of keyboard keys that are currently down */
+//   downChars: string[];
 
-    if (shouldStop) return;
+//   constructor() {
+//     this.ctx = new Context(
+//       (font, str, len) => {
+//         if (len !== undefined) {
+//           str = str.slice(0, len);
+//         }
+//         const [width, _] = gfx.measurestr(str);
+//         return width;
+//       },
+//       (font) => {
+//         return gfx.texth;
+//       },
+//     );
+//     this.downKeys = {
+//       // mouse
+//       left: false,
+//       middle: false,
+//       right: false,
 
-    reaper.defer(inner);
-  }
-  inner();
-}
+//       // keyboard
+//       shift: false,
+//       ctrl: false,
+//       alt: false,
+//       backspace: false,
+//       return: false,
+//     };
+//     this.downChars = [];
+//   }
+
+//   process(): boolean {
+//     // handle char input
+//     this.downKeys.backspace = false;
+//     this.downKeys.return = false;
+//     this.downChars.length = 0;
+//     while (true) {
+//       const char = gfx.getchar();
+//       // return false to stop looping
+//       if (char === -1) return false;
+//       if (char === 0) break;
+
+//       if (char === 8) {
+//         // 8 is backspace / ctrl+h
+//         this.downKeys.backspace = true;
+//         continue;
+//       } else if (char === 13) {
+//         // 13 is enter / ctrl+?
+//         this.downKeys.return = true;
+//         continue;
+//       }
+
+//       const isUnicode = char >>> 24 === 117; // 'u'
+//       if (isUnicode) {
+//         const unicodeChar = char & 0xffffff;
+//         this.downChars.push(utf8.char(unicodeChar));
+//         continue;
+//       }
+
+//       // not unicode, only allow normal ASCII characters
+//       if (0x20 <= char && char <= 0x7e) {
+//         this.downChars.push(utf8.char(char));
+//         continue;
+//       }
+
+//       // TODO: unhandled character combination, e.g. Ctrl+A
+//       // log(char, isUnicode);
+//     }
+
+//     this.ctx.inputScroll(gfx.mouse_hwheel * 0.2, -gfx.mouse_wheel * 0.2);
+//     gfx.mouse_wheel = 0;
+//     gfx.mouse_hwheel = 0;
+
+//     this.ctx.inputMouseMove(gfx.mouse_x, gfx.mouse_y);
+
+//     this.downKeys.left = (gfx.mouse_cap & MouseCap.LeftMouse) !== 0;
+//     this.downKeys.middle = (gfx.mouse_cap & MouseCap.MiddleMouse) !== 0;
+//     this.downKeys.right = (gfx.mouse_cap & MouseCap.RightMouse) !== 0;
+//     this.downKeys.ctrl = (gfx.mouse_cap & MouseCap.CommandKey) !== 0;
+//     this.downKeys.alt = (gfx.mouse_cap & MouseCap.OptionKey) !== 0;
+//     this.downKeys.shift = (gfx.mouse_cap & MouseCap.ShiftKey) !== 0;
+//     this.ctx.inputMouseContinuous(
+//       (this.downKeys.left ? MouseButton.Left : 0) |
+//         (this.downKeys.middle ? MouseButton.Middle : 0) |
+//         (this.downKeys.right ? MouseButton.Right : 0),
+//     );
+//     this.ctx.inputKeyContinuous(
+//       (this.downKeys.alt ? Key.Alt : 0) |
+//         (this.downKeys.backspace ? Key.Backspace : 0) |
+//         (this.downKeys.ctrl ? Key.Ctrl : 0) |
+//         (this.downKeys.return ? Key.Return : 0) |
+//         (this.downKeys.shift ? Key.Shift : 0),
+//     );
+
+//     this.ctx.inputText(this.downChars.join(""));
+
+//     return true;
+//   }
+
+//   update() {
+//     // draw frame
+//     let currentClip: Rect | null = null;
+//     for (const cmd of this.ctx.iterCommands()) {
+//       switch (cmd.type) {
+//         case CommandType.Clip: {
+//           currentClip = cmd.rect;
+//           break;
+//         }
+//         case CommandType.Rect: {
+//           // set color
+//           gfx.r = cmd.color.r / 255;
+//           gfx.g = cmd.color.g / 255;
+//           gfx.b = cmd.color.b / 255;
+//           gfx.a = cmd.color.a / 255;
+
+//           gfx.rect(cmd.rect.x, cmd.rect.y, cmd.rect.w, cmd.rect.h);
+//           break;
+//         }
+//         case CommandType.Text: {
+//           // set color
+//           gfx.r = cmd.color.r / 255;
+//           gfx.g = cmd.color.g / 255;
+//           gfx.b = cmd.color.b / 255;
+//           gfx.a = cmd.color.a / 255;
+
+//           gfx.x = cmd.pos.x;
+//           gfx.y = cmd.pos.y;
+
+//           if (currentClip) {
+//             const [width, height] = gfx.measurestr(cmd.str);
+//             const clipLeft = cmd.pos.x < currentClip.x;
+//             const clipRight =
+//               cmd.pos.x + width >= currentClip.x + currentClip.w;
+//             const clipTop = cmd.pos.y < currentClip.y;
+//             const clipBottom =
+//               cmd.pos.y + height < currentClip.y + currentClip.h;
+
+//             if (!clipLeft && !clipRight && !clipTop && !clipBottom) {
+//               gfx.drawstr(cmd.str);
+//             } else if (!clipLeft && !clipTop) {
+//               // clipping right or bottom only, not left or top
+//               gfx.drawstr(
+//                 cmd.str,
+//                 0,
+//                 currentClip.x + currentClip.w,
+//                 currentClip.y + currentClip.h,
+//               );
+//             } else {
+//               // TODO: clipping top or left (and maybe also right and bottom)
+//               // log("TODO: Clip text top/bottom");
+//               gfx.drawstr(
+//                 cmd.str,
+//                 0,
+//                 currentClip.x + currentClip.w,
+//                 currentClip.y + currentClip.h,
+//               );
+//             }
+//           } else {
+//             gfx.drawstr(cmd.str);
+//           }
+//           break;
+//         }
+//         case CommandType.Icon: {
+//           // set color
+//           gfx.r = cmd.color.r / 255;
+//           gfx.g = cmd.color.g / 255;
+//           gfx.b = cmd.color.b / 255;
+//           gfx.a = cmd.color.a / 255;
+
+//           gfx.x = cmd.rect.x;
+//           gfx.y = cmd.rect.y;
+//           // TODO: Handle:
+//           // cmd.font
+//           // Clipping rect
+//           switch (cmd.id) {
+//             case IconId.Close: {
+//               gfx.drawstr(
+//                 "✕",
+//                 DrawStrFlags.CenterHorizontally | DrawStrFlags.CenterVertically,
+//                 cmd.rect.x + cmd.rect.w,
+//                 cmd.rect.y + cmd.rect.h,
+//               );
+//               break;
+//             }
+//             case IconId.Check: {
+//               gfx.drawstr(
+//                 "✓",
+//                 DrawStrFlags.CenterHorizontally | DrawStrFlags.CenterVertically,
+//                 cmd.rect.x + cmd.rect.w,
+//                 cmd.rect.y + cmd.rect.h,
+//               );
+//               break;
+//             }
+//             case IconId.Collapsed: {
+//               gfx.drawstr(
+//                 "▸",
+//                 DrawStrFlags.CenterHorizontally | DrawStrFlags.CenterVertically,
+//                 cmd.rect.x + cmd.rect.w,
+//                 cmd.rect.y + cmd.rect.h,
+//               );
+//               break;
+//             }
+//             case IconId.Expanded: {
+//               gfx.drawstr(
+//                 "▾",
+//                 DrawStrFlags.CenterHorizontally | DrawStrFlags.CenterVertically,
+//                 cmd.rect.x + cmd.rect.w,
+//                 cmd.rect.y + cmd.rect.h,
+//               );
+//               break;
+//             }
+//             default:
+//               error(`unhandled icon type: ${cmd}`);
+//           }
+//           break;
+//         }
+//         default:
+//           error(`unhandled command type: ${cmd}`);
+//       }
+//     }
+
+//     gfx.update();
+//   }
+// }
 
 /**
  * Create a new microUI context.
@@ -63,7 +300,11 @@ export function createContext() {
  * - {@link demoSingleWindow}
  * - {@link demoMultiWindow}
  */
-export function microUILoop(ctx: Context, func: () => void) {
+export function microUILoop(
+  ctx: Context,
+  func: () => void,
+  cleanup?: () => void,
+) {
   const downKeys = {
     // mouse
     left: false,
@@ -114,7 +355,7 @@ export function microUILoop(ctx: Context, func: () => void) {
         }
 
         // TODO: unhandled character combination, e.g. Ctrl+A
-        // log.info(char, isUnicode);
+        // log(char, isUnicode);
       }
 
       ctx.inputScroll(gfx.mouse_hwheel * 0.2, -gfx.mouse_wheel * 0.2);
@@ -197,7 +438,7 @@ export function microUILoop(ctx: Context, func: () => void) {
               );
             } else {
               // TODO: clipping top or left (and maybe also right and bottom)
-              // log.debug("TODO: Clip text top/bottom");
+              // log("TODO: Clip text top/bottom");
               gfx.drawstr(
                 cmd.str,
                 0,
@@ -270,7 +511,7 @@ export function microUILoop(ctx: Context, func: () => void) {
     }
 
     gfx.update();
-  });
+  }, cleanup);
 }
 
 export function demoMultiWindow() {
@@ -547,14 +788,14 @@ export function demoSingleWindow() {
         ctx.layoutRow([86, -110, -1], 0);
         ctx.label("Test buttons 1:");
         if (ctx.button("Button 1")) {
-          log.info("Pressed button 1");
+          log("Pressed button 1");
         }
         if (ctx.button("Button 2")) {
-          log.info("Pressed button 2");
+          log("Pressed button 2");
         }
         ctx.label("Test buttons 2:");
         if (ctx.button("Button 3")) {
-          log.info("Pressed button 3");
+          log("Pressed button 3");
         }
         if (ctx.button("Popup")) {
           ctx.openPopup("Test Popup");
@@ -576,18 +817,18 @@ export function demoSingleWindow() {
             ctx.endTreenode();
           }
           if (ctx.beginTreenode("Test 1b")) {
-            if (ctx.button("Button 1")) log.info("Pressed button 1");
-            if (ctx.button("Button 2")) log.info("Pressed button 2");
+            if (ctx.button("Button 1")) log("Pressed button 1");
+            if (ctx.button("Button 2")) log("Pressed button 2");
             ctx.endTreenode();
           }
           ctx.endTreenode();
         }
         if (ctx.beginTreenode("Test 2")) {
           ctx.layoutRow([54, 54], 0);
-          if (ctx.button("Button 3")) log.info("Pressed button 3");
-          if (ctx.button("Button 4")) log.info("Pressed button 4");
-          if (ctx.button("Button 5")) log.info("Pressed button 5");
-          if (ctx.button("Button 6")) log.info("Pressed button 6");
+          if (ctx.button("Button 3")) log("Pressed button 3");
+          if (ctx.button("Button 4")) log("Pressed button 4");
+          if (ctx.button("Button 5")) log("Pressed button 5");
+          if (ctx.button("Button 6")) log("Pressed button 6");
           ctx.endTreenode();
         }
         if (ctx.beginTreenode("Test 3")) {
@@ -682,14 +923,14 @@ export function demoSimple() {
         ctx.layoutRow([86, -110, -1], 0);
         ctx.label("Test buttons 1:");
         if (ctx.button("Button 1")) {
-          log.info("Pressed button 1");
+          log("Pressed button 1");
         }
         if (ctx.button("Button 2")) {
-          log.info("Pressed button 2");
+          log("Pressed button 2");
         }
         ctx.label("Test buttons 2:");
         if (ctx.button("Button 3")) {
-          log.info("Pressed button 3");
+          log("Pressed button 3");
         }
         if (ctx.button("Popup")) {
           ctx.openPopup("Test Popup");
@@ -711,8 +952,8 @@ export function demoSimple() {
             ctx.endTreenode();
           }
           if (ctx.beginTreenode("Test 1b")) {
-            if (ctx.button("Button 1")) log.info("Pressed button 1");
-            if (ctx.button("Button 2")) log.info("Pressed button 2");
+            if (ctx.button("Button 1")) log("Pressed button 1");
+            if (ctx.button("Button 2")) log("Pressed button 2");
             ctx.endTreenode();
           }
           ctx.endTreenode();

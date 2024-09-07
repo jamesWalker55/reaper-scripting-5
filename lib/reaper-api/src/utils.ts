@@ -34,7 +34,10 @@ export function clearConsole() {
   reaper.ShowConsoleMsg("");
 }
 
-export function deferLoop(func: (stop: () => void) => void) {
+export function deferLoop(
+  func: (stop: () => void) => void,
+  cleanup?: () => void,
+) {
   let shouldStop = false;
   function stop() {
     shouldStop = true;
@@ -43,14 +46,19 @@ export function deferLoop(func: (stop: () => void) => void) {
   function inner(this: void) {
     func(stop);
 
-    if (shouldStop) return;
+    if (shouldStop) {
+      if (cleanup !== undefined) {
+        cleanup();
+      }
+      return;
+    }
 
     reaper.defer(inner);
   }
   inner();
 }
 
-export function deferAsync() {
+export function deferAsync(): Promise<void> {
   return new Promise((resolve) => reaper.defer(() => resolve(undefined)));
 }
 
