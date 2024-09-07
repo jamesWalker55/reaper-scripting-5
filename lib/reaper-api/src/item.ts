@@ -1,8 +1,20 @@
+import { inspect } from "./inspect";
+
 export class Item {
   obj: MediaItem;
 
   constructor(obj: MediaItem) {
     this.obj = obj;
+  }
+
+  static getSelected(): Item[] {
+    const count = reaper.CountSelectedMediaItems(0);
+    const result: Item[] = [];
+    for (let i = 0; i < count; i++) {
+      const obj = reaper.GetSelectedMediaItem(0, i);
+      result.push(new Item(obj));
+    }
+    return result;
   }
 
   *iterTakes() {
@@ -17,6 +29,36 @@ export class Item {
     const count = reaper.GetMediaItemNumTakes(this.obj);
     return count === 0;
   }
+
+  getColor(): { r: number; g: number; b: number } | null {
+    const color = reaper.GetMediaItemInfo_Value(this.obj, "I_CUSTOMCOLOR");
+    if (color === 0) return null;
+
+    const [r, g, b] = reaper.ColorFromNative(color);
+    return { r, g, b };
+  }
+
+  setColor(color: { r: number; g: number; b: number } | null) {
+    const newColor: number =
+      color !== null
+        ? reaper.ColorToNative(color.r, color.g, color.b) | 0x01000000
+        : 0;
+    const rv = reaper.SetMediaItemInfo_Value(
+      this.obj,
+      "I_CUSTOMCOLOR",
+      newColor,
+    );
+    if (!rv) throw new Error(`failed to set item color to ${inspect(color)}`);
+  }
+
+  getPosition(): number {
+    return reaper.GetMediaItemInfo_Value(this.obj, "D_POSITION");
+  }
+
+  // getTrack(): Track {
+  //   const obj = reaper.GetMediaItemTrack(this.obj);
+  //   return new Track(obj);
+  // }
 }
 
 export class Take {

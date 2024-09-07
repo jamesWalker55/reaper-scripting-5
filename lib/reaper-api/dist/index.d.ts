@@ -9,6 +9,7 @@
 /// <reference path="./installedFx.d.ts" />
 /// <reference path="./item.d.ts" />
 /// <reference path="./menu.d.ts" />
+/// <reference path="./project.d.ts" />
 /// <reference path="./selectedFx.d.ts" />
 /// <reference path="./track.d.ts" />
 /// <reference path="./utils.d.ts" />

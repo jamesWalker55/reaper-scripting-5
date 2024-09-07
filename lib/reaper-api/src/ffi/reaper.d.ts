@@ -392,7 +392,7 @@ declare namespace reaper {
    * ```
    * count the number of selected items in the project (proj=0 for active project)
    */
-  function CountSelectedMediaItems(proj: ReaProject): number;
+  function CountSelectedMediaItems(proj: ReaProject | 0): number;
 
   /**
    * ```
@@ -2727,7 +2727,10 @@ declare namespace reaper {
    * ```
    * get a selected item by selected item count (zero-based) (proj=0 for active project)
    */
-  function GetSelectedMediaItem(proj: ReaProject, selitem: number): MediaItem;
+  function GetSelectedMediaItem(
+    proj: ReaProject | 0,
+    selitem: number,
+  ): MediaItem;
 
   /**
    * ```
@@ -3484,7 +3487,10 @@ declare namespace reaper {
   ): LuaMultiReturn<[boolean, number, number, number, number, number]>;
 
   /** get a track from a project by track count (zero-based) (proj=0 for active project) */
-  function GetTrack(proj: ReaProject | number, trackidx: number): MediaTrack | null;
+  function GetTrack(
+    proj: ReaProject | number,
+    trackidx: number,
+  ): MediaTrack | null;
 
   /**
    * ```
