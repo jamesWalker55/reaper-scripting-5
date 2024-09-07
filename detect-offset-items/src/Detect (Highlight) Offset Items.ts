@@ -25,7 +25,7 @@ function getScriptName() {
 
 type Color = { r: number; g: number; b: number };
 
-const HIGHLIGHT_COLOR: Color = { r: 255, g: 0, b: 0 };
+const HIGHLIGHT_COLOR: Color = { r: 254, g: 1, b: 2 };
 
 function colorsEqual(a: Color, b: Color) {
   return a.r === b.r && a.g === b.g && a.b === b.b;
