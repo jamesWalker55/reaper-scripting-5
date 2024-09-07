@@ -53,6 +53,8 @@ function main() {
   let thresholdLow = 2e-10;
   let thresholdHigh = HIGH_THRESHOLD_MAX;
   let thresholdInclusive = false;
+  let checkItemEnds = false;
+  let checkItemSnapOffset = false;
 
   microUILoop(
     ctx,
@@ -69,7 +71,11 @@ function main() {
           let anyItemColorChanged = false;
           for (const track of Track.iterAll()) {
             for (const item of track.iterItems()) {
-              const itemPos = item.getPosition();
+              const itemPos = checkItemEnds
+                ? item.getPosition() + item.getLength()
+                : checkItemSnapOffset
+                ? item.getPosition() + item.getSnapOffset()
+                : item.getPosition();
               const gridPos = reaper.BR_GetClosestGridDivision(itemPos);
               const posDiff = Math.abs(itemPos - gridPos);
 
@@ -151,6 +157,11 @@ function main() {
         );
 
         ctx.layoutRow([-1], 0);
+        checkItemEnds = ctx.checkbox("Check item ends", checkItemEnds);
+        checkItemSnapOffset = ctx.checkbox(
+          "Account for item snap offset",
+          checkItemSnapOffset,
+        );
         thresholdInclusive = ctx.checkbox(
           "Inclusive range",
           thresholdInclusive,

@@ -55,6 +55,14 @@ export class Item {
     return reaper.GetMediaItemInfo_Value(this.obj, "D_POSITION");
   }
 
+  getSnapOffset(): number {
+    return reaper.GetMediaItemInfo_Value(this.obj, "D_SNAPOFFSET");
+  }
+
+  getLength(): number {
+    return reaper.GetMediaItemInfo_Value(this.obj, "D_LENGTH");
+  }
+
   // getTrack(): Track {
   //   const obj = reaper.GetMediaItemTrack(this.obj);
   //   return new Track(obj);
