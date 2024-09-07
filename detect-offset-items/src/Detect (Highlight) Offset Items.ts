@@ -31,63 +31,81 @@ function colorsEqual(a: Color, b: Color) {
   return a.r === b.r && a.g === b.g && a.b === b.b;
 }
 
+// process every 5 defer loops to reduce CPU usage
+const FRAMESKIP = 5;
+
+const NUMBER_FORMAT = "%.12f s";
+
 function main() {
   // UI setup
-  gfx.init(getScriptName(), 360, 150);
+  gfx.init(getScriptName(), 360, 400);
   gfx.setfont(1, "Arial", 14);
   const ctx = createContext();
 
   // Logic
+  let frameskipLeft = FRAMESKIP;
+  let posDiffs: number[] = [];
   const originalItemColors: LuaTable<MediaItem, Color | null> = new LuaTable();
-  const THRESHOLD_MIN = 0.0;
-  const THRESHOLD_MAX = 1000.0;
-  let thresholdLow = 0.0;
-  let thresholdHigh = 20.0;
+  const LOW_THRESHOLD_MIN = 0;
+  const LOW_THRESHOLD_MAX = 1e-9;
+  const HIGH_THRESHOLD_MIN = LOW_THRESHOLD_MAX;
+  const HIGH_THRESHOLD_MAX = 1e-2;
+  let thresholdLow = 2e-10;
+  let thresholdHigh = HIGH_THRESHOLD_MAX;
   let thresholdInclusive = false;
 
   microUILoop(
     ctx,
     () => {
-      // logic
-      let anyItemColorChanged = false;
-      for (const track of Track.iterAll()) {
-        for (const item of track.iterItems()) {
-          const itemPos = item.getPosition();
-          const gridPos = reaper.BR_GetClosestGridDivision(itemPos);
-          const posDiff = Math.abs(itemPos - gridPos);
+      if (frameskipLeft > 0) {
+        frameskipLeft -= 1;
+        // don't do logic
+      } else {
+        frameskipLeft = FRAMESKIP;
 
-          const color = item.getColor();
+        // do logic
+        {
+          posDiffs = [];
+          let anyItemColorChanged = false;
+          for (const track of Track.iterAll()) {
+            for (const item of track.iterItems()) {
+              const itemPos = item.getPosition();
+              const gridPos = reaper.BR_GetClosestGridDivision(itemPos);
+              const posDiff = Math.abs(itemPos - gridPos);
 
-          const inThreshold = thresholdInclusive
-            ? thresholdLow * 1000000 <= posDiff &&
-              posDiff <= thresholdHigh * 1000000
-            : thresholdLow * 1000000 < posDiff &&
-              posDiff < thresholdHigh * 1000000;
+              const color = item.getColor();
 
-          if (inThreshold) {
-            // if position is within threshold...
+              const inThreshold = thresholdInclusive
+                ? thresholdLow <= posDiff && posDiff <= thresholdHigh
+                : thresholdLow < posDiff && posDiff < thresholdHigh;
 
-            // and if color isn't currently HIGHLIGHT_COLOR...
-            if (color === null || !colorsEqual(color, HIGHLIGHT_COLOR)) {
-              // store color to database
-              originalItemColors.set(item.obj, color);
-              // set color to HIGHLIGHT_COLOR
-              item.setColor(HIGHLIGHT_COLOR);
-              anyItemColorChanged = true;
-            }
-          } else {
-            // not in threshold
-            // revert color to original if is HIGHLIGHT_COLOR
-            if (color && colorsEqual(color, HIGHLIGHT_COLOR)) {
-              const originalColor = originalItemColors.get(item.obj);
-              item.setColor(originalColor);
-              anyItemColorChanged = true;
+              if (inThreshold) {
+                // if position is within threshold...
+                posDiffs.push(posDiff);
+
+                // and if color isn't currently HIGHLIGHT_COLOR...
+                if (color === null || !colorsEqual(color, HIGHLIGHT_COLOR)) {
+                  // store color to database
+                  originalItemColors.set(item.obj, color);
+                  // set color to HIGHLIGHT_COLOR
+                  item.setColor(HIGHLIGHT_COLOR);
+                  anyItemColorChanged = true;
+                }
+              } else {
+                // not in threshold
+                // revert color to original if is HIGHLIGHT_COLOR
+                if (color && colorsEqual(color, HIGHLIGHT_COLOR)) {
+                  const originalColor = originalItemColors.get(item.obj);
+                  item.setColor(originalColor);
+                  anyItemColorChanged = true;
+                }
+              }
             }
           }
+          if (anyItemColorChanged) {
+            reaper.UpdateArrange();
+          }
         }
-      }
-      if (anyItemColorChanged) {
-        reaper.UpdateArrange();
       }
 
       // draw frame
@@ -108,7 +126,7 @@ function main() {
         // create sliders for the threshold
         ctx.layoutRow([-1], 0);
         ctx.text(
-          "Highlight items that are NOT on gridlines. The threshold controls how far the item should be from a gridline. (Unit is in microseconds)",
+          "Highlight items that are NOT on gridlines. The threshold controls how far the item should be from a gridline.",
         );
         ctx.label("Threshold range:");
 
@@ -117,19 +135,19 @@ function main() {
         thresholdLow = ctx.slider(
           "thresholdLow",
           thresholdLow,
-          THRESHOLD_MIN,
-          thresholdHigh,
+          LOW_THRESHOLD_MIN,
+          LOW_THRESHOLD_MAX,
           undefined,
-          "%.2f μs",
+          NUMBER_FORMAT,
         );
         ctx.label("High:");
         thresholdHigh = ctx.slider(
           "thresholdHigh",
           thresholdHigh,
-          thresholdLow,
-          THRESHOLD_MAX,
+          HIGH_THRESHOLD_MIN,
+          HIGH_THRESHOLD_MAX,
           undefined,
-          "%.2f μs",
+          NUMBER_FORMAT,
         );
 
         ctx.layoutRow([-1], 0);
@@ -137,6 +155,12 @@ function main() {
           "Inclusive range",
           thresholdInclusive,
         );
+
+        if (ctx.header("Detected offset positions", Option.Expanded)) {
+          for (const x of posDiffs) {
+            ctx.text(string.format(NUMBER_FORMAT, x));
+          }
+        }
 
         ctx.endWindow();
       }
