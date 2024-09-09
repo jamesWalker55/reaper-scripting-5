@@ -61,7 +61,7 @@ export enum ColorId {
   ScrollThumb,
 }
 
-type Color = { r: number; g: number; b: number; a: number };
+export type Color = { r: number; g: number; b: number; a: number };
 
 function rgba(r: number, g: number, b: number, a: number): Color {
   return { r, g, b, a };
@@ -76,7 +76,7 @@ export enum Response {
 declare const IdSymbol: unique symbol;
 export type Id = NewType<number, typeof IdSymbol>;
 
-type Font = any;
+export type Font = any;
 
 export type Style = {
   font: Font;
@@ -233,42 +233,42 @@ const MU_SLIDER_FMT = "%.2f";
 
 export class Context {
   /* callbacks */
-  private textWidth: TextWidthFunc;
-  private textHeight: TextHeightFunc;
+  public textWidth: TextWidthFunc;
+  public textHeight: TextHeightFunc;
   /* core state */
   public style: Style;
-  private hover: Id | null;
-  private focus: Id | null;
+  public hover: Id | null;
+  public focus: Id | null;
   public lastId: Id | null;
-  private lastRect: Rect | null;
-  private lastZindex: number;
-  private updatedFocus: boolean;
-  // private frame: number;
-  private hoverRoot: Container | null;
-  private nextHoverRoot: Container | null; // set the hover root for the next frame
-  private scrollTarget: Container | null;
+  public lastRect: Rect | null;
+  public lastZindex: number;
+  public updatedFocus: boolean;
+  // public frame: number;
+  public hoverRoot: Container | null;
+  public nextHoverRoot: Container | null; // set the hover root for the next frame
+  public scrollTarget: Container | null;
   /* widget-specific states */
-  private numberEditBuf: string;
-  private numberEdit: Id | null;
-  private treeNodes: Record<Id, true | undefined>;
+  public numberEditBuf: string;
+  public numberEdit: Id | null;
+  public treeNodes: Record<Id, true | undefined>;
   /* stacks */
-  private commands: Command[];
-  private roots: Container[];
-  private containerStack: Container[];
-  private clipStack: Rect[];
-  private idStack: Id[];
-  private layoutStack: Layout[];
-  private containers: Record<Id, Container>;
+  public commands: Command[];
+  public roots: Container[];
+  public containerStack: Container[];
+  public clipStack: Rect[];
+  public idStack: Id[];
+  public layoutStack: Layout[];
+  public containers: Record<Id, Container>;
   /* input state */
-  private mousePos: Vec2;
-  private lastMousePos: Vec2;
-  private mouseDelta: Vec2;
-  private scrollDelta: Vec2;
-  private mouseDown: MouseButton;
-  private mousePressed: MouseButton;
-  private keyDown: Key;
-  private keyPressed: Key;
-  private _inputText: string;
+  public mousePos: Vec2;
+  public lastMousePos: Vec2;
+  public mouseDelta: Vec2;
+  public scrollDelta: Vec2;
+  public mouseDown: MouseButton;
+  public mousePressed: MouseButton;
+  public keyDown: Key;
+  public keyPressed: Key;
+  public _inputText: string;
 
   constructor(
     textWidth: TextWidthFunc,
@@ -770,6 +770,12 @@ export class Context {
     };
     this.layoutStack.push(layout);
     this.layoutRow([0], 0);
+  }
+
+  layoutSetNext(r: Rect, relative: boolean) {
+    const layout = this.getLayout();
+    layout.next = r;
+    layout.nextType = relative ? Position.Relative : Position.Absolute;
   }
 
   layoutNext() {
