@@ -13,37 +13,8 @@ import {
   rgba,
 } from "reaper-microui";
 import { getFXTarget } from "./detectTarget";
-import { getCategories } from "./categories";
-
-function toggleButton(ctx: Context, label: string, state: boolean): boolean {
-  const id = ctx.getId(label);
-  const r = ctx.layoutNext();
-  ctx.updateControl(id, r, Option.AlignCenter);
-
-  // handle click
-  if (ctx.mousePressed === MouseButton.Left && ctx.focus === id) {
-    state = !state;
-  }
-
-  // draw
-  if (state) {
-    const originalButton = ctx.style.colors[ColorId.Button];
-    const originalButtonHover = ctx.style.colors[ColorId.ButtonHover];
-    const originalButtonFocus = ctx.style.colors[ColorId.ButtonFocus];
-    ctx.style.colors[ColorId.Button] = rgba(255, 0, 0, 255);
-    ctx.style.colors[ColorId.ButtonHover] = rgba(255, 255, 0, 255);
-    ctx.style.colors[ColorId.ButtonFocus] = rgba(0, 255, 255, 255);
-    ctx.drawControlFrame(id, r, ColorId.Button, 0);
-    ctx.style.colors[ColorId.Button] = originalButton;
-    ctx.style.colors[ColorId.ButtonHover] = originalButtonHover;
-    ctx.style.colors[ColorId.ButtonFocus] = originalButtonFocus;
-  } else {
-    ctx.drawControlFrame(id, r, ColorId.Button, 0);
-  }
-  ctx.drawControlText(label, r, ColorId.Text, 0);
-
-  return state;
-}
+import { getCategories, serialiseFx } from "./categories";
+import { toggleButton } from "./widgets";
 
 function wrappedButtons<T extends { name: string; state: boolean }>(
   ctx: Context,
@@ -100,18 +71,36 @@ function wrappedButtons<T extends { name: string; state: boolean }>(
   return activeBtns;
 }
 
-function main() {
+function loadInitialData() {
   const fxfolders = loadFXFolders();
   const installedfx: Record<string, string | undefined> = {};
   for (const fx of loadInstalledFX()) {
     installedfx[fx.ident] = fx.displayName;
   }
-  const categories = getCategories();
-  const temp = Object.values(categories.folders).map((x) => ({
-    ...x,
-    name: x.stem,
-    state: false,
-  }));
+  return {
+    fxfolders,
+    installedfx,
+  };
+}
+
+function generateIntermediateData(init: ReturnType<typeof loadInitialData>) {
+  const folders = init.fxfolders.map((x) => ({ id: x.id, name: x.name }));
+  const fxMap: Record<string, LuaSet<string>> = {};
+  for (const folder of init.fxfolders) {
+    for (const fx of folder.items) {
+      fxMap[folder.id] ||= new LuaSet();
+      fxMap[folder.id].add(serialiseFx(fx));
+    }
+  }
+
+  const activeIds: LuaSet<string> = new LuaSet();
+
+  return { folders, fxMap, activeIds };
+}
+
+function main() {
+  let init = loadInitialData();
+  let inter = generateIntermediateData(init);
 
   gfx.init("My Window", 260, 450);
   gfx.setfont(1, "Arial", 12);
@@ -135,9 +124,61 @@ function main() {
 
       ctx.layoutRow([-1], 0);
 
-      const activeButtons = wrappedButtons(ctx, temp);
+      {
+        // "peek" the next layout
+        const r = ctx.layoutNext();
+        ctx.layoutSetNext(r, false);
 
-      ctx.text(inspect(activeButtons));
+        // calculate available space for buttons
+        const availableWidth = r.w + ctx.style.spacing;
+
+        ctx.layoutBeginColumn();
+        {
+          let remainingWidth = availableWidth;
+
+          // split the names into rows, based on the width of each button
+          type T = (typeof inter.folders)[number];
+          let rows: { folder: T; width: number }[][] = [[]];
+          for (const btn of inter.folders) {
+            const buttonWidth =
+              ctx.textWidth(ctx.style.font, btn.name) + ctx.style.padding * 2;
+
+            if (remainingWidth < buttonWidth + ctx.style.spacing) {
+              remainingWidth = availableWidth;
+              rows.push([]);
+            }
+            remainingWidth -= buttonWidth + ctx.style.spacing;
+
+            const currentRow = rows[rows.length - 1];
+            currentRow.push({ folder: btn, width: buttonWidth });
+          }
+
+          // layout each row
+          for (const row of rows) {
+            if (row.length === 0) continue;
+
+            ctx.layoutRow(
+              row.map((x) => x.width),
+              0,
+            );
+            for (const btn of row) {
+              ctx.pushId(btn.folder.id);
+              const active = toggleButton(
+                ctx,
+                btn.folder.name,
+                inter.activeIds.has(btn.folder.id),
+              );
+              ctx.popId();
+              if (active) {
+                inter.activeIds.add(btn.folder.id);
+              } else {
+                inter.activeIds.delete(btn.folder.id);
+              }
+            }
+          }
+        }
+        ctx.layoutEndColumn();
+      }
 
       // {
       //   const origSpacing = ctx.style.spacing;

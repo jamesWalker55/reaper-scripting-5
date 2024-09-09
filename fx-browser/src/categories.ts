@@ -12,11 +12,11 @@ type FolderInfo = { id: string; category: string; stem: string };
 
 type FxInfo = { ident: string; type: number };
 
-function serialiseFx(fx: FxInfo): string {
+export function serialiseFx(fx: FxInfo): string {
   return `${fx.type}\n${fx.ident}`;
 }
 
-function deserialiseFx(text: string): FxInfo {
+export function deserialiseFx(text: string): FxInfo {
   const nlIndex = text.indexOf("\n");
   if (nlIndex === -1)
     throw new Error(`failed to deserialise fx: ${inspect(text)}`);
