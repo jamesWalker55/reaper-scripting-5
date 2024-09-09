@@ -126,7 +126,7 @@ export function loadFXFolders() {
   const result: {
     id: string;
     name: string;
-    items: { name: string; type: number }[];
+    items: { ident: string; type: number }[];
   }[] = [];
 
   const metadata = data["Folders"];
@@ -137,11 +137,11 @@ export function loadFXFolders() {
 
     const itemdata = data[`Folder${id}`];
     const itemCount = parseInt(itemdata["Nb"]);
-    const items: { name: string; type: number }[] = [];
+    const items: { ident: string; type: number }[] = [];
     for (let j = 0; j < itemCount; j++) {
       const item = itemdata[`Item${j}`];
       const type = parseInt(itemdata[`Type${j}`]);
-      items.push({ name: item, type });
+      items.push({ ident: item, type });
     }
 
     result.push({

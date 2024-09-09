@@ -5,6 +5,7 @@ import { loadFXFolders, loadInstalledFX } from "reaper-api/installedFx";
 import { errorHandler } from "reaper-api/utils";
 import { Context, createContext, microUILoop, Option } from "reaper-microui";
 import { getFXTarget } from "./detectTarget";
+import { getCategories } from "./categories";
 
 function wrappedButtons<T extends { name: string }>(
   ctx: Context,
@@ -66,48 +67,14 @@ function main() {
   for (const fx of loadInstalledFX()) {
     installedfx[fx.ident] = fx.displayName;
   }
+  const categories = inspect(getCategories());
 
   gfx.init("My Window", 260, 450);
   gfx.setfont(1, "Arial", 12);
 
   const ctx = createContext();
 
-  let processCooldown = 0;
-  let data: string = "null";
-
   microUILoop(ctx, () => {
-    if (processCooldown < 0) {
-      // do logic
-      processCooldown = 5;
-
-      data = inspect({
-        hwnds: (() => {
-          const hwnds: any[] = [];
-          for (
-            let hwnd: identifier | null = reaper.JS_Window_GetFocus();
-            hwnd !== null;
-            hwnd = reaper.JS_Window_GetParent(hwnd)
-          ) {
-            const id = reaper.JS_Window_GetLong(hwnd, "ID");
-            const title = reaper.JS_Window_GetTitle(hwnd);
-            const classname = reaper.JS_Window_GetClassName(hwnd);
-            const hwndstring = reaper.JS_Window_AddressFromHandle(hwnd);
-            hwnds.push({
-              title,
-              classname,
-              hwndstring,
-              id,
-            });
-          }
-          return hwnds;
-        })(),
-        getFXTarget: getFXTarget(),
-      });
-    } else {
-      // do nothing
-      processCooldown -= 1;
-    }
-
     if (
       ctx.beginWindow(
         "Demo Window",
@@ -123,7 +90,7 @@ function main() {
       }
 
       ctx.layoutRow([-1], 0);
-      ctx.text(data);
+      ctx.text(categories);
 
       // {
       //   const origSpacing = ctx.style.spacing;
@@ -134,18 +101,16 @@ function main() {
       //     ctx.label(`${folder.id}. ${folder.name}`);
       //     ctx.layoutRow([10, 20, 150, -1], 0);
       //     for (const item of folder.items) {
-      //       const displayName = installedfx[item.name];
+      //       const displayName = installedfx[item.ident];
       //       ctx.label("");
       //       ctx.label(item.type.toString());
       //       ctx.label(displayName || "");
-      //       ctx.label(item.name);
+      //       ctx.label(item.ident);
       //     }
       //   }
 
       //   ctx.style.spacing = origSpacing;
       // }
-
-      processCooldown;
 
       ctx.endWindow();
     }
