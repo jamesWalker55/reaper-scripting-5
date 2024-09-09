@@ -50,7 +50,7 @@ function main() {
   const LOW_THRESHOLD_MAX = 1e-9;
   const HIGH_THRESHOLD_MIN = LOW_THRESHOLD_MAX;
   const HIGH_THRESHOLD_MAX = 1e-2;
-  let thresholdLow = 2e-10;
+  let thresholdLow = 4.5e-10;
   let thresholdHigh = HIGH_THRESHOLD_MAX;
   let thresholdInclusive = false;
   let checkItemEnds = false;
