@@ -88,8 +88,6 @@ function main() {
   let relative = true;
 
   microUILoop(ctx, () => {
-    ctx.begin();
-
     if (
       ctx.beginWindow(
         "Demo Window",
@@ -163,8 +161,6 @@ function main() {
 
       ctx.endWindow();
     }
-
-    ctx.end();
   });
 }
 

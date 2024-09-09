@@ -387,7 +387,9 @@ export function microUILoop(
     }
 
     // user-provided GUI and processing code
+    ctx.begin();
     func();
+    ctx.end();
 
     // draw frame
     let currentClip: Rect | null = null;
@@ -740,11 +742,9 @@ export function demoMultiWindow() {
   }
 
   microUILoop(ctx, () => {
-    ctx.begin();
     styleWindow(ctx);
     logWindow(ctx);
     testWindow(ctx);
-    ctx.end();
 
     gfx.clear = bgColor[0] + bgColor[1] * 256 + bgColor[2] * 65536;
   });
@@ -760,8 +760,6 @@ export function demoSingleWindow() {
   const checks = [true, false, true];
 
   microUILoop(ctx, () => {
-    ctx.begin();
-
     if (
       ctx.beginWindow(
         "Demo Window",
@@ -880,8 +878,6 @@ export function demoSingleWindow() {
       ctx.endWindow();
     }
 
-    ctx.end();
-
     gfx.clear = bgColor[0] + bgColor[1] * 256 + bgColor[2] * 65536;
   });
 }
@@ -895,8 +891,6 @@ export function demoSimple() {
   const checks = [true, false, true];
 
   microUILoop(ctx, () => {
-    ctx.begin();
-
     if (
       ctx.beginWindow(
         "Demo Window",
@@ -978,7 +972,5 @@ export function demoSimple() {
 
       ctx.endWindow();
     }
-
-    ctx.end();
   });
 }
