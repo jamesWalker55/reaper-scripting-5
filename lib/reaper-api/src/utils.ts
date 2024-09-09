@@ -1,4 +1,5 @@
 import { inspect } from "./inspect";
+import * as path from "./path/path";
 
 export function ensureAPI(source: string, functionName: string) {
   if (reaper.APIExists(functionName)) return;
@@ -199,4 +200,15 @@ export function getReaperVersion() {
 
   const [major, minor] = match;
   return { major: parseInt(major), minor: parseInt(minor) };
+}
+
+export function getReaperDataFile(filename?: string) {
+  const reaperIniPath = reaper.get_ini_file();
+  // assume base dir is parent directory of ini path
+  const parentDir = path.split(reaperIniPath)[0];
+  if (filename) {
+    return path.normpath(path.join(parentDir, filename));
+  } else {
+    return path.normpath(parentDir);
+  }
 }

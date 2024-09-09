@@ -3,6 +3,7 @@ AddCwdToImportPaths();
 import { encode } from "json";
 import { OSType } from "reaper-api/ffi";
 import { inspect } from "reaper-api/inspect";
+import { loadFXFolders, loadInstalledFX } from "reaper-api/installedFx";
 import { errorHandler, log } from "reaper-api/utils";
 import {
   Color,
@@ -76,6 +77,12 @@ function wrappedButtons<T extends { name: string }>(
 }
 
 function main() {
+  const fxfolders = loadFXFolders();
+  const installedfx: Record<string, string | undefined> = {};
+  for (const fx of loadInstalledFX()) {
+    installedfx[fx.ident] = fx.displayName;
+  }
+
   gfx.init("My Window", 260, 450);
   gfx.setfont(1, "Arial", 12);
 
@@ -100,6 +107,26 @@ function main() {
         const win = ctx.getCurrentContainer();
         win.rect.w = gfx.w;
         win.rect.h = gfx.h;
+      }
+
+      {
+        const origSpacing = ctx.style.spacing;
+        ctx.style.spacing = -3;
+
+        for (const folder of fxfolders) {
+          ctx.layoutRow([-1], 0);
+          ctx.label(`${folder.id}. ${folder.name}`);
+          ctx.layoutRow([10, 20, 150, -1], 0);
+          for (const item of folder.items) {
+            const displayName = installedfx[item.name];
+            ctx.label("");
+            ctx.label(item.type.toString());
+            ctx.label(displayName || "");
+            ctx.label(item.name);
+          }
+        }
+
+        ctx.style.spacing = origSpacing;
       }
 
       ctx.layoutRow([-1], 0);

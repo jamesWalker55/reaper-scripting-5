@@ -2,14 +2,13 @@ import { encode } from "json";
 import { copy } from "./clipboard";
 import { parseIni } from "./ini";
 import { inspect } from "./inspect";
-import { abspath } from "./path/path";
-import { log } from "./utils";
+import { getReaperDataFile, log } from "./utils";
 
 /**
  * NOTE: Only works on Windows (because the filename contains "win64.ini")
  */
 function loadCLAPPlugins() {
-  const [ini, msg] = parseIni(abspath("reaper-clap-win64.ini"));
+  const [ini, msg] = parseIni(getReaperDataFile("reaper-clap-win64.ini"));
   if (ini === null) {
     if (msg.startsWith("Given path does not exist")) {
       // assume no CLAP plugins are installed, hence INI is missing
@@ -44,7 +43,7 @@ function loadCLAPPlugins() {
  * NOTE: Only works on Windows (because the filename contains "64.ini")
  */
 function loadVSTPlugins() {
-  const [ini, msg] = parseIni(abspath("reaper-vstplugins64.ini"));
+  const [ini, msg] = parseIni(getReaperDataFile("reaper-vstplugins64.ini"));
   if (ini === null) {
     if (msg.startsWith("Given path does not exist")) {
       // assume no VST plugins are installed, hence INI is missing
@@ -100,7 +99,7 @@ function loadVSTPlugins() {
  *  ...]
  * ```
  */
-function loadInstalledFX() {
+export function loadInstalledFX() {
   const result = [];
   let i = 0;
   while (true) {
@@ -112,6 +111,49 @@ function loadInstalledFX() {
   }
 }
 
+export enum FXFolderItemType {
+  JS = 2,
+  VST = 3, // also VST3
+  CLAP = 7,
+  FXChain = 1000,
+  Smart = 0x100000, // smart folder
+}
+
+export function loadFXFolders() {
+  const [data, error] = parseIni(getReaperDataFile("reaper-fxfolders.ini"));
+  if (data === null) throw new Error(error);
+
+  const result: {
+    id: string;
+    name: string;
+    items: { name: string; type: number }[];
+  }[] = [];
+
+  const metadata = data["Folders"];
+  const folderCount = parseInt(metadata["NbFolders"]);
+  for (let i = 0; i < folderCount; i++) {
+    const id = metadata[`Id${i}`];
+    const name = metadata[`Name${i}`];
+
+    const itemdata = data[`Folder${id}`];
+    const itemCount = parseInt(itemdata["Nb"]);
+    const items: { name: string; type: number }[] = [];
+    for (let j = 0; j < itemCount; j++) {
+      const item = itemdata[`Item${j}`];
+      const type = parseInt(itemdata[`Type${j}`]);
+      items.push({ name: item, type });
+    }
+
+    result.push({
+      id,
+      name,
+      items,
+    });
+  }
+
+  return result;
+}
+
 export function main() {
   const result = loadInstalledFX();
   copy(encode(result));
@@ -121,15 +163,15 @@ export function main() {
 function temp() {
   let temp;
   // // list of known CLAP plugins
-  // temp = parseIni(abspath("reaper-clap-win64.ini"));
+  // temp = parseIni(getReaperDataFile("reaper-clap-win64.ini"));
   // CLAP renames
-  temp = parseIni(abspath("reaper-clap-rename-win64.ini"));
+  temp = parseIni(getReaperDataFile("reaper-clap-rename-win64.ini"));
   // fx favourites folder
-  temp = parseIni(abspath("reaper-fxfolders.ini"));
+  temp = parseIni(getReaperDataFile("reaper-fxfolders.ini"));
   // (not INI format) list of known JSFX plugins
-  temp = abspath("reaper-jsfx.ini");
+  temp = getReaperDataFile("reaper-jsfx.ini");
   // // list of known VST plugins
-  // temp = parseIni(abspath("reaper-vstplugins64.ini"));
+  // temp = parseIni(getReaperDataFile("reaper-vstplugins64.ini"));
   // vst renames
-  temp = parseIni(abspath("reaper-vstrenames64.ini"));
+  temp = parseIni(getReaperDataFile("reaper-vstrenames64.ini"));
 }
