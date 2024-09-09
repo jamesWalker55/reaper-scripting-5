@@ -61,7 +61,7 @@ export function stringifyAddFxParams(params: AddFxParams): string {
 
 // container indexing functions from:
 // https://forum.cockos.com/showthread.php?p=2714770#post2714770
-export function parseContainerFxidx(
+export function parseTrackContainerFxidx(
   track: MediaTrack,
   fxidx: number,
 ): number[] {
@@ -104,7 +104,7 @@ export function parseContainerFxidx(
     addr_sc = addr_sc * (n + 1);
   }
 }
-export function generateContainerFxidx(
+export function generateTrackContainerFxidx(
   track: MediaTrack,
   allidx: number[],
 ): number {
@@ -117,6 +117,73 @@ export function generateContainerFxidx(
 
     const [ccok, cc] = reaper.TrackFX_GetNamedConfigParm(
       track,
+      rv,
+      "container_count",
+    );
+    if (!ccok) {
+      error("bad container address: container does not exist");
+    }
+    rv = rv + sc * v;
+    sc = sc * (1 + parseInt(cc));
+  }
+  return rv;
+}
+export function parseTakeContainerFxidx(
+  take: MediaItem_Take,
+  fxidx: number,
+): number[] {
+  const isContainerFxidx = (fxidx & 0x2000000) !== 0;
+  if (!isContainerFxidx) return [fxidx];
+
+  const ret = [];
+  let n = reaper.TakeFX_GetCount(take);
+  let curidx = (fxidx - 0x2000000) % (n + 1);
+  let remain = math.floor((fxidx - 0x2000000) / (n + 1));
+  if (curidx < 1) {
+    error("bad container address");
+  }
+
+  let addr = curidx + 0x2000000;
+  let addr_sc = n + 1;
+  while (true) {
+    const [ccok, cc] = reaper.TakeFX_GetNamedConfigParm(
+      take,
+      addr,
+      "container_count",
+    );
+    if (!ccok) {
+      error("bad container address: not a container");
+    }
+    ret.push(curidx - 1);
+    n = parseInt(cc);
+    if (remain <= n) {
+      if (remain > 0) {
+        ret.push(remain - 1);
+      }
+      return ret;
+    }
+    curidx = remain % (n + 1);
+    remain = math.floor(remain / (n + 1));
+    if (curidx < 1) {
+      error("bad container address");
+    }
+    addr = addr + addr_sc * curidx;
+    addr_sc = addr_sc * (n + 1);
+  }
+}
+export function generateTakeContainerFxidx(
+  take: MediaItem_Take,
+  allidx: number[],
+): number {
+  if (allidx.length <= 0)
+    throw new Error("container index must be at least length 1");
+  let sc = reaper.TakeFX_GetCount(take) + 1;
+  let rv = 0x2000000 + allidx[0] + 1;
+  for (let i = 1; i < allidx.length; i++) {
+    const v = allidx[i] + 1;
+
+    const [ccok, cc] = reaper.TakeFX_GetNamedConfigParm(
+      take,
       rv,
       "container_count",
     );

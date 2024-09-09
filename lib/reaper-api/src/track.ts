@@ -1,7 +1,7 @@
 import {
   AddFxParams,
   FX,
-  generateContainerFxidx,
+  generateTrackContainerFxidx,
   stringifyAddFxParams,
 } from "./fx";
 import { Item } from "./item";
@@ -59,7 +59,7 @@ export class Track {
   addFx(fx: AddFxParams, position?: number | number[]) {
     const fxname = stringifyAddFxParams(fx);
     if (position !== undefined && typeof position !== "number") {
-      position = generateContainerFxidx(this.obj, position);
+      position = generateTrackContainerFxidx(this.obj, position);
     }
 
     const rv = reaper.TrackFX_AddByName(

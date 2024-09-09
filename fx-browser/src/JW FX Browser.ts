@@ -2,7 +2,12 @@ AddCwdToImportPaths();
 
 import { encode } from "json";
 import { OSType } from "reaper-api/ffi";
-import { FX, getLastTouchedFx } from "reaper-api/fx";
+import {
+  FX,
+  getLastTouchedFx,
+  parseTakeContainerFxidx,
+  parseTrackContainerFxidx,
+} from "reaper-api/fx";
 import { inspect } from "reaper-api/inspect";
 import { loadFXFolders, loadInstalledFX } from "reaper-api/installedFx";
 import { getSelectedFx } from "reaper-api/selectedFx";
@@ -86,7 +91,16 @@ function wrappedButtons<T extends { name: string }>(
   return clickedBtn;
 }
 
-function fxChainIsFocused() {
+const FXCHAIN_WINDOW_TITLE_PREFIX = reaper.LocalizeString("FX: ", "fx", 0);
+
+/**
+ * Very hacky function to detect the FX Chain window being focused (if any).
+ *
+ * This returns the same type as `CF_GetFocusedFXChain`.
+ *
+ * Note: `identifier`, `HWND`, `FxChain` are all interchangable, they are just hwnds
+ */
+function getFocusedFxChain(): identifier | null {
   // the JS_Window classname and title functions only work correctly on Windows, see:
   // https://forum.cockos.com/showthread.php?t=213189
   assertWindowsOnly();
@@ -110,25 +124,90 @@ function fxChainIsFocused() {
     // very hacky implementation:
     // just check if any of the parent window titles start with "FX:"
     // only works with English locale but fuck it
-    if (title.startsWith("FX:")) return true;
+    if (title.startsWith(FXCHAIN_WINDOW_TITLE_PREFIX)) {
+      return hwnd;
+    }
   }
 
-  return false;
+  return null;
 }
 
-// function getFXTarget() {
-//   // trackIdxOut will be track index (-1 is master track, 0 is first track).
-//   // itemidxOut will be 0-based item index if an item, or -1 if not an item.
-//   // takeidxOut will be 0-based take index.
-//   // fxidxOut will be FX index, potentially with 0x2000000 set to signify container-addressing, or with 0x1000000 set to signify record-input FX.
+function getFXTarget() {
+  const focusedFxChain = getFocusedFxChain();
+  if (focusedFxChain) {
+    // we are currently focused on an fx chain, try to use `GetTouchedOrFocusedFX`
 
-//   const x = Math.random();
-//   if (x === 1) {
-//     return { target: "track", trackIdx: 87, fxidx: 0x2000000 + 2 };
-//   } else if (x === 2) {
-//     return { target: "item", trackIdx: 87, itemIdx: 12 };
-//   }
-// }
+    // NOTE: `GetTouchedOrFocusedFX` will not detect the focused FX chain if the FX chain is empty, so you can't add FX to an empty fx chain
+    const listview = reaper.JS_Window_FindChildByID(focusedFxChain, 1076);
+    if (!listview)
+      throw new Error("failed to find listview object in FX Chain window");
+
+    const fxCount = reaper.JS_ListView_GetItemCount(listview);
+    const fxChainIsEmpty = fxCount === 0;
+    // TODO: Handle something when fxchain is empty, GetTouchedOrFocusedFX is not to be trusted
+
+    const [ok, trackidx, itemidx, takeidx, fxidx, parm] =
+      reaper.GetTouchedOrFocusedFX(1);
+
+    const track = reaper.GetTrack(0, trackidx);
+    if (!track) throw new Error(`failed to get track ${trackidx}`);
+
+    if (itemidx === -1) {
+      // target the parent of the fx
+      // can be an empty list (represents root fxchain)
+      const fxpath = parseTrackContainerFxidx(track, fxidx);
+      fxpath.pop();
+
+      return {
+        target: "track",
+        trackidx,
+        track,
+        fxpath,
+      };
+    } else {
+      const item = reaper.GetTrackMediaItem(track, itemidx);
+      if (!item)
+        throw new Error(`failed to get item ${itemidx} on track ${trackidx}`);
+
+      const take = reaper.GetTake(item, takeidx);
+      if (!take)
+        throw new Error(
+          `failed to get take ${takeidx} from item ${itemidx} on track ${trackidx}`,
+        );
+
+      // target the parent of the fx
+      // can be an empty list (represents root fxchain)
+      const fxpath = parseTakeContainerFxidx(take, fxidx);
+      fxpath.pop();
+
+      return {
+        target: "take",
+        trackidx,
+        track,
+        itemidx,
+        item,
+        takeidx,
+        take,
+        fxpath,
+      };
+    }
+  }
+
+  // no focused FX chain, determine if adding to track or take
+  // reaper.selitem
+
+  return "temp";
+  // reaper.GetLastTouchedTrack();
+
+  // const x = Math.random();
+  // if (x === 1) {
+  //   return { target: "track", trackIdx: 87, fxidx: 0x2000000 + 2 };
+  // } else if (x === 2) {
+  //   return { target: "item", trackIdx: 87, itemIdx: 12 };
+  // }
+
+  // return null;
+}
 
 function main() {
   const fxfolders = loadFXFolders();
@@ -151,42 +230,38 @@ function main() {
       processCooldown = 5;
 
       {
-        const result: any[] = [];
+        const hwnds: any[] = [];
         for (
           let hwnd: identifier | null = reaper.JS_Window_GetFocus();
           hwnd !== null;
           hwnd = reaper.JS_Window_GetParent(hwnd)
         ) {
-          const rect = reaper.JS_Window_GetRect(hwnd);
+          // reaper.JS_Window_GetLongPtr(hwnd)
+          // reaper.JS_Window_AddressFromHandle
+          // reaper.JS_Window_GetLongPtr("USERDATA");
+          // reaper.JS_Window_GetLongPtr("WNDPROC");
+          // reaper.JS_Window_GetLongPtr("DLGPROC");
+          // reaper.JS_Window_GetLongPtr("ID");
+          // reaper.JS_Window_GetLongPtr("EXSTYLE");
+          // reaper.JS_Window_GetLongPtr("STYLE");
+          // reaper.JS_Window_GetLong(hwnd)
+          reaper.CF_GetFocusedFXChain;
           const title = reaper.JS_Window_GetTitle(hwnd);
           const classname = reaper.JS_Window_GetClassName(hwnd);
-          const hwndstring = reaper.BR_Win32_HwndToString(hwnd);
+          const hwndstring = reaper.JS_Window_AddressFromHandle(hwnd);
           const idInfo = {
-            hwnd,
-            rect,
             title,
             classname,
             hwndstring,
           };
-          result.push(idInfo);
+          hwnds.push(idInfo);
         }
-        // let id: identifier | null = reaper.JS_Window_GetFocus();
-        // while (id !== null) {
-        //   const rect = reaper.JS_Window_GetRect(id);
-        //   const title = reaper.JS_Window_GetTitle(id);
-        //   const classname = reaper.JS_Window_GetClassName(id);
-        //   const hwndstring = reaper.BR_Win32_HwndToString(id);
-        //   const idInfo = {
-        //     id,
-        //     rect,
-        //     title,
-        //     classname,
-        //     hwndstring,
-        //   };
-        //   result.push(idInfo);
 
-        //   id = reaper.JS_Window_GetParent(id);
-        // }
+        const focusedfxchain = reaper.CF_GetFocusedFXChain();
+        const focusedfxchainstring = reaper.JS_Window_AddressFromHandle(
+          focusedfxchain as any,
+        );
+        // const focusedfxchainstring = reaper.JS_Window_AddressFromHandle(focusedfxchain as any);
 
         const [retval, trackidx, itemidx, takeidx, fxidx, parm] =
           reaper.GetTouchedOrFocusedFX(1);
@@ -195,16 +270,27 @@ function main() {
         const trackIdx = track ? new Track(track).getIdx() : "no track";
 
         data = inspect({
-          hwnds: result,
+          hwnds,
+          fxchainFocused: getFocusedFxChain() !== null,
+          focusedfxchainstring,
           trackIdx,
-          focusedFx: {
-            retval,
-            trackidx,
-            itemidx,
-            takeidx,
-            fxidx,
-            parm,
-          },
+          getFXTarget: getFXTarget(),
+          focusedFx: retval
+            ? (() => {
+                const track = Track.getByIdx(trackidx);
+                if (itemidx === -1) {
+                  // target is track
+                  const parsedFxidx = parseTrackContainerFxidx(
+                    track.obj,
+                    fxidx,
+                  );
+                  return `track ${trackidx} - fx ${parsedFxidx.join(" > ")}`;
+                } else {
+                  // target is item
+                  return `item ${itemidx} take ${takeidx} (on track ${trackidx}) - fx ${fxidx}`;
+                }
+              })()
+            : "null",
         });
       }
     } else {
