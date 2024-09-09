@@ -2,8 +2,11 @@ AddCwdToImportPaths();
 
 import { encode } from "json";
 import { OSType } from "reaper-api/ffi";
+import { FX, getLastTouchedFx } from "reaper-api/fx";
 import { inspect } from "reaper-api/inspect";
 import { loadFXFolders, loadInstalledFX } from "reaper-api/installedFx";
+import { getSelectedFx } from "reaper-api/selectedFx";
+import { Track } from "reaper-api/track";
 import { errorHandler, log } from "reaper-api/utils";
 import {
   Color,
@@ -21,6 +24,13 @@ import {
   Response,
   rgba,
 } from "reaper-microui";
+
+const OS = reaper.GetOS();
+
+function assertWindowsOnly() {
+  const isWindows = OS.toLowerCase().startsWith("win");
+  if (!isWindows) throw new Error("Only Windows is supported");
+}
 
 function wrappedButtons<T extends { name: string }>(
   ctx: Context,
@@ -76,6 +86,50 @@ function wrappedButtons<T extends { name: string }>(
   return clickedBtn;
 }
 
+function fxChainIsFocused() {
+  // the JS_Window classname and title functions only work correctly on Windows, see:
+  // https://forum.cockos.com/showthread.php?t=213189
+  assertWindowsOnly();
+
+  for (
+    let hwnd: identifier | null = reaper.JS_Window_GetFocus();
+    hwnd !== null;
+    hwnd = reaper.JS_Window_GetParent(hwnd)
+  ) {
+    const classname = reaper.JS_Window_GetClassName(hwnd);
+
+    // // inputboxes have classname == "Edit", and their title is the content of the inputbox
+    // // i.e. try renaming an item to have the name "FX:" and the `title` variable will be what you typed
+    // if (classname === "Edit") continue;
+
+    // '#32770' is a generic classname for dialog boxes
+    // FX chains also happen to use this classname
+    if (classname !== "#32770") continue;
+
+    const title = reaper.JS_Window_GetTitle(hwnd);
+    // very hacky implementation:
+    // just check if any of the parent window titles start with "FX:"
+    // only works with English locale but fuck it
+    if (title.startsWith("FX:")) return true;
+  }
+
+  return false;
+}
+
+// function getFXTarget() {
+//   // trackIdxOut will be track index (-1 is master track, 0 is first track).
+//   // itemidxOut will be 0-based item index if an item, or -1 if not an item.
+//   // takeidxOut will be 0-based take index.
+//   // fxidxOut will be FX index, potentially with 0x2000000 set to signify container-addressing, or with 0x1000000 set to signify record-input FX.
+
+//   const x = Math.random();
+//   if (x === 1) {
+//     return { target: "track", trackIdx: 87, fxidx: 0x2000000 + 2 };
+//   } else if (x === 2) {
+//     return { target: "item", trackIdx: 87, itemIdx: 12 };
+//   }
+// }
+
 function main() {
   const fxfolders = loadFXFolders();
   const installedfx: Record<string, string | undefined> = {};
@@ -88,13 +142,76 @@ function main() {
 
   const ctx = createContext();
 
-  let x = 300;
-  let y = 300;
-  let w = 40;
-  let h = 40;
-  let relative = true;
+  let processCooldown = 0;
+  let data: string = "null";
 
   microUILoop(ctx, () => {
+    if (processCooldown < 0) {
+      // do logic
+      processCooldown = 5;
+
+      {
+        const result: any[] = [];
+        for (
+          let hwnd: identifier | null = reaper.JS_Window_GetFocus();
+          hwnd !== null;
+          hwnd = reaper.JS_Window_GetParent(hwnd)
+        ) {
+          const rect = reaper.JS_Window_GetRect(hwnd);
+          const title = reaper.JS_Window_GetTitle(hwnd);
+          const classname = reaper.JS_Window_GetClassName(hwnd);
+          const hwndstring = reaper.BR_Win32_HwndToString(hwnd);
+          const idInfo = {
+            hwnd,
+            rect,
+            title,
+            classname,
+            hwndstring,
+          };
+          result.push(idInfo);
+        }
+        // let id: identifier | null = reaper.JS_Window_GetFocus();
+        // while (id !== null) {
+        //   const rect = reaper.JS_Window_GetRect(id);
+        //   const title = reaper.JS_Window_GetTitle(id);
+        //   const classname = reaper.JS_Window_GetClassName(id);
+        //   const hwndstring = reaper.BR_Win32_HwndToString(id);
+        //   const idInfo = {
+        //     id,
+        //     rect,
+        //     title,
+        //     classname,
+        //     hwndstring,
+        //   };
+        //   result.push(idInfo);
+
+        //   id = reaper.JS_Window_GetParent(id);
+        // }
+
+        const [retval, trackidx, itemidx, takeidx, fxidx, parm] =
+          reaper.GetTouchedOrFocusedFX(1);
+
+        const track = reaper.GetLastTouchedTrack();
+        const trackIdx = track ? new Track(track).getIdx() : "no track";
+
+        data = inspect({
+          hwnds: result,
+          trackIdx,
+          focusedFx: {
+            retval,
+            trackidx,
+            itemidx,
+            takeidx,
+            fxidx,
+            parm,
+          },
+        });
+      }
+    } else {
+      // do nothing
+      processCooldown -= 1;
+    }
+
     if (
       ctx.beginWindow(
         "Demo Window",
@@ -109,82 +226,30 @@ function main() {
         win.rect.h = gfx.h;
       }
 
-      {
-        const origSpacing = ctx.style.spacing;
-        ctx.style.spacing = -3;
-
-        for (const folder of fxfolders) {
-          ctx.layoutRow([-1], 0);
-          ctx.label(`${folder.id}. ${folder.name}`);
-          ctx.layoutRow([10, 20, 150, -1], 0);
-          for (const item of folder.items) {
-            const displayName = installedfx[item.name];
-            ctx.label("");
-            ctx.label(item.type.toString());
-            ctx.label(displayName || "");
-            ctx.label(item.name);
-          }
-        }
-
-        ctx.style.spacing = origSpacing;
-      }
-
       ctx.layoutRow([-1], 0);
-      ctx.label("Controls:");
+      ctx.text(data);
 
-      ctx.layoutBeginColumn();
-      {
-        ctx.layoutRow([50, -1], 0);
-        ctx.label("x");
-        x = ctx.slider("x", x, 0, 500);
-        ctx.label("y");
-        y = ctx.slider("y", y, 0, 500);
-        ctx.label("w");
-        w = ctx.slider("w", w, 0, 500);
-        ctx.label("h");
-        h = ctx.slider("h", h, 0, 500);
-      }
-      ctx.layoutEndColumn();
+      // {
+      //   const origSpacing = ctx.style.spacing;
+      //   ctx.style.spacing = -3;
 
-      relative = ctx.checkbox("relative", relative);
+      //   for (const folder of fxfolders) {
+      //     ctx.layoutRow([-1], 0);
+      //     ctx.label(`${folder.id}. ${folder.name}`);
+      //     ctx.layoutRow([10, 20, 150, -1], 0);
+      //     for (const item of folder.items) {
+      //       const displayName = installedfx[item.name];
+      //       ctx.label("");
+      //       ctx.label(item.type.toString());
+      //       ctx.label(displayName || "");
+      //       ctx.label(item.name);
+      //     }
+      //   }
 
-      ctx.layoutBeginColumn();
-      {
-        const names: { name: string }[] = [];
-        for (let i = 0; i < 20; i++) {
-          const name = i.toString().repeat(i);
-          names.push({ name });
-        }
+      //   ctx.style.spacing = origSpacing;
+      // }
 
-        ctx.layoutRow([-1], 0);
-        const clickedBtn = wrappedButtons(ctx, names);
-        if (clickedBtn) {
-          log(clickedBtn);
-        }
-      }
-      ctx.layoutEndColumn();
-
-      // ctx.layoutRow([-1], -1);
-      ctx.layoutBeginColumn();
-      {
-        // set layout of the next element
-        ctx.layoutSetNext(rect(x, y, w, h), relative);
-
-        ctx.button("X", Option.AlignCenter);
-
-        ctx.button("another button");
-
-        // "peek" the next layout
-        {
-          const r = ctx.layoutNext();
-          ctx.layoutSetNext(r, false);
-          ctx.drawRect(r, rgba(255, 0, 0, 255));
-        }
-        ctx.text(
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-        );
-      }
-      ctx.layoutEndColumn();
+      processCooldown;
 
       ctx.endWindow();
     }
