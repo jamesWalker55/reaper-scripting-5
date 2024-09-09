@@ -2025,7 +2025,7 @@ declare namespace reaper {
    * MediaTrack _ = reaper.GetLastTouchedTrack()
    * ```
    */
-  function GetLastTouchedTrack(): MediaTrack;
+  function GetLastTouchedTrack(): MediaTrack | null;
 
   /**
    * ```

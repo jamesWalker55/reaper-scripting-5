@@ -25,6 +25,13 @@ export class Item {
     }
   }
 
+  activeTake() {
+    const take = reaper.GetActiveTake(this.obj);
+    if (!take) return null;
+
+    return new Take(take);
+  }
+
   isEmpty() {
     const count = reaper.GetMediaItemNumTakes(this.obj);
     return count === 0;
