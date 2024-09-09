@@ -3,14 +3,52 @@ AddCwdToImportPaths();
 import { inspect } from "reaper-api/inspect";
 import { loadFXFolders, loadInstalledFX } from "reaper-api/installedFx";
 import { errorHandler } from "reaper-api/utils";
-import { Context, createContext, microUILoop, Option } from "reaper-microui";
+import {
+  ColorId,
+  Context,
+  createContext,
+  microUILoop,
+  MouseButton,
+  Option,
+  rgba,
+} from "reaper-microui";
 import { getFXTarget } from "./detectTarget";
 import { getCategories } from "./categories";
 
-function wrappedButtons<T extends { name: string }>(
+function toggleButton(ctx: Context, label: string, state: boolean): boolean {
+  const id = ctx.getId(label);
+  const r = ctx.layoutNext();
+  ctx.updateControl(id, r, Option.AlignCenter);
+
+  // handle click
+  if (ctx.mousePressed === MouseButton.Left && ctx.focus === id) {
+    state = !state;
+  }
+
+  // draw
+  if (state) {
+    const originalButton = ctx.style.colors[ColorId.Button];
+    const originalButtonHover = ctx.style.colors[ColorId.ButtonHover];
+    const originalButtonFocus = ctx.style.colors[ColorId.ButtonFocus];
+    ctx.style.colors[ColorId.Button] = rgba(255, 0, 0, 255);
+    ctx.style.colors[ColorId.ButtonHover] = rgba(255, 255, 0, 255);
+    ctx.style.colors[ColorId.ButtonFocus] = rgba(0, 255, 255, 255);
+    ctx.drawControlFrame(id, r, ColorId.Button, 0);
+    ctx.style.colors[ColorId.Button] = originalButton;
+    ctx.style.colors[ColorId.ButtonHover] = originalButtonHover;
+    ctx.style.colors[ColorId.ButtonFocus] = originalButtonFocus;
+  } else {
+    ctx.drawControlFrame(id, r, ColorId.Button, 0);
+  }
+  ctx.drawControlText(label, r, ColorId.Text, 0);
+
+  return state;
+}
+
+function wrappedButtons<T extends { name: string; state: boolean }>(
   ctx: Context,
   buttons: T[],
-): T | null {
+): T[] {
   // "peek" the next layout
   const r = ctx.layoutNext();
   ctx.layoutSetNext(r, false);
@@ -19,7 +57,7 @@ function wrappedButtons<T extends { name: string }>(
   const availableWidth = r.w + ctx.style.spacing;
 
   // storage to determine which button is clicked
-  let clickedBtn: T | null = null;
+  let activeBtns: T[] = [];
 
   ctx.layoutBeginColumn();
   {
@@ -50,15 +88,16 @@ function wrappedButtons<T extends { name: string }>(
         0,
       );
       for (const btn of row) {
-        if (ctx.button(btn.btn.name)) {
-          clickedBtn = btn.btn;
+        btn.btn.state = toggleButton(ctx, btn.btn.name, btn.btn.state);
+        if (btn.btn.state) {
+          activeBtns.push(btn.btn);
         }
       }
     }
   }
   ctx.layoutEndColumn();
 
-  return clickedBtn;
+  return activeBtns;
 }
 
 function main() {
@@ -67,7 +106,12 @@ function main() {
   for (const fx of loadInstalledFX()) {
     installedfx[fx.ident] = fx.displayName;
   }
-  const categories = inspect(getCategories());
+  const categories = getCategories();
+  const temp = Object.values(categories.folders).map((x) => ({
+    ...x,
+    name: x.stem,
+    state: false,
+  }));
 
   gfx.init("My Window", 260, 450);
   gfx.setfont(1, "Arial", 12);
@@ -90,7 +134,10 @@ function main() {
       }
 
       ctx.layoutRow([-1], 0);
-      ctx.text(categories);
+
+      const activeButtons = wrappedButtons(ctx, temp);
+
+      ctx.text(inspect(activeButtons));
 
       // {
       //   const origSpacing = ctx.style.spacing;
