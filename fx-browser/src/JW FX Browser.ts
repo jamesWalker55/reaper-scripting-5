@@ -99,8 +99,8 @@ function generateIntermediateData(init: ReturnType<typeof loadInitialData>) {
 }
 
 function main() {
-  let init = loadInitialData();
-  let inter = generateIntermediateData(init);
+  let data = getCategories();
+  let activeIds: LuaSet<string> = new LuaSet();
 
   gfx.init("My Window", 260, 450);
   gfx.setfont(1, "Arial", 12);
@@ -132,52 +132,56 @@ function main() {
         // calculate available space for buttons
         const availableWidth = r.w + ctx.style.spacing;
 
-        ctx.layoutBeginColumn();
-        {
-          let remainingWidth = availableWidth;
+        for (const { category, folders } of data.categories) {
+          ctx.label(category);
 
-          // split the names into rows, based on the width of each button
-          type T = (typeof inter.folders)[number];
-          let rows: { folder: T; width: number }[][] = [[]];
-          for (const btn of inter.folders) {
-            const buttonWidth =
-              ctx.textWidth(ctx.style.font, btn.name) + ctx.style.padding * 2;
+          ctx.layoutBeginColumn();
+          {
+            let remainingWidth = availableWidth;
 
-            if (remainingWidth < buttonWidth + ctx.style.spacing) {
-              remainingWidth = availableWidth;
-              rows.push([]);
+            // split the names into rows, based on the width of each button
+            type T = (typeof folders)[number];
+            let rows: { folder: T; width: number }[][] = [[]];
+            for (const btn of folders) {
+              const buttonWidth =
+                ctx.textWidth(ctx.style.font, btn.name) + ctx.style.padding * 2;
+
+              if (remainingWidth < buttonWidth + ctx.style.spacing) {
+                remainingWidth = availableWidth;
+                rows.push([]);
+              }
+              remainingWidth -= buttonWidth + ctx.style.spacing;
+
+              const currentRow = rows[rows.length - 1];
+              currentRow.push({ folder: btn, width: buttonWidth });
             }
-            remainingWidth -= buttonWidth + ctx.style.spacing;
 
-            const currentRow = rows[rows.length - 1];
-            currentRow.push({ folder: btn, width: buttonWidth });
-          }
+            // layout each row
+            for (const row of rows) {
+              if (row.length === 0) continue;
 
-          // layout each row
-          for (const row of rows) {
-            if (row.length === 0) continue;
-
-            ctx.layoutRow(
-              row.map((x) => x.width),
-              0,
-            );
-            for (const btn of row) {
-              ctx.pushId(btn.folder.id);
-              const active = toggleButton(
-                ctx,
-                btn.folder.name,
-                inter.activeIds.has(btn.folder.id),
+              ctx.layoutRow(
+                row.map((x) => x.width),
+                0,
               );
-              ctx.popId();
-              if (active) {
-                inter.activeIds.add(btn.folder.id);
-              } else {
-                inter.activeIds.delete(btn.folder.id);
+              for (const btn of row) {
+                ctx.pushId(btn.folder.id);
+                const active = toggleButton(
+                  ctx,
+                  btn.folder.name,
+                  activeIds.has(btn.folder.id),
+                );
+                ctx.popId();
+                if (active) {
+                  activeIds.add(btn.folder.id);
+                } else {
+                  activeIds.delete(btn.folder.id);
+                }
               }
             }
           }
+          ctx.layoutEndColumn();
         }
-        ctx.layoutEndColumn();
       }
 
       // {

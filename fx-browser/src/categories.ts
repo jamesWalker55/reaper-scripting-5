@@ -8,8 +8,6 @@ import {
 const FOLDER_NAME_FAVOURITES = "Favourites";
 const DEFAULT_CATEGORY = "Default";
 
-type FolderInfo = { id: string; category: string; stem: string };
-
 type FxInfo = { ident: string; type: number };
 
 export function serialiseFx(fx: FxInfo): string {
@@ -32,10 +30,20 @@ export function deserialiseFx(text: string): FxInfo {
 }
 
 export function getCategories() {
+  // get initial data
   const fxfolders = loadFXFolders();
 
-  const folders: Record<string, FolderInfo> = {};
+  const fxNames: Record<string, string | undefined> = {};
+  for (const fx of loadInstalledFX()) {
+    fxNames[fx.ident] = fx.displayName;
+  }
+
+  // processing to group data
+  // record of category name to folders, names split into category/stem
+  const folderCategories: Record<string, { id: string; name: string }[]> = {};
+  // map from folder ID to FX set (serialised)
   const folderFx: Record<string, LuaSet<string>> = {};
+  // a set of favourited FX (serialised)
   const favouriteFx: LuaSet<string> = new LuaSet();
   for (const folder of fxfolders) {
     if (
@@ -59,11 +67,8 @@ export function getCategories() {
 
     if (category.length === 0) category = DEFAULT_CATEGORY;
 
-    folders[folder.id] = {
-      id: folder.id,
-      stem,
-      category,
-    };
+    folderCategories[category] ||= [];
+    folderCategories[category].push({ id: folder.id, name: stem });
 
     folderFx[folder.id] ||= new LuaSet();
     for (const fx of folder.items) {
@@ -71,13 +76,12 @@ export function getCategories() {
     }
   }
 
-  const fxNames: Record<string, string | undefined> = {};
-  for (const fx of loadInstalledFX()) {
-    fxNames[fx.ident] = fx.displayName;
-  }
-
   return {
-    folders,
+    // TODO: Need to sort this consistently
+    categories: Object.entries(folderCategories).map(([category, folders]) => ({
+      category,
+      folders,
+    })),
     folderFx,
     favouriteFx,
     fxNames,
