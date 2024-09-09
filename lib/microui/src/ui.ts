@@ -63,7 +63,7 @@ export enum ColorId {
 
 export type Color = { r: number; g: number; b: number; a: number };
 
-function rgba(r: number, g: number, b: number, a: number): Color {
+export function rgba(r: number, g: number, b: number, a: number): Color {
   return { r, g, b, a };
 }
 
@@ -142,7 +142,7 @@ export type Layout = {
   indent: number;
 };
 
-function Rect(x: number, y: number, w: number, h: number): Rect {
+export function rect(x: number, y: number, w: number, h: number): Rect {
   return { x, y, w, h };
 }
 
@@ -1119,7 +1119,7 @@ export class Context {
 
     this.drawIcon(
       expanded ? IconId.Expanded : IconId.Collapsed,
-      Rect(r.x, r.y, r.h, r.h),
+      rect(r.x, r.y, r.h, r.h),
       this.style.colors[ColorId.Text],
     );
     r.x += r.h - this.style.padding;
@@ -1166,7 +1166,7 @@ export class Context {
     // set as hover root so popup isn't closed in begin_window_ex()
     this.hoverRoot = this.nextHoverRoot = cnt;
     // position at mouse cursor, open and bring-to-front
-    cnt.rect = Rect(this.mousePos.x, this.mousePos.y, 1, 1);
+    cnt.rect = rect(this.mousePos.x, this.mousePos.y, 1, 1);
     cnt.open = true;
     this.bringToFront(cnt);
   }
@@ -1254,7 +1254,7 @@ export class Context {
       const texty = r.y + (r.h - texth) / 2;
       this.pushClipRect(r);
       this.drawText(font, buf, null, { x: textx, y: texty }, color);
-      this.drawRect(Rect(textx + textw, texty, 1, texth), color);
+      this.drawRect(rect(textx + textw, texty, 1, texth), color);
       this.popClipRect();
     } else {
       this.drawControlText(buf, r, ColorId.Text, opt);
@@ -1350,7 +1350,7 @@ export class Context {
     // draw thumb
     const w = this.style.thumbSize;
     const x = ((value - low) * (base.w - w)) / (high - low);
-    const thumb = Rect(base.x + x, base.y, w, base.h);
+    const thumb = rect(base.x + x, base.y, w, base.h);
     this.drawControlFrame(id, thumb, ColorId.Button, opt);
 
     // draw text
@@ -1379,7 +1379,7 @@ export class Context {
     let res: false | Response = false;
     const id = this.getId(label);
     const r = this.layoutNext();
-    const box = Rect(r.x, r.y, r.h, r.h);
+    const box = rect(r.x, r.y, r.h, r.h);
     this.updateControl(id, r, 0);
     /* handle click */
     if (this.mousePressed === MouseButton.Left && this.focus === id) {
@@ -1391,7 +1391,7 @@ export class Context {
     if (state) {
       this.drawIcon(IconId.Check, box, this.style.colors[ColorId.Text]);
     }
-    const r2 = Rect(r.x + box.w, r.y, r.w - box.w, r.h);
+    const r2 = rect(r.x + box.w, r.y, r.w - box.w, r.h);
     this.drawControlText(label, r2, ColorId.Text, 0);
     return state;
   }
@@ -1458,11 +1458,10 @@ export class Context {
   beginPanel(name: string, opt: Option = Option.None) {
     const id = this.getId(name);
     this.idStack.push(id);
-    assert(
-      this.lastId !== null,
-      "attempted to begin panel with no parent container",
-    );
-    const cnt = this.getContainer(this.lastId!, opt);
+    if (this.lastId === null)
+      error("attempted to begin panel with no parent container");
+
+    const cnt = this.getContainer(this.lastId, opt);
     if (cnt === null) error("panel must never be closed!");
 
     cnt.rect = this.layoutNext();
