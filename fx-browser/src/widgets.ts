@@ -46,29 +46,76 @@ export function toggleButton(
   return state;
 }
 
-export function fxRow(
+const asd = rgba(50, 50, 50, 1.0);
+const FX_ROW_COLOR_NORMAL = rgba(0, 0, 0, 0.0);
+const FX_ROW_COLOR_HOVER = rgba(70, 70, 70, 1.0);
+const FX_ROW_COLOR_FOCUS = rgba(90, 90, 90, 1.0);
+
+// /**
+//  * Used for vertical list layout
+//  */
+// export function fxBrowserV(
+//   ctx: Context,
+//   fxs: { uid: string; name: string; type: string; favourite: boolean }[],
+// ) {
+//   const r = ctx.layoutNext();
+
+//   // each row is `ctx.style.size.y` tall, with `ctx.style.spacing` between each one
+//   let maxRows =
+//     (r.h + ctx.style.spacing) / (ctx.style.size.y + ctx.style.spacing);
+//   maxRows = Math.max(maxRows, 1.0);
+//   maxRows = Math.floor(maxRows);
+// }
+
+/**
+ * Used for vertical list layout
+ */
+export function fxBrowserV(
   ctx: Context,
-  uid: string,
-  name: string,
-  type: string,
-  favourite: boolean,
+  fxs: { uid: string; name: string; type: string; favourite: boolean }[],
+) {
+  ctx.beginPanel("fxlist");
+
+  ctx.layoutRow([-1], 0);
+
+  const origSpacing = ctx.style.spacing;
+  ctx.style.spacing = 0;
+
+  for (const fx of fxs) {
+    fxBrowserVRow(ctx, fx);
+  }
+
+  ctx.style.spacing = origSpacing;
+
+  ctx.endPanel();
+}
+
+/**
+ * Used for vertical list layout
+ */
+export function fxBrowserVRow(
+  ctx: Context,
+  fx: { uid: string; name: string; type: string; favourite: boolean },
 ) {
   // mouse interaction logic
-  const id = ctx.getId(uid);
+  const id = ctx.getId(fx.uid);
   const r = ctx.layoutNext();
   ctx.updateControl(id, r, 0);
+
+  // handle click
+  const clicked = ctx.mousePressed === MouseButton.Left && ctx.focus === id;
 
   // draw the background
   {
     if (ctx.focus === id) {
       // focused
-      ctx.drawRect(r, ctx.style.colors[ColorId.BaseFocus]);
+      ctx.drawRect(r, FX_ROW_COLOR_FOCUS);
     } else if (ctx.hover === id) {
       // hovered
-      ctx.drawRect(r, ctx.style.colors[ColorId.BaseHover]);
+      ctx.drawRect(r, FX_ROW_COLOR_HOVER);
     } else {
       // normal
-      ctx.drawRect(r, ctx.style.colors[ColorId.Base]);
+      ctx.drawRect(r, FX_ROW_COLOR_NORMAL);
     }
   }
 
@@ -79,7 +126,7 @@ export function fxRow(
   const favouriteX = r.x + ctx.style.padding;
   const favouriteWidth = ctx.textWidth(ctx.style.font, "★");
 
-  if (favourite) {
+  if (fx.favourite) {
     ctx.drawText(
       ctx.style.font,
       "★",
@@ -90,14 +137,14 @@ export function fxRow(
   }
 
   // generate text for the FX type
-  const typeWidth = ctx.textWidth(ctx.style.font, type);
+  const typeWidth = ctx.textWidth(ctx.style.font, fx.type);
   const typeX = r.x + r.w - ctx.style.padding - typeWidth;
 
   // draw the fx type
   {
     ctx.drawText(
       ctx.style.font,
-      type,
+      fx.type,
       null,
       vec2(typeX, textY),
       ctx.style.colors[ColorId.Text],
@@ -118,11 +165,13 @@ export function fxRow(
     ctx.pushClipRect(rect(x, r.y, width, r.h));
     ctx.drawText(
       ctx.style.font,
-      name,
+      fx.name,
       null,
       vec2(x, textY),
       ctx.style.colors[ColorId.Text],
     );
     ctx.popClipRect();
   }
+
+  return clicked;
 }

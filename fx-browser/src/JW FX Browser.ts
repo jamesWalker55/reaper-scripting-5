@@ -19,7 +19,7 @@ import {
 } from "reaper-microui";
 import { getFXTarget } from "./detectTarget";
 import { FxInfo, getCategories } from "./categories";
-import { fxRow, toggleButton } from "./widgets";
+import { fxBrowserVRow, toggleButton } from "./widgets";
 
 function wrappedButtons<T extends { name: string; state: boolean }>(
   ctx: Context,
@@ -409,22 +409,21 @@ function main() {
           const fxInfo = manager.getFxInfo(uid);
           if (fxInfo.display) {
             // fx is installed and known
-            fxRow(
-              ctx,
+            fxBrowserVRow(ctx, {
               uid,
-              fxInfo.display.name,
-              fxInfo.display.prefix || FXFolderItemType[fxInfo.type] || "?",
+              name: fxInfo.display.name,
+              type:
+                fxInfo.display.prefix || FXFolderItemType[fxInfo.type] || "?",
               favourite,
-            );
+            });
           } else if (fxInfo.type === FXFolderItemType.FXChain) {
             // fx chain has no display value
-            fxRow(
-              ctx,
+            fxBrowserVRow(ctx, {
               uid,
-              fxInfo.ident,
-              FXFolderItemType[FXFolderItemType.FXChain],
+              name: fxInfo.ident,
+              type: FXFolderItemType[FXFolderItemType.FXChain],
               favourite,
-            );
+            });
           }
         }
 
