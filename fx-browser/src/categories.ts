@@ -40,7 +40,7 @@ export function getCategories() {
 
   // processing to group data
   // record of category name to folders, names split into category/stem
-  const folderCategories: Record<string, { id: string; name: string }[]> = {};
+  const categoriesMap: Record<string, { id: string; name: string }[]> = {};
   // map from folder ID to FX set (serialised)
   const folderFx: Record<string, LuaSet<string>> = {};
   // a set of favourited FX (serialised)
@@ -67,8 +67,8 @@ export function getCategories() {
 
     if (category.length === 0) category = DEFAULT_CATEGORY;
 
-    folderCategories[category] ||= [];
-    folderCategories[category].push({ id: folder.id, name: stem });
+    categoriesMap[category] ||= [];
+    categoriesMap[category].push({ id: folder.id, name: stem });
 
     folderFx[folder.id] ||= new LuaSet();
     for (const fx of folder.items) {
@@ -76,12 +76,33 @@ export function getCategories() {
     }
   }
 
-  return {
-    // TODO: Need to sort this consistently
-    categories: Object.entries(folderCategories).map(([category, folders]) => ({
+  const categories = Object.entries(categoriesMap)
+    .sort(([a, _], [b, _2]) => {
+      // always sort the default category last
+      if (a === DEFAULT_CATEGORY && b !== DEFAULT_CATEGORY) {
+        return 1;
+      } else if (a !== DEFAULT_CATEGORY && b === DEFAULT_CATEGORY) {
+        return -1;
+      } else if (a === DEFAULT_CATEGORY && b === DEFAULT_CATEGORY) {
+        return 0;
+      }
+
+      // sort alphabetically
+      if (a > b) {
+        return 1;
+      } else if (a < b) {
+        return -1;
+      } else {
+        return 0;
+      }
+    })
+    .map(([category, folders]) => ({
       category,
       folders,
-    })),
+    }));
+
+  return {
+    categories,
     folderFx,
     favouriteFx,
     fxNames,
