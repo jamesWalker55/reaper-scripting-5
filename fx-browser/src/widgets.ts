@@ -51,6 +51,8 @@ const FX_ROW_COLOR_NORMAL = rgba(0, 0, 0, 0.0);
 const FX_ROW_COLOR_HOVER = rgba(70, 70, 70, 1.0);
 const FX_ROW_COLOR_FOCUS = rgba(90, 90, 90, 1.0);
 
+const FX_ROW_TYPE_NAME_COLOR = rgba(140, 140, 140, 1.0);
+
 const FX_ROW_H_WIDTH = 300;
 
 /**
@@ -61,6 +63,11 @@ export function fxBrowserH(
   fxs: { uid: string; name: string; type: string; favourite: boolean }[],
 ) {
   ctx.beginPanel("fxlistv");
+
+  if (fxs.length === 0) {
+    ctx.endPanel();
+    return null;
+  }
 
   const origSpacing = ctx.style.spacing;
   ctx.style.spacing = 0;
@@ -195,7 +202,7 @@ function fxBrowserHRow(
       fx.type,
       null,
       vec2(typeX, textY),
-      ctx.style.colors[ColorId.Text],
+      FX_ROW_TYPE_NAME_COLOR,
     );
   }
 
@@ -288,7 +295,7 @@ export function fxBrowserVRow(
       fx.type,
       null,
       vec2(typeX, textY),
-      ctx.style.colors[ColorId.Text],
+      FX_ROW_TYPE_NAME_COLOR,
     );
   }
 
