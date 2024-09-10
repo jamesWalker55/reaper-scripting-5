@@ -9,7 +9,7 @@ import {
 import { errorHandler, log } from "reaper-api/utils";
 import {
   ColorId,
-  Context,
+  ReaperContext as Context,
   createContext,
   microUILoop,
   MouseButton,
@@ -216,6 +216,7 @@ function main() {
   gfx.setfont(1, "Arial", 12);
 
   const ctx = createContext();
+  ctx.style.font = 1;
 
   microUILoop(ctx, () => {
     if (

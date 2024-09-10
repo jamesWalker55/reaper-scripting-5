@@ -76,9 +76,7 @@ export enum Response {
 declare const IdSymbol: unique symbol;
 export type Id = NewType<number, typeof IdSymbol>;
 
-export type Font = any;
-
-export type Style = {
+export type Style<Font> = {
   font: Font;
   size: Vec2;
   padding: number;
@@ -90,32 +88,34 @@ export type Style = {
   colors: Record<ColorId, Color>;
 };
 
-export const DEFAULT_STYLE: Style = {
-  font: null,
-  size: { x: 68, y: 10 },
-  padding: 5,
-  spacing: 4,
-  indent: 24,
-  titleHeight: 24,
-  scrollbarSize: 12,
-  thumbSize: 8,
-  colors: {
-    [ColorId.Text]: rgba(230, 230, 230, 255),
-    [ColorId.Border]: rgba(25, 25, 25, 255),
-    [ColorId.WindowBG]: rgba(50, 50, 50, 255),
-    [ColorId.TitleBG]: rgba(25, 25, 25, 255),
-    [ColorId.TitleText]: rgba(240, 240, 240, 255),
-    [ColorId.PanelBG]: rgba(0, 0, 0, 0),
-    [ColorId.Button]: rgba(75, 75, 75, 255),
-    [ColorId.ButtonHover]: rgba(95, 95, 95, 255),
-    [ColorId.ButtonFocus]: rgba(115, 115, 115, 255),
-    [ColorId.Base]: rgba(30, 30, 30, 255),
-    [ColorId.BaseHover]: rgba(35, 35, 35, 255),
-    [ColorId.BaseFocus]: rgba(40, 40, 40, 255),
-    [ColorId.ScrollBase]: rgba(43, 43, 43, 255),
-    [ColorId.ScrollThumb]: rgba(30, 30, 30, 255),
-  },
-};
+export function createDefaultStyle<T>(font: T): Style<T> {
+  return {
+    font: font,
+    size: { x: 68, y: 10 },
+    padding: 5,
+    spacing: 4,
+    indent: 24,
+    titleHeight: 24,
+    scrollbarSize: 12,
+    thumbSize: 8,
+    colors: {
+      [ColorId.Text]: rgba(230, 230, 230, 255),
+      [ColorId.Border]: rgba(25, 25, 25, 255),
+      [ColorId.WindowBG]: rgba(50, 50, 50, 255),
+      [ColorId.TitleBG]: rgba(25, 25, 25, 255),
+      [ColorId.TitleText]: rgba(240, 240, 240, 255),
+      [ColorId.PanelBG]: rgba(0, 0, 0, 0),
+      [ColorId.Button]: rgba(75, 75, 75, 255),
+      [ColorId.ButtonHover]: rgba(95, 95, 95, 255),
+      [ColorId.ButtonFocus]: rgba(115, 115, 115, 255),
+      [ColorId.Base]: rgba(30, 30, 30, 255),
+      [ColorId.BaseHover]: rgba(35, 35, 35, 255),
+      [ColorId.BaseFocus]: rgba(40, 40, 40, 255),
+      [ColorId.ScrollBase]: rgba(43, 43, 43, 255),
+      [ColorId.ScrollThumb]: rgba(30, 30, 30, 255),
+    },
+  };
+}
 
 export type Container = {
   headIdx: number | null;
@@ -203,7 +203,7 @@ export enum CommandType {
 type JumpCommand = { type: CommandType.Jump; dstIdx: number | null };
 type ClipCommand = { type: CommandType.Clip; rect: Rect };
 type RectCommand = { type: CommandType.Rect; rect: Rect; color: Color };
-type TextCommand = {
+type TextCommand<Font> = {
   type: CommandType.Text;
   font: Font;
   pos: Vec2;
@@ -217,26 +217,30 @@ type IconCommand = {
   color: Color;
 };
 
-type Command =
+type Command<Font> =
   | JumpCommand
   | ClipCommand
   | RectCommand
-  | TextCommand
+  | TextCommand<Font>
   | IconCommand;
 
-export type TextWidthFunc = (font: Font, str: string, len?: number) => number;
-export type TextHeightFunc = (font: Font) => number;
+export type TextWidthFunc<Font> = (
+  font: Font,
+  str: string,
+  len?: number,
+) => number;
+export type TextHeightFunc<Font> = (font: Font) => number;
 
 const MU_REAL_FMT = "%.3g";
 const MU_MAX_FMT = 127;
 const MU_SLIDER_FMT = "%.2f";
 
-export class Context {
+export class Context<Font> {
   /* callbacks */
-  public textWidth: TextWidthFunc;
-  public textHeight: TextHeightFunc;
+  public textWidth: TextWidthFunc<Font>;
+  public textHeight: TextHeightFunc<Font>;
   /* core state */
-  public style: Style;
+  public style: Style<Font>;
   public hover: Id | null;
   public focus: Id | null;
   public lastId: Id | null;
@@ -252,7 +256,7 @@ export class Context {
   public numberEdit: Id | null;
   public treeNodes: Record<Id, true | undefined>;
   /* stacks */
-  public commands: Command[];
+  public commands: Command<Font>[];
   public roots: Container[];
   public containerStack: Container[];
   public clipStack: Rect[];
@@ -271,9 +275,9 @@ export class Context {
   public _inputText: string;
 
   constructor(
-    textWidth: TextWidthFunc,
-    textHeight: TextHeightFunc,
-    style: Style = deepcopy(DEFAULT_STYLE),
+    textWidth: TextWidthFunc<Font>,
+    textHeight: TextHeightFunc<Font>,
+    style: Style<Font>,
   ) {
     this.textWidth = textWidth;
     this.textHeight = textHeight;
@@ -605,7 +609,13 @@ export class Context {
     if (len === null) {
       len = str.length;
     }
-    const cmd: TextCommand = { type: CommandType.Text, color, font, pos, str };
+    const cmd: TextCommand<Font> = {
+      type: CommandType.Text,
+      color,
+      font,
+      pos,
+      str,
+    };
     this.commands.push(cmd);
     /* reset clipping if it was set */
     if (clipped !== Clip.None) {

@@ -4,6 +4,7 @@ import {
   ColorId,
   CommandType,
   Context,
+  createDefaultStyle,
   IconId,
   Key,
   MouseButton,
@@ -14,258 +15,7 @@ import {
 
 export * from "./ui";
 
-// /**
-//  * Create a new MicroUI wrapper object.
-//  *
-//  * You must run gfx.init and gfx.setfont before calling this. E.g.:
-//  *
-//  *     gfx.init("My window", 260, 450);
-//  *     gfx.setfont(1, "Arial", 12);
-//  *
-//  * Note: This does not work with async / Promises, use `deferLoop` instead of `deferAsync`
-//  */
-// class MicroUI {
-//   /** The MicroUI context object */
-//   ctx: Context;
-//   /** State to keep track of keys that are currently down */
-//   downKeys: {
-//     // mouse
-//     left: boolean;
-//     middle: boolean;
-//     right: boolean;
-
-//     // keyboard
-//     shift: boolean;
-//     ctrl: boolean;
-//     alt: boolean;
-//     backspace: boolean;
-//     return: boolean;
-//   };
-//   /** State to keep track of keyboard keys that are currently down */
-//   downChars: string[];
-
-//   constructor() {
-//     this.ctx = new Context(
-//       (font, str, len) => {
-//         if (len !== undefined) {
-//           str = str.slice(0, len);
-//         }
-//         const [width, _] = gfx.measurestr(str);
-//         return width;
-//       },
-//       (font) => {
-//         return gfx.texth;
-//       },
-//     );
-//     this.downKeys = {
-//       // mouse
-//       left: false,
-//       middle: false,
-//       right: false,
-
-//       // keyboard
-//       shift: false,
-//       ctrl: false,
-//       alt: false,
-//       backspace: false,
-//       return: false,
-//     };
-//     this.downChars = [];
-//   }
-
-//   process(): boolean {
-//     // handle char input
-//     this.downKeys.backspace = false;
-//     this.downKeys.return = false;
-//     this.downChars.length = 0;
-//     while (true) {
-//       const char = gfx.getchar();
-//       // return false to stop looping
-//       if (char === -1) return false;
-//       if (char === 0) break;
-
-//       if (char === 8) {
-//         // 8 is backspace / ctrl+h
-//         this.downKeys.backspace = true;
-//         continue;
-//       } else if (char === 13) {
-//         // 13 is enter / ctrl+?
-//         this.downKeys.return = true;
-//         continue;
-//       }
-
-//       const isUnicode = char >>> 24 === 117; // 'u'
-//       if (isUnicode) {
-//         const unicodeChar = char & 0xffffff;
-//         this.downChars.push(utf8.char(unicodeChar));
-//         continue;
-//       }
-
-//       // not unicode, only allow normal ASCII characters
-//       if (0x20 <= char && char <= 0x7e) {
-//         this.downChars.push(utf8.char(char));
-//         continue;
-//       }
-
-//       // TODO: unhandled character combination, e.g. Ctrl+A
-//       // log(char, isUnicode);
-//     }
-
-//     this.ctx.inputScroll(gfx.mouse_hwheel * 0.2, -gfx.mouse_wheel * 0.2);
-//     gfx.mouse_wheel = 0;
-//     gfx.mouse_hwheel = 0;
-
-//     this.ctx.inputMouseMove(gfx.mouse_x, gfx.mouse_y);
-
-//     this.downKeys.left = (gfx.mouse_cap & MouseCap.LeftMouse) !== 0;
-//     this.downKeys.middle = (gfx.mouse_cap & MouseCap.MiddleMouse) !== 0;
-//     this.downKeys.right = (gfx.mouse_cap & MouseCap.RightMouse) !== 0;
-//     this.downKeys.ctrl = (gfx.mouse_cap & MouseCap.CommandKey) !== 0;
-//     this.downKeys.alt = (gfx.mouse_cap & MouseCap.OptionKey) !== 0;
-//     this.downKeys.shift = (gfx.mouse_cap & MouseCap.ShiftKey) !== 0;
-//     this.ctx.inputMouseContinuous(
-//       (this.downKeys.left ? MouseButton.Left : 0) |
-//         (this.downKeys.middle ? MouseButton.Middle : 0) |
-//         (this.downKeys.right ? MouseButton.Right : 0),
-//     );
-//     this.ctx.inputKeyContinuous(
-//       (this.downKeys.alt ? Key.Alt : 0) |
-//         (this.downKeys.backspace ? Key.Backspace : 0) |
-//         (this.downKeys.ctrl ? Key.Ctrl : 0) |
-//         (this.downKeys.return ? Key.Return : 0) |
-//         (this.downKeys.shift ? Key.Shift : 0),
-//     );
-
-//     this.ctx.inputText(this.downChars.join(""));
-
-//     return true;
-//   }
-
-//   update() {
-//     // draw frame
-//     let currentClip: Rect | null = null;
-//     for (const cmd of this.ctx.iterCommands()) {
-//       switch (cmd.type) {
-//         case CommandType.Clip: {
-//           currentClip = cmd.rect;
-//           break;
-//         }
-//         case CommandType.Rect: {
-//           // set color
-//           gfx.r = cmd.color.r / 255;
-//           gfx.g = cmd.color.g / 255;
-//           gfx.b = cmd.color.b / 255;
-//           gfx.a = cmd.color.a / 255;
-
-//           gfx.rect(cmd.rect.x, cmd.rect.y, cmd.rect.w, cmd.rect.h);
-//           break;
-//         }
-//         case CommandType.Text: {
-//           // set color
-//           gfx.r = cmd.color.r / 255;
-//           gfx.g = cmd.color.g / 255;
-//           gfx.b = cmd.color.b / 255;
-//           gfx.a = cmd.color.a / 255;
-
-//           gfx.x = cmd.pos.x;
-//           gfx.y = cmd.pos.y;
-
-//           if (currentClip) {
-//             const [width, height] = gfx.measurestr(cmd.str);
-//             const clipLeft = cmd.pos.x < currentClip.x;
-//             const clipRight =
-//               cmd.pos.x + width >= currentClip.x + currentClip.w;
-//             const clipTop = cmd.pos.y < currentClip.y;
-//             const clipBottom =
-//               cmd.pos.y + height < currentClip.y + currentClip.h;
-
-//             if (!clipLeft && !clipRight && !clipTop && !clipBottom) {
-//               gfx.drawstr(cmd.str);
-//             } else if (!clipLeft && !clipTop) {
-//               // clipping right or bottom only, not left or top
-//               gfx.drawstr(
-//                 cmd.str,
-//                 0,
-//                 currentClip.x + currentClip.w,
-//                 currentClip.y + currentClip.h,
-//               );
-//             } else {
-//               // TODO: clipping top or left (and maybe also right and bottom)
-//               // log("TODO: Clip text top/bottom");
-//               gfx.drawstr(
-//                 cmd.str,
-//                 0,
-//                 currentClip.x + currentClip.w,
-//                 currentClip.y + currentClip.h,
-//               );
-//             }
-//           } else {
-//             gfx.drawstr(cmd.str);
-//           }
-//           break;
-//         }
-//         case CommandType.Icon: {
-//           // set color
-//           gfx.r = cmd.color.r / 255;
-//           gfx.g = cmd.color.g / 255;
-//           gfx.b = cmd.color.b / 255;
-//           gfx.a = cmd.color.a / 255;
-
-//           gfx.x = cmd.rect.x;
-//           gfx.y = cmd.rect.y;
-//           // TODO: Handle:
-//           // cmd.font
-//           // Clipping rect
-//           switch (cmd.id) {
-//             case IconId.Close: {
-//               gfx.drawstr(
-//                 "✕",
-//                 DrawStrFlags.CenterHorizontally | DrawStrFlags.CenterVertically,
-//                 cmd.rect.x + cmd.rect.w,
-//                 cmd.rect.y + cmd.rect.h,
-//               );
-//               break;
-//             }
-//             case IconId.Check: {
-//               gfx.drawstr(
-//                 "✓",
-//                 DrawStrFlags.CenterHorizontally | DrawStrFlags.CenterVertically,
-//                 cmd.rect.x + cmd.rect.w,
-//                 cmd.rect.y + cmd.rect.h,
-//               );
-//               break;
-//             }
-//             case IconId.Collapsed: {
-//               gfx.drawstr(
-//                 "▸",
-//                 DrawStrFlags.CenterHorizontally | DrawStrFlags.CenterVertically,
-//                 cmd.rect.x + cmd.rect.w,
-//                 cmd.rect.y + cmd.rect.h,
-//               );
-//               break;
-//             }
-//             case IconId.Expanded: {
-//               gfx.drawstr(
-//                 "▾",
-//                 DrawStrFlags.CenterHorizontally | DrawStrFlags.CenterVertically,
-//                 cmd.rect.x + cmd.rect.w,
-//                 cmd.rect.y + cmd.rect.h,
-//               );
-//               break;
-//             }
-//             default:
-//               error(`unhandled icon type: ${cmd}`);
-//           }
-//           break;
-//         }
-//         default:
-//           error(`unhandled command type: ${cmd}`);
-//       }
-//     }
-
-//     gfx.update();
-//   }
-// }
+export type ReaperContext = Context<number>;
 
 /**
  * Create a new microUI context.
@@ -277,18 +27,21 @@ export * from "./ui";
  *
  * Afterwards, use {@link microUILoop} to run the main GUI loop.
  */
-export function createContext() {
+export function createContext(): ReaperContext {
   return new Context(
     (font, str, len) => {
       if (len !== undefined) {
         str = str.slice(0, len);
       }
+      gfx.setfont(font);
       const [width, _] = gfx.measurestr(str);
       return width;
     },
     (font) => {
+      gfx.setfont(font);
       return gfx.texth;
     },
+    createDefaultStyle(0),
   );
 }
 
@@ -301,7 +54,7 @@ export function createContext() {
  * - {@link demoMultiWindow}
  */
 export function microUILoop(
-  ctx: Context,
+  ctx: ReaperContext,
   func: () => void,
   cleanup?: () => void,
 ) {
@@ -521,6 +274,7 @@ export function demoMultiWindow() {
   gfx.setfont(1, "Arial", 12);
 
   const ctx = createContext();
+  ctx.style.font = 1;
 
   const bgColor = [90, 95, 100];
   const checks = [true, false, true];
@@ -538,7 +292,7 @@ export function demoMultiWindow() {
     logWindowLogUpdated = true;
   }
 
-  function logWindow(ctx: Context) {
+  function logWindow(ctx: ReaperContext) {
     if (ctx.beginWindow("Log Window", { x: 350, y: 40, w: 300, h: 200 })) {
       /* output text panel */
       ctx.layoutRow([-1], -25);
@@ -573,7 +327,7 @@ export function demoMultiWindow() {
     }
   }
 
-  function testWindow(ctx: Context) {
+  function testWindow(ctx: ReaperContext) {
     if (ctx.beginWindow("Demo Window", { x: 40, y: 40, w: 300, h: 450 })) {
       const win = ctx.getCurrentContainer();
       win.rect.w = Math.max(win.rect.w, 240);
@@ -688,7 +442,7 @@ export function demoMultiWindow() {
   }
 
   function uint8Slider(
-    ctx: Context,
+    ctx: ReaperContext,
     name: string,
     value: number,
     low: number,
@@ -723,7 +477,7 @@ export function demoMultiWindow() {
     ["scrollthumb:", ColorId.ScrollThumb],
   ];
 
-  function styleWindow(ctx: Context) {
+  function styleWindow(ctx: ReaperContext) {
     if (ctx.beginWindow("Style Editor", { x: 350, y: 250, w: 300, h: 240 })) {
       const sw = ctx.getCurrentContainer().body.w * 0.14;
       ctx.layoutRow([80, sw, sw, sw, sw, -1], 0);
@@ -755,6 +509,7 @@ export function demoSingleWindow() {
   gfx.setfont(1, "Arial", 12);
 
   const ctx = createContext();
+  ctx.style.font = 1;
 
   const bgColor = [90, 95, 100];
   const checks = [true, false, true];
@@ -887,6 +642,7 @@ export function demoSimple() {
   gfx.setfont(1, "Arial", 12);
 
   const ctx = createContext();
+  ctx.style.font = 1;
 
   const checks = [true, false, true];
 

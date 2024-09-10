@@ -3,7 +3,7 @@ import { loadFXFolders, loadInstalledFX } from "reaper-api/installedFx";
 import { errorHandler } from "reaper-api/utils";
 import {
   ColorId,
-  Context,
+  ReaperContext as Context,
   createContext,
   microUILoop,
   MouseButton,
