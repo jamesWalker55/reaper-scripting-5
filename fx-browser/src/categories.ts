@@ -8,7 +8,7 @@ import {
 const FOLDER_NAME_FAVOURITES = "Favourites";
 const DEFAULT_CATEGORY = "Default";
 
-type FxInfo = { ident: string; type: number };
+export type FxInfo = { ident: string; type: number };
 
 export function serialiseFx(fx: FxInfo): string {
   return `${fx.type}\n${fx.ident}`;

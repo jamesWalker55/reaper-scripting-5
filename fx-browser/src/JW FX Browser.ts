@@ -1,7 +1,11 @@
 AddCwdToImportPaths();
 
 import { inspect } from "reaper-api/inspect";
-import { loadFXFolders, loadInstalledFX } from "reaper-api/installedFx";
+import {
+  FXFolderItemType,
+  loadFXFolders,
+  loadInstalledFX,
+} from "reaper-api/installedFx";
 import { errorHandler, log } from "reaper-api/utils";
 import {
   ColorId,
@@ -13,7 +17,12 @@ import {
   rgba,
 } from "reaper-microui";
 import { getFXTarget } from "./detectTarget";
-import { getCategories, serialiseFx } from "./categories";
+import {
+  deserialiseFx,
+  FxInfo,
+  getCategories,
+  serialiseFx,
+} from "./categories";
 import { toggleButton } from "./widgets";
 
 function wrappedButtons<T extends { name: string; state: boolean }>(
@@ -71,23 +80,144 @@ function wrappedButtons<T extends { name: string; state: boolean }>(
   return activeBtns;
 }
 
-function main() {
+function setIntersection<T extends AnyNotNil>(
+  mutable: LuaSet<T>,
+  other: LuaSet<T>,
+) {
+  for (const x of mutable) {
+    if (!other.has(x)) {
+      mutable.delete(x);
+    }
+  }
+}
+
+function setClone<T extends AnyNotNil>(value: LuaSet<T>): LuaSet<T> {
+  const result: LuaSet<T> = new LuaSet();
+  for (const x of value) {
+    result.add(x);
+  }
+  return result;
+}
+
+function Manager(
+  fxOrder: Record<FXFolderItemType, number> = {
+    [FXFolderItemType.VST]: 1,
+    [FXFolderItemType.CLAP]: 2,
+    [FXFolderItemType.JS]: 3,
+    [FXFolderItemType.FXChain]: 4,
+    [FXFolderItemType.Smart]: -99999,
+  },
+) {
   let data = getCategories();
   let activeIds: LuaSet<string> = new LuaSet();
-  let fxList = (() => {
-    const resultSet: LuaSet<string> = new LuaSet();
-    for (const [folderId, fxs] of Object.entries(data.folderFx)) {
-      for (const fx of fxs) {
-        resultSet.add(fx);
+
+  function generateFxList(fxOrder: Record<FXFolderItemType, number>) {
+    // collect all FX to be displayed
+    let resultSet: LuaSet<string> = new LuaSet();
+    if (activeIds.isEmpty()) {
+      // no filters active, return all FX in all folders
+      for (const [folderId, fxs] of Object.entries(data.folderFx)) {
+        for (const fx of fxs) {
+          resultSet.add(fx);
+        }
       }
+    } else {
+      // filters active, take the union of all folders
+      let working: LuaSet<string> | null = null;
+      for (const folderId of activeIds) {
+        if (!(folderId in data.folderFx)) {
+          continue;
+        }
+        const folderFxs = data.folderFx[folderId];
+        log(folderFxs);
+
+        if (working === null) {
+          // first loop, use folder contents as-is
+          working = setClone(folderFxs);
+        } else {
+          // other loop, take union / intersection
+          setIntersection(working, folderFxs);
+        }
+      }
+      resultSet = working || new LuaSet();
     }
-    const result: string[] = [];
+
+    // sort the fx
+    const result: (FxInfo & {
+      serialised: string;
+      displayName: string | undefined;
+    })[] = [];
     for (const x of resultSet) {
-      result.push(x);
+      const fx = deserialiseFx(x);
+      result.push({
+        ...fx,
+        serialised: x,
+        displayName: data.fxNames[fx.ident],
+      });
     }
-    result.sort();
+    result.sort((a, b) => {
+      const aFav = data.favouriteFx.has(a.serialised);
+      const bFav = data.favouriteFx.has(b.serialised);
+      // favourites always come first
+      if (aFav && !bFav) {
+        return -1;
+      } else if (!aFav && bFav) {
+        return 1;
+      }
+
+      // sort by plugin type
+      const aOrder =
+        a.type in fxOrder ? fxOrder[a.type as FXFolderItemType] : 0;
+      const bOrder =
+        b.type in fxOrder ? fxOrder[b.type as FXFolderItemType] : 0;
+      if (aOrder !== bOrder) return aOrder - bOrder;
+
+      // sort by display name
+      if (a.displayName && b.displayName) {
+        if (a.displayName < b.displayName) {
+          return -1;
+        } else if (a.displayName > b.displayName) {
+          return 1;
+        }
+      }
+
+      // sort by identifier name
+      if (a.ident < b.ident) {
+        return -1;
+      } else if (a.ident > b.ident) {
+        return 1;
+      }
+
+      return 0;
+    });
+
     return result;
-  })();
+  }
+
+  let fxlist = generateFxList(fxOrder);
+
+  return {
+    getFxlist() {
+      return fxlist;
+    },
+    setOrder(newOrder: typeof fxOrder) {
+      fxOrder = newOrder;
+      fxlist = generateFxList(fxOrder);
+    },
+    getActiveIdsMut() {
+      return activeIds;
+    },
+    regenerateFxList() {
+      fxlist = generateFxList(fxOrder);
+    },
+    getCategories() {
+      return data.categories;
+    },
+  };
+}
+
+function main() {
+  let manager = Manager();
 
   gfx.init("My Window", 260, 450);
   gfx.setfont(1, "Arial", 12);
@@ -121,7 +251,9 @@ function main() {
         // calculate available space for buttons
         const availableWidth = r.w + ctx.style.spacing;
 
-        for (const { category, folders } of data.categories) {
+        const categories = manager.getCategories();
+        const activeIds = manager.getActiveIdsMut();
+        for (const { category, folders } of categories) {
           ctx.label(category);
 
           ctx.layoutBeginColumn();
@@ -181,41 +313,19 @@ function main() {
 
       // if filter has changed, regenerate the fx list
       if (activeIdsChanged) {
-        fxList = (() => {
-          const resultSet: LuaSet<string> = new LuaSet();
-          for (const [folderId, fxs] of Object.entries(data.folderFx)) {
-            if (activeIds.has(folderId)) {
-              for (const fx of fxs) {
-                resultSet.add(fx);
-              }
-            }
-          }
-          const result: string[] = [];
-          for (const x of resultSet) {
-            result.push(x);
-          }
-          result.sort();
-          return result;
-        })();
+        manager.regenerateFxList();
       }
 
       ctx.layoutRow([-1], 0);
-      ctx.text(inspect(activeIds));
+      ctx.text(inspect(manager.getActiveIdsMut()));
       {
         const origSpacing = ctx.style.spacing;
-        ctx.style.spacing = -3;
+        ctx.style.spacing = -6;
 
-        for (const fx of fxList) {
+        for (const fx of manager.getFxlist()) {
           ctx.layoutRow([-1], 0);
-          ctx.text(inspect(fx));
-          // ctx.layoutRow([10, 20, 150, -1], 0);
-          // for (const item of folder.items) {
-          //   const displayName = installedfx[item.ident];
-          //   ctx.label("");
-          //   ctx.label(item.type.toString());
-          //   ctx.label(displayName || "");
-          //   ctx.label(item.ident);
-          // }
+          const fxTypeStr = FXFolderItemType[fx.type] || fx.type.toString();
+          ctx.text(`[${fxTypeStr}] ${fx.displayName || fx.ident}`);
         }
 
         ctx.style.spacing = origSpacing;
