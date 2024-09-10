@@ -212,7 +212,7 @@ function Manager(
 function main() {
   let manager = Manager();
 
-  gfx.init("My Window", 260, 450);
+  gfx.init("My Window", 500, 700);
   gfx.setfont(1, "Arial", 12);
 
   const ctx = createContext();
