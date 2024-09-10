@@ -64,7 +64,7 @@ export enum ColorId {
 export type Color = { r: number; g: number; b: number; a: number };
 
 export function rgba(r: number, g: number, b: number, a: number): Color {
-  return { r, g, b, a };
+  return { r, g, b, a: a * 255 };
 }
 
 export enum Response {
@@ -99,20 +99,20 @@ export function createDefaultStyle<T>(font: T): Style<T> {
     scrollbarSize: 12,
     thumbSize: 8,
     colors: {
-      [ColorId.Text]: rgba(230, 230, 230, 255),
-      [ColorId.Border]: rgba(25, 25, 25, 255),
-      [ColorId.WindowBG]: rgba(50, 50, 50, 255),
-      [ColorId.TitleBG]: rgba(25, 25, 25, 255),
-      [ColorId.TitleText]: rgba(240, 240, 240, 255),
-      [ColorId.PanelBG]: rgba(0, 0, 0, 0),
-      [ColorId.Button]: rgba(75, 75, 75, 255),
-      [ColorId.ButtonHover]: rgba(95, 95, 95, 255),
-      [ColorId.ButtonFocus]: rgba(115, 115, 115, 255),
-      [ColorId.Base]: rgba(30, 30, 30, 255),
-      [ColorId.BaseHover]: rgba(35, 35, 35, 255),
-      [ColorId.BaseFocus]: rgba(40, 40, 40, 255),
-      [ColorId.ScrollBase]: rgba(43, 43, 43, 255),
-      [ColorId.ScrollThumb]: rgba(30, 30, 30, 255),
+      [ColorId.Text]: rgba(230, 230, 230, 1.0),
+      [ColorId.Border]: rgba(25, 25, 25, 1.0),
+      [ColorId.WindowBG]: rgba(50, 50, 50, 1.0),
+      [ColorId.TitleBG]: rgba(25, 25, 25, 1.0),
+      [ColorId.TitleText]: rgba(240, 240, 240, 1.0),
+      [ColorId.PanelBG]: rgba(0, 0, 0, 0.0),
+      [ColorId.Button]: rgba(75, 75, 75, 1.0),
+      [ColorId.ButtonHover]: rgba(95, 95, 95, 1.0),
+      [ColorId.ButtonFocus]: rgba(115, 115, 115, 1.0),
+      [ColorId.Base]: rgba(30, 30, 30, 1.0),
+      [ColorId.BaseHover]: rgba(35, 35, 35, 1.0),
+      [ColorId.BaseFocus]: rgba(40, 40, 40, 1.0),
+      [ColorId.ScrollBase]: rgba(43, 43, 43, 1.0),
+      [ColorId.ScrollThumb]: rgba(30, 30, 30, 1.0),
     },
   };
 }

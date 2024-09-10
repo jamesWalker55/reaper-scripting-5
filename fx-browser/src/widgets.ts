@@ -8,9 +8,9 @@ import {
   vec2,
 } from "reaper-microui";
 
-const TOGGLE_BUTTON_COLOR_NORMAL = rgba(25, 25, 25, 255);
-const TOGGLE_BUTTON_COLOR_HOVER = rgba(45, 45, 45, 255);
-const TOGGLE_BUTTON_COLOR_FOCUS = rgba(115, 115, 115, 255);
+const TOGGLE_BUTTON_COLOR_NORMAL = rgba(25, 25, 25, 1.0);
+const TOGGLE_BUTTON_COLOR_HOVER = rgba(45, 45, 45, 1.0);
+const TOGGLE_BUTTON_COLOR_FOCUS = rgba(115, 115, 115, 1.0);
 
 export function toggleButton(
   ctx: Context,
