@@ -25661,6 +25661,11 @@ declare namespace gfx {
     flags?: string,
   ): void;
 
+  /**
+   * Resize image referenced by index 0..1024-1, width and height must be 0-8192. The contents of the image will be undefined after the resize.
+   */
+  function setimgdim(image: number, w: number, h: number): void;
+
   // Resize image referenced by index 0..1024-1, width and height must be 0-8192. The contents of the image will be undefined after the resize.
   // function setimgdim(image,w,h);
 

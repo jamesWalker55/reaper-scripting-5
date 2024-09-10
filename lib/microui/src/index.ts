@@ -1,4 +1,4 @@
-import { DrawStrFlags, MouseCap } from "reaper-api/ffi";
+import { DrawStrFlags, Mode, MouseCap } from "reaper-api/ffi";
 import { deferLoop, log } from "reaper-api/utils";
 import {
   ColorId,
@@ -176,7 +176,11 @@ export function microUILoop(
           gfx.setfont(cmd.font);
 
           if (currentClip) {
-            const [width, height] = gfx.measurestr(cmd.str);
+            let [width, height] = gfx.measurestr(cmd.str);
+            // increase by 1 pixel, because measurestr is inaccurate
+            width += 1;
+            height += 1;
+
             const clipLeft = cmd.pos.x < currentClip.x;
             const clipRight =
               cmd.pos.x + width >= currentClip.x + currentClip.w;
@@ -197,12 +201,84 @@ export function microUILoop(
             } else {
               // TODO: clipping top or left (and maybe also right and bottom)
               // log("TODO: Clip text top/bottom");
-              gfx.drawstr(
-                cmd.str,
+
+              // set buffer #0 resolution
+              gfx.setimgdim(0, width, height);
+
+              // clear the buffer to be transparent
+              {
+                // fill area with text color
+                gfx.r = cmd.color.r / 255;
+                gfx.g = cmd.color.g / 255;
+                gfx.b = cmd.color.b / 255;
+                gfx.a = 1.0;
+                gfx.a2 = 1.0;
+                gfx.mode = Mode.Default;
+                gfx.dest = 0; // buffer #0
+                gfx.rect(0, 0, width, height, true);
+
+                // subtract alpha to make it completely transparent
+                gfx.r = 0.0;
+                gfx.g = 0.0;
+                gfx.b = 0.0;
+                gfx.a = -1.0;
+                gfx.a2 = 1.0;
+                gfx.mode = Mode.AdditiveBlend;
+                gfx.dest = 0; // buffer #0
+                gfx.rect(0, 0, width, height, true);
+              }
+
+              // draw text at (0, 0)
+              {
+                // only affect the alpha channel
+                gfx.r = 0.0;
+                gfx.g = 0.0;
+                gfx.b = 0.0;
+                gfx.a = cmd.color.a / 255;
+                gfx.a2 = 1.0;
+                gfx.mode = Mode.AdditiveBlend;
+
+                gfx.x = 0;
+                gfx.y = 0;
+
+                gfx.dest = 0; // buffer #0
+                gfx.drawstr(
+                  cmd.str,
+                  0,
+                  // currentClip.x + currentClip.w,
+                  // currentClip.y + currentClip.h,
+                );
+              }
+
+              log(currentClip);
+
+              // blit the text to the main screen
+              gfx.x = 0.0;
+              gfx.y = 0.0;
+              gfx.a = 1.0;
+              gfx.a2 = 1.0;
+              gfx.dest = -1; // main screen
+              gfx.mode = Mode.Default;
+              gfx.blit(
                 0,
-                currentClip.x + currentClip.w,
-                currentClip.y + currentClip.h,
+                1.0,
+                0.0,
+                // src
+                currentClip.x - cmd.pos.x,
+                currentClip.y - cmd.pos.y,
+                currentClip.w,
+                currentClip.h,
+                // dst
+                currentClip.x,
+                currentClip.y,
+                // currentClip.w,
+                // currentClip.h,
               );
+
+              // reset drawing settings
+              gfx.dest = -1; // main screen
+              gfx.a2 = 1.0;
+              gfx.mode = Mode.Default;
             }
           } else {
             gfx.drawstr(cmd.str);
