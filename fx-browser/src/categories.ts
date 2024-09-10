@@ -84,9 +84,18 @@ export function getCategories() {
 
     // categorise the current folder
     let targetSet: LuaSet<string>;
+    let favouriteFolderId: string | null = null;
 
-    if (folder.name === FOLDER_NAME_FAVOURITES) {
+    if (folder.name === FOLDER_NAME_FAVOURITES && favouriteFolderId === null) {
       // 1. Favourites
+      // only handle the first "Favourites" folder, ignore all others
+      favouriteFolderId = folder.id;
+      categoriesMap[DEFAULT_CATEGORY] ||= [];
+      categoriesMap[DEFAULT_CATEGORY].push({
+        id: folder.id,
+        name: FOLDER_NAME_FAVOURITES,
+      });
+
       targetSet = favouriteFx;
     } else {
       // 2. Generic category
