@@ -262,8 +262,7 @@ export function microUILoop(
                   currentClip.w,
                   currentClip.h,
                   // dst
-                  // idk why it is offset by (-1, 0), let's undo that movement:
-                  currentClip.x + 1,
+                  currentClip.x,
                   currentClip.y,
                   // currentClip.w,
                   // currentClip.h,

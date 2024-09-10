@@ -50,8 +50,7 @@ export function fxRow(
   ctx: Context,
   uid: string,
   name: string,
-  type: number,
-  instrument: boolean,
+  type: string,
   favourite: boolean,
 ) {
   // mouse interaction logic
@@ -91,19 +90,14 @@ export function fxRow(
   }
 
   // generate text for the FX type
-  let typeName =
-    type in FXFolderItemType ? FXFolderItemType[type] : type.toString();
-  if (instrument) {
-    typeName = `${typeName}i`;
-  }
-  const typeWidth = ctx.textWidth(ctx.style.font, typeName);
+  const typeWidth = ctx.textWidth(ctx.style.font, type);
   const typeX = r.x + r.w - ctx.style.padding - typeWidth;
 
   // draw the fx type
   {
     ctx.drawText(
       ctx.style.font,
-      typeName,
+      type,
       null,
       vec2(typeX, textY),
       ctx.style.colors[ColorId.Text],

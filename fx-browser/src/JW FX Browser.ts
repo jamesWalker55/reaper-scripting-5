@@ -14,6 +14,7 @@ import {
   microUILoop,
   MouseButton,
   Option,
+  Response,
   rgba,
 } from "reaper-microui";
 import { getFXTarget } from "./detectTarget";
@@ -213,6 +214,8 @@ function Manager(
 
 function main() {
   let manager = Manager();
+  let query = "";
+  let firstLoop = true;
 
   gfx.init("My Window", 500, 700);
   gfx.setfont(1, "Arial", 12);
@@ -235,7 +238,57 @@ function main() {
         win.rect.h = gfx.h;
       }
 
+      // {
+      //   ctx.layoutRow([50, -1], 0);
+      //   ctx.label("indent");
+      //   ctx.style.indent = ctx.slider("ctx.style.indent", ctx.style.indent, 0, 50);
+      //   ctx.label("padding");
+      //   ctx.style.padding = ctx.slider("ctx.style.padding", ctx.style.padding, 0, 50);
+      //   ctx.label("scrollbarSize");
+      //   ctx.style.scrollbarSize = ctx.slider("ctx.style.scrollbarSize", ctx.style.scrollbarSize, 0, 50);
+      //   ctx.label("thumbSize");
+      //   ctx.style.thumbSize = ctx.slider("ctx.style.thumbSize", ctx.style.thumbSize, 0, 50);
+      //   ctx.label("spacing");
+      //   ctx.style.spacing = ctx.slider("ctx.style.spacing", ctx.style.spacing, 0, 50);
+      //   ctx.label("size.x");
+      //   ctx.style.size.x = ctx.slider("ctx.style.size.x", ctx.style.size.x, 0, 50);
+      //   ctx.label("size.y");
+      //   ctx.style.size.y = ctx.slider("ctx.style.size.y", ctx.style.size.y, 0, 50);
+      // }
+
+      // top title bar
+      {
+        const refreshWidth =
+          ctx.textWidth(ctx.style.font, "Refresh") +
+          ctx.style.padding * 2 +
+          ctx.style.spacing;
+        ctx.layoutRow([-refreshWidth, -1], 0);
+
+        ctx.label("Add FX to: Track 1");
+        ctx.button("Refresh");
+      }
+
+      // search bar
+      {
+        if (firstLoop) {
+          const id = ctx.getId("query");
+          ctx.setFocus(id);
+        }
+        ctx.layoutRow([-1], 0);
+        const [rv, newQuery] = ctx.textbox("query", query);
+        query = newQuery;
+        if (rv === Response.Change) {
+          ctx.label("query changed!");
+        }
+      }
+
       ctx.layoutRow([-1], 0);
+
+      // ctx.button("⟳");
+      // ctx.button("↻");
+      // ctx.button("🗘");
+      // ctx.button("✖");
+      // gfx.ima
 
       let activeIdsChanged = false;
 
@@ -346,35 +399,49 @@ function main() {
         manager.regenerateFxList();
       }
 
-      ctx.layoutRow([-1], 0);
-      ctx.text(inspect(manager.getActiveIdsMut()));
-
       ctx.layoutRow([-1], -1);
+      const origPadding = ctx.style.padding;
+      ctx.style.padding = 0;
       ctx.beginPanel("fxlist");
+      ctx.style.padding = origPadding;
       {
-        const origSpacing = ctx.style.size.y;
-        // ctx.style.size.y = 4;
+        ctx.layoutRow([-1], 0);
+
+        const origSpacing = ctx.style.spacing;
+        ctx.style.spacing = 0;
 
         for (const uid of manager.getFxlist()) {
-          ctx.layoutRow([-1], 0);
           const favourite = manager.inFavourites(uid);
           const fxInfo = manager.getFxInfo(uid);
-          fxRow(
-            ctx,
-            uid,
-            fxInfo.display?.name || fxInfo.ident,
-            fxInfo.type,
-            fxInfo.isInstrument || false,
-            favourite,
-          );
+          if (fxInfo.display) {
+            // fx is installed and known
+            fxRow(
+              ctx,
+              uid,
+              fxInfo.display.name,
+              fxInfo.display.prefix || FXFolderItemType[fxInfo.type] || "?",
+              favourite,
+            );
+          } else if (fxInfo.type === FXFolderItemType.FXChain) {
+            // fx chain has no display value
+            fxRow(
+              ctx,
+              uid,
+              fxInfo.ident,
+              FXFolderItemType[FXFolderItemType.FXChain],
+              favourite,
+            );
+          }
         }
 
-        ctx.style.size.y = origSpacing;
+        ctx.style.spacing = origSpacing;
       }
       ctx.endPanel();
 
       ctx.endWindow();
     }
+
+    if (firstLoop) firstLoop = false;
   });
 }
 
