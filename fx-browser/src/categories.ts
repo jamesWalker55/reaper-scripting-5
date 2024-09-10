@@ -29,6 +29,8 @@ export function parseFxUid(text: string): FxInfo {
   };
 }
 
+const CATEGORY_SEPARATOR = "/";
+
 export function getCategories() {
   // get initial data
   const fxfolders = loadFXFolders();
@@ -88,10 +90,12 @@ export function getCategories() {
       targetSet = favouriteFx;
     } else {
       // 2. Generic category
-      const splitPos = folder.name.indexOf("/");
+      const splitPos = folder.name.indexOf(CATEGORY_SEPARATOR);
 
-      let category = folder.name.substring(0, splitPos);
-      const stem = folder.name.substring(splitPos + 1, folder.name.length);
+      let category = folder.name.substring(0, splitPos).trim();
+      const stem = folder.name
+        .substring(splitPos + 1, folder.name.length)
+        .trim();
 
       if (category.length === 0) category = DEFAULT_CATEGORY;
 
