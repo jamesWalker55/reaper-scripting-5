@@ -33,9 +33,23 @@ export function getCategories() {
   // get initial data
   const fxfolders = loadFXFolders();
 
-  const fxNames: Record<string, string | undefined> = {};
+  const fxNames: Record<
+    string,
+    { prefix: string | null; name: string } | undefined
+  > = {};
   for (const fx of loadInstalledFX()) {
-    fxNames[fx.ident] = fx.displayName;
+    const colonIndex = fx.displayName.indexOf(": ");
+    if (colonIndex === -1) {
+      fxNames[fx.ident] = {
+        name: fx.displayName,
+        prefix: null,
+      };
+    } else {
+      fxNames[fx.ident] = {
+        name: fx.displayName.slice(colonIndex + 2, fx.displayName.length),
+        prefix: fx.displayName.slice(0, colonIndex),
+      };
+    }
   }
 
   // processing to group data

@@ -145,14 +145,23 @@ function Manager(
     // sort the fx
     const result: (FxInfo & {
       serialised: string;
-      displayName: string | undefined;
+      display: {
+        prefix: string | null;
+        name: string;
+      } | null;
     })[] = [];
     for (const x of resultSet) {
       const fx = deserialiseFx(x);
       result.push({
         ...fx,
         serialised: x,
-        displayName: data.fxNames[fx.ident],
+        display:
+          fx.ident in data.fxNames
+            ? {
+                prefix: data.fxNames[fx.ident]!.prefix,
+                name: data.fxNames[fx.ident]!.name,
+              }
+            : null,
       });
     }
     result.sort((a, b) => {
@@ -173,10 +182,10 @@ function Manager(
       if (aOrder !== bOrder) return aOrder - bOrder;
 
       // sort by display name
-      if (a.displayName && b.displayName) {
-        if (a.displayName < b.displayName) {
+      if (a.display?.name && b.display?.name) {
+        if (a.display.name < b.display.name) {
           return -1;
-        } else if (a.displayName > b.displayName) {
+        } else if (a.display.name > b.display.name) {
           return 1;
         }
       }
@@ -325,7 +334,11 @@ function main() {
         for (const fx of manager.getFxlist()) {
           ctx.layoutRow([-1], 0);
           const fxTypeStr = FXFolderItemType[fx.type] || fx.type.toString();
-          ctx.text(`[${fxTypeStr}] ${fx.displayName || fx.ident}`);
+          ctx.text(
+            `[${fxTypeStr}] [${fx.display?.prefix || "???"}] ${
+              fx.display?.name || fx.ident
+            }`,
+          );
         }
 
         ctx.style.spacing = origSpacing;
