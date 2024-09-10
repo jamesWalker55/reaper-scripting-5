@@ -163,12 +163,10 @@ function Manager(
       if (aOrder !== bOrder) return aOrder - bOrder;
 
       // sort by display name
-      if (aInfo.display?.name && bInfo.display?.name) {
-        if (aInfo.display.name < bInfo.display.name) {
-          return -1;
-        } else if (aInfo.display.name > bInfo.display.name) {
-          return 1;
-        }
+      if (aInfo.name < bInfo.name) {
+        return -1;
+      } else if (aInfo.name > bInfo.name) {
+        return 1;
       }
 
       // sort by identifier name
@@ -395,32 +393,18 @@ function main() {
 
       ctx.layoutRow([-1], -1);
 
-      const uid = fxBrowserH(
+      const uid = fxBrowserV(
         ctx,
-        manager
-          .getFxlist()
-          .map((uid) => {
-            const favourite = manager.inFavourites(uid);
-            const fxInfo = manager.getFxInfo(uid);
-            if (fxInfo.display) {
-              // fx is installed and known
-              return {
-                uid,
-                name: fxInfo.display.name,
-                type:
-                  fxInfo.display.prefix || FXFolderItemType[fxInfo.type] || "?",
-                favourite,
-              };
-            } else {
-              // not installed, skip this
-
-              // DO NOT RETURN NULL
-              // null causes Lua fuckery in lists
-
-              return 0;
-            }
-          })
-          .filter((x) => x !== 0),
+        manager.getFxlist().map((uid) => {
+          const favourite = manager.inFavourites(uid);
+          const fxInfo = manager.getFxInfo(uid);
+          return {
+            uid,
+            name: fxInfo.name,
+            type: fxInfo.prefix || FXFolderItemType[fxInfo.type] || "?",
+            favourite,
+          };
+        }),
       );
       if (uid) log("Clicked on", inspect(uid));
 

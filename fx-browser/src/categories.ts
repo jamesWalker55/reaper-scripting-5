@@ -69,9 +69,10 @@ export function getCategories() {
     string,
     {
       ident: string;
+      name: string;
       type: number;
+      prefix: string | null;
       isInstrument: boolean | null;
-      display: { name: string; prefix: string | null } | null;
     }
   > = {};
   // =======
@@ -120,22 +121,33 @@ export function getCategories() {
 
     for (const fx of folder.items) {
       const uid = fxUid(fx);
-      // add FX to the folder
-      targetSet.add(uid);
 
-      // FXChain aren't listed in loadInstalledFX()
-      // manually create a fake entry
-      const display: (typeof fxNames)[string] =
-        fx.type === FXFolderItemType.FXChain
-          ? { name: path.split(fx.ident)[1], prefix: "FXChain" }
-          : fxNames[fx.ident];
+      if (fx.type === FXFolderItemType.FXChain) {
+        // FXChain aren't listed in loadInstalledFX()
+        // manually create a fake entry
+        targetSet.add(uid);
+        fxMap[uid] = {
+          ident: fx.ident,
+          name: path.split(fx.ident)[1],
+          type: fx.type,
+          prefix: "FXChain",
+          isInstrument: false,
+        };
+        continue;
+      }
+
+      // check if the ident is found in Reaper
+      const display = fxNames[fx.ident];
+      if (!display) continue;
 
       // parse FX and add to FX map
+      targetSet.add(uid);
       fxMap[uid] = {
         ident: fx.ident,
+        name: display.name,
         type: fx.type,
-        isInstrument: display?.prefix?.endsWith("i") ?? null,
-        display: display || null,
+        prefix: display.prefix,
+        isInstrument: display.prefix?.endsWith("i") ?? null,
       };
     }
   }
