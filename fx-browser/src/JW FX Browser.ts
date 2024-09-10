@@ -21,61 +21,6 @@ import { getFXTarget } from "./detectTarget";
 import { FxInfo, getCategories } from "./categories";
 import { fxBrowserH, fxBrowserV, fxBrowserVRow, toggleButton } from "./widgets";
 
-function wrappedButtons<T extends { name: string; state: boolean }>(
-  ctx: Context,
-  buttons: T[],
-): T[] {
-  // "peek" the next layout
-  const r = ctx.layoutNext();
-  ctx.layoutSetNext(r, false);
-
-  // calculate available space for buttons
-  const availableWidth = r.w + ctx.style.spacing;
-
-  // storage to determine which button is clicked
-  let activeBtns: T[] = [];
-
-  ctx.layoutBeginColumn();
-  {
-    let remainingWidth = availableWidth;
-
-    // split the names into rows, based on the width of each button
-    let rows: { btn: T; width: number }[][] = [[]];
-    for (const btn of buttons) {
-      const buttonWidth =
-        ctx.textWidth(ctx.style.font, btn.name) + ctx.style.padding * 2;
-
-      if (remainingWidth < buttonWidth + ctx.style.spacing) {
-        remainingWidth = availableWidth;
-        rows.push([]);
-      }
-      remainingWidth -= buttonWidth + ctx.style.spacing;
-
-      const currentRow = rows[rows.length - 1];
-      currentRow.push({ btn, width: buttonWidth });
-    }
-
-    // layout each row
-    for (const row of rows) {
-      if (row.length === 0) continue;
-
-      ctx.layoutRow(
-        row.map((x) => x.width),
-        0,
-      );
-      for (const btn of row) {
-        btn.btn.state = toggleButton(ctx, btn.btn.name, btn.btn.state);
-        if (btn.btn.state) {
-          activeBtns.push(btn.btn);
-        }
-      }
-    }
-  }
-  ctx.layoutEndColumn();
-
-  return activeBtns;
-}
-
 function setIntersection<T extends AnyNotNil>(
   mutable: LuaSet<T>,
   other: LuaSet<T>,
