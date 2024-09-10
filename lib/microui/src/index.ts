@@ -199,10 +199,7 @@ export function microUILoop(
                 currentClip.y + currentClip.h,
               );
             } else {
-              // TODO: clipping top or left (and maybe also right and bottom)
-              // log("TODO: Clip text top/bottom");
-
-              // set buffer #0 resolution
+              // set buffer #0 resolution (must run this first)
               gfx.setimgdim(0, width, height);
 
               // clear the buffer to be transparent
@@ -243,46 +240,42 @@ export function microUILoop(
                 gfx.y = cmd.pos.y % 1;
 
                 gfx.dest = 0; // buffer #0
-                gfx.drawstr(
-                  cmd.str,
+                gfx.drawstr(cmd.str, 0);
+              }
+
+              // blit the text to the main screen
+              {
+                gfx.x = 0.0;
+                gfx.y = 0.0;
+                gfx.a = 1.0;
+                gfx.dest = -1; // main screen
+                gfx.a2 = 1.0;
+                gfx.mode = Mode.Default;
+                gfx.blit(
                   0,
-                  // currentClip.x + currentClip.w,
-                  // currentClip.y + currentClip.h,
+                  1.0,
+                  0.0,
+                  // src
+                  // account for fractional part of command position for correct rendering
+                  currentClip.x - cmd.pos.x + (cmd.pos.x % 1),
+                  currentClip.y - cmd.pos.y + (cmd.pos.y % 1),
+                  currentClip.w,
+                  currentClip.h,
+                  // dst
+                  // idk why it is offset by (-1, 0), let's undo that movement:
+                  currentClip.x + 1,
+                  currentClip.y,
+                  // currentClip.w,
+                  // currentClip.h,
                 );
               }
 
-              log(cmd);
-              log(currentClip);
-
-              // blit the text to the main screen
-              gfx.x = 0.0;
-              gfx.y = 0.0;
-              gfx.a = 1.0;
-              gfx.a2 = 1.0;
-              gfx.dest = -1; // main screen
-              gfx.mode = Mode.Default;
-              gfx.blit(
-                0,
-                1.0,
-                0.0,
-                // src
-                // account for fractional part of command position for correct rendering
-                currentClip.x - cmd.pos.x + cmd.pos.x % 1,
-                currentClip.y - cmd.pos.y + cmd.pos.y % 1,
-                currentClip.w,
-                currentClip.h,
-                // dst
-                // idk why it is offset by (-1, 0), let's undo that movement:
-                currentClip.x + 1,
-                currentClip.y,
-                // currentClip.w,
-                // currentClip.h,
-              );
-
               // reset drawing settings
-              gfx.dest = -1; // main screen
-              gfx.a2 = 1.0;
-              gfx.mode = Mode.Default;
+              {
+                gfx.dest = -1; // main screen
+                gfx.a2 = 1.0;
+                gfx.mode = Mode.Default;
+              }
             }
           } else {
             gfx.drawstr(cmd.str);
