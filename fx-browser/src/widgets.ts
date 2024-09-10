@@ -13,9 +13,9 @@ import {
 import { getFXTarget } from "./detectTarget";
 import { getCategories } from "./categories";
 
-const COLOR_NORMAL = rgba(255, 0, 0, 255);
-const COLOR_HOVER = rgba(255, 255, 0, 255);
-const COLOR_FOCUS = rgba(0, 255, 255, 255);
+const COLOR_NORMAL = rgba(25, 25, 25, 255);
+const COLOR_HOVER = rgba(45, 45, 45, 255);
+const COLOR_FOCUS = rgba(115, 115, 115, 255);
 
 export function toggleButton(
   ctx: Context,
