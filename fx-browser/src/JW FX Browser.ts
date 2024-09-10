@@ -2,7 +2,7 @@ AddCwdToImportPaths();
 
 import { inspect } from "reaper-api/inspect";
 import { loadFXFolders, loadInstalledFX } from "reaper-api/installedFx";
-import { errorHandler } from "reaper-api/utils";
+import { errorHandler, log } from "reaper-api/utils";
 import {
   ColorId,
   Context,
@@ -71,36 +71,23 @@ function wrappedButtons<T extends { name: string; state: boolean }>(
   return activeBtns;
 }
 
-function loadInitialData() {
-  const fxfolders = loadFXFolders();
-  const installedfx: Record<string, string | undefined> = {};
-  for (const fx of loadInstalledFX()) {
-    installedfx[fx.ident] = fx.displayName;
-  }
-  return {
-    fxfolders,
-    installedfx,
-  };
-}
-
-function generateIntermediateData(init: ReturnType<typeof loadInitialData>) {
-  const folders = init.fxfolders.map((x) => ({ id: x.id, name: x.name }));
-  const fxMap: Record<string, LuaSet<string>> = {};
-  for (const folder of init.fxfolders) {
-    for (const fx of folder.items) {
-      fxMap[folder.id] ||= new LuaSet();
-      fxMap[folder.id].add(serialiseFx(fx));
-    }
-  }
-
-  const activeIds: LuaSet<string> = new LuaSet();
-
-  return { folders, fxMap, activeIds };
-}
-
 function main() {
   let data = getCategories();
   let activeIds: LuaSet<string> = new LuaSet();
+  let fxList = (() => {
+    const resultSet: LuaSet<string> = new LuaSet();
+    for (const [folderId, fxs] of Object.entries(data.folderFx)) {
+      for (const fx of fxs) {
+        resultSet.add(fx);
+      }
+    }
+    const result: string[] = [];
+    for (const x of resultSet) {
+      result.push(x);
+    }
+    result.sort();
+    return result;
+  })();
 
   gfx.init("My Window", 260, 450);
   gfx.setfont(1, "Arial", 12);
@@ -123,6 +110,8 @@ function main() {
       }
 
       ctx.layoutRow([-1], 0);
+
+      let activeIdsChanged = false;
 
       {
         // "peek" the next layout
@@ -173,15 +162,63 @@ function main() {
                 );
                 ctx.popId();
                 if (active) {
-                  activeIds.add(btn.folder.id);
+                  if (!activeIds.has(btn.folder.id)) {
+                    activeIds.add(btn.folder.id);
+                    activeIdsChanged = true;
+                  }
                 } else {
-                  activeIds.delete(btn.folder.id);
+                  if (activeIds.has(btn.folder.id)) {
+                    activeIds.delete(btn.folder.id);
+                    activeIdsChanged = true;
+                  }
                 }
               }
             }
           }
           ctx.layoutEndColumn();
         }
+      }
+
+      // if filter has changed, regenerate the fx list
+      if (activeIdsChanged) {
+        fxList = (() => {
+          const resultSet: LuaSet<string> = new LuaSet();
+          for (const [folderId, fxs] of Object.entries(data.folderFx)) {
+            if (activeIds.has(folderId)) {
+              for (const fx of fxs) {
+                resultSet.add(fx);
+              }
+            }
+          }
+          const result: string[] = [];
+          for (const x of resultSet) {
+            result.push(x);
+          }
+          result.sort();
+          return result;
+        })();
+      }
+
+      ctx.layoutRow([-1], 0);
+      ctx.text(inspect(activeIds));
+      {
+        const origSpacing = ctx.style.spacing;
+        ctx.style.spacing = -3;
+
+        for (const fx of fxList) {
+          ctx.layoutRow([-1], 0);
+          ctx.text(inspect(fx));
+          // ctx.layoutRow([10, 20, 150, -1], 0);
+          // for (const item of folder.items) {
+          //   const displayName = installedfx[item.ident];
+          //   ctx.label("");
+          //   ctx.label(item.type.toString());
+          //   ctx.label(displayName || "");
+          //   ctx.label(item.ident);
+          // }
+        }
+
+        ctx.style.spacing = origSpacing;
       }
 
       // {
