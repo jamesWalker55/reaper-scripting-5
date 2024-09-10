@@ -186,7 +186,7 @@ export function microUILoop(
               cmd.pos.x + width >= currentClip.x + currentClip.w;
             const clipTop = cmd.pos.y < currentClip.y;
             const clipBottom =
-              cmd.pos.y + height < currentClip.y + currentClip.h;
+              cmd.pos.y + height >= currentClip.y + currentClip.h;
 
             if (!clipLeft && !clipRight && !clipTop && !clipBottom) {
               gfx.drawstr(cmd.str);
