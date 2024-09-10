@@ -68,6 +68,7 @@ export function getCategories() {
   const fxMap: Record<
     string,
     {
+      uid: string;
       ident: string;
       name: string;
       type: number;
@@ -127,6 +128,7 @@ export function getCategories() {
         // manually create a fake entry
         targetSet.add(uid);
         fxMap[uid] = {
+          uid,
           ident: fx.ident,
           name: path.split(fx.ident)[1],
           type: fx.type,
@@ -143,6 +145,7 @@ export function getCategories() {
       // parse FX and add to FX map
       targetSet.add(uid);
       fxMap[uid] = {
+        uid,
         ident: fx.ident,
         name: display.name,
         type: fx.type,

@@ -20,6 +20,7 @@ import {
 import { getFXTarget } from "./detectTarget";
 import { FxInfo, getCategories } from "./categories";
 import { fxBrowserH, fxBrowserV, fxBrowserVRow, toggleButton } from "./widgets";
+import { split } from "reaper-api/utilsLua";
 
 function setIntersection<T extends AnyNotNil>(
   mutable: LuaSet<T>,
@@ -51,6 +52,8 @@ function Manager(
 ) {
   let data = getCategories();
   let activeIds: LuaSet<string> = new LuaSet();
+  // query keywords must be lowercase
+  let query: string[] = [];
 
   function generateFxList(fxOrder: Record<FXFolderItemType, number>) {
     // collect all FX to be displayed
@@ -82,11 +85,27 @@ function Manager(
       resultSet = working || new LuaSet();
     }
 
-    // sort the fx
-    const result: string[] = [];
+    // collect uids into list
+    let result: string[] = [];
     for (const uid of resultSet) {
       result.push(uid);
     }
+
+    // filter the fx by the query
+    if (query.length > 0) {
+      result = result.filter((uid) => {
+        const fx = data.fxMap[uid];
+        const fxName = fx.name.toLowerCase();
+        for (const keyword of query) {
+          if (fxName.includes(keyword)) {
+            return true;
+          }
+        }
+        return false;
+      });
+    }
+
+    // sort fx
     result.sort((a, b) => {
       const aFav = data.favouriteFx.has(a);
       const bFav = data.favouriteFx.has(b);
@@ -141,6 +160,14 @@ function Manager(
     },
     setOrder(newOrder: typeof fxOrder) {
       fxOrder = newOrder;
+      fxlist = generateFxList(fxOrder);
+    },
+    setQuery(text: string) {
+      // split by whitespace
+      query = [];
+      for (const [rv] of string.gmatch(text, "%S+")) {
+        query.push(rv.toLowerCase());
+      }
       fxlist = generateFxList(fxOrder);
     },
     getActiveIdsMut() {
@@ -221,7 +248,7 @@ function main() {
         const [rv, newQuery] = ctx.textbox("query", query);
         query = newQuery;
         if (rv === Response.Change) {
-          ctx.label("query changed!");
+          manager.setQuery(query);
         }
       }
 
@@ -338,7 +365,7 @@ function main() {
 
       ctx.layoutRow([-1], -1);
 
-      const uid = fxBrowserV(
+      const uid = fxBrowserH(
         ctx,
         manager.getFxlist().map((uid) => {
           const favourite = manager.inFavourites(uid);
