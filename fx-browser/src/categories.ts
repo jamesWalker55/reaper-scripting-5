@@ -10,11 +10,11 @@ const DEFAULT_CATEGORY = "Default";
 
 export type FxInfo = { ident: string; type: number };
 
-export function serialiseFx(fx: FxInfo): string {
+export function fxUid(fx: FxInfo): string {
   return `${fx.type}\n${fx.ident}`;
 }
 
-export function deserialiseFx(text: string): FxInfo {
+export function parseFxUid(text: string): FxInfo {
   const nlIndex = text.indexOf("\n");
   if (nlIndex === -1)
     throw new Error(`failed to deserialise fx: ${inspect(text)}`);
@@ -53,13 +53,26 @@ export function getCategories() {
   }
 
   // processing to group data
+  // =======
   // record of category name to folders, names split into category/stem
   const categoriesMap: Record<string, { id: string; name: string }[]> = {};
   // map from folder ID to FX set (serialised)
   const folderFx: Record<string, LuaSet<string>> = {};
   // a set of favourited FX (serialised)
   const favouriteFx: LuaSet<string> = new LuaSet();
+  // map from stringified FX to its info
+  const fxMap: Record<
+    string,
+    {
+      ident: string;
+      type: number;
+      isInstrument: boolean | null;
+      display: { name: string; prefix: string | null } | null;
+    }
+  > = {};
+  // =======
   for (const folder of fxfolders) {
+    // skip smart folders
     if (
       folder.items.length === 1 &&
       folder.items[0].type === FXFolderItemType.Smart
@@ -67,26 +80,42 @@ export function getCategories() {
       continue;
     }
 
+    // categorise the current folder
+    let targetSet: LuaSet<string>;
+
     if (folder.name === FOLDER_NAME_FAVOURITES) {
-      for (const fx of folder.items) {
-        favouriteFx.add(serialiseFx(fx));
-      }
-      continue;
+      // 1. Favourites
+      targetSet = favouriteFx;
+    } else {
+      // 2. Generic category
+      const splitPos = folder.name.indexOf("/");
+
+      let category = folder.name.substring(0, splitPos);
+      const stem = folder.name.substring(splitPos + 1, folder.name.length);
+
+      if (category.length === 0) category = DEFAULT_CATEGORY;
+
+      categoriesMap[category] ||= [];
+      categoriesMap[category].push({ id: folder.id, name: stem });
+
+      folderFx[folder.id] ||= new LuaSet();
+      targetSet = folderFx[folder.id];
     }
 
-    const splitPos = folder.name.indexOf("/");
-
-    let category = folder.name.substring(0, splitPos);
-    const stem = folder.name.substring(splitPos + 1, folder.name.length);
-
-    if (category.length === 0) category = DEFAULT_CATEGORY;
-
-    categoriesMap[category] ||= [];
-    categoriesMap[category].push({ id: folder.id, name: stem });
-
-    folderFx[folder.id] ||= new LuaSet();
     for (const fx of folder.items) {
-      folderFx[folder.id].add(serialiseFx(fx));
+      const uid = fxUid(fx);
+      // add FX to the folder
+      targetSet.add(uid);
+
+      const display = fxNames[fx.ident];
+
+      // parse FX and add to FX map
+      fxMap[uid] = {
+        ident: fx.ident,
+        type: fx.type,
+        isInstrument: display?.prefix?.endsWith("i") ?? null,
+        display: display || null,
+      };
     }
   }
 
@@ -119,6 +148,6 @@ export function getCategories() {
     categories,
     folderFx,
     favouriteFx,
-    fxNames,
+    fxMap,
   };
 }

@@ -17,12 +17,7 @@ import {
   rgba,
 } from "reaper-microui";
 import { getFXTarget } from "./detectTarget";
-import {
-  deserialiseFx,
-  FxInfo,
-  getCategories,
-  serialiseFx,
-} from "./categories";
+import { FxInfo, getCategories } from "./categories";
 import { toggleButton } from "./widgets";
 
 function wrappedButtons<T extends { name: string; state: boolean }>(
@@ -143,30 +138,13 @@ function Manager(
     }
 
     // sort the fx
-    const result: (FxInfo & {
-      serialised: string;
-      display: {
-        prefix: string | null;
-        name: string;
-      } | null;
-    })[] = [];
-    for (const x of resultSet) {
-      const fx = deserialiseFx(x);
-      result.push({
-        ...fx,
-        serialised: x,
-        display:
-          fx.ident in data.fxNames
-            ? {
-                prefix: data.fxNames[fx.ident]!.prefix,
-                name: data.fxNames[fx.ident]!.name,
-              }
-            : null,
-      });
+    const result: string[] = [];
+    for (const uid of resultSet) {
+      result.push(uid);
     }
     result.sort((a, b) => {
-      const aFav = data.favouriteFx.has(a.serialised);
-      const bFav = data.favouriteFx.has(b.serialised);
+      const aFav = data.favouriteFx.has(a);
+      const bFav = data.favouriteFx.has(b);
       // favourites always come first
       if (aFav && !bFav) {
         return -1;
@@ -174,26 +152,29 @@ function Manager(
         return 1;
       }
 
+      const aInfo = data.fxMap[a];
+      const bInfo = data.fxMap[b];
+
       // sort by plugin type
       const aOrder =
-        a.type in fxOrder ? fxOrder[a.type as FXFolderItemType] : 0;
+        aInfo.type in fxOrder ? fxOrder[aInfo.type as FXFolderItemType] : 0;
       const bOrder =
-        b.type in fxOrder ? fxOrder[b.type as FXFolderItemType] : 0;
+        bInfo.type in fxOrder ? fxOrder[bInfo.type as FXFolderItemType] : 0;
       if (aOrder !== bOrder) return aOrder - bOrder;
 
       // sort by display name
-      if (a.display?.name && b.display?.name) {
-        if (a.display.name < b.display.name) {
+      if (aInfo.display?.name && bInfo.display?.name) {
+        if (aInfo.display.name < bInfo.display.name) {
           return -1;
-        } else if (a.display.name > b.display.name) {
+        } else if (aInfo.display.name > bInfo.display.name) {
           return 1;
         }
       }
 
       // sort by identifier name
-      if (a.ident < b.ident) {
+      if (aInfo.ident < bInfo.ident) {
         return -1;
-      } else if (a.ident > b.ident) {
+      } else if (aInfo.ident > bInfo.ident) {
         return 1;
       }
 
@@ -208,6 +189,9 @@ function Manager(
   return {
     getFxlist() {
       return fxlist;
+    },
+    getFxInfo(uid: string) {
+      return data.fxMap[uid];
     },
     setOrder(newOrder: typeof fxOrder) {
       fxOrder = newOrder;
@@ -327,42 +311,28 @@ function main() {
 
       ctx.layoutRow([-1], 0);
       ctx.text(inspect(manager.getActiveIdsMut()));
+
+      ctx.layoutRow([-1], -1);
+      ctx.beginPanel("fxlist");
       {
         const origSpacing = ctx.style.spacing;
         ctx.style.spacing = -6;
 
-        for (const fx of manager.getFxlist()) {
+        for (const uid of manager.getFxlist()) {
           ctx.layoutRow([-1], 0);
-          const fxTypeStr = FXFolderItemType[fx.type] || fx.type.toString();
+          const fxInfo = manager.getFxInfo(uid);
+          const fxTypeStr =
+            FXFolderItemType[fxInfo.type] || fxInfo.type.toString();
           ctx.text(
-            `[${fxTypeStr}] [${fx.display?.prefix || "???"}] ${
-              fx.display?.name || fx.ident
+            `[${fxTypeStr}] [${fxInfo.isInstrument}] ${
+              fxInfo.display?.name || fxInfo.ident
             }`,
           );
         }
 
         ctx.style.spacing = origSpacing;
       }
-
-      // {
-      //   const origSpacing = ctx.style.spacing;
-      //   ctx.style.spacing = -3;
-
-      //   for (const folder of fxfolders) {
-      //     ctx.layoutRow([-1], 0);
-      //     ctx.label(`${folder.id}. ${folder.name}`);
-      //     ctx.layoutRow([10, 20, 150, -1], 0);
-      //     for (const item of folder.items) {
-      //       const displayName = installedfx[item.ident];
-      //       ctx.label("");
-      //       ctx.label(item.type.toString());
-      //       ctx.label(displayName || "");
-      //       ctx.label(item.ident);
-      //     }
-      //   }
-
-      //   ctx.style.spacing = origSpacing;
-      // }
+      ctx.endPanel();
 
       ctx.endWindow();
     }
