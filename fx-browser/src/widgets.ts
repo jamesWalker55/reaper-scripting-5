@@ -1,6 +1,10 @@
 import { inspect } from "reaper-api/inspect";
-import { loadFXFolders, loadInstalledFX } from "reaper-api/installedFx";
-import { errorHandler } from "reaper-api/utils";
+import {
+  FXFolderItemType,
+  loadFXFolders,
+  loadInstalledFX,
+} from "reaper-api/installedFx";
+import { assertUnreachable, errorHandler } from "reaper-api/utils";
 import {
   ColorId,
   ReaperContext as Context,
@@ -8,7 +12,9 @@ import {
   microUILoop,
   MouseButton,
   Option,
+  rect,
   rgba,
+  vec2,
 } from "reaper-microui";
 import { getFXTarget } from "./detectTarget";
 import { getCategories } from "./categories";
@@ -24,7 +30,7 @@ export function toggleButton(
 ): boolean {
   const id = ctx.getId(label);
   const r = ctx.layoutNext();
-  ctx.updateControl(id, r, Option.AlignCenter);
+  ctx.updateControl(id, r, 0);
 
   // handle click
   if (ctx.mousePressed === MouseButton.Left && ctx.focus === id) {
@@ -49,4 +55,89 @@ export function toggleButton(
   ctx.drawControlText(label, r, ColorId.Text, 0);
 
   return state;
+}
+
+export function fxRow(
+  ctx: Context,
+  uid: string,
+  name: string,
+  type: number,
+  instrument: boolean,
+  favourite: boolean,
+) {
+  // mouse interaction logic
+  const id = ctx.getId(uid);
+  const r = ctx.layoutNext();
+  ctx.updateControl(id, r, 0);
+
+  // draw the background
+  {
+    if (ctx.focus === id) {
+      // focused
+    } else if (ctx.hover === id) {
+      // hovered
+    } else {
+      // normal
+    }
+    ctx.drawRect(r, rgba(100, 0, 0, 255));
+  }
+
+  // draw text
+  const textY = r.y + (r.h - ctx.textHeight(ctx.style.font)) / 2;
+
+  // draw the favourite icon
+  const favouriteX = r.x + ctx.style.padding;
+  const favouriteWidth = ctx.textWidth(ctx.style.font, "★");
+
+  if (favourite) {
+    ctx.drawText(
+      ctx.style.font,
+      "★",
+      null,
+      vec2(favouriteX, textY),
+      ctx.style.colors[ColorId.Text],
+    );
+  }
+
+  // generate text for the FX type
+  let typeName =
+    type in FXFolderItemType ? FXFolderItemType[type] : type.toString();
+  if (instrument) {
+    typeName = `${typeName}i`;
+  }
+  const typeWidth = ctx.textWidth(ctx.style.font, typeName);
+  const typeX = r.x + r.w - ctx.style.padding - typeWidth;
+
+  // draw the fx type
+  {
+    ctx.drawText(
+      ctx.style.font,
+      typeName,
+      null,
+      vec2(typeX, textY),
+      ctx.style.colors[ColorId.Text],
+    );
+  }
+
+  // draw the fx name text
+  {
+    const x = favouriteX + favouriteWidth + ctx.style.padding;
+    const width =
+      r.w -
+      ctx.style.padding -
+      favouriteWidth -
+      ctx.style.padding -
+      ctx.style.padding -
+      typeWidth -
+      ctx.style.padding;
+    ctx.pushClipRect(rect(x, r.y, width, r.h));
+    ctx.drawText(
+      ctx.style.font,
+      name,
+      null,
+      vec2(x, textY),
+      ctx.style.colors[ColorId.Text],
+    );
+    ctx.popClipRect();
+  }
 }

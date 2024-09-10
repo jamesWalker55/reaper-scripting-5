@@ -18,7 +18,7 @@ import {
 } from "reaper-microui";
 import { getFXTarget } from "./detectTarget";
 import { FxInfo, getCategories } from "./categories";
-import { toggleButton } from "./widgets";
+import { fxRow, toggleButton } from "./widgets";
 
 function wrappedButtons<T extends { name: string; state: boolean }>(
   ctx: Context,
@@ -353,23 +353,24 @@ function main() {
       ctx.layoutRow([-1], -1);
       ctx.beginPanel("fxlist");
       {
-        const origSpacing = ctx.style.spacing;
-        ctx.style.spacing = -6;
+        const origSpacing = ctx.style.size.y;
+        // ctx.style.size.y = 4;
 
         for (const uid of manager.getFxlist()) {
           ctx.layoutRow([-1], 0);
           const favourite = manager.inFavourites(uid);
           const fxInfo = manager.getFxInfo(uid);
-          const fxTypeStr =
-            FXFolderItemType[fxInfo.type] || fxInfo.type.toString();
-          ctx.text(
-            `${favourite ? "★" : ""} [${fxTypeStr}] [${fxInfo.isInstrument}] ${
-              fxInfo.display?.name || fxInfo.ident
-            }`,
+          fxRow(
+            ctx,
+            uid,
+            fxInfo.display?.name || fxInfo.ident,
+            fxInfo.type,
+            fxInfo.isInstrument || false,
+            favourite,
           );
         }
 
-        ctx.style.spacing = origSpacing;
+        ctx.style.size.y = origSpacing;
       }
       ctx.endPanel();
 

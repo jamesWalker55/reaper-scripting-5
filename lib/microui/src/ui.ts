@@ -142,6 +142,10 @@ export type Layout = {
   indent: number;
 };
 
+export function vec2(x: number, y: number): Vec2 {
+  return { x, y };
+}
+
 export function rect(x: number, y: number, w: number, h: number): Rect {
   return { x, y, w, h };
 }
