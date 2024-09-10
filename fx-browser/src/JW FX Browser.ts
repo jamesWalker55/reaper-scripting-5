@@ -124,7 +124,6 @@ function Manager(
           continue;
         }
         const folderFxs = data.folderFx[folderId];
-        log(folderFxs);
 
         if (working === null) {
           // first loop, use folder contents as-is

@@ -1,23 +1,12 @@
-import { inspect } from "reaper-api/inspect";
-import {
-  FXFolderItemType,
-  loadFXFolders,
-  loadInstalledFX,
-} from "reaper-api/installedFx";
-import { assertUnreachable, errorHandler } from "reaper-api/utils";
+import { FXFolderItemType } from "reaper-api/installedFx";
 import {
   ColorId,
   ReaperContext as Context,
-  createContext,
-  microUILoop,
   MouseButton,
-  Option,
   rect,
   rgba,
   vec2,
 } from "reaper-microui";
-import { getFXTarget } from "./detectTarget";
-import { getCategories } from "./categories";
 
 const COLOR_NORMAL = rgba(25, 25, 25, 255);
 const COLOR_HOVER = rgba(45, 45, 45, 255);
@@ -74,12 +63,14 @@ export function fxRow(
   {
     if (ctx.focus === id) {
       // focused
+      ctx.drawRect(r, ctx.style.colors[ColorId.BaseFocus]);
     } else if (ctx.hover === id) {
       // hovered
+      ctx.drawRect(r, ctx.style.colors[ColorId.BaseHover]);
     } else {
       // normal
+      ctx.drawRect(r, ctx.style.colors[ColorId.Base]);
     }
-    ctx.drawRect(r, rgba(100, 0, 0, 255));
   }
 
   // draw text
