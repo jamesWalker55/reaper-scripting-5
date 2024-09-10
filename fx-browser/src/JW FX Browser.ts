@@ -190,6 +190,9 @@ function Manager(
     getFxlist() {
       return fxlist;
     },
+    inFavourites(uid: string) {
+      return data.favouriteFx.has(uid);
+    },
     getFxInfo(uid: string) {
       return data.fxMap[uid];
     },
@@ -355,11 +358,12 @@ function main() {
 
         for (const uid of manager.getFxlist()) {
           ctx.layoutRow([-1], 0);
+          const favourite = manager.inFavourites(uid);
           const fxInfo = manager.getFxInfo(uid);
           const fxTypeStr =
             FXFolderItemType[fxInfo.type] || fxInfo.type.toString();
           ctx.text(
-            `[${fxTypeStr}] [${fxInfo.isInstrument}] ${
+            `${favourite ? "★" : ""} [${fxTypeStr}] [${fxInfo.isInstrument}] ${
               fxInfo.display?.name || fxInfo.ident
             }`,
           );
