@@ -284,12 +284,6 @@ function main() {
 
       ctx.layoutRow([-1], 0);
 
-      // ctx.button("⟳");
-      // ctx.button("↻");
-      // ctx.button("🗘");
-      // ctx.button("✖");
-      // gfx.ima
-
       let activeIdsChanged = false;
 
       {

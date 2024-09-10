@@ -8,9 +8,9 @@ import {
   vec2,
 } from "reaper-microui";
 
-const COLOR_NORMAL = rgba(25, 25, 25, 255);
-const COLOR_HOVER = rgba(45, 45, 45, 255);
-const COLOR_FOCUS = rgba(115, 115, 115, 255);
+const TOGGLE_BUTTON_COLOR_NORMAL = rgba(25, 25, 25, 255);
+const TOGGLE_BUTTON_COLOR_HOVER = rgba(45, 45, 45, 255);
+const TOGGLE_BUTTON_COLOR_FOCUS = rgba(115, 115, 115, 255);
 
 export function toggleButton(
   ctx: Context,
@@ -31,9 +31,9 @@ export function toggleButton(
     const originalButton = ctx.style.colors[ColorId.Button];
     const originalButtonHover = ctx.style.colors[ColorId.ButtonHover];
     const originalButtonFocus = ctx.style.colors[ColorId.ButtonFocus];
-    ctx.style.colors[ColorId.Button] = COLOR_NORMAL;
-    ctx.style.colors[ColorId.ButtonHover] = COLOR_HOVER;
-    ctx.style.colors[ColorId.ButtonFocus] = COLOR_FOCUS;
+    ctx.style.colors[ColorId.Button] = TOGGLE_BUTTON_COLOR_NORMAL;
+    ctx.style.colors[ColorId.ButtonHover] = TOGGLE_BUTTON_COLOR_HOVER;
+    ctx.style.colors[ColorId.ButtonFocus] = TOGGLE_BUTTON_COLOR_FOCUS;
     ctx.drawControlFrame(id, r, ColorId.Button, 0);
     ctx.style.colors[ColorId.Button] = originalButton;
     ctx.style.colors[ColorId.ButtonHover] = originalButtonHover;
