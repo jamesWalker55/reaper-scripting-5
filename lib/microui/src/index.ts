@@ -111,7 +111,12 @@ export function microUILoop(
         // log(char, isUnicode);
       }
 
-      ctx.inputScroll(gfx.mouse_hwheel * 0.2, -gfx.mouse_wheel * 0.2);
+      if (downKeys.shift) {
+        // treat mouse wheel as horizontal wheel
+        ctx.inputScroll(-gfx.mouse_wheel * 0.3, gfx.mouse_hwheel * 0.3);
+      } else {
+        ctx.inputScroll(gfx.mouse_hwheel * 0.3, -gfx.mouse_wheel * 0.3);
+      }
       gfx.mouse_wheel = 0;
       gfx.mouse_hwheel = 0;
 

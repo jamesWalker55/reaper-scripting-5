@@ -19,7 +19,7 @@ import {
 } from "reaper-microui";
 import { getFXTarget } from "./detectTarget";
 import { FxInfo, getCategories } from "./categories";
-import { fxBrowserV, fxBrowserVRow, toggleButton } from "./widgets";
+import { fxBrowserH, fxBrowserV, fxBrowserVRow, toggleButton } from "./widgets";
 
 function wrappedButtons<T extends { name: string; state: boolean }>(
   ctx: Context,
@@ -395,7 +395,7 @@ function main() {
 
       ctx.layoutRow([-1], -1);
 
-      const uid = fxBrowserV(
+      const uid = fxBrowserH(
         ctx,
         manager
           .getFxlist()
