@@ -55,7 +55,7 @@ export function createContext(): ReaperContext {
  */
 export function microUILoop(
   ctx: ReaperContext,
-  func: () => void,
+  func: (stop: () => void) => void,
   cleanup?: () => void,
 ) {
   const downKeys = {
@@ -141,7 +141,7 @@ export function microUILoop(
 
     // user-provided GUI and processing code
     ctx.begin();
-    func();
+    func(stop);
     ctx.end();
 
     // draw frame

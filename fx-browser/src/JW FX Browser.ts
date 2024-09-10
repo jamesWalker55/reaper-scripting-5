@@ -223,7 +223,7 @@ function main() {
   const ctx = createContext();
   ctx.style.font = 1;
 
-  microUILoop(ctx, () => {
+  microUILoop(ctx, (stop) => {
     if (
       ctx.beginWindow(
         "Demo Window",
