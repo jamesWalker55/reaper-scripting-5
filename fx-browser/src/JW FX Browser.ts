@@ -6,7 +6,7 @@ import {
   loadFXFolders,
   loadInstalledFX,
 } from "reaper-api/installedFx";
-import { errorHandler, log } from "reaper-api/utils";
+import { assertUnreachable, errorHandler, log } from "reaper-api/utils";
 import {
   ColorId,
   ReaperContext as Context,
@@ -248,15 +248,34 @@ function main() {
         const categories = manager.getCategories();
         const activeIds = manager.getActiveIdsMut();
         for (const { category, folders } of categories) {
-          ctx.label(category);
-
           ctx.layoutBeginColumn();
           {
             let remainingWidth = availableWidth;
 
             // split the names into rows, based on the width of each button
-            type T = (typeof folders)[number];
-            let rows: { folder: T; width: number }[][] = [[]];
+            type Folder = (typeof folders)[number];
+            type RowElement =
+              | { width: number; type: "button"; folder: Folder }
+              | { width: number; type: "label"; text: string };
+            let rows: RowElement[][] = [[]];
+            if (categories.length > 1) {
+              // only show category label if there are more than 1 categories
+              const labelWidth =
+                ctx.textWidth(ctx.style.font, category) + ctx.style.padding * 2;
+
+              if (remainingWidth < labelWidth + ctx.style.spacing) {
+                remainingWidth = availableWidth;
+                rows.push([]);
+              }
+              remainingWidth -= labelWidth + ctx.style.spacing;
+
+              const currentRow = rows[rows.length - 1];
+              currentRow.push({
+                type: "label",
+                width: labelWidth,
+                text: category,
+              });
+            }
             for (const btn of folders) {
               const buttonWidth =
                 ctx.textWidth(ctx.style.font, btn.name) + ctx.style.padding * 2;
@@ -268,7 +287,11 @@ function main() {
               remainingWidth -= buttonWidth + ctx.style.spacing;
 
               const currentRow = rows[rows.length - 1];
-              currentRow.push({ folder: btn, width: buttonWidth });
+              currentRow.push({
+                type: "button",
+                folder: btn,
+                width: buttonWidth,
+              });
             }
 
             // layout each row
@@ -279,24 +302,35 @@ function main() {
                 row.map((x) => x.width),
                 0,
               );
-              for (const btn of row) {
-                ctx.pushId(btn.folder.id);
-                const active = toggleButton(
-                  ctx,
-                  btn.folder.name,
-                  activeIds.has(btn.folder.id),
-                );
-                ctx.popId();
-                if (active) {
-                  if (!activeIds.has(btn.folder.id)) {
-                    activeIds.add(btn.folder.id);
-                    activeIdsChanged = true;
+              for (const element of row) {
+                switch (element.type) {
+                  case "button": {
+                    ctx.pushId(element.folder.id);
+                    const active = toggleButton(
+                      ctx,
+                      element.folder.name,
+                      activeIds.has(element.folder.id),
+                    );
+                    ctx.popId();
+                    if (active) {
+                      if (!activeIds.has(element.folder.id)) {
+                        activeIds.add(element.folder.id);
+                        activeIdsChanged = true;
+                      }
+                    } else {
+                      if (activeIds.has(element.folder.id)) {
+                        activeIds.delete(element.folder.id);
+                        activeIdsChanged = true;
+                      }
+                    }
+                    break;
                   }
-                } else {
-                  if (activeIds.has(btn.folder.id)) {
-                    activeIds.delete(btn.folder.id);
-                    activeIdsChanged = true;
+                  case "label": {
+                    ctx.label(category);
+                    break;
                   }
+                  default:
+                    assertUnreachable(element);
                 }
               }
             }
