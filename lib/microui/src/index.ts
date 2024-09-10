@@ -177,7 +177,7 @@ export function microUILoop(
 
           if (currentClip) {
             let [width, height] = gfx.measurestr(cmd.str);
-            // increase by 1 pixel, because measurestr is inaccurate
+            // increase by 1 pixel, because cmd position may be fractional
             width += 1;
             height += 1;
 
@@ -228,18 +228,19 @@ export function microUILoop(
                 gfx.rect(0, 0, width, height, true);
               }
 
-              // draw text at (0, 0)
+              // draw text at (0, 0) + cmd fractional offset
               {
                 // only affect the alpha channel
                 gfx.r = 0.0;
                 gfx.g = 0.0;
                 gfx.b = 0.0;
-                gfx.a = cmd.color.a / 255;
-                gfx.a2 = 1.0;
+                gfx.a = 1.0;
+                gfx.a2 = cmd.color.a / 255;
                 gfx.mode = Mode.AdditiveBlend;
 
-                gfx.x = 0;
-                gfx.y = 0;
+                // use fractional part of command position for correct rendering
+                gfx.x = cmd.pos.x % 1;
+                gfx.y = cmd.pos.y % 1;
 
                 gfx.dest = 0; // buffer #0
                 gfx.drawstr(
@@ -250,6 +251,7 @@ export function microUILoop(
                 );
               }
 
+              log(cmd);
               log(currentClip);
 
               // blit the text to the main screen
@@ -264,12 +266,14 @@ export function microUILoop(
                 1.0,
                 0.0,
                 // src
-                currentClip.x - cmd.pos.x,
-                currentClip.y - cmd.pos.y,
+                // account for fractional part of command position for correct rendering
+                currentClip.x - cmd.pos.x + cmd.pos.x % 1,
+                currentClip.y - cmd.pos.y + cmd.pos.y % 1,
                 currentClip.w,
                 currentClip.h,
                 // dst
-                currentClip.x,
+                // idk why it is offset by (-1, 0), let's undo that movement:
+                currentClip.x + 1,
                 currentClip.y,
                 // currentClip.w,
                 // currentClip.h,
