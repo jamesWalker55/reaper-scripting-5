@@ -4,6 +4,8 @@ import {
   loadFXFolders,
   loadInstalledFX,
 } from "reaper-api/installedFx";
+import * as path from "reaper-api/path/path";
+import { log } from "reaper-api/utils";
 
 const FOLDER_NAME_FAVOURITES = "Favourites";
 const DEFAULT_CATEGORY = "Default";
@@ -121,7 +123,12 @@ export function getCategories() {
       // add FX to the folder
       targetSet.add(uid);
 
-      const display = fxNames[fx.ident];
+      // FXChain aren't listed in loadInstalledFX()
+      // manually create a fake entry
+      const display: (typeof fxNames)[string] =
+        fx.type === FXFolderItemType.FXChain
+          ? { name: path.split(fx.ident)[1], prefix: "FXChain" }
+          : fxNames[fx.ident];
 
       // parse FX and add to FX map
       fxMap[uid] = {

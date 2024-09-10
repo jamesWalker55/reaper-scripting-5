@@ -411,20 +411,16 @@ function main() {
                   fxInfo.display.prefix || FXFolderItemType[fxInfo.type] || "?",
                 favourite,
               };
-            } else if (fxInfo.type === FXFolderItemType.FXChain) {
-              // fx chain has no display value
-              return {
-                uid,
-                name: fxInfo.ident,
-                type: FXFolderItemType[FXFolderItemType.FXChain],
-                favourite,
-              };
             } else {
               // not installed, skip this
-              return null;
+
+              // DO NOT RETURN NULL
+              // null causes Lua fuckery in lists
+
+              return 0;
             }
           })
-          .filter((x) => x !== null),
+          .filter((x) => x !== 0),
       );
       if (uid) log("Clicked on", inspect(uid));
 
