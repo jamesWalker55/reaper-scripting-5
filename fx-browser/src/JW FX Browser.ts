@@ -19,7 +19,7 @@ import {
 } from "reaper-microui";
 import { getFXTarget } from "./detectTarget";
 import { FxInfo, getCategories } from "./categories";
-import { fxBrowserVRow, toggleButton } from "./widgets";
+import { fxBrowserV, fxBrowserVRow, toggleButton } from "./widgets";
 
 function wrappedButtons<T extends { name: string; state: boolean }>(
   ctx: Context,
@@ -394,42 +394,39 @@ function main() {
       }
 
       ctx.layoutRow([-1], -1);
-      const origPadding = ctx.style.padding;
-      ctx.style.padding = 0;
-      ctx.beginPanel("fxlist");
-      ctx.style.padding = origPadding;
-      {
-        ctx.layoutRow([-1], 0);
 
-        const origSpacing = ctx.style.spacing;
-        ctx.style.spacing = 0;
-
-        for (const uid of manager.getFxlist()) {
-          const favourite = manager.inFavourites(uid);
-          const fxInfo = manager.getFxInfo(uid);
-          if (fxInfo.display) {
-            // fx is installed and known
-            fxBrowserVRow(ctx, {
-              uid,
-              name: fxInfo.display.name,
-              type:
-                fxInfo.display.prefix || FXFolderItemType[fxInfo.type] || "?",
-              favourite,
-            });
-          } else if (fxInfo.type === FXFolderItemType.FXChain) {
-            // fx chain has no display value
-            fxBrowserVRow(ctx, {
-              uid,
-              name: fxInfo.ident,
-              type: FXFolderItemType[FXFolderItemType.FXChain],
-              favourite,
-            });
-          }
-        }
-
-        ctx.style.spacing = origSpacing;
-      }
-      ctx.endPanel();
+      const uid = fxBrowserV(
+        ctx,
+        manager
+          .getFxlist()
+          .map((uid) => {
+            const favourite = manager.inFavourites(uid);
+            const fxInfo = manager.getFxInfo(uid);
+            if (fxInfo.display) {
+              // fx is installed and known
+              return {
+                uid,
+                name: fxInfo.display.name,
+                type:
+                  fxInfo.display.prefix || FXFolderItemType[fxInfo.type] || "?",
+                favourite,
+              };
+            } else if (fxInfo.type === FXFolderItemType.FXChain) {
+              // fx chain has no display value
+              return {
+                uid,
+                name: fxInfo.ident,
+                type: FXFolderItemType[FXFolderItemType.FXChain],
+                favourite,
+              };
+            } else {
+              // not installed, skip this
+              return null;
+            }
+          })
+          .filter((x) => x !== null),
+      );
+      if (uid) log("Clicked on", inspect(uid));
 
       ctx.endWindow();
     }

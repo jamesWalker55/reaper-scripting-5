@@ -81,13 +81,19 @@ export function fxBrowserV(
   const origSpacing = ctx.style.spacing;
   ctx.style.spacing = 0;
 
+  let clickedUid: string | null = null;
+
   for (const fx of fxs) {
-    fxBrowserVRow(ctx, fx);
+    if (fxBrowserVRow(ctx, fx)) {
+      clickedUid = fx.uid;
+    }
   }
 
   ctx.style.spacing = origSpacing;
 
   ctx.endPanel();
+
+  return clickedUid;
 }
 
 /**
