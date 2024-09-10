@@ -96,6 +96,7 @@ export function getCategories() {
         name: FOLDER_NAME_FAVOURITES,
       });
 
+      folderFx[folder.id] = favouriteFx;
       targetSet = favouriteFx;
     } else {
       // 2. Generic category
