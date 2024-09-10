@@ -172,6 +172,9 @@ export function microUILoop(
           gfx.x = cmd.pos.x;
           gfx.y = cmd.pos.y;
 
+          // set font
+          gfx.setfont(cmd.font);
+
           if (currentClip) {
             const [width, height] = gfx.measurestr(cmd.str);
             const clipLeft = cmd.pos.x < currentClip.x;
