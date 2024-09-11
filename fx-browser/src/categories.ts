@@ -61,6 +61,9 @@ export function getCategories() {
   > = {};
   // =======
   for (const folder of fxfolders) {
+    // skip empty folders
+    if (folder.items.length === 0) continue;
+
     // skip smart folders
     if (
       folder.items.length === 1 &&
