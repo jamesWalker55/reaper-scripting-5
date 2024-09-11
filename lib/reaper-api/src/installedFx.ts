@@ -114,6 +114,9 @@ export function loadInstalledFX() {
 export enum FXFolderItemType {
   JS = 2,
   VST = 3, // also VST3
+  ReWire = 4,
+  VideoProcessor = 6, // the "Video Processor" fx
+  Container = 8, // the "Container" fx
   CLAP = 7,
   FXChain = 1000,
   Smart = 0x100000, // smart folder
