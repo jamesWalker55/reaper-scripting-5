@@ -440,6 +440,11 @@ function main() {
         }
       }
 
+      // add some space
+      ctx.layoutRow([-1], 1);
+      ctx.layoutNext();
+
+      // filters
       ctx.layoutRow([-1], 0);
 
       {
@@ -478,6 +483,7 @@ function main() {
         }
       }
 
+      // fx browser
       ctx.layoutRow([-1], -1);
 
       const uid = verticalLayout

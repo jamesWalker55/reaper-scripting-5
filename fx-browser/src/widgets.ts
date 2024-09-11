@@ -7,6 +7,7 @@ import {
   IconId,
   Key,
   MouseButton,
+  Option,
   ReaperContext,
   Rect,
   rect,
@@ -542,7 +543,7 @@ export function fxBrowserH(
   ctx: Context,
   fxs: { uid: string; name: string; type: string; favourite: boolean }[],
 ) {
-  ctx.beginPanel("fxlistv");
+  ctx.beginPanel("fxlistv", Option.NoFrame);
 
   if (fxs.length === 0) {
     ctx.endPanel();
@@ -715,7 +716,7 @@ export function fxBrowserV(
   ctx: Context,
   fxs: { uid: string; name: string; type: string; favourite: boolean }[],
 ) {
-  ctx.beginPanel("fxlistv");
+  ctx.beginPanel("fxlistv", Option.NoFrame);
 
   ctx.layoutRow([-1], 0);
 
