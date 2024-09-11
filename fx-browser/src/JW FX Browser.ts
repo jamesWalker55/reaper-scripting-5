@@ -112,12 +112,12 @@ function Manager(
       const aInfo = data.fxMap[a];
       const bInfo = data.fxMap[b];
 
-      // sort by plugin type
-      const aOrder =
-        aInfo.type in fxOrder ? fxOrder[aInfo.type as FXFolderItemType] : 0;
-      const bOrder =
-        bInfo.type in fxOrder ? fxOrder[bInfo.type as FXFolderItemType] : 0;
-      if (aOrder !== bOrder) return aOrder - bOrder;
+      // // sort by plugin type
+      // const aOrder =
+      //   aInfo.type in fxOrder ? fxOrder[aInfo.type as FXFolderItemType] : 0;
+      // const bOrder =
+      //   bInfo.type in fxOrder ? fxOrder[bInfo.type as FXFolderItemType] : 0;
+      // if (aOrder !== bOrder) return aOrder - bOrder;
 
       // sort by display name
       const aName = aInfo.name.toLowerCase();
