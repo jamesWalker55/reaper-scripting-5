@@ -1,11 +1,9 @@
-import { inspect } from "reaper-api/inspect";
 import {
   FXFolderItemType,
   loadFXFolders,
   loadInstalledFX,
 } from "reaper-api/installedFx";
 import * as path from "reaper-api/path/path";
-import { log } from "reaper-api/utils";
 
 const FOLDER_NAME_FAVOURITES = "Favourites";
 const DEFAULT_CATEGORY = "Default";
@@ -14,21 +12,6 @@ export type FxInfo = { ident: string; type: number };
 
 export function fxUid(fx: FxInfo): string {
   return `${fx.type}\n${fx.ident}`;
-}
-
-export function parseFxUid(text: string): FxInfo {
-  const nlIndex = text.indexOf("\n");
-  if (nlIndex === -1)
-    throw new Error(`failed to deserialise fx: ${inspect(text)}`);
-
-  const type = tonumber(text.slice(0, nlIndex));
-  if (type === undefined)
-    throw new Error(`failed to deserialise fx: ${inspect(text)}`);
-
-  return {
-    type,
-    ident: text.slice(nlIndex + 1, text.length),
-  };
 }
 
 const CATEGORY_SEPARATOR = "/";
