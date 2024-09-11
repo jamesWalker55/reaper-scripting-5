@@ -158,6 +158,7 @@ async function main() {
     reaper.ShowConsoleMsg("");
     if (uncategorizedFxNames.length === 0) {
       log("All FX have been categorized! :)");
+      return;
     } else {
       for (const name of uncategorizedFxNames) {
         log(name);
