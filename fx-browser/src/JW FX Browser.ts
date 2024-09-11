@@ -6,7 +6,12 @@ import {
   loadFXFolders,
   loadInstalledFX,
 } from "reaper-api/installedFx";
-import { assertUnreachable, deferLoop, errorHandler, log } from "reaper-api/utils";
+import {
+  assertUnreachable,
+  deferLoop,
+  errorHandler,
+  log,
+} from "reaper-api/utils";
 import {
   ColorId,
   CommandType,
@@ -245,14 +250,13 @@ export function microUILoop(
         // log(char, isUnicode);
       }
 
-      if (downKeys.shift) {
-        // treat mouse wheel as horizontal wheel
-        ctx.inputScroll(-gfx.mouse_wheel * 0.3, gfx.mouse_hwheel * 0.3);
-      } else {
-        ctx.inputScroll(gfx.mouse_hwheel * 0.3, -gfx.mouse_wheel * 0.3);
+      {
+        const totalWheel = -gfx.mouse_wheel + gfx.mouse_hwheel;
+        const wheelCoeff = 0.4;
+        ctx.inputScroll(totalWheel * wheelCoeff, totalWheel * wheelCoeff);
+        gfx.mouse_wheel = 0;
+        gfx.mouse_hwheel = 0;
       }
-      gfx.mouse_wheel = 0;
-      gfx.mouse_hwheel = 0;
 
       ctx.inputMouseMove(gfx.mouse_x, gfx.mouse_y);
 
