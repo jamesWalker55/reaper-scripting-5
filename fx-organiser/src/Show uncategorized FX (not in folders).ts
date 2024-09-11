@@ -114,15 +114,10 @@ async function main() {
     const uncategorizedFxNames = [];
     for (const [uid, fx] of Object.entries(installedUid)) {
       if (uid in folderUids) continue;
-      if (fx.displayName.includes('"'))
-        throw new Error(
-          `FX name has a fucking double quote: ${fx.displayName}`,
-        );
 
       // log(fx.displayName)
       uncategorizedFxNames.push(fx.displayName);
     }
-
     uncategorizedFxNames.sort((a, b) => {
       a = a.toLowerCase();
       b = b.toLowerCase();
@@ -135,11 +130,35 @@ async function main() {
       }
     });
 
+    // // find FXChains in folders
+    // const fxchains = [];
+    // for (const [uid, fx] of Object.entries(folderUids)) {
+    //   if (fx.type !== FXFolderItemType.FXChain) continue;
+    //   if (uid in installedUid) continue;
+
+    //   fxchains.push(fx.ident);
+    // }
+    // fxchains.sort((a, b) => {
+    //   a = a.toLowerCase();
+    //   b = b.toLowerCase();
+    //   if (a > b) {
+    //     return 1;
+    //   } else if (a < b) {
+    //     return -1;
+    //   } else {
+    //     return 0;
+    //   }
+    // });
+
     // clear console
     reaper.ShowConsoleMsg("");
     for (const name of uncategorizedFxNames) {
       log(name);
     }
+    // log("\nFX chains:");
+    // for (const name of fxchains) {
+    //   log(name);
+    // }
 
     for (let i = 0; i < 10; i++) {
       await deferAsync();
