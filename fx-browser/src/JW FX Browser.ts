@@ -4,7 +4,12 @@ import { inspect } from "reaper-api/inspect";
 import { FXFolderItemType } from "reaper-api/installedFx";
 import { Take } from "reaper-api/item";
 import { Track } from "reaper-api/track";
-import { assertUnreachable, errorHandler, log } from "reaper-api/utils";
+import {
+  assertUnreachable,
+  ensureAPI,
+  errorHandler,
+  log,
+} from "reaper-api/utils";
 import { createContext, Option, Response } from "reaper-microui";
 import { getCategories } from "./categories";
 import { getFXTarget } from "./detectTarget";
@@ -185,6 +190,29 @@ function Manager(
   };
 }
 
+function getScreenViewport() {
+  ensureAPI("SWS Extensions", "JS_Window_GetViewportFromRect");
+
+  // get mouse position
+  const [mouseX, mouseY] = reaper.GetMousePosition();
+
+  // find the monitor where the mouse lies
+  const [left, top, right, bottom] = reaper.JS_Window_GetViewportFromRect(
+    mouseX,
+    mouseY,
+    1,
+    1,
+    true,
+  );
+
+  return {
+    left,
+    top,
+    right,
+    bottom,
+  };
+}
+
 function main() {
   const fxTarget = (() => {
     const fxTarget = getFXTarget();
@@ -302,7 +330,23 @@ function main() {
   let query = "";
   let firstLoop = true;
 
-  gfx.init("My Window", 500, 700);
+  {
+    const WINDOW_WIDTH = 500;
+    const WINDOW_HEIGHT = 700;
+    const viewport = getScreenViewport();
+    const windowPos = {
+      x: (viewport.left + viewport.right) / 2 - WINDOW_WIDTH / 2,
+      y: (viewport.top + viewport.bottom) / 2 - WINDOW_HEIGHT / 2,
+    };
+    gfx.init(
+      "FX Browser",
+      WINDOW_WIDTH,
+      WINDOW_HEIGHT,
+      undefined,
+      windowPos.x,
+      windowPos.y,
+    );
+  }
   gfx.setfont(1, "Arial", 12);
 
   const ctx = createContext();
