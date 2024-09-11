@@ -21,6 +21,7 @@ export type AddFxParams =
   | { js: string }
   | { dx: string }
   | { clap: string }
+  | { fxchain: string }
   | { browser: true | { max: number } | { exactly: number } }
   | string;
 
@@ -43,6 +44,8 @@ export function stringifyAddFxParams(params: AddFxParams): string {
     return `DX: ${params.dx}`;
   } else if ("clap" in params) {
     return `CLAP: ${params.clap}`;
+  } else if ("fxchain" in params) {
+    return `${params.fxchain}.rfxchain`;
   } else if ("browser" in params) {
     const browser = params.browser;
     if (browser === true) {

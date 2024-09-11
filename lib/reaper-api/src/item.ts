@@ -1,3 +1,8 @@
+import {
+  AddFxParams,
+  generateTakeContainerFxidx,
+  stringifyAddFxParams,
+} from "./fx";
 import { inspect } from "./inspect";
 
 export class Item {
@@ -106,6 +111,25 @@ export class Take {
     );
     if (!ok) throw new Error("failed to get name of take");
     return rv;
+  }
+
+  /** Returns new position if success, otherwise return nil */
+  addFx(fx: AddFxParams, position?: number | number[]) {
+    const fxname = stringifyAddFxParams(fx);
+    if (position !== undefined && typeof position !== "number") {
+      position = generateTakeContainerFxidx(this.obj, position);
+    }
+
+    const rv = reaper.TakeFX_AddByName(
+      this.obj,
+      fxname,
+      position === undefined ? -1 : -1000 - position,
+    );
+    if (rv === -1) {
+      return null;
+    }
+    const newPosition = rv;
+    return newPosition;
   }
 }
 
