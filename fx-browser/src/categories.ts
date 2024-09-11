@@ -42,7 +42,18 @@ export function getCategories() {
   // processing to group data
   // =======
   // record of category name to folders, names split into category/stem
-  const categoriesMap: Record<string, { id: string; name: string }[]> = {};
+  const categories: {
+    category: string;
+    folders: { id: string; name: string }[];
+  }[] = [];
+  function getCategory(name: string) {
+    const existing = categories.find((x) => x.category === name);
+    if (existing) return existing;
+
+    const result = { category: name, folders: [] };
+    categories.push(result);
+    return result;
+  }
   // map from folder ID to FX set (serialised)
   const folderFx: Record<string, LuaSet<string>> = {};
   // a set of favourited FX (serialised)
@@ -80,8 +91,8 @@ export function getCategories() {
       // 1. Favourites
       // only handle the first "Favourites" folder, ignore all others
       favouriteFolderId = folder.id;
-      categoriesMap[DEFAULT_CATEGORY] ||= [];
-      categoriesMap[DEFAULT_CATEGORY].push({
+      const category = getCategory(DEFAULT_CATEGORY);
+      category.folders.push({
         id: folder.id,
         name: FOLDER_NAME_FAVOURITES,
       });
@@ -92,15 +103,15 @@ export function getCategories() {
       // 2. Generic category
       const splitPos = folder.name.indexOf(CATEGORY_SEPARATOR);
 
-      let category = folder.name.substring(0, splitPos).trim();
+      let categoryName = folder.name.substring(0, splitPos).trim();
       const stem = folder.name
         .substring(splitPos + 1, folder.name.length)
         .trim();
 
-      if (category.length === 0) category = DEFAULT_CATEGORY;
+      if (categoryName.length === 0) categoryName = DEFAULT_CATEGORY;
 
-      categoriesMap[category] ||= [];
-      categoriesMap[category].push({ id: folder.id, name: stem });
+      const category = getCategory(categoryName);
+      category.folders.push({ id: folder.id, name: stem });
 
       folderFx[folder.id] ||= new LuaSet();
       targetSet = folderFx[folder.id];
@@ -140,31 +151,6 @@ export function getCategories() {
       };
     }
   }
-
-  const categories = Object.entries(categoriesMap)
-    .sort(([a, _], [b, _2]) => {
-      // always sort the default category last
-      if (a === DEFAULT_CATEGORY && b !== DEFAULT_CATEGORY) {
-        return 1;
-      } else if (a !== DEFAULT_CATEGORY && b === DEFAULT_CATEGORY) {
-        return -1;
-      } else if (a === DEFAULT_CATEGORY && b === DEFAULT_CATEGORY) {
-        return 0;
-      }
-
-      // sort alphabetically
-      if (a > b) {
-        return 1;
-      } else if (a < b) {
-        return -1;
-      } else {
-        return 0;
-      }
-    })
-    .map(([category, folders]) => ({
-      category,
-      folders,
-    }));
 
   return {
     categories,
