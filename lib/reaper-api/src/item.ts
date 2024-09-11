@@ -96,6 +96,17 @@ export class Take {
   source() {
     return new Source(reaper.GetMediaItemTake_Source(this.obj));
   }
+
+  getName(): string {
+    const [ok, rv] = reaper.GetSetMediaItemTakeInfo_String(
+      this.obj,
+      "P_NAME",
+      "",
+      false,
+    );
+    if (!ok) throw new Error("failed to get name of take");
+    return rv;
+  }
 }
 
 export class MidiTake {

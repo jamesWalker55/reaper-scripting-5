@@ -31,6 +31,8 @@ import { FxInfo, getCategories } from "./categories";
 import { fxBrowserH, fxBrowserV, fxBrowserVRow, toggleButton } from "./widgets";
 import { split } from "reaper-api/utilsLua";
 import { MouseCap, Mode, DrawStrFlags } from "reaper-api/ffi";
+import { Track } from "reaper-api/track";
+import { Item, Take } from "reaper-api/item";
 
 function setIntersection<T extends AnyNotNil>(
   mutable: LuaSet<T>,
@@ -496,6 +498,45 @@ export function microUILoop(
 }
 
 function main() {
+  const fxTarget = (() => {
+    const fxTarget = getFXTarget();
+    if (!fxTarget)
+      throw new Error("Please click on a track before running this script!");
+
+    const fxpathName =
+      fxTarget.fxpath.length > 0
+        ? ` > FX ${fxTarget.fxpath.map((x) => x + 1).join(" > ")}`
+        : "";
+
+    switch (fxTarget.target) {
+      case "track": {
+        const track = new Track(fxTarget.track);
+        return {
+          getDisplayName() {
+            const trackIdx = track.getIdx() + 1;
+            const trackName = track.getName();
+            return `Track ${trackIdx} ${inspect(trackName)}${fxpathName}`;
+          },
+        };
+      }
+      case "take": {
+        const track = new Track(fxTarget.track);
+        const take = new Take(fxTarget.take);
+        return {
+          getDisplayName() {
+            const trackIdx = track.getIdx() + 1;
+            const takeName = take.getName();
+            return `Take ${inspect(
+              takeName,
+            )} (on Track ${trackIdx})${fxpathName}`;
+          },
+        };
+      }
+      default:
+        assertUnreachable(fxTarget);
+    }
+  })();
+
   let manager = Manager();
   let query = "";
   let firstLoop = true;
@@ -547,7 +588,7 @@ function main() {
           ctx.style.spacing;
         ctx.layoutRow([-refreshWidth, -1], 0);
 
-        ctx.label("Add FX to: Track 1");
+        ctx.label(`Add FX to: ${fxTarget.getDisplayName()}`);
         if (ctx.button("Refresh")) {
           const oldActiveIds = manager.getActiveIdsMut();
           manager = Manager();

@@ -259,7 +259,8 @@ export class Track {
     if (tracknumber === 0) error("failed to get track number");
     if (tracknumber === -1) return -1;
 
-    return tracknumber - 1;
+    // convert the float to an integer
+    return Math.round(tracknumber - 1);
   }
 
   *iterItems() {
