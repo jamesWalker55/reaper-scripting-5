@@ -53,10 +53,11 @@ const FX_ROW_COLOR_FOCUS = rgba(90, 90, 90, 1.0);
 
 const FX_ROW_TYPE_NAME_COLOR = rgba(140, 140, 140, 1.0);
 
-const FX_ROW_H_WIDTH = 300;
+// width of columns
+const FX_ROW_H_MIN_COL_WIDTH = 200;
 
 /**
- * Used for vertical list layout
+ * Used for horizontal list layout
  */
 export function fxBrowserH(
   ctx: Context,
@@ -77,20 +78,39 @@ export function fxBrowserH(
   // each row is `size.y + padding * 2` tall, with `spacing` between each one
   // also account for panel's border padding (`padding`)
   let maxRows =
-    (r.h - ctx.style.padding * 2) /
+    (r.h - ctx.style.padding * 2 + ctx.style.spacing) /
     (ctx.style.size.y + ctx.style.padding * 2 + ctx.style.spacing);
   maxRows = Math.max(maxRows, 1.0);
   maxRows = Math.floor(maxRows);
 
-  const cols = Math.ceil(fxs.length / maxRows);
+  // actual number of columns needed to show all FX
+  const realCols = Math.ceil(fxs.length / maxRows);
+  // column limit for fitting FX without scrolling
+  const fitMaxCols = Math.floor(
+    (r.w - ctx.style.padding * 2 + ctx.style.spacing) /
+      (FX_ROW_H_MIN_COL_WIDTH + ctx.style.spacing),
+  );
 
   let clickedUid: string | null = null;
 
   {
     const widths = [];
-    for (let i = 0; i < cols; i++) {
-      widths.push(FX_ROW_H_WIDTH);
+
+    if (realCols <= fitMaxCols) {
+      // all columns can fit on screen without scrolling
+      const width =
+        (r.w - ctx.style.padding * 2 + ctx.style.spacing) / realCols -
+        ctx.style.spacing;
+      for (let i = 0; i < realCols; i++) {
+        widths.push(width);
+      }
+    } else {
+      // columns will overflow and need scrolling
+      for (let i = 0; i < realCols; i++) {
+        widths.push(FX_ROW_H_MIN_COL_WIDTH);
+      }
     }
+
     ctx.layoutRow(widths, 0);
 
     // iterate though fx and rows at the same time
