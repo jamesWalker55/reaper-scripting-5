@@ -113,6 +113,10 @@ export class Take {
     return rv;
   }
 
+  getFxCount() {
+    return reaper.TakeFX_GetCount(this.obj);
+  }
+
   /** Returns new position if success, otherwise return nil */
   addFx(fx: AddFxParams, position?: number | number[]) {
     const fxname = stringifyAddFxParams(fx);

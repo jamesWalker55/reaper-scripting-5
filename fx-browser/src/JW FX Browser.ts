@@ -1,45 +1,19 @@
 AddCwdToImportPaths();
 
 import { inspect } from "reaper-api/inspect";
-import {
-  FXFolderItemType,
-  loadFXFolders,
-  loadInstalledFX,
-} from "reaper-api/installedFx";
-import {
-  assertUnreachable,
-  deferLoop,
-  errorHandler,
-  log,
-} from "reaper-api/utils";
-import {
-  ColorId,
-  CommandType,
-  ReaperContext as Context,
-  createContext,
-  IconId,
-  Key,
-  MouseButton,
-  Option,
-  ReaperContext,
-  Rect,
-  Response,
-  rgba,
-} from "reaper-microui";
-import { getFXTarget } from "./detectTarget";
-import { FxInfo, getCategories } from "./categories";
-import {
-  fxBrowserH,
-  fxBrowserV,
-  fxBrowserVRow,
-  microUILoop,
-  toggleButton,
-  wrappedToggleButtons,
-} from "./widgets";
-import { split } from "reaper-api/utilsLua";
-import { MouseCap, Mode, DrawStrFlags } from "reaper-api/ffi";
+import { FXFolderItemType } from "reaper-api/installedFx";
+import { Take } from "reaper-api/item";
 import { Track } from "reaper-api/track";
-import { Item, Take } from "reaper-api/item";
+import { assertUnreachable, errorHandler, log } from "reaper-api/utils";
+import { createContext, Option, Response } from "reaper-microui";
+import { getCategories } from "./categories";
+import { getFXTarget } from "./detectTarget";
+import { fxBrowserH, microUILoop, wrappedToggleButtons } from "./widgets";
+import {
+  AddFxParams,
+  generateTakeContainerFxidx,
+  generateTrackContainerFxidx,
+} from "reaper-api/fx";
 
 function setIntersection<T extends AnyNotNil>(
   mutable: LuaSet<T>,
@@ -218,11 +192,46 @@ function main() {
     switch (fxTarget.target) {
       case "track": {
         const track = new Track(fxTarget.track);
+
         return {
           getDisplayName() {
             const trackIdx = track.getIdx() + 1;
             const trackName = track.getName();
             return `Track ${trackIdx} ${inspect(trackName)}${fxpathName}`;
+          },
+          addFx(fx: AddFxParams) {
+            const destpath = [...fxTarget.fxpath];
+
+            // append FX count to the end of the path
+            if (fxTarget.fxpath.length === 0) {
+              const count = track.getFxCount();
+              destpath.push(count);
+            } else {
+              const destContainerFxid = generateTrackContainerFxidx(
+                track.obj,
+                fxTarget.fxpath,
+              );
+              const [ok, count] = reaper.TrackFX_GetNamedConfigParm(
+                track.obj,
+                destContainerFxid,
+                "container_count",
+              );
+              if (!ok)
+                throw new Error(
+                  `failed to get container_count for ${inspect(
+                    fxTarget.fxpath,
+                  )}`,
+                );
+
+              destpath.push(parseInt(count));
+            }
+
+            const newPos = track.addFx(fx, destpath);
+            if (newPos === null) {
+              throw new Error(
+                `failed to add fx ${inspect(fx)} to dest ${destpath}`,
+              );
+            }
           },
         };
       }
@@ -236,6 +245,40 @@ function main() {
             return `Take ${inspect(
               takeName,
             )} (on Track ${trackIdx})${fxpathName}`;
+          },
+          addFx(fx: AddFxParams) {
+            const destpath = [...fxTarget.fxpath];
+
+            // append FX count to the end of the path
+            if (fxTarget.fxpath.length === 0) {
+              const count = take.getFxCount();
+              destpath.push(count);
+            } else {
+              const destContainerFxid = generateTakeContainerFxidx(
+                take.obj,
+                fxTarget.fxpath,
+              );
+              const [ok, count] = reaper.TakeFX_GetNamedConfigParm(
+                take.obj,
+                destContainerFxid,
+                "container_count",
+              );
+              if (!ok)
+                throw new Error(
+                  `failed to get container_count for ${inspect(
+                    fxTarget.fxpath,
+                  )}`,
+                );
+
+              destpath.push(parseInt(count));
+            }
+
+            const newPos = take.addFx(fx, destpath);
+            if (newPos === null) {
+              throw new Error(
+                `failed to add fx ${inspect(fx)} to dest ${destpath}`,
+              );
+            }
           },
         };
       }
@@ -366,7 +409,33 @@ function main() {
           };
         }),
       );
-      if (uid) log("Clicked on", manager.getFxInfo(uid));
+      if (uid) {
+        const fx = manager.getFxInfo(uid);
+        switch (fx.type) {
+          case FXFolderItemType.VST: {
+            fxTarget.addFx({ vst: fx.ident });
+            break;
+          }
+          case FXFolderItemType.CLAP: {
+            fxTarget.addFx({ clap: fx.ident });
+            break;
+          }
+          case FXFolderItemType.JS: {
+            fxTarget.addFx({ js: fx.ident });
+            break;
+          }
+          case FXFolderItemType.FXChain: {
+            fxTarget.addFx({ fxchain: fx.ident });
+            break;
+          }
+          default: {
+            fxTarget.addFx(fx.ident);
+            break;
+          }
+        }
+        // exit after adding fx
+        stop();
+      }
 
       ctx.endWindow();
     }
