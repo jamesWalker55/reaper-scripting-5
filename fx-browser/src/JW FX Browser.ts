@@ -336,8 +336,8 @@ function main() {
   let verticalLayout = false;
 
   {
-    const WINDOW_WIDTH = 500;
-    const WINDOW_HEIGHT = 700;
+    const WINDOW_WIDTH = 600;
+    const WINDOW_HEIGHT = 702;
     const viewport = getScreenViewport();
     const windowPos = {
       x: (viewport.left + viewport.right) / 2 - WINDOW_WIDTH / 2,
