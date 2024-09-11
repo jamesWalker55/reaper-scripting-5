@@ -183,6 +183,9 @@ function Manager(
     getActiveIdsMut() {
       return activeIds;
     },
+    setActiveIds(newval: typeof activeIds) {
+      activeIds = newval;
+    },
     regenerateFxList() {
       fxlist = generateFxList(fxOrder);
     },
@@ -545,7 +548,12 @@ function main() {
         ctx.layoutRow([-refreshWidth, -1], 0);
 
         ctx.label("Add FX to: Track 1");
-        ctx.button("Refresh");
+        if (ctx.button("Refresh")) {
+          const oldActiveIds = manager.getActiveIdsMut();
+          manager = Manager();
+          manager.setActiveIds(oldActiveIds);
+          manager.setQuery(query);
+        }
       }
 
       // search bar
