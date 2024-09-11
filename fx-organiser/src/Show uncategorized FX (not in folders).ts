@@ -98,6 +98,10 @@ async function main() {
             type = LimitedFXType.CLAP;
           } else if (prefix === "ReWire") {
             type = LimitedFXType.ReWire;
+            // ident is also prefixed with colon for some reason, remove it
+            if (fx.ident.startsWith("ReWire: ")) {
+              fx.ident = fx.ident.slice("ReWire: ".length, fx.ident.length);
+            }
           } else {
             // throw new Error(`Not implemented type ${inspect(prefix)}`);
             log(`Not implemented type ${inspect(prefix)}`);
@@ -152,8 +156,12 @@ async function main() {
 
     // clear console
     reaper.ShowConsoleMsg("");
-    for (const name of uncategorizedFxNames) {
-      log(name);
+    if (uncategorizedFxNames.length === 0) {
+      log("All FX have been categorized! :)");
+    } else {
+      for (const name of uncategorizedFxNames) {
+        log(name);
+      }
     }
     // log("\nFX chains:");
     // for (const name of fxchains) {
