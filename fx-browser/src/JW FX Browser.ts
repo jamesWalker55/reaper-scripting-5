@@ -28,7 +28,13 @@ import {
 } from "reaper-microui";
 import { getFXTarget } from "./detectTarget";
 import { FxInfo, getCategories } from "./categories";
-import { fxBrowserH, fxBrowserV, fxBrowserVRow, toggleButton } from "./widgets";
+import {
+  fxBrowserH,
+  fxBrowserV,
+  fxBrowserVRow,
+  toggleButton,
+  wrappedToggleButtons,
+} from "./widgets";
 import { split } from "reaper-api/utilsLua";
 import { MouseCap, Mode, DrawStrFlags } from "reaper-api/ffi";
 import { Track } from "reaper-api/track";
@@ -613,113 +619,35 @@ function main() {
 
       ctx.layoutRow([-1], 0);
 
-      let activeIdsChanged = false;
-
       {
-        // "peek" the next layout
-        const r = ctx.layoutNext();
-        ctx.layoutSetNext(r, false);
-
-        // calculate available space for buttons
-        const availableWidth = r.w + ctx.style.spacing;
-
         const categories = manager.getCategories();
         const activeIds = manager.getActiveIdsMut();
         for (const { category, folders } of categories) {
-          ctx.layoutBeginColumn();
-          {
-            let remainingWidth = availableWidth;
-
-            // split the names into rows, based on the width of each button
-            type Folder = (typeof folders)[number];
-            type RowElement =
-              | { width: number; type: "button"; folder: Folder }
-              | { width: number; type: "label"; text: string };
-            let rows: RowElement[][] = [[]];
-            if (categories.length > 1) {
-              // only show category label if there are more than 1 categories
-              const labelWidth =
-                ctx.textWidth(ctx.style.font, category) + ctx.style.padding * 2;
-
-              if (remainingWidth < labelWidth + ctx.style.spacing) {
-                remainingWidth = availableWidth;
-                rows.push([]);
-              }
-              remainingWidth -= labelWidth + ctx.style.spacing;
-
-              const currentRow = rows[rows.length - 1];
-              currentRow.push({
-                type: "label",
-                width: labelWidth,
-                text: category,
-              });
-            }
-            for (const btn of folders) {
-              const buttonWidth =
-                ctx.textWidth(ctx.style.font, btn.name) + ctx.style.padding * 2;
-
-              if (remainingWidth < buttonWidth + ctx.style.spacing) {
-                remainingWidth = availableWidth;
-                rows.push([]);
-              }
-              remainingWidth -= buttonWidth + ctx.style.spacing;
-
-              const currentRow = rows[rows.length - 1];
-              currentRow.push({
-                type: "button",
-                folder: btn,
-                width: buttonWidth,
-              });
-            }
-
-            // layout each row
-            for (const row of rows) {
-              if (row.length === 0) continue;
-
-              ctx.layoutRow(
-                row.map((x) => x.width),
-                0,
-              );
-              for (const element of row) {
-                switch (element.type) {
-                  case "button": {
-                    ctx.pushId(element.folder.id);
-                    const active = toggleButton(
-                      ctx,
-                      element.folder.name,
-                      activeIds.has(element.folder.id),
-                    );
-                    ctx.popId();
-                    if (active) {
-                      if (!activeIds.has(element.folder.id)) {
-                        activeIds.add(element.folder.id);
-                        activeIdsChanged = true;
-                      }
-                    } else {
-                      if (activeIds.has(element.folder.id)) {
-                        activeIds.delete(element.folder.id);
-                        activeIdsChanged = true;
-                      }
-                    }
-                    break;
-                  }
-                  case "label": {
-                    ctx.label(category);
-                    break;
-                  }
-                  default:
-                    assertUnreachable(element);
-                }
-              }
-            }
+          let res: ReturnType<typeof wrappedToggleButtons>;
+          if (categories.length === 1) {
+            // just 1 category, hide the label
+            res = wrappedToggleButtons(ctx, null, folders, activeIds);
+          } else {
+            // show the category label
+            res = wrappedToggleButtons(ctx, category, folders, activeIds);
           }
-          ctx.layoutEndColumn();
-        }
-      }
 
-      // if filter has changed, regenerate the fx list
-      if (activeIdsChanged) {
-        manager.regenerateFxList();
+          if (res) {
+            switch (res.type) {
+              case "enable":
+                activeIds.add(res.id);
+                break;
+              case "disable":
+                activeIds.delete(res.id);
+                break;
+              default:
+                assertUnreachable(res.type);
+            }
+
+            // if filter has changed, regenerate the fx list
+            manager.regenerateFxList();
+          }
+        }
       }
 
       ctx.layoutRow([-1], -1);

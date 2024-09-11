@@ -1,5 +1,3 @@
-import { FXFolderItemType } from "reaper-api/installedFx";
-import { log } from "reaper-api/utils";
 import {
   ColorId,
   ReaperContext as Context,
@@ -45,6 +43,109 @@ export function toggleButton(
   ctx.drawControlText(label, r, ColorId.Text, 0);
 
   return state;
+}
+
+export function wrappedToggleButtons(
+  ctx: Context,
+  label: string | null,
+  buttons: {
+    id: string;
+    name: string;
+  }[],
+  activeIds: LuaSet<string>,
+) {
+  // "peek" the next layout
+  const r = ctx.layoutNext();
+  ctx.layoutSetNext(r, false);
+
+  // calculate available space for buttons
+  const availableWidth = r.w + ctx.style.spacing;
+  let labelWidth = 0;
+
+  let response: { type: "enable" | "disable"; id: string } | null = null;
+
+  ctx.layoutBeginColumn();
+  {
+    let remainingWidth = availableWidth;
+
+    // if there is a section name, subtract it from the initial row's width
+    if (label !== null) {
+      labelWidth = ctx.textWidth(ctx.style.font, label) + ctx.style.padding * 2;
+
+      remainingWidth -= labelWidth + ctx.style.spacing;
+    }
+
+    // split the buttons into rows, based on the width of each button
+    type Button = (typeof buttons)[number];
+    let rows: { width: number; button: Button }[][] = [[]];
+    for (const btn of buttons) {
+      const buttonWidth =
+        ctx.textWidth(ctx.style.font, btn.name) + ctx.style.padding * 2;
+
+      if (remainingWidth < buttonWidth + ctx.style.spacing) {
+        remainingWidth = availableWidth;
+        rows.push([]);
+      }
+      remainingWidth -= buttonWidth + ctx.style.spacing;
+
+      const currentRow = rows[rows.length - 1];
+      currentRow.push({
+        button: btn,
+        width: buttonWidth,
+      });
+    }
+
+    // layout each row
+    let firstRow = true;
+    for (const row of rows) {
+      if (firstRow && label) {
+        // add section label if is first row
+        const widths = [labelWidth];
+        for (const x of row) {
+          widths.push(x.width);
+        }
+
+        ctx.layoutRow(widths, 0);
+        ctx.label(label);
+      } else if (row.length > 0) {
+        // otherwise handle buttons normally (skip empty rows)
+        const widths = [];
+        for (const x of row) {
+          widths.push(x.width);
+        }
+
+        ctx.layoutRow(widths, 0);
+      } else {
+        // skip empty row
+        continue;
+      }
+
+      // add the buttons for this row
+      for (const element of row) {
+        ctx.pushId(element.button.id);
+        const oldActive = activeIds.has(element.button.id);
+        const newActive = toggleButton(
+          ctx,
+          element.button.name,
+          activeIds.has(element.button.id),
+        );
+        ctx.popId();
+
+        // handle mouse click
+        if (oldActive !== newActive) {
+          response = {
+            type: newActive ? "enable" : "disable",
+            id: element.button.id,
+          };
+        }
+      }
+
+      if (firstRow) firstRow = false;
+    }
+  }
+  ctx.layoutEndColumn();
+
+  return response;
 }
 
 const FX_ROW_COLOR_NORMAL = rgba(0, 0, 0, 0.0);
