@@ -364,7 +364,7 @@ function main() {
   let optionsEnabled = false;
   let verticalLayout = false;
   let queryIsFocused = false;
-  const initialSendToVKB = virtualKeyboard.isSendToVKB();
+  let initialSendToVKB = virtualKeyboard.isSendToVKB();
 
   {
     const WINDOW_WIDTH = 600;
@@ -479,8 +479,9 @@ function main() {
           if (oldQueryIsFocused !== queryIsFocused) {
             if (queryIsFocused) {
               // inputbox has been focused
-              // turn off vkb send
-              if (virtualKeyboard.isSendToVKB()) {
+              // turn off vkb send if it is on
+              initialSendToVKB = virtualKeyboard.isSendToVKB();
+              if (initialSendToVKB) {
                 virtualKeyboard.toggleSendToVKB();
               }
             } else {
