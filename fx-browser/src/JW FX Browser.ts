@@ -271,7 +271,9 @@ function main() {
               );
             }
 
-            reaper.TrackFX_SetOpen(track.obj, newPos, true);
+            // SetOpen doesn't work inside containers, only call this if the target is the root fxchain
+            if (destpath.length === 1)
+              reaper.TrackFX_SetOpen(track.obj, newPos, true);
           },
         };
       }
@@ -320,7 +322,9 @@ function main() {
               );
             }
 
-            reaper.TakeFX_SetOpen(take.obj, newPos, true);
+            // SetOpen doesn't work inside containers, only call this if the target is the root fxchain
+            if (destpath.length === 1)
+              reaper.TakeFX_SetOpen(take.obj, newPos, true);
           },
         };
       }

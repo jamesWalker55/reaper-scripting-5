@@ -2,6 +2,7 @@ import {
   AddFxParams,
   FX,
   generateTrackContainerFxidx,
+  parseTrackContainerFxidx,
   stringifyAddFxParams,
 } from "./fx";
 import { Item } from "./item";
@@ -58,21 +59,64 @@ export class Track {
   /** Returns new position if success, otherwise return nil */
   addFx(fx: AddFxParams, position?: number | number[]) {
     const fxname = stringifyAddFxParams(fx);
-    if (position !== undefined && typeof position !== "number") {
-      position = generateTrackContainerFxidx(this.obj, position);
+
+    let positionNum: number | null = null;
+    let positionArr: number[] | null = null;
+    if (position !== undefined) {
+      if (typeof position === "number") {
+        positionArr = parseTrackContainerFxidx(this.obj, position);
+        positionNum = position;
+      } else {
+        positionArr = { ...position };
+        positionNum = generateTrackContainerFxidx(this.obj, position);
+      }
     }
 
     const rv = reaper.TrackFX_AddByName(
       this.obj,
       fxname,
       false,
-      position === undefined ? -1 : -1000 - position,
+      positionNum === null ? -1 : -1000 - positionNum,
     );
     if (rv === -1) {
       return null;
     }
-    const newPosition = rv;
-    return newPosition;
+
+    // rv is fx index WITHIN container / fxchain, does not have container index
+    const newSubposition = rv;
+    if (positionArr === null) {
+      // no position specified, so it must be root fxchain position
+      return newSubposition;
+    } else {
+      positionArr[positionArr.length - 1] = newSubposition;
+      return generateTrackContainerFxidx(this.obj, positionArr);
+    }
+
+    // const fxname = stringifyAddFxParams(fx);
+    // if (position !== undefined && typeof position !== "number") {
+    //   position = generateTrackContainerFxidx(this.obj, position);
+    // }
+
+    // const rv = reaper.TrackFX_AddByName(
+    //   this.obj,
+    //   fxname,
+    //   false,
+    //   position === undefined ? -1 : -1000 - position,
+    // );
+    // if (rv === -1) {
+    //   return null;
+    // }
+    // // rv is fx index WITHIN container / fxchain, does not have container index
+    // const newSubposition = rv;
+    // if (position === undefined) {
+    //   // no position specified, so it must be root fxchain position
+    //   return newSubposition;
+    // } else {
+    //   const parsedPos = parseTrackContainerFxidx(this.obj, position);
+    //   parsedPos.pop();
+    //   parsedPos.push(newSubposition);
+    //   return generateTrackContainerFxidx(this.obj, parsedPos);
+    // }
   }
 
   getFxCount() {
