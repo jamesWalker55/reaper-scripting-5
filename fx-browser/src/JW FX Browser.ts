@@ -212,6 +212,10 @@ export function microUILoop(
   };
   const downChars: string[] = [];
 
+  const KEY = {
+    ESC: 27,
+  } as const;
+
   deferLoop((stop) => {
     // handle char input
     {
@@ -220,6 +224,7 @@ export function microUILoop(
       downChars.length = 0;
       while (true) {
         const char = gfx.getchar();
+        if (char === KEY.ESC) return stop();
         if (char === -1) return stop();
         if (char === 0) break;
 
