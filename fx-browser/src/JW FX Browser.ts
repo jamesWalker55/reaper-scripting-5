@@ -41,6 +41,9 @@ function Manager(
     [FXFolderItemType.JS]: 3,
     [FXFolderItemType.FXChain]: 4,
     [FXFolderItemType.Smart]: -99999,
+    [FXFolderItemType.ReWire]: 5,
+    [FXFolderItemType.Container]: 5,
+    [FXFolderItemType.VideoProcessor]: 5,
   },
 ) {
   let data = getCategories();
