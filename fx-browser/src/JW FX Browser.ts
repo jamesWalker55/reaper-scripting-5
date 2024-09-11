@@ -6,14 +6,18 @@ import {
   loadFXFolders,
   loadInstalledFX,
 } from "reaper-api/installedFx";
-import { assertUnreachable, errorHandler, log } from "reaper-api/utils";
+import { assertUnreachable, deferLoop, errorHandler, log } from "reaper-api/utils";
 import {
   ColorId,
+  CommandType,
   ReaperContext as Context,
   createContext,
-  microUILoop,
+  IconId,
+  Key,
   MouseButton,
   Option,
+  ReaperContext,
+  Rect,
   Response,
   rgba,
 } from "reaper-microui";
@@ -21,6 +25,7 @@ import { getFXTarget } from "./detectTarget";
 import { FxInfo, getCategories } from "./categories";
 import { fxBrowserH, fxBrowserV, fxBrowserVRow, toggleButton } from "./widgets";
 import { split } from "reaper-api/utilsLua";
+import { MouseCap, Mode, DrawStrFlags } from "reaper-api/ffi";
 
 function setIntersection<T extends AnyNotNil>(
   mutable: LuaSet<T>,
@@ -180,6 +185,302 @@ function Manager(
       return data.categories;
     },
   };
+}
+
+export function microUILoop(
+  ctx: ReaperContext,
+  func: (stop: () => void) => void,
+  cleanup?: () => void,
+) {
+  const downKeys = {
+    // mouse
+    left: false,
+    middle: false,
+    right: false,
+
+    // keyboard
+    shift: false,
+    ctrl: false,
+    alt: false,
+    backspace: false,
+    return: false,
+  };
+  const downChars: string[] = [];
+
+  deferLoop((stop) => {
+    // handle char input
+    {
+      downKeys.backspace = false;
+      downKeys.return = false;
+      downChars.length = 0;
+      while (true) {
+        const char = gfx.getchar();
+        if (char === -1) return stop();
+        if (char === 0) break;
+
+        if (char === 8) {
+          // 8 is backspace / ctrl+h
+          downKeys.backspace = true;
+          continue;
+        } else if (char === 13) {
+          // 13 is enter / ctrl+?
+          downKeys.return = true;
+          continue;
+        }
+
+        const isUnicode = char >>> 24 === 117; // 'u'
+        if (isUnicode) {
+          const unicodeChar = char & 0xffffff;
+          downChars.push(utf8.char(unicodeChar));
+          continue;
+        }
+
+        // not unicode, only allow normal ASCII characters
+        if (0x20 <= char && char <= 0x7e) {
+          downChars.push(utf8.char(char));
+          continue;
+        }
+
+        // TODO: unhandled character combination, e.g. Ctrl+A
+        // log(char, isUnicode);
+      }
+
+      if (downKeys.shift) {
+        // treat mouse wheel as horizontal wheel
+        ctx.inputScroll(-gfx.mouse_wheel * 0.3, gfx.mouse_hwheel * 0.3);
+      } else {
+        ctx.inputScroll(gfx.mouse_hwheel * 0.3, -gfx.mouse_wheel * 0.3);
+      }
+      gfx.mouse_wheel = 0;
+      gfx.mouse_hwheel = 0;
+
+      ctx.inputMouseMove(gfx.mouse_x, gfx.mouse_y);
+
+      downKeys.left = (gfx.mouse_cap & MouseCap.LeftMouse) !== 0;
+      downKeys.middle = (gfx.mouse_cap & MouseCap.MiddleMouse) !== 0;
+      downKeys.right = (gfx.mouse_cap & MouseCap.RightMouse) !== 0;
+      downKeys.ctrl = (gfx.mouse_cap & MouseCap.CommandKey) !== 0;
+      downKeys.alt = (gfx.mouse_cap & MouseCap.OptionKey) !== 0;
+      downKeys.shift = (gfx.mouse_cap & MouseCap.ShiftKey) !== 0;
+      ctx.inputMouseContinuous(
+        (downKeys.left ? MouseButton.Left : 0) |
+          (downKeys.middle ? MouseButton.Middle : 0) |
+          (downKeys.right ? MouseButton.Right : 0),
+      );
+      ctx.inputKeyContinuous(
+        (downKeys.alt ? Key.Alt : 0) |
+          (downKeys.backspace ? Key.Backspace : 0) |
+          (downKeys.ctrl ? Key.Ctrl : 0) |
+          (downKeys.return ? Key.Return : 0) |
+          (downKeys.shift ? Key.Shift : 0),
+      );
+
+      ctx.inputText(downChars.join(""));
+    }
+
+    // user-provided GUI and processing code
+    ctx.begin();
+    func(stop);
+    ctx.end();
+
+    // draw frame
+    let currentClip: Rect | null = null;
+    for (const cmd of ctx.iterCommands()) {
+      switch (cmd.type) {
+        case CommandType.Clip: {
+          currentClip = cmd.rect;
+          break;
+        }
+        case CommandType.Rect: {
+          // set color
+          gfx.r = cmd.color.r / 255;
+          gfx.g = cmd.color.g / 255;
+          gfx.b = cmd.color.b / 255;
+          gfx.a = cmd.color.a / 255;
+
+          gfx.rect(cmd.rect.x, cmd.rect.y, cmd.rect.w, cmd.rect.h);
+          break;
+        }
+        case CommandType.Text: {
+          // set color
+          gfx.r = cmd.color.r / 255;
+          gfx.g = cmd.color.g / 255;
+          gfx.b = cmd.color.b / 255;
+          gfx.a = cmd.color.a / 255;
+
+          gfx.x = cmd.pos.x;
+          gfx.y = cmd.pos.y;
+
+          // set font
+          gfx.setfont(cmd.font);
+
+          if (currentClip) {
+            let [width, height] = gfx.measurestr(cmd.str);
+            // increase by 1 pixel, because cmd position may be fractional
+            width += 1;
+            height += 1;
+
+            const clipLeft = cmd.pos.x < currentClip.x;
+            const clipRight =
+              cmd.pos.x + width >= currentClip.x + currentClip.w;
+            const clipTop = cmd.pos.y < currentClip.y;
+            const clipBottom =
+              cmd.pos.y + height >= currentClip.y + currentClip.h;
+
+            if (!clipLeft && !clipRight && !clipTop && !clipBottom) {
+              gfx.drawstr(cmd.str);
+            } else if (!clipLeft && !clipTop) {
+              // clipping right or bottom only, not left or top
+              gfx.drawstr(
+                cmd.str,
+                0,
+                currentClip.x + currentClip.w,
+                currentClip.y + currentClip.h,
+              );
+            } else {
+              // set buffer #0 resolution (must run this first)
+              gfx.setimgdim(0, width, height);
+
+              // clear the buffer to be transparent
+              {
+                // fill area with text color
+                gfx.r = cmd.color.r / 255;
+                gfx.g = cmd.color.g / 255;
+                gfx.b = cmd.color.b / 255;
+                gfx.a = 1.0;
+                gfx.a2 = 1.0;
+                gfx.mode = Mode.Default;
+                gfx.dest = 0; // buffer #0
+                gfx.rect(0, 0, width, height, true);
+
+                // subtract alpha to make it completely transparent
+                gfx.r = 0.0;
+                gfx.g = 0.0;
+                gfx.b = 0.0;
+                gfx.a = -1.0;
+                gfx.a2 = 1.0;
+                gfx.mode = Mode.AdditiveBlend;
+                gfx.dest = 0; // buffer #0
+                gfx.rect(0, 0, width, height, true);
+              }
+
+              // draw text at (0, 0) + cmd fractional offset
+              {
+                // only affect the alpha channel
+                gfx.r = 0.0;
+                gfx.g = 0.0;
+                gfx.b = 0.0;
+                gfx.a = 1.0;
+                gfx.a2 = cmd.color.a / 255;
+                gfx.mode = Mode.AdditiveBlend;
+
+                // use fractional part of command position for correct rendering
+                gfx.x = cmd.pos.x % 1;
+                gfx.y = cmd.pos.y % 1;
+
+                gfx.dest = 0; // buffer #0
+                gfx.drawstr(cmd.str, 0);
+              }
+
+              // blit the text to the main screen
+              {
+                gfx.x = 0.0;
+                gfx.y = 0.0;
+                gfx.a = 1.0;
+                gfx.dest = -1; // main screen
+                gfx.a2 = 1.0;
+                gfx.mode = Mode.Default;
+                gfx.blit(
+                  0,
+                  1.0,
+                  0.0,
+                  // src
+                  // account for fractional part of command position for correct rendering
+                  currentClip.x - cmd.pos.x + (cmd.pos.x % 1),
+                  currentClip.y - cmd.pos.y + (cmd.pos.y % 1),
+                  currentClip.w,
+                  currentClip.h,
+                  // dst
+                  currentClip.x,
+                  currentClip.y,
+                  // currentClip.w,
+                  // currentClip.h,
+                );
+              }
+
+              // reset drawing settings
+              {
+                gfx.dest = -1; // main screen
+                gfx.a2 = 1.0;
+                gfx.mode = Mode.Default;
+              }
+            }
+          } else {
+            gfx.drawstr(cmd.str);
+          }
+          break;
+        }
+        case CommandType.Icon: {
+          // set color
+          gfx.r = cmd.color.r / 255;
+          gfx.g = cmd.color.g / 255;
+          gfx.b = cmd.color.b / 255;
+          gfx.a = cmd.color.a / 255;
+
+          gfx.x = cmd.rect.x;
+          gfx.y = cmd.rect.y;
+          // TODO: Handle:
+          // cmd.font
+          // Clipping rect
+          switch (cmd.id) {
+            case IconId.Close: {
+              gfx.drawstr(
+                "✕",
+                DrawStrFlags.CenterHorizontally | DrawStrFlags.CenterVertically,
+                cmd.rect.x + cmd.rect.w,
+                cmd.rect.y + cmd.rect.h,
+              );
+              break;
+            }
+            case IconId.Check: {
+              gfx.drawstr(
+                "✓",
+                DrawStrFlags.CenterHorizontally | DrawStrFlags.CenterVertically,
+                cmd.rect.x + cmd.rect.w,
+                cmd.rect.y + cmd.rect.h,
+              );
+              break;
+            }
+            case IconId.Collapsed: {
+              gfx.drawstr(
+                "▸",
+                DrawStrFlags.CenterHorizontally | DrawStrFlags.CenterVertically,
+                cmd.rect.x + cmd.rect.w,
+                cmd.rect.y + cmd.rect.h,
+              );
+              break;
+            }
+            case IconId.Expanded: {
+              gfx.drawstr(
+                "▾",
+                DrawStrFlags.CenterHorizontally | DrawStrFlags.CenterVertically,
+                cmd.rect.x + cmd.rect.w,
+                cmd.rect.y + cmd.rect.h,
+              );
+              break;
+            }
+            default:
+              error(`unhandled icon type: ${cmd}`);
+          }
+          break;
+        }
+        default:
+          error(`unhandled command type: ${cmd}`);
+      }
+    }
+
+    gfx.update();
+  }, cleanup);
 }
 
 function main() {
