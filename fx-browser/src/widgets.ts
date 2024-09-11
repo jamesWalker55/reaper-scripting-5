@@ -314,6 +314,52 @@ export function microUILoop(
   }, cleanup);
 }
 
+const BASE_MUTED_TEXT_COLOR = rgba(140, 140, 140, 1.0);
+
+export function addFxText(ctx: Context, text: string) {
+  const r = ctx.layoutNext();
+
+  const PREFIX_TEXT = "Add FX to: ";
+  const prefixWidth = ctx.textWidth(ctx.style.font, PREFIX_TEXT);
+  const textWidth = ctx.textWidth(ctx.style.font, text);
+  const availableWidth = r.w - ctx.style.padding * 2;
+
+  const y = r.y + (r.h - ctx.textHeight(ctx.style.font)) / 2;
+
+  ctx.pushClipRect(r);
+  if (prefixWidth + textWidth > availableWidth) {
+    // hide the prefix
+    const textX = r.x + ctx.style.padding;
+    ctx.drawText(
+      ctx.style.font,
+      text,
+      null,
+      vec2(textX, y),
+      ctx.style.colors[ColorId.Text],
+    );
+  } else {
+    // draw the prefix
+    const prefixX = r.x + ctx.style.padding;
+    ctx.drawText(
+      ctx.style.font,
+      PREFIX_TEXT,
+      null,
+      vec2(prefixX, y),
+      BASE_MUTED_TEXT_COLOR,
+    );
+
+    const textX = prefixX + prefixWidth;
+    ctx.drawText(
+      ctx.style.font,
+      text,
+      null,
+      vec2(textX, y),
+      ctx.style.colors[ColorId.Text],
+    );
+  }
+  ctx.popClipRect();
+}
+
 const TOGGLE_BUTTON_COLOR_NORMAL = rgba(25, 25, 25, 1.0);
 const TOGGLE_BUTTON_COLOR_HOVER = rgba(45, 45, 45, 1.0);
 const TOGGLE_BUTTON_COLOR_FOCUS = rgba(115, 115, 115, 1.0);

@@ -13,7 +13,13 @@ import {
 import { createContext, Option, Response } from "reaper-microui";
 import { getCategories } from "./categories";
 import { getFXTarget } from "./detectTarget";
-import { fxBrowserH, microUILoop, wrappedToggleButtons } from "./widgets";
+import {
+  addFxText,
+  fxBrowserH,
+  microUILoop,
+  toggleButton,
+  wrappedToggleButtons,
+} from "./widgets";
 import {
   AddFxParams,
   generateTakeContainerFxidx,
@@ -329,6 +335,7 @@ function main() {
   let manager = Manager();
   let query = "";
   let firstLoop = true;
+  let optionsEnabled = false;
 
   {
     const WINDOW_WIDTH = 500;
@@ -391,15 +398,23 @@ function main() {
           ctx.textWidth(ctx.style.font, "Refresh") +
           ctx.style.padding * 2 +
           ctx.style.spacing;
-        ctx.layoutRow([-refreshWidth, -1], 0);
+        const optionsWidth =
+          ctx.textWidth(ctx.style.font, "Options") +
+          ctx.style.padding * 2 +
+          ctx.style.spacing;
 
-        ctx.label(`Add FX to: ${fxTarget.getDisplayName()}`);
+        ctx.layoutRow([-refreshWidth - optionsWidth, -optionsWidth, -1], 0);
+
+        addFxText(ctx, fxTarget.getDisplayName());
+
         if (ctx.button("Refresh")) {
           const oldActiveIds = manager.getActiveIdsMut();
           manager = Manager();
           manager.setActiveIds(oldActiveIds);
           manager.setQuery(query);
         }
+
+        optionsEnabled = toggleButton(ctx, "Options", optionsEnabled)[0];
       }
 
       // search bar
