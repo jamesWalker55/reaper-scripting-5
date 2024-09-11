@@ -232,6 +232,8 @@ function main() {
                 `failed to add fx ${inspect(fx)} to dest ${destpath}`,
               );
             }
+
+            reaper.TrackFX_SetOpen(track.obj, newPos, true);
           },
         };
       }
@@ -279,6 +281,8 @@ function main() {
                 `failed to add fx ${inspect(fx)} to dest ${destpath}`,
               );
             }
+
+            reaper.TakeFX_SetOpen(take.obj, newPos, true);
           },
         };
       }
