@@ -14,7 +14,7 @@ export function fxUid(fx: FxInfo): string {
   return `${fx.type}\n${fx.ident}`;
 }
 
-const CATEGORY_SEPARATOR = "/";
+const CATEGORY_SEPARATOR = "\\";
 
 export function getCategories() {
   // get initial data
