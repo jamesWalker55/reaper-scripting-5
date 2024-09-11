@@ -395,6 +395,11 @@ function main() {
               case "disable":
                 activeIds.delete(res.id);
                 break;
+              case "solo":
+                const newActiveIds: LuaSet<string> = new LuaSet();
+                newActiveIds.add(res.id);
+                manager.setActiveIds(newActiveIds);
+                break;
               default:
                 assertUnreachable(res.type);
             }

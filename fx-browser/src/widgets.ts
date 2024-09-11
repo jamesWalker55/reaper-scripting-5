@@ -322,15 +322,18 @@ export function toggleButton(
   ctx: Context,
   label: string,
   state: boolean,
-): boolean {
+): [boolean, boolean] {
   const id = ctx.getId(label);
   const r = ctx.layoutNext();
   ctx.updateControl(id, r, 0);
 
-  // handle click
+  // handle left click
   if (ctx.mousePressed === MouseButton.Left && ctx.focus === id) {
     state = !state;
   }
+  // handle right click
+  const rightClicked =
+    ctx.mousePressed === MouseButton.Right && ctx.focus === id;
 
   // draw
   if (state) {
@@ -349,7 +352,7 @@ export function toggleButton(
   }
   ctx.drawControlText(label, r, ColorId.Text, 0);
 
-  return state;
+  return [state, rightClicked];
 }
 
 export function wrappedToggleButtons(
@@ -369,7 +372,8 @@ export function wrappedToggleButtons(
   const availableWidth = r.w + ctx.style.spacing;
   let labelWidth = 0;
 
-  let response: { type: "enable" | "disable"; id: string } | null = null;
+  let response: { type: "enable" | "disable" | "solo"; id: string } | null =
+    null;
 
   ctx.layoutBeginColumn();
   {
@@ -431,7 +435,7 @@ export function wrappedToggleButtons(
       for (const element of row) {
         ctx.pushId(element.button.id);
         const oldActive = activeIds.has(element.button.id);
-        const newActive = toggleButton(
+        const [newActive, rightClicked] = toggleButton(
           ctx,
           element.button.name,
           activeIds.has(element.button.id),
@@ -439,7 +443,12 @@ export function wrappedToggleButtons(
         ctx.popId();
 
         // handle mouse click
-        if (oldActive !== newActive) {
+        if (rightClicked) {
+          response = {
+            type: "solo",
+            id: element.button.id,
+          };
+        } else if (oldActive !== newActive) {
           response = {
             type: newActive ? "enable" : "disable",
             id: element.button.id,
