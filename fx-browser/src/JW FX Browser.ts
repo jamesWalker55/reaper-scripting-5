@@ -329,11 +329,42 @@ function main() {
     }
   })();
 
+  const virtualKeyboard = (() => {
+    const MAIN_SECTION_ID = 0;
+    const ACTION_SEND_TO_VKB = 40637;
+    const ACTION_SHOW_VKB = 40377;
+
+    return {
+      isSendToVKB() {
+        const state = reaper.GetToggleCommandStateEx(
+          MAIN_SECTION_ID,
+          ACTION_SEND_TO_VKB,
+        );
+        return state === 1;
+      },
+      isVKBVisible() {
+        const state = reaper.GetToggleCommandStateEx(
+          MAIN_SECTION_ID,
+          ACTION_SHOW_VKB,
+        );
+        return state === 1;
+      },
+      toggleSendToVKB() {
+        reaper.Main_OnCommand(ACTION_SEND_TO_VKB, 0);
+      },
+      toggleVKBVisible() {
+        reaper.Main_OnCommand(ACTION_SHOW_VKB, 0);
+      },
+    };
+  })();
+
   let manager = Manager();
   let query = "";
   let firstLoop = true;
   let optionsEnabled = false;
   let verticalLayout = false;
+  let queryIsFocused = false;
+  const initialSendToVKB = virtualKeyboard.isSendToVKB();
 
   {
     const WINDOW_WIDTH = 600;
@@ -357,195 +388,224 @@ function main() {
   const ctx = createContext();
   ctx.style.font = 1;
 
-  microUILoop(ctx, (stop) => {
-    if (
-      ctx.beginWindow(
-        "Demo Window",
-        { x: 0, y: 0, w: 0, h: 0 },
-        Option.NoResize | Option.NoTitle | Option.NoClose,
-      )
-    ) {
-      // resize window to gfx bounds
-      {
-        const win = ctx.getCurrentContainer();
-        win.rect.w = gfx.w;
-        win.rect.h = gfx.h;
-      }
-
-      // {
-      //   ctx.layoutRow([50, -1], 0);
-      //   ctx.label("indent");
-      //   ctx.style.indent = ctx.slider("ctx.style.indent", ctx.style.indent, 0, 50);
-      //   ctx.label("padding");
-      //   ctx.style.padding = ctx.slider("ctx.style.padding", ctx.style.padding, 0, 50);
-      //   ctx.label("scrollbarSize");
-      //   ctx.style.scrollbarSize = ctx.slider("ctx.style.scrollbarSize", ctx.style.scrollbarSize, 0, 50);
-      //   ctx.label("thumbSize");
-      //   ctx.style.thumbSize = ctx.slider("ctx.style.thumbSize", ctx.style.thumbSize, 0, 50);
-      //   ctx.label("spacing");
-      //   ctx.style.spacing = ctx.slider("ctx.style.spacing", ctx.style.spacing, 0, 50);
-      //   ctx.label("size.x");
-      //   ctx.style.size.x = ctx.slider("ctx.style.size.x", ctx.style.size.x, 0, 50);
-      //   ctx.label("size.y");
-      //   ctx.style.size.y = ctx.slider("ctx.style.size.y", ctx.style.size.y, 0, 50);
-      // }
-
-      // top title bar
-      {
-        const refreshWidth =
-          ctx.textWidth(ctx.style.font, "Refresh") +
-          ctx.style.padding * 2 +
-          ctx.style.spacing;
-        const optionsWidth =
-          ctx.textWidth(ctx.style.font, "Options") +
-          ctx.style.padding * 2 +
-          ctx.style.spacing;
-
-        ctx.layoutRow([-refreshWidth - optionsWidth, -optionsWidth, -1], 0);
-
-        addFxText(ctx, fxTarget.getDisplayName());
-
-        if (ctx.button("Refresh")) {
-          const oldActiveIds = manager.getActiveIdsMut();
-          manager = Manager();
-          manager.setActiveIds(oldActiveIds);
-          manager.setQuery(query);
+  microUILoop(
+    ctx,
+    (stop) => {
+      if (
+        ctx.beginWindow(
+          "Demo Window",
+          { x: 0, y: 0, w: 0, h: 0 },
+          Option.NoResize | Option.NoTitle | Option.NoClose,
+        )
+      ) {
+        // resize window to gfx bounds
+        {
+          const win = ctx.getCurrentContainer();
+          win.rect.w = gfx.w;
+          win.rect.h = gfx.h;
         }
 
-        optionsEnabled = toggleButton(ctx, "Options", optionsEnabled)[0];
-      }
+        // {
+        //   ctx.layoutRow([50, -1], 0);
+        //   ctx.label("indent");
+        //   ctx.style.indent = ctx.slider("ctx.style.indent", ctx.style.indent, 0, 50);
+        //   ctx.label("padding");
+        //   ctx.style.padding = ctx.slider("ctx.style.padding", ctx.style.padding, 0, 50);
+        //   ctx.label("scrollbarSize");
+        //   ctx.style.scrollbarSize = ctx.slider("ctx.style.scrollbarSize", ctx.style.scrollbarSize, 0, 50);
+        //   ctx.label("thumbSize");
+        //   ctx.style.thumbSize = ctx.slider("ctx.style.thumbSize", ctx.style.thumbSize, 0, 50);
+        //   ctx.label("spacing");
+        //   ctx.style.spacing = ctx.slider("ctx.style.spacing", ctx.style.spacing, 0, 50);
+        //   ctx.label("size.x");
+        //   ctx.style.size.x = ctx.slider("ctx.style.size.x", ctx.style.size.x, 0, 50);
+        //   ctx.label("size.y");
+        //   ctx.style.size.y = ctx.slider("ctx.style.size.y", ctx.style.size.y, 0, 50);
+        // }
 
-      if (optionsEnabled) {
-        ctx.layoutRow([-1], ctx.style.padding * 2 + 1);
-        divider(ctx);
+        // top title bar
+        {
+          const refreshWidth =
+            ctx.textWidth(ctx.style.font, "Refresh") +
+            ctx.style.padding * 2 +
+            ctx.style.spacing;
+          const optionsWidth =
+            ctx.textWidth(ctx.style.font, "Options") +
+            ctx.style.padding * 2 +
+            ctx.style.spacing;
 
-        ctx.layoutRow([-1], 0);
-        verticalLayout = ctx.checkbox("Vertical layout", verticalLayout);
+          ctx.layoutRow([-refreshWidth - optionsWidth, -optionsWidth, -1], 0);
 
-        ctx.layoutRow([-1], ctx.style.padding * 2 + 1);
-        divider(ctx);
-      }
+          addFxText(ctx, fxTarget.getDisplayName());
 
-      // search bar
-      {
-        if (firstLoop) {
-          const id = ctx.getId("query");
-          ctx.setFocus(id);
-        }
-        ctx.layoutRow([-1], 0);
-        const [rv, newQuery] = ctx.textbox("query", query);
-        query = newQuery;
-        if (rv === Response.Change) {
-          manager.setQuery(query);
-        }
-      }
-
-      // add some space
-      ctx.layoutRow([-1], 1);
-      ctx.layoutNext();
-
-      // filters
-      ctx.layoutRow([-1], 0);
-
-      {
-        const categories = manager.getCategories();
-        const activeIds = manager.getActiveIdsMut();
-        for (const { category, folders } of categories) {
-          let res: ReturnType<typeof wrappedToggleButtons>;
-          if (categories.length === 1) {
-            // just 1 category, hide the label
-            res = wrappedToggleButtons(ctx, null, folders, activeIds);
-          } else {
-            // show the category label
-            res = wrappedToggleButtons(ctx, category, folders, activeIds);
+          if (ctx.button("Refresh")) {
+            const oldActiveIds = manager.getActiveIdsMut();
+            manager = Manager();
+            manager.setActiveIds(oldActiveIds);
+            manager.setQuery(query);
           }
 
-          if (res) {
-            switch (res.type) {
-              case "enable":
-                activeIds.add(res.id);
-                break;
-              case "disable":
-                activeIds.delete(res.id);
-                break;
-              case "solo":
-                const newActiveIds: LuaSet<string> = new LuaSet();
-                newActiveIds.add(res.id);
-                manager.setActiveIds(newActiveIds);
-                break;
-              default:
-                assertUnreachable(res.type);
+          optionsEnabled = toggleButton(ctx, "Options", optionsEnabled)[0];
+        }
+
+        if (optionsEnabled) {
+          ctx.layoutRow([-1], ctx.style.padding * 2 + 1);
+          divider(ctx);
+
+          ctx.layoutRow([-1], 0);
+          verticalLayout = ctx.checkbox("Vertical layout", verticalLayout);
+
+          ctx.layoutRow([-1], ctx.style.padding * 2 + 1);
+          divider(ctx);
+        }
+
+        // search bar
+        {
+          const id = ctx.getId("query");
+          if (firstLoop) {
+            ctx.setFocus(id);
+          }
+
+          ctx.layoutRow([-1], 0);
+          const [rv, newQuery] = ctx.textbox("query", query);
+          query = newQuery;
+          if (rv === Response.Change) {
+            manager.setQuery(query);
+          }
+
+          // virtual keyboard shit
+          const oldQueryIsFocused = queryIsFocused;
+          queryIsFocused = ctx.focus === id;
+          if (oldQueryIsFocused !== queryIsFocused) {
+            if (queryIsFocused) {
+              // inputbox has been focused
+              // turn off vkb send
+              if (virtualKeyboard.isSendToVKB()) {
+                virtualKeyboard.toggleSendToVKB();
+              }
+            } else {
+              // inputbox has been unfocused
+              // turn on vkb send if it was on initially
+              if (initialSendToVKB && !virtualKeyboard.isSendToVKB()) {
+                virtualKeyboard.toggleSendToVKB();
+              }
+            }
+          }
+        }
+
+        // add some space
+        ctx.layoutRow([-1], 1);
+        ctx.layoutNext();
+
+        // filters
+        ctx.layoutRow([-1], 0);
+
+        {
+          const categories = manager.getCategories();
+          const activeIds = manager.getActiveIdsMut();
+          for (const { category, folders } of categories) {
+            let res: ReturnType<typeof wrappedToggleButtons>;
+            if (categories.length === 1) {
+              // just 1 category, hide the label
+              res = wrappedToggleButtons(ctx, null, folders, activeIds);
+            } else {
+              // show the category label
+              res = wrappedToggleButtons(ctx, category, folders, activeIds);
             }
 
-            // if filter has changed, regenerate the fx list
-            manager.regenerateFxList();
+            if (res) {
+              switch (res.type) {
+                case "enable":
+                  activeIds.add(res.id);
+                  break;
+                case "disable":
+                  activeIds.delete(res.id);
+                  break;
+                case "solo":
+                  const newActiveIds: LuaSet<string> = new LuaSet();
+                  newActiveIds.add(res.id);
+                  manager.setActiveIds(newActiveIds);
+                  break;
+                default:
+                  assertUnreachable(res.type);
+              }
+
+              // if filter has changed, regenerate the fx list
+              manager.regenerateFxList();
+            }
           }
         }
-      }
 
-      // fx browser
-      ctx.layoutRow([-1], -1);
+        // fx browser
+        ctx.layoutRow([-1], -1);
 
-      const uid = verticalLayout
-        ? fxBrowserV(
-            ctx,
-            manager.getFxlist().map((uid) => {
-              const favourite = manager.inFavourites(uid);
-              const fxInfo = manager.getFxInfo(uid);
-              return {
-                uid,
-                name: fxInfo.name,
-                type: fxInfo.prefix || FXFolderItemType[fxInfo.type] || "?",
-                favourite,
-              };
-            }),
-          )
-        : fxBrowserH(
-            ctx,
-            manager.getFxlist().map((uid) => {
-              const favourite = manager.inFavourites(uid);
-              const fxInfo = manager.getFxInfo(uid);
-              return {
-                uid,
-                name: fxInfo.name,
-                type: fxInfo.prefix || FXFolderItemType[fxInfo.type] || "?",
-                favourite,
-              };
-            }),
-          );
-      if (uid) {
-        const fx = manager.getFxInfo(uid);
-        switch (fx.type) {
-          case FXFolderItemType.VST: {
-            fxTarget.addFx({ vst: fx.ident });
-            break;
+        const uid = verticalLayout
+          ? fxBrowserV(
+              ctx,
+              manager.getFxlist().map((uid) => {
+                const favourite = manager.inFavourites(uid);
+                const fxInfo = manager.getFxInfo(uid);
+                return {
+                  uid,
+                  name: fxInfo.name,
+                  type: fxInfo.prefix || FXFolderItemType[fxInfo.type] || "?",
+                  favourite,
+                };
+              }),
+            )
+          : fxBrowserH(
+              ctx,
+              manager.getFxlist().map((uid) => {
+                const favourite = manager.inFavourites(uid);
+                const fxInfo = manager.getFxInfo(uid);
+                return {
+                  uid,
+                  name: fxInfo.name,
+                  type: fxInfo.prefix || FXFolderItemType[fxInfo.type] || "?",
+                  favourite,
+                };
+              }),
+            );
+        if (uid) {
+          const fx = manager.getFxInfo(uid);
+          switch (fx.type) {
+            case FXFolderItemType.VST: {
+              fxTarget.addFx({ vst: fx.ident });
+              break;
+            }
+            case FXFolderItemType.CLAP: {
+              fxTarget.addFx({ clap: fx.ident });
+              break;
+            }
+            case FXFolderItemType.JS: {
+              fxTarget.addFx({ js: fx.ident });
+              break;
+            }
+            case FXFolderItemType.FXChain: {
+              fxTarget.addFx({ fxchain: fx.ident });
+              break;
+            }
+            default: {
+              fxTarget.addFx(fx.ident);
+              break;
+            }
           }
-          case FXFolderItemType.CLAP: {
-            fxTarget.addFx({ clap: fx.ident });
-            break;
-          }
-          case FXFolderItemType.JS: {
-            fxTarget.addFx({ js: fx.ident });
-            break;
-          }
-          case FXFolderItemType.FXChain: {
-            fxTarget.addFx({ fxchain: fx.ident });
-            break;
-          }
-          default: {
-            fxTarget.addFx(fx.ident);
-            break;
-          }
+          // exit after adding fx
+          stop();
         }
-        // exit after adding fx
-        stop();
+
+        ctx.endWindow();
       }
 
-      ctx.endWindow();
-    }
-
-    if (firstLoop) firstLoop = false;
-  });
+      if (firstLoop) firstLoop = false;
+    },
+    () => {
+      // on exit, ensure vkb send is reverted
+      if (initialSendToVKB && !virtualKeyboard.isSendToVKB()) {
+        virtualKeyboard.toggleSendToVKB();
+      }
+    },
+  );
 }
 
 errorHandler(main);
