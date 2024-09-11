@@ -696,7 +696,7 @@ function main() {
           };
         }),
       );
-      if (uid) log("Clicked on", inspect(uid));
+      if (uid) log("Clicked on", manager.getFxInfo(uid));
 
       ctx.endWindow();
     }
