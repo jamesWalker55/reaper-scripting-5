@@ -120,16 +120,20 @@ function Manager(
       if (aOrder !== bOrder) return aOrder - bOrder;
 
       // sort by display name
-      if (aInfo.name < bInfo.name) {
+      const aName = aInfo.name.toLowerCase();
+      const bName = bInfo.name.toLowerCase();
+      if (aName < bName) {
         return -1;
-      } else if (aInfo.name > bInfo.name) {
+      } else if (aName > bName) {
         return 1;
       }
 
       // sort by identifier name
-      if (aInfo.ident < bInfo.ident) {
+      const aIdent = aInfo.ident.toLowerCase();
+      const bIdent = bInfo.ident.toLowerCase();
+      if (aIdent < bIdent) {
         return -1;
-      } else if (aInfo.ident > bInfo.ident) {
+      } else if (aIdent > bIdent) {
         return 1;
       }
 
