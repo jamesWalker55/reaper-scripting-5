@@ -23,7 +23,7 @@ export class Track {
 
   static getByIdx(idx: number) {
     const obj = reaper.GetTrack(0, idx);
-    if (obj === null) error(`failed to get track with index ${idx}`);
+    if (obj === null) throw new Error(`failed to get track with index ${idx}`);
     return new Track(obj);
   }
 
@@ -153,7 +153,7 @@ export class Track {
   /** Value is scalar, 0..1..inf */
   setVolume(val: number) {
     const ok = reaper.SetMediaTrackInfo_Value(this.obj, "D_VOL", val);
-    if (!ok) error("failed to set volume");
+    if (!ok) throw new Error("failed to set volume");
   }
   /** Return value in range -1..0..1 */
   getPan() {
@@ -162,7 +162,7 @@ export class Track {
   /** Value in range -1..0..1 */
   setPan(val: number) {
     const ok = reaper.SetMediaTrackInfo_Value(this.obj, "D_PAN", val);
-    if (!ok) error("failed to set pan");
+    if (!ok) throw new Error("failed to set pan");
   }
   /** Return value in range -1..0..1 */
   getWidth() {
@@ -171,7 +171,7 @@ export class Track {
   /** Value in range -1..0..1 */
   setWidth(val: number) {
     const ok = reaper.SetMediaTrackInfo_Value(this.obj, "D_WIDTH", val);
-    if (!ok) error("failed to set width");
+    if (!ok) throw new Error("failed to set width");
   }
   /** pan law of track, <0=project default, 0.5=-6dB, 0.707..=-3dB, 1=+0dB, 1.414..=-3dB with gain compensation, 2=-6dB with gain compensation, etc */
   getPanLaw() {
@@ -180,21 +180,21 @@ export class Track {
   /** pan law of track, <0=project default, 0.5=-6dB, 0.707..=-3dB, 1=+0dB, 1.414..=-3dB with gain compensation, 2=-6dB with gain compensation, etc */
   setPanLaw(val: number) {
     const ok = reaper.SetMediaTrackInfo_Value(this.obj, "D_PANLAW", val);
-    if (!ok) error("failed to set pan law");
+    if (!ok) throw new Error("failed to set pan law");
   }
   getMuted() {
     return reaper.GetMediaTrackInfo_Value(this.obj, "B_MUTE") === 1;
   }
   setMuted(val: boolean) {
     const ok = reaper.SetMediaTrackInfo_Value(this.obj, "B_MUTE", val ? 1 : 0);
-    if (!ok) error("failed to set muted");
+    if (!ok) throw new Error("failed to set muted");
   }
   getPhaseInverted() {
     return reaper.GetMediaTrackInfo_Value(this.obj, "B_PHASE") === 1;
   }
   setPhaseInverted(val: boolean) {
     const ok = reaper.SetMediaTrackInfo_Value(this.obj, "B_PHASE", val ? 1 : 0);
-    if (!ok) error("failed to set phase inverted");
+    if (!ok) throw new Error("failed to set phase inverted");
   }
   /** pan mode, 0=classic 3.x, 3=new balance, 5=stereo pan, 6=dual pan */
   getPanmode() {
@@ -203,7 +203,7 @@ export class Track {
   /** pan mode, 0=classic 3.x, 3=new balance, 5=stereo pan, 6=dual pan */
   setPanmode(val: number) {
     const ok = reaper.SetMediaTrackInfo_Value(this.obj, "I_PANMODE", val);
-    if (!ok) error("failed to set panmode");
+    if (!ok) throw new Error("failed to set panmode");
   }
 
   getReceives() {
@@ -242,7 +242,12 @@ export class Track {
       "",
       false,
     );
-    if (!ok) error("failed to get track name");
+    if (!ok) {
+      // will always fail on master track, check if we are on master track
+      if (this.getIdx() === -1) return "";
+
+      throw new Error("failed to get track name");
+    }
     return val;
   }
 
@@ -256,7 +261,7 @@ export class Track {
       this.obj,
       "IP_TRACKNUMBER",
     );
-    if (tracknumber === 0) error("failed to get track number");
+    if (tracknumber === 0) throw new Error("failed to get track number");
     if (tracknumber === -1) return -1;
 
     // convert the float to an integer
