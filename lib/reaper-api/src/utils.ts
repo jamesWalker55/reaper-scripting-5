@@ -45,11 +45,23 @@ export function deferLoop(
   }
 
   function inner(this: void) {
-    func(stop);
+    try {
+      errorHandler(() => func(stop));
+    } catch (e) {
+      // errorHandler should handle the error and log to console
+      // al we need to do is stop the script, so `return`
+      return;
+    }
 
     if (shouldStop) {
       if (cleanup !== undefined) {
-        cleanup();
+        try {
+          errorHandler(() => cleanup());
+        } catch (e) {
+          // errorHandler should handle the error and log to console
+          // al we need to do is stop the script, so `return`
+          return;
+        }
       }
       return;
     }
