@@ -1,30 +1,27 @@
 AddCwdToImportPaths();
 
-import { inspect } from "reaper-api/inspect";
-import { FXFolderItemType } from "reaper-api/installedFx";
-import { Take } from "reaper-api/item";
-import { Track } from "reaper-api/track";
-import {
-  assertUnreachable,
-  ensureAPI,
-  errorHandler,
-  log,
-} from "reaper-api/utils";
-import { createContext, Option, Response } from "reaper-microui";
-import { getCategories } from "./categories";
-import { getFXTarget } from "./detectTarget";
-import {
-  addFxText,
-  fxBrowserH,
-  microUILoop,
-  toggleButton,
-  wrappedToggleButtons,
-} from "./widgets";
 import {
   AddFxParams,
   generateTakeContainerFxidx,
   generateTrackContainerFxidx,
 } from "reaper-api/fx";
+import { inspect } from "reaper-api/inspect";
+import { FXFolderItemType } from "reaper-api/installedFx";
+import { Take } from "reaper-api/item";
+import { Track } from "reaper-api/track";
+import { assertUnreachable, ensureAPI, errorHandler } from "reaper-api/utils";
+import { createContext, Option, Response } from "reaper-microui";
+import { getCategories } from "./categories";
+import { getFXTarget } from "./detectTarget";
+import {
+  addFxText,
+  divider,
+  fxBrowserH,
+  fxBrowserV,
+  microUILoop,
+  toggleButton,
+  wrappedToggleButtons,
+} from "./widgets";
 
 function setIntersection<T extends AnyNotNil>(
   mutable: LuaSet<T>,
@@ -336,6 +333,7 @@ function main() {
   let query = "";
   let firstLoop = true;
   let optionsEnabled = false;
+  let verticalLayout = false;
 
   {
     const WINDOW_WIDTH = 500;
@@ -417,6 +415,17 @@ function main() {
         optionsEnabled = toggleButton(ctx, "Options", optionsEnabled)[0];
       }
 
+      if (optionsEnabled) {
+        ctx.layoutRow([-1], ctx.style.padding * 2 + 1);
+        divider(ctx);
+
+        ctx.layoutRow([-1], 0);
+        verticalLayout = ctx.checkbox("Vertical layout", verticalLayout);
+
+        ctx.layoutRow([-1], ctx.style.padding * 2 + 1);
+        divider(ctx);
+      }
+
       // search bar
       {
         if (firstLoop) {
@@ -471,19 +480,33 @@ function main() {
 
       ctx.layoutRow([-1], -1);
 
-      const uid = fxBrowserH(
-        ctx,
-        manager.getFxlist().map((uid) => {
-          const favourite = manager.inFavourites(uid);
-          const fxInfo = manager.getFxInfo(uid);
-          return {
-            uid,
-            name: fxInfo.name,
-            type: fxInfo.prefix || FXFolderItemType[fxInfo.type] || "?",
-            favourite,
-          };
-        }),
-      );
+      const uid = verticalLayout
+        ? fxBrowserV(
+            ctx,
+            manager.getFxlist().map((uid) => {
+              const favourite = manager.inFavourites(uid);
+              const fxInfo = manager.getFxInfo(uid);
+              return {
+                uid,
+                name: fxInfo.name,
+                type: fxInfo.prefix || FXFolderItemType[fxInfo.type] || "?",
+                favourite,
+              };
+            }),
+          )
+        : fxBrowserH(
+            ctx,
+            manager.getFxlist().map((uid) => {
+              const favourite = manager.inFavourites(uid);
+              const fxInfo = manager.getFxInfo(uid);
+              return {
+                uid,
+                name: fxInfo.name,
+                type: fxInfo.prefix || FXFolderItemType[fxInfo.type] || "?",
+                favourite,
+              };
+            }),
+          );
       if (uid) {
         const fx = manager.getFxInfo(uid);
         switch (fx.type) {

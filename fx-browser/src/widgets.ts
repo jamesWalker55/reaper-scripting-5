@@ -360,6 +360,22 @@ export function addFxText(ctx: Context, text: string) {
   ctx.popClipRect();
 }
 
+const DIVIDER_COLOR = rgba(115, 115, 115, 1.0);
+
+export function divider(ctx: Context) {
+  const r = ctx.layoutNext();
+
+  ctx.drawRect(
+    rect(
+      r.x + ctx.style.padding,
+      r.y + ctx.style.padding,
+      r.w - ctx.style.padding * 2,
+      r.h - ctx.style.padding * 2,
+    ),
+    DIVIDER_COLOR,
+  );
+}
+
 const TOGGLE_BUTTON_COLOR_NORMAL = rgba(25, 25, 25, 1.0);
 const TOGGLE_BUTTON_COLOR_HOVER = rgba(45, 45, 45, 1.0);
 const TOGGLE_BUTTON_COLOR_FOCUS = rgba(115, 115, 115, 1.0);
