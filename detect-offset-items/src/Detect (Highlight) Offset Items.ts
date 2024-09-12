@@ -38,9 +38,10 @@ const NUMBER_FORMAT = "%.12f s";
 
 function main() {
   // UI setup
-  gfx.init(getScriptName(), 360, 400);
+  gfx.init(getScriptName(), 360, 210);
   gfx.setfont(1, "Arial", 14);
   const ctx = createContext();
+  ctx.style.font = 1;
 
   // Logic
   let frameskipLeft = FRAMESKIP;
@@ -114,9 +115,6 @@ function main() {
         }
       }
 
-      // draw frame
-      ctx.begin();
-
       if (
         ctx.beginWindow(
           "Demo Window",
@@ -169,7 +167,7 @@ function main() {
           );
         }
 
-        if (ctx.header("Detected offset positions", Option.Expanded)) {
+        if (ctx.header("Detected offset positions")) {
           for (const x of posDiffs) {
             ctx.text(string.format(NUMBER_FORMAT, x));
           }
@@ -177,8 +175,6 @@ function main() {
 
         ctx.endWindow();
       }
-
-      ctx.end();
     },
     () => {
       // code to run on exit
