@@ -234,8 +234,12 @@ function main() {
         return {
           getDisplayName() {
             const trackIdx = track.getIdx() + 1;
-            const trackName = track.getName();
-            return `Track ${trackIdx} ${inspect(trackName)}${fxpathName}`;
+            if (trackIdx === 0) {
+              return `Master Track${fxpathName}`;
+            } else {
+              const trackName = track.getName();
+              return `Track ${trackIdx} ${inspect(trackName)}${fxpathName}`;
+            }
           },
           addFx(fx: AddFxParams) {
             const destpath = [...fxTarget.fxpath];
