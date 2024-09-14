@@ -129,7 +129,7 @@ export class Take {
         positionArr = parseTakeContainerFxidx(this.obj, position);
         positionNum = position;
       } else {
-        positionArr = { ...position };
+        positionArr = [...position];
         positionNum = generateTakeContainerFxidx(this.obj, position);
       }
     }

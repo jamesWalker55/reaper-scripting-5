@@ -67,7 +67,7 @@ export class Track {
         positionArr = parseTrackContainerFxidx(this.obj, position);
         positionNum = position;
       } else {
-        positionArr = { ...position };
+        positionArr = [...position];
         positionNum = generateTrackContainerFxidx(this.obj, position);
       }
     }
