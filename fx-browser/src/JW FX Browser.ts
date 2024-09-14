@@ -101,11 +101,11 @@ function Manager(
         const fx = data.fxMap[uid];
         const fxName = fx.name.toLowerCase();
         for (const keyword of query) {
-          if (fxName.includes(keyword)) {
-            return true;
+          if (!fxName.includes(keyword)) {
+            return false;
           }
         }
-        return false;
+        return true;
       });
     }
 
