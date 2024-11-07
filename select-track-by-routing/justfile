@@ -5,3 +5,6 @@ watch:
 
 build:
     bun "{{tstl}}"
+
+publish:
+    cd .. && just publish select-track-by-routing select-track-by-routing/dist
