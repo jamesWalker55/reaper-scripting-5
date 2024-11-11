@@ -1,0 +1,13 @@
+{
+  "name": "track-names-edit",
+  "module": "src/index.ts",
+  "type": "module",
+  "dependencies": {},
+  "devDependencies": {
+    "json": "link:json.lua",
+    "lua-types": "^2.13.1",
+    "reaper-api": "link:reaper-api",
+    "typescript": "^5.5.3",
+    "typescript-to-lua": "^1.26.0"
+  }
+}
