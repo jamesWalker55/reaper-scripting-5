@@ -44,6 +44,66 @@ enum Param {
   Delta = 32,
 }
 
+class RS5KFileModifier {
+  private readonly fx: FX;
+  private edited: boolean;
+  constructor(fx: FX) {
+    this.fx = fx;
+    this.edited = false;
+  }
+
+  getFile(i: number) {
+    const filename = this.fx.chain.GetNamedConfigParm(
+      this.fx.fxidx,
+      `FILE${i}`,
+    );
+    if (filename === null)
+      throw new Error(`Failed to get file ${i} in RS5K instance`);
+
+    if (filename.length === 0) {
+      // explicitly handle empty strings here
+      // this indicates an empty slot
+      return null;
+    } else {
+      return filename;
+    }
+  }
+
+  deleteFile(i: number) {
+    const rv = this.fx.chain.SetNamedConfigParm(
+      this.fx.fxidx,
+      `-FILE${i}`,
+      "a",
+    );
+    if (!rv) throw new Error(`Failed to delete file ${i} in RS5K instance`);
+
+    this.edited = true;
+  }
+
+  addFile(i: number, path: string) {
+    const rv = this.fx.chain.SetNamedConfigParm(
+      this.fx.fxidx,
+      `+FILE${i}`,
+      path,
+    );
+    if (!rv) throw new Error(`Failed to add file ${i} in RS5K instance`);
+
+    this.edited = true;
+  }
+
+  deleteAllFiles() {
+    const rv = this.fx.chain.SetNamedConfigParm(this.fx.fxidx, `-FILE*`, "a");
+    if (!rv) throw new Error(`Failed to delete all files in RS5K instance`);
+
+    this.edited = true;
+  }
+
+  /** Return whether any mutations to the list have been done */
+  isEdited() {
+    return this.edited;
+  }
+}
+
 export class RS5K {
   fx: FX;
   constructor(fx: FX) {
@@ -95,6 +155,26 @@ export class RS5K {
 
       i += 1;
     }
+  }
+
+  modifyFiles(func: (m: RS5KFileModifier) => void) {
+    const m = new RS5KFileModifier(this.fx);
+
+    let error = null;
+    try {
+      func(m);
+    } catch (e) {
+      error = e;
+    }
+
+    if (m.isEdited()) {
+      // write "DONE" to indicate we're done editing files
+      const rv = this.fx.chain.SetNamedConfigParm(this.fx.fxidx, "DONE", "a");
+      if (!rv)
+        throw new Error(`Failed to finish editing files in RS5K instance`);
+    }
+
+    if (error !== null) throw error;
   }
 
   get mode() {
