@@ -137,7 +137,7 @@ export class RS5K {
    */
   getFiles() {
     let i = 0;
-    const files: (string | null)[] = [];
+    const files: string[] = [];
     while (true) {
       const filename = this.fx.chain.GetNamedConfigParm(
         this.fx.fxidx,
