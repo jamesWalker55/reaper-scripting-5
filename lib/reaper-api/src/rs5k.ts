@@ -97,19 +97,27 @@ export class RS5K {
     }
   }
 
-  getMode(): RS5KMode {
+  get mode() {
     const mode = this.fx.chain.GetNamedConfigParm(this.fx.fxidx, "MODE");
     if (mode === null) throw new Error("Failed to get RS5K mode");
     return mode as RS5KMode;
+  }
+  set mode(x: RS5KMode) {
+    const rv = this.fx.chain.SetNamedConfigParm(this.fx.fxidx, "MODE", x);
+    if (!rv) throw new Error(`Failed to set RS5K mode`);
   }
 
   /**
    * Returns an integer (but formatted as string). "-1" indicates "(project default)".
    */
-  getResampleMode(): string {
+  get resampleMode() {
     const mode = this.fx.chain.GetNamedConfigParm(this.fx.fxidx, "RSMODE");
     if (mode === null) throw new Error("Failed to get RS5K resample mode");
     return mode;
+  }
+  set resampleMode(x: string) {
+    const rv = this.fx.chain.SetNamedConfigParm(this.fx.fxidx, "RSMODE", x);
+    if (!rv) throw new Error(`Failed to set RS5K resample mode`);
   }
 
   /**
