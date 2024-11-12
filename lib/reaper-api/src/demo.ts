@@ -10,6 +10,8 @@ import * as Element from "./element";
 import { deferAsync, errorHandler, log, readFile, writeFile } from "./utils";
 import * as path from "./path/path";
 import { splitlines } from "./utilsLua";
+import { RS5K, RS5KMode } from "./rs5k";
+import { FX } from "./fx";
 
 function measureTime<T>(func: () => T): [number, T] {
   const startTime = os.clock();
@@ -19,6 +21,38 @@ function measureTime<T>(func: () => T): [number, T] {
 }
 
 async function main() {
+  const rs = new RS5K(new FX({track: Track.getSelected()[0].obj}, 0));
+  rs.portamento = 342.4;
+
+  // while (true) {
+  //   for (let i = -80; i <= 80; i++) {
+  //     await deferAsync();
+
+  //     for (const track of Track.getSelected()) {
+  //       log(`id: ${track.getIdx()}`);
+
+  //       const rs = new RS5K(new FX({ track: track.obj }, 0));
+  //       if (!rs.isValid())
+  //         log(`Invalid RS5K instance: Track ${track.getIdx()}, FX ${0}`);
+
+  //       // log(rs.pitchOffset);
+  //       log(rs.temp());
+
+  //       // rs.pitchStart = i;
+  //       // assert(rs.pitchStart === i)
+
+  //       // for (const param of track.getFx(0).getParameters()) {
+  //       //   log(`param ${param.param}:`)
+  //       //   log(inspect(param.getIdent()));
+  //       //   log(inspect(param.getName()));
+  //       //   log(inspect(param.getValue()));
+  //       //   log();
+  //       // }
+  //     }
+  //   }
+  //   log();
+  // }
+
   // while (true) {
   //   await deferAsync();
 
@@ -30,10 +64,10 @@ async function main() {
   //   log("  grid", grid);
   // }
 
-  splitlines("apple")
-  log(path.abspath("Hello, world.txt"));
-  log(`path.join("/", "apple", "foo", "a/")`);
-  log(path.join("/", "apple", "foo", "a/"));
+  // splitlines("apple")
+  // log(path.abspath("Hello, world.txt"));
+  // log(`path.join("/", "apple", "foo", "a/")`);
+  // log(path.join("/", "apple", "foo", "a/"));
   // for (const track of Track.getSelected()) {
   //   for (const item of track.iterItems()) {
   //     const element = Element.parse(Chunk.item(item.obj));

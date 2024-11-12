@@ -295,6 +295,21 @@ export class Track {
     return val;
   }
 
+  setName(name: string) {
+    const [ok, val] = reaper.GetSetMediaTrackInfo_String(
+      this.obj,
+      "P_NAME",
+      name,
+      true,
+    );
+    if (!ok) {
+      // will always fail on master track, check if we are on master track
+      if (this.getIdx() === -1) return;
+
+      throw new Error("failed to set track name");
+    }
+  }
+
   delete() {
     reaper.DeleteTrack(this.obj);
   }
