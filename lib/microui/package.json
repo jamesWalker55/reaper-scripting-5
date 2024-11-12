@@ -13,8 +13,8 @@
     "reaper-api": "link:reaper-api"
   },
   "devDependencies": {
-    "typescript": "^5.4.5",
-    "typescript-to-lua": "^1.25.1",
+    "typescript": "5.6.2",
+    "typescript-to-lua": "^1.27.0",
     "lua-types": "^2.13.1"
   }
 }
