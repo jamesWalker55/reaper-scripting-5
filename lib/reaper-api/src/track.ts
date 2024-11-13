@@ -586,7 +586,7 @@ export enum TrackSendAutomationMode {
   Latch = 4,
 }
 
-module TrackRouting {
+namespace TrackRouting {
   export function parseMidiFlags(flags: number) {
     const first5bits = flags & 0b0000011111;
     const midiSendDisabled = first5bits === 0b11111;
