@@ -91,7 +91,10 @@ export function msgBox(title: string, msg: string) {
  * 16: freeze states
  * ```
  */
-export function undoBlock(func: () => { desc: string; flags: number }) {
+export function undoBlock(
+  func: () => { desc: string; flags: number },
+  errorDesc: string,
+) {
   reaper.Undo_BeginBlock2(0);
   reaper.PreventUIRefresh(1);
 
@@ -103,7 +106,7 @@ export function undoBlock(func: () => { desc: string; flags: number }) {
     desc = config.desc;
     flags = config.flags;
   } catch (e) {
-    desc = "";
+    desc = errorDesc || "";
     flags = -1;
     error = e;
   }
@@ -222,5 +225,24 @@ export function getReaperDataFile(filename?: string) {
     return path.normpath(path.join(parentDir, filename));
   } else {
     return path.normpath(parentDir);
+  }
+}
+
+export function runMainAction(action: number | string, project?: ReaProject) {
+  if (typeof action === "string") action = reaper.NamedCommandLookup(action);
+
+  reaper.Main_OnCommandEx(action, 0, project || 0);
+}
+
+export function runMidiAction(
+  action: number | string,
+  target?: { hwnd: HWND } | { listview: boolean },
+) {
+  if (typeof action === "string") action = reaper.NamedCommandLookup(action);
+
+  if (target !== undefined && "hwnd" in target) {
+    reaper.MIDIEditor_OnCommand(target.hwnd, action);
+  } else {
+    reaper.MIDIEditor_LastFocused_OnCommand(action, target?.listview || false);
   }
 }
