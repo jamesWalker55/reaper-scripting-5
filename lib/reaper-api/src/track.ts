@@ -408,10 +408,10 @@ export class Item {
     return reaper.GetMediaItemInfo_Value(this.obj, "D_LENGTH");
   }
 
-  // getTrack(): Track {
-  //   const obj = reaper.GetMediaItemTrack(this.obj);
-  //   return new Track(obj);
-  // }
+  getTrack(): Track {
+    const obj = reaper.GetMediaItemTrack(this.obj);
+    return new Track(obj);
+  }
 }
 
 export class Take {
@@ -509,6 +509,16 @@ export class Take {
     //   parsedPos.push(newSubposition);
     //   return generateTakeContainerFxidx(this.obj, parsedPos);
     // }
+  }
+
+  getItem(): Item {
+    const obj = reaper.GetMediaItemTake_Item(this.obj);
+    return new Item(obj);
+  }
+
+  getTrack(): Track {
+    const obj = reaper.GetMediaItemTake_Track(this.obj);
+    return new Track(obj);
   }
 }
 
