@@ -2323,7 +2323,7 @@ declare namespace reaper {
    * ```
    * Returns the parent source, or NULL if src is the root source. This can be used to retrieve the parent properties of sections or reversed sources for example.
    */
-  function GetMediaSourceParent(src: PCM_source): PCM_source;
+  function GetMediaSourceParent(src: PCM_source): PCM_source | null;
 
   /**
    * ```

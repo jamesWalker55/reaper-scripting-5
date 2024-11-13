@@ -387,7 +387,11 @@ export class Item {
       rv = reaper.SetMediaItemInfo_Value(this.obj, "I_CUSTOMCOLOR", 0);
     } else {
       const color = reaper.ColorToNative(x.r, x.g, x.b);
-      rv = reaper.SetMediaItemInfo_Value(this.obj, "I_CUSTOMCOLOR", 0x1000000 | color);
+      rv = reaper.SetMediaItemInfo_Value(
+        this.obj,
+        "I_CUSTOMCOLOR",
+        0x1000000 | color,
+      );
     }
     if (!rv) throw new Error(`failed to set item color to ${inspect(x)}`);
   }
@@ -674,9 +678,15 @@ export class Source {
     return reaper.GetMediaSourceType(this.obj);
   }
 
-  /** Note that in-project MIDI media sources have no associated filename. */
+  /**
+   * Get the filename. If the item is reversed / is a section, this will error.
+   * Use `getParent()` to get the root source first.
+   */
   getFilename() {
-    return reaper.GetMediaSourceFileName(this.obj);
+    const name = reaper.GetMediaSourceFileName(this.obj);
+    if (name.length === 0) throw new Error("failed to get PCM_source filename");
+
+    return name;
   }
 
   /** Return the length in seconds. Errors if source is beat-based. */
@@ -693,6 +703,19 @@ export class Source {
     if (!isQuarterNotes)
       throw new Error("source is seconds-based, does not have length in beats");
     return length;
+  }
+
+  getParent() {
+    const parent = reaper.GetMediaSourceParent(this.obj);
+    if (parent === null) return null;
+
+    return new Source(parent);
+  }
+
+  getSectionInfo() {
+    const [isSection, offset, length, reversed] =
+      reaper.PCM_Source_GetSectionInfo(this.obj);
+    return { isSection, offset, length, reversed };
   }
 }
 
