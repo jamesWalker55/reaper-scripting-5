@@ -12,6 +12,7 @@ import * as path from "./path/path";
 import { splitlines } from "./utilsLua";
 import { RS5K, RS5KMode } from "./rs5k";
 import { FX } from "./fx";
+import { parseBuf } from "./midibuf";
 
 function measureTime<T>(func: () => T): [number, T] {
   const startTime = os.clock();
@@ -21,17 +22,25 @@ function measureTime<T>(func: () => T): [number, T] {
 }
 
 async function main() {
-  const rs = new RS5K(new FX({ track: Track.getSelected()[0].obj }, 0));
-  rs.portamento = 342.4;
-  rs.modifyFiles((m) => {
-    m.deleteAllFiles();
-    const path1 =
-      "d:\\Audio Samples\\Packs\\MusicRadar - Guitar Bass Samples\\Guitar Loops\\Gentle Riffs\\Sharp_Strummin.wav";
-    m.addFile(5, path1);
-    const path2 =
-      "d:\\Audio Samples\\Packs\\MusicRadar - Guitar Bass Samples\\Guitar Loops\\Gentle Riffs\\Real_Nice_Strum_A.wav";
-    m.addFile(5, path2);
-  });
+  // log("Hello world!")
+  const [rv, buf] = reaper.MIDI_GetAllEvts(
+    Item.getSelected()[0].activeTake()!.obj,
+  );
+  const x = parseBuf(buf);
+  log(`x: ${inspect(x)}`);
+  // log(inspect(buf))
+
+  // const rs = new RS5K(new FX({ track: Track.getSelected()[0].obj }, 0));
+  // rs.portamento = 342.4;
+  // rs.modifyFiles((m) => {
+  //   m.deleteAllFiles();
+  //   const path1 =
+  //     "d:\\Audio Samples\\Packs\\MusicRadar - Guitar Bass Samples\\Guitar Loops\\Gentle Riffs\\Sharp_Strummin.wav";
+  //   m.addFile(5, path1);
+  //   const path2 =
+  //     "d:\\Audio Samples\\Packs\\MusicRadar - Guitar Bass Samples\\Guitar Loops\\Gentle Riffs\\Real_Nice_Strum_A.wav";
+  //   m.addFile(5, path2);
+  // });
 
   // while (true) {
   //   for (let i = -80; i <= 80; i++) {
