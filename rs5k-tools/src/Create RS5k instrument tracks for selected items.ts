@@ -79,6 +79,8 @@ function main() {
         reaper.InsertTrackInProject(0, targetTrackIdx, 0);
         const targetTrack = Track.getByIdx(targetTrackIdx);
 
+        targetTrack.setName(take.name);
+
         // add sampler for this item
         {
           const fxpos = targetTrack.addFx({ vst: "ReaSamplOmatic5000" });
