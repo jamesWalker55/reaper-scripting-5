@@ -37,7 +37,7 @@ declare type MediaItem_Take = { readonly [opaqueTypeTag]: "MediaItem_Take" };
 declare type MediaTrack = { readonly [opaqueTypeTag]: "MediaTrack" };
 declare type PCM_source = { readonly [opaqueTypeTag]: "PCM_source" };
 declare type PackageEntry = { readonly [opaqueTypeTag]: "PackageEntry" };
-declare type ReaProject = { readonly [opaqueTypeTag]: "ReaProject" };
+declare type ReaProject = { readonly [opaqueTypeTag]: "ReaProject" } | 0;
 declare type RprMidiNote = { readonly [opaqueTypeTag]: "RprMidiNote" };
 declare type RprMidiTake = { readonly [opaqueTypeTag]: "RprMidiTake" };
 declare type TrackEnvelope = { readonly [opaqueTypeTag]: "TrackEnvelope" };
@@ -392,7 +392,7 @@ declare namespace reaper {
    * ```
    * count the number of selected items in the project (proj=0 for active project)
    */
-  function CountSelectedMediaItems(proj: ReaProject | 0): number;
+  function CountSelectedMediaItems(proj: ReaProject): number;
 
   /**
    * ```
@@ -2728,7 +2728,7 @@ declare namespace reaper {
    * get a selected item by selected item count (zero-based) (proj=0 for active project)
    */
   function GetSelectedMediaItem(
-    proj: ReaProject | 0,
+    proj: ReaProject,
     selitem: number,
   ): MediaItem;
 
@@ -2997,7 +2997,7 @@ declare namespace reaper {
    * Get or set the arrange view grid division. 0.25=quarter note, 1.0/3.0=half note triplet, etc. swingmode can be 1 for swing enabled, swingamt is -1..1. swingmode can be 3 for measure-grid. Returns grid configuration flags
    */
   function GetSetProjectGrid(
-    project: ReaProject | 0,
+    project: ReaProject,
     set: boolean,
     division?: number,
     swingmode?: number,
