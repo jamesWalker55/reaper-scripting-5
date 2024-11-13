@@ -375,37 +375,74 @@ export class Item {
     return count === 0;
   }
 
-  getColor(): { r: number; g: number; b: number } | null {
-    const color = reaper.GetMediaItemInfo_Value(this.obj, "I_CUSTOMCOLOR");
-    if (color === 0) return null;
-
-    const [r, g, b] = reaper.ColorFromNative(color);
+  get color() {
+    const x = reaper.GetMediaItemInfo_Value(this.obj, "I_CUSTOMCOLOR");
+    if (x === 0) return null;
+    const [r, g, b] = reaper.ColorFromNative(x);
     return { r, g, b };
   }
-
-  setColor(color: { r: number; g: number; b: number } | null) {
-    const newColor: number =
-      color !== null
-        ? reaper.ColorToNative(color.r, color.g, color.b) | 0x01000000
-        : 0;
-    const rv = reaper.SetMediaItemInfo_Value(
-      this.obj,
-      "I_CUSTOMCOLOR",
-      newColor,
-    );
-    if (!rv) throw new Error(`failed to set item color to ${inspect(color)}`);
+  set color(x: { r: number; g: number; b: number } | null) {
+    let rv: boolean;
+    if (x === null) {
+      rv = reaper.SetMediaItemInfo_Value(this.obj, "I_CUSTOMCOLOR", 0);
+    } else {
+      const color = reaper.ColorToNative(x.r, x.g, x.b);
+      rv = reaper.SetMediaItemInfo_Value(this.obj, "I_CUSTOMCOLOR", 0x1000000 | color);
+    }
+    if (!rv) throw new Error(`failed to set item color to ${inspect(x)}`);
   }
 
-  getPosition(): number {
+  /** Item position in seconds. */
+  get position() {
     return reaper.GetMediaItemInfo_Value(this.obj, "D_POSITION");
   }
-
-  getSnapOffset(): number {
-    return reaper.GetMediaItemInfo_Value(this.obj, "D_SNAPOFFSET");
+  set position(x: number) {
+    const rv = reaper.SetMediaItemInfo_Value(this.obj, "D_POSITION", x);
+    if (!rv) throw new Error(`failed to set item position`);
   }
 
-  getLength(): number {
+  /** Item snapOffset in seconds. */
+  get snapOffset() {
+    return reaper.GetMediaItemInfo_Value(this.obj, "D_SNAPOFFSET");
+  }
+  set snapOffset(x: number) {
+    const rv = reaper.SetMediaItemInfo_Value(this.obj, "D_SNAPOFFSET", x);
+    if (!rv) throw new Error(`failed to set item snap offset`);
+  }
+
+  /** Item length in seconds. */
+  get length() {
     return reaper.GetMediaItemInfo_Value(this.obj, "D_LENGTH");
+  }
+  set length(x: number) {
+    const rv = reaper.SetMediaItemInfo_Value(this.obj, "D_LENGTH", x);
+    if (!rv) throw new Error(`failed to set item length`);
+  }
+
+  get volume() {
+    return reaper.GetMediaItemInfo_Value(this.obj, "D_VOL");
+  }
+  set volume(x: number) {
+    const rv = reaper.SetMediaItemInfo_Value(this.obj, "D_VOL", x);
+    if (!rv) throw new Error(`failed to set item volume`);
+  }
+
+  /** Fade-in length in seconds. */
+  get fadeInLength() {
+    return reaper.GetMediaItemInfo_Value(this.obj, "D_FADEINLEN");
+  }
+  set fadeInLength(x: number) {
+    const rv = reaper.SetMediaItemInfo_Value(this.obj, "D_FADEINLEN", x);
+    if (!rv) throw new Error(`failed to set item fade-in length`);
+  }
+
+  /** Fade-out length in seconds. */
+  get fadeOutLength() {
+    return reaper.GetMediaItemInfo_Value(this.obj, "D_FADEOUTLEN");
+  }
+  set fadeOutLength(x: number) {
+    const rv = reaper.SetMediaItemInfo_Value(this.obj, "D_FADEOUTLEN", x);
+    if (!rv) throw new Error(`failed to set item fade-out length`);
   }
 
   getTrack(): Track {
@@ -431,19 +468,8 @@ export class Take {
     return type === "MIDI" || type === "MIDIPOOL";
   }
 
-  source() {
+  getSource() {
     return new Source(reaper.GetMediaItemTake_Source(this.obj));
-  }
-
-  getName(): string {
-    const [ok, rv] = reaper.GetSetMediaItemTakeInfo_String(
-      this.obj,
-      "P_NAME",
-      "",
-      false,
-    );
-    if (!ok) throw new Error("failed to get name of take");
-    return rv;
   }
 
   getFxCount() {
@@ -520,6 +546,89 @@ export class Take {
     const obj = reaper.GetMediaItemTake_Track(this.obj);
     return new Track(obj);
   }
+
+  getStretchMarkerCount() {
+    return reaper.GetTakeNumStretchMarkers(this.obj);
+  }
+
+  get name() {
+    const [ok, rv] = reaper.GetSetMediaItemTakeInfo_String(
+      this.obj,
+      "P_NAME",
+      "",
+      false,
+    );
+    if (!ok) throw new Error("failed to get take name");
+    return rv;
+  }
+  set name(x: string) {
+    const [ok, rv] = reaper.GetSetMediaItemTakeInfo_String(
+      this.obj,
+      "P_NAME",
+      x,
+      true,
+    );
+    if (!ok) throw new Error("failed to set take name");
+  }
+
+  /** Start offset in source media, in seconds */
+  get sourceStartOffset() {
+    const x = reaper.GetMediaItemTakeInfo_Value(this.obj, "D_STARTOFFS");
+    return x;
+  }
+  set sourceStartOffset(x: number) {
+    const ok = reaper.SetMediaItemTakeInfo_Value(this.obj, "D_STARTOFFS", x);
+    if (!ok) throw new Error("failed to set take source start offset");
+  }
+
+  get volume() {
+    const x = reaper.GetMediaItemTakeInfo_Value(this.obj, "D_VOL");
+    return x;
+  }
+  set volume(x: number) {
+    const ok = reaper.SetMediaItemTakeInfo_Value(this.obj, "D_VOL", x);
+    if (!ok) throw new Error("failed to set take volume");
+  }
+
+  get pan() {
+    const x = reaper.GetMediaItemTakeInfo_Value(this.obj, "D_PAN");
+    return x;
+  }
+  set pan(x: number) {
+    const ok = reaper.SetMediaItemTakeInfo_Value(this.obj, "D_PAN", x);
+    if (!ok) throw new Error("failed to set take pan");
+  }
+
+  get playrate() {
+    const x = reaper.GetMediaItemTakeInfo_Value(this.obj, "D_PLAYRATE");
+    return x;
+  }
+  set playrate(x: number) {
+    const ok = reaper.SetMediaItemTakeInfo_Value(this.obj, "D_PLAYRATE", x);
+    if (!ok) throw new Error("failed to set take playrate");
+  }
+
+  get pitch() {
+    const x = reaper.GetMediaItemTakeInfo_Value(this.obj, "D_PITCH");
+    return x;
+  }
+  set pitch(x: number) {
+    const ok = reaper.SetMediaItemTakeInfo_Value(this.obj, "D_PITCH", x);
+    if (!ok) throw new Error("failed to set take pitch");
+  }
+
+  get preservePitch() {
+    const x = reaper.GetMediaItemTakeInfo_Value(this.obj, "D_PITCH") !== 0;
+    return x;
+  }
+  set preservePitch(x: boolean) {
+    const ok = reaper.SetMediaItemTakeInfo_Value(
+      this.obj,
+      "D_PITCH",
+      x ? 1 : 0,
+    );
+    if (!ok) throw new Error("failed to set take preserve pitch");
+  }
 }
 
 export class MidiTake {
@@ -563,6 +672,27 @@ export class Source {
 
   type() {
     return reaper.GetMediaSourceType(this.obj);
+  }
+
+  /** Note that in-project MIDI media sources have no associated filename. */
+  getFilename() {
+    return reaper.GetMediaSourceFileName(this.obj);
+  }
+
+  /** Return the length in seconds. Errors if source is beat-based. */
+  getLength() {
+    const [length, isQuarterNotes] = reaper.GetMediaSourceLength(this.obj);
+    if (isQuarterNotes)
+      throw new Error("source is beat-based, does not have length in seconds");
+    return length;
+  }
+
+  /** Return the length in beats. Errors if source is seconds-based. */
+  getBeatLength() {
+    const [length, isQuarterNotes] = reaper.GetMediaSourceLength(this.obj);
+    if (!isQuarterNotes)
+      throw new Error("source is seconds-based, does not have length in beats");
+    return length;
   }
 }
 

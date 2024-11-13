@@ -31,8 +31,8 @@ function main() {
         for (const item of items) {
           // save current state
           // select item
-          const pos = item.getPosition();
-          const len = item.getLength();
+          const pos = item.position;
+          const len = item.length;
           setTimeSelection(pos, pos + len);
 
           log(`  item at ${pos}s:`);
@@ -67,7 +67,7 @@ function main() {
                 `Expected item on track ${renderedTrackIdx} to be audio`,
               );
           }
-          log(`    rendered item pos = ${renderedItem.getPosition()}`);
+          log(`    rendered item pos = ${renderedItem.position}`);
 
           if (outputTrack === null) {
             // keep this track
