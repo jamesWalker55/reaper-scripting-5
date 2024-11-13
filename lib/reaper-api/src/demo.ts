@@ -2,9 +2,8 @@ AddCwdToImportPaths();
 
 import { encode } from "json";
 import { inspect } from "./inspect";
-import { getProjectRoutingInfo, Track } from "./track";
+import { getProjectRoutingInfo, Item, Track } from "./track";
 import { copy } from "./clipboard";
-import { Item, MidiTake } from "./item";
 import * as Chunk from "./chunk";
 import * as Element from "./element";
 import { deferAsync, errorHandler, log, readFile, writeFile } from "./utils";

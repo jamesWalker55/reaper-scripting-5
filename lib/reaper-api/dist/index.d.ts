@@ -7,7 +7,6 @@
 /// <reference path="./ini.d.ts" />
 /// <reference path="./inspect.d.ts" />
 /// <reference path="./installedFx.d.ts" />
-/// <reference path="./item.d.ts" />
 /// <reference path="./menu.d.ts" />
 /// <reference path="./midibuf.d.ts" />
 /// <reference path="./project.d.ts" />
