@@ -4863,7 +4863,7 @@ declare namespace reaper {
     midieditor: HWND,
     takeindex: number,
     editable_only: boolean,
-  ): MediaItem_Take;
+  ): MediaItem_Take | null;
 
   /**
    * ```
