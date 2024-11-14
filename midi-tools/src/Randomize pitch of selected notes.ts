@@ -19,9 +19,59 @@ function randInt(min: number, max: number) {
   return rangeRand + min;
 }
 
-function randomize(
-  minChannel: number,
-  maxChannel: number,
+function getPitchRangeFromSelection() {
+  const hwnd = reaper.MIDIEditor_GetActive();
+  if (hwnd === null) {
+    msgBox("Error", "No active MIDI editor!");
+    return null;
+  }
+
+  let minPitch: number | null = null;
+  let maxPitch: number | null = null;
+
+  let takeIdx = 0;
+  while (true) {
+    const take = reaper.MIDIEditor_EnumTakes(hwnd, takeIdx, true);
+    if (take === null) break;
+
+    let noteIdx = 0;
+    while (true) {
+      let [rv, selected, muted, startppqpos, endppqpos, chan, pitch, vel] =
+        reaper.MIDI_GetNote(take, noteIdx);
+      if (!rv) break;
+
+      if (selected) {
+        if (minPitch === null) {
+          minPitch = pitch;
+        } else {
+          minPitch = Math.min(minPitch, pitch);
+        }
+        if (maxPitch === null) {
+          maxPitch = pitch;
+        } else {
+          maxPitch = Math.max(maxPitch, pitch);
+        }
+      }
+
+      noteIdx += 1;
+    }
+
+    takeIdx += 1;
+  }
+
+  if (minPitch === null || maxPitch === null) {
+    return null;
+  } else {
+    return {
+      min: minPitch,
+      max: maxPitch,
+    };
+  }
+}
+
+function randomizePitch(
+  minPitch: number,
+  maxPitch: number,
   selectedOnly: boolean,
 ) {
   const hwnd = reaper.MIDIEditor_GetActive();
@@ -35,7 +85,7 @@ function randomize(
     const take = reaper.MIDIEditor_EnumTakes(hwnd, i, true);
     if (take === null) break;
 
-    randomizeTake(take, minChannel, maxChannel, selectedOnly);
+    randomizeTakePitch(take, minPitch, maxPitch, selectedOnly);
 
     i += 1;
   }
@@ -50,10 +100,10 @@ function randomize(
   }
 }
 
-function randomizeTake(
+function randomizeTakePitch(
   take: MediaItem_Take,
-  minChannel: number,
-  maxChannel: number,
+  minPitch: number,
+  maxPitch: number,
   selectedOnly: boolean,
 ) {
   let i = 0;
@@ -63,8 +113,7 @@ function randomizeTake(
     if (!rv) break;
 
     if ((selectedOnly && selected) || !selectedOnly) {
-      // channels are indexed from 0
-      chan = randInt(minChannel, maxChannel) - 1;
+      pitch = randInt(minPitch, maxPitch);
     }
 
     reaper.MIDI_SetNote(
@@ -89,12 +138,12 @@ function randomizeTake(
 function main() {
   // parameters
   let selectedNotesOnly = true;
-  let minChannel = 1;
-  let maxChannel = 16;
+  let minPitch = 0;
+  let maxPitch = 127;
 
   // gui code
   const ctx = createContext();
-  gfx.init("Randomize note channels", 200, 150);
+  gfx.init("Randomize note pitch", 400, 170);
   gfx.setfont(1, "Arial", 14);
   ctx.style.font = 1;
 
@@ -114,21 +163,29 @@ function main() {
       }
 
       ctx.layoutRow([-1], 0);
-      ctx.text(
-        "Randomize the MIDI channel of notes in the active MIDI editor.",
-      );
+      ctx.text("Randomize the pitch of notes in the active MIDI editor.");
 
       // channel range sliders
       {
-        ctx.layoutRow([90, -1], 0);
+        ctx.layoutRow([60, -1], 0);
 
-        ctx.label("Min. channel");
-        minChannel = ctx.slider("minChannel", minChannel, 1, 16, 1, "%d");
-        ctx.label("Max. channel");
-        maxChannel = ctx.slider("maxChannel", maxChannel, 1, 16, 1, "%d");
+        ctx.label("Min. pitch");
+        minPitch = ctx.slider("minPitch", minPitch, 0, 127, 1, "%d");
+        ctx.label("Max. pitch");
+        maxPitch = ctx.slider("maxPitch", maxPitch, 0, 127, 1, "%d");
 
-        minChannel = Math.max(1, Math.min(minChannel, maxChannel));
-        maxChannel = Math.max(minChannel, Math.min(maxChannel, 16));
+        ctx.layoutNext();
+
+        if (ctx.button("Get pitch range from selected notes")) {
+          const selection = getPitchRangeFromSelection();
+          if (selection !== null) {
+            minPitch = selection.min;
+            maxPitch = selection.max;
+          }
+        }
+
+        minPitch = Math.max(1, Math.min(minPitch, maxPitch));
+        maxPitch = Math.max(minPitch, Math.min(maxPitch, 127));
       }
 
       ctx.layoutRow([-1], 0);
@@ -140,7 +197,7 @@ function main() {
 
       if (ctx.button("Randomize!")) {
         undoBlock(() => {
-          randomize(minChannel, maxChannel, selectedNotesOnly);
+          randomizePitch(minPitch, maxPitch, selectedNotesOnly);
           return { desc: SCRIPT_NAME, flags: -1 };
         }, SCRIPT_NAME);
       }
