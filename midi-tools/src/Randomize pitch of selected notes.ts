@@ -10,6 +10,30 @@ const SCRIPT_NAME = (() => {
   return Path.splitext(Path.split(filename)[1])[0];
 })();
 
+function getNoteName(val: number) {
+  const NOTE_NAMES = [
+    "C",
+    "C#",
+    "D",
+    "D#",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "G#",
+    "A",
+    "A#",
+    "B",
+  ];
+
+  // pitch in range 0 <= x < 12
+  const pitch = val % 12;
+  // octave in range -1 <= x <= 9
+  const octave = Math.floor(val / 12) - 1;
+
+  return `${NOTE_NAMES[pitch]}${string.format("%d", octave)}`;
+}
+
 /** Random integer in range `min..=max` (inclusive) */
 function randInt(min: number, max: number) {
   const rangeRand = math.min(
@@ -91,6 +115,7 @@ function randomizePitch(
   }
 
   // random code to make reaper create an undo point
+  // https://forum.cockos.com/showthread.php?t=185118
   {
     const take = new Take(reaper.MIDIEditor_GetTake(hwnd));
     const item = take.getItem();
@@ -143,7 +168,7 @@ function main() {
 
   // gui code
   const ctx = createContext();
-  gfx.init("Randomize note pitch", 400, 170);
+  gfx.init("Randomize note pitch", 460, 170);
   gfx.setfont(1, "Arial", 14);
   ctx.style.font = 1;
 
@@ -167,12 +192,15 @@ function main() {
 
       // channel range sliders
       {
-        ctx.layoutRow([60, -1], 0);
+        ctx.layoutRow([60, -42, -1], 0);
 
         ctx.label("Min. pitch");
         minPitch = ctx.slider("minPitch", minPitch, 0, 127, 1, "%d");
+        ctx.label(getNoteName(minPitch));
+
         ctx.label("Max. pitch");
         maxPitch = ctx.slider("maxPitch", maxPitch, 0, 127, 1, "%d");
+        ctx.label(getNoteName(maxPitch));
 
         ctx.layoutNext();
 

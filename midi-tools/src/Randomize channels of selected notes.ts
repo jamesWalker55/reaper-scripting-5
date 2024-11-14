@@ -41,6 +41,7 @@ function randomize(
   }
 
   // random code to make reaper create an undo point
+  // https://forum.cockos.com/showthread.php?t=185118
   {
     const take = new Take(reaper.MIDIEditor_GetTake(hwnd));
     const item = take.getItem();
