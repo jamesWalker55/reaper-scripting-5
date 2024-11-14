@@ -1349,7 +1349,8 @@ export class Context<Font> {
     ) {
       value = low + ((this.mousePos.x - base.x) * (high - low)) / base.w;
       if (step !== null && step !== 0) {
-        value = ((value + step / 2) / step) * step;
+        value = Math.round((value - low) / step) * step + low;
+        value = Math.max(low, Math.min(value, high))
       }
     }
     // clamp and store value, update res
