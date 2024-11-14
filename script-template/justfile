@@ -5,3 +5,6 @@ watch:
 
 build:
     bun "{{tstl}}"
+
+publish:
+    cd .. && just publish YOUR_SCRIPT_NAME YOUR_SCRIPT_NAME/dist

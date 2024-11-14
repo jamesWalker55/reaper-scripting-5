@@ -76,7 +76,12 @@ export function deferAsync(): Promise<void> {
 }
 
 export function msgBox(title: string, msg: string) {
-  return reaper.ShowMessageBox(msg, title, 0);
+  reaper.ShowMessageBox(msg, title, 0);
+}
+
+export function confirmBox(title: string, msg: string) {
+  const rv = reaper.ShowMessageBox(msg, title, 4);
+  return rv === 6;
 }
 
 /**
@@ -218,9 +223,7 @@ export function getReaperVersion() {
 }
 
 export function getReaperDataFile(filename?: string) {
-  const reaperIniPath = reaper.get_ini_file();
-  // assume base dir is parent directory of ini path
-  const parentDir = path.split(reaperIniPath)[0];
+  const parentDir = reaper.GetResourcePath();
   if (filename) {
     return path.normpath(path.join(parentDir, filename));
   } else {
