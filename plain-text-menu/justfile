@@ -9,3 +9,6 @@ watch-script:
 build:
     bun "{{tstl}}"
     bun "{{tstl}}" -p tsconfig.script.json
+
+publish:
+    cd .. && just publish plain-text-menu plain-text-menu/dist
