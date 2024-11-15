@@ -2,12 +2,7 @@ AddCwdToImportPaths();
 
 import * as Path from "reaper-api/path/path";
 import { Item, Take, Track } from "reaper-api/track";
-import {
-  assertUnreachable,
-  errorHandler,
-  log,
-  undoBlock,
-} from "reaper-api/utils";
+import { assertUnreachable, errorHandler, undoBlock } from "reaper-api/utils";
 import { createContext, microUILoop, Option } from "reaper-microui";
 
 const SCRIPT_NAME = (() => {
@@ -312,7 +307,6 @@ function main() {
         ctx.layoutNext();
         if (ctx.button("Load samples from selection")) {
           samples = getSamples(sampleImportPitch);
-          log(samples);
         }
 
         // ctx.label("Samples loaded:");
