@@ -97,22 +97,23 @@ export function confirmBox(title: string, msg: string) {
  * ```
  */
 export function undoBlock(
-  func: () => { desc: string; flags: number },
-  errorDesc: string,
+  desc: string,
+  flags: number,
+  func: () => { desc?: string; flags?: number } | void,
 ) {
   reaper.Undo_BeginBlock2(0);
   reaper.PreventUIRefresh(1);
 
-  let desc;
-  let flags;
   let error = null;
   try {
     const config = func();
-    desc = config.desc;
-    flags = config.flags;
+    if (config && config.desc !== undefined) {
+      desc = config.desc;
+    }
+    if (config && config.flags !== undefined) {
+      flags = config.flags;
+    }
   } catch (e) {
-    desc = errorDesc || "";
-    flags = -1;
     error = e;
   }
 
