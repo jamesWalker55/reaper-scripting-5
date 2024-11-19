@@ -1,38 +1,26 @@
 AddCwdToImportPaths();
 
 import * as Path from "reaper-api/path/path";
-import { Item, Take, Track } from "reaper-api/track";
-import { assertUnreachable, errorHandler, undoBlock } from "reaper-api/utils";
+import { Item, MidiTake, Source, Take, Track } from "reaper-api/track";
+import {
+  assertUnreachable,
+  errorHandler,
+  log,
+  undoBlock,
+} from "reaper-api/utils";
 import { createContext, microUILoop, Option } from "reaper-microui";
+
+// constants for finding tracks
+const SAMPLE_TRACK_NAME = "Samples";
+const PITCH_TRACK_NAME = "Samples Pitch";
+const SEQUENCE_TRACK_NAME_PREFIX = "SP: ";
+
+type Result<T, E> = { ok: true; val: T } | { ok: false; err: E };
 
 const SCRIPT_NAME = (() => {
   const filename = reaper.get_action_context()[1];
   return Path.splitext(Path.split(filename)[1])[0];
 })();
-
-function getNoteName(val: number) {
-  const NOTE_NAMES = [
-    "C",
-    "C#",
-    "D",
-    "D#",
-    "E",
-    "F",
-    "F#",
-    "G",
-    "G#",
-    "A",
-    "A#",
-    "B",
-  ];
-
-  // pitch in range 0 <= x < 12
-  const pitch = val % 12;
-  // octave in range -1 <= x <= 9
-  const octave = Math.floor(val / 12) - 1;
-
-  return `${NOTE_NAMES[pitch]}${string.format("%d", octave)}`;
-}
 
 /** Random integer in range `min..=max` (inclusive) */
 function randInt(min: number, max: number) {
@@ -43,33 +31,134 @@ function randInt(min: number, max: number) {
   return rangeRand + min;
 }
 
-/** Get the palette of samples from the selection */
-function getSamples(samplePitch: number) {
-  const result = [];
+function getNotesInTrack(pitchTrack: Track) {
+  const notes = [];
 
-  for (const item of Item.getSelected()) {
-    const take = item.activeTake();
+  for (const item of pitchTrack.iterItems()) {
+    if (item.muted) continue;
+
+    const take = item.activeTake()?.asTypedTake();
     if (!take) continue;
-    if (take.isMidi()) continue;
+    if (take.TYPE !== "MIDI") continue;
+
+    for (const note of take.iterNotes()) {
+      if (note.muted) continue;
+      if (note.vel === 0) continue;
+
+      const startTime = take.tickToProjectTime(note.startTick);
+      const endTime = take.tickToProjectTime(note.endTick);
+
+      notes.push({ ...note, startTime, endTime });
+    }
+  }
+
+  // // sort by start time
+  // notes.sort((a, b) => a.startTime - b.startTime);
+
+  return notes;
+}
+
+type Note = ReturnType<typeof getNotesInTrack>[number];
+
+function mainNoteInTimeRange(
+  notes: Note[],
+  start: number,
+  end: number,
+): Result<Note, "MULTIPLE_NOTES" | "NO_NOTES"> {
+  // filter overlapping notes with time range
+  notes = notes.filter(
+    (x) =>
+      (start <= x.startTime && x.startTime < end) ||
+      (start < x.endTime && x.endTime <= end) ||
+      (x.startTime <= start && end <= x.endTime),
+  );
+
+  // how long the note needs to be (in relation to time range)
+  const THRESHOLD = 0.75;
+
+  const rangeLength = end - start;
+  const minNoteLength = rangeLength * THRESHOLD;
+  notes = notes.filter((x) => x.endTime - x.startTime >= minNoteLength);
+
+  if (notes.length > 1) return { ok: false, err: "MULTIPLE_NOTES" };
+  if (notes.length === 0) return { ok: false, err: "NO_NOTES" };
+
+  return { ok: true, val: notes[0] };
+}
+
+type Sample = {
+  source: Source;
+  name: string;
+  volume: number;
+  pan: number;
+  playrate: number;
+  startOffset: number;
+  endOffset: number;
+  fadeInLength: number;
+  fadeOutLength: number;
+  pitch: number;
+};
+
+function getSamples(
+  sampleTrack: Track,
+  pitchTrack: Track,
+): Result<Sample[], { item: Item; err: "MULTIPLE_NOTES" }> {
+  const notes = getNotesInTrack(pitchTrack);
+
+  const result: Sample[] = [];
+
+  for (const item of sampleTrack.iterItems()) {
+    if (item.muted) continue;
+
+    const take = item.activeTake()?.asTypedTake();
+    if (!take) continue;
+    if (take.TYPE !== "AUDIO") continue;
 
     const source = take.getSource();
 
+    const name = take.name;
     const volume = take.volume * item.volume;
     const pan = take.pan;
     const playrate = take.playrate;
     const startOffset = take.sourceStartOffset;
     const endOffset = startOffset + item.length * take.playrate;
-    // length in source sample seconds
+
+    // length in source sample seconds (assuming playrate === 1.0)
     const fadeInLength = item.fadeInLength * playrate;
     const fadeOutLength = item.fadeOutLength * playrate;
-    // assume all samples have the same pitch as given by `samplePitch`
+
     // absolute pitch, in MIDI terms (i.e. from 0.0 -- 127.0)
-    const pitch =
-      samplePitch -
-      (take.pitch + (take.preservePitch ? 0 : Math.log2(take.playrate) * 12));
+    let pitch: number;
+    {
+      // pitch that is ADDED to the sample by stretching/pitching
+      const pitchOffset =
+        take.pitch + (take.preservePitch ? 0 : Math.log2(take.playrate) * 12);
+
+      // find the MIDI note that represents the pitch for this item
+      const noteResult = mainNoteInTimeRange(
+        notes,
+        item.position,
+        item.position + item.length,
+      );
+      if (!noteResult.ok) {
+        switch (noteResult.err) {
+          case "MULTIPLE_NOTES":
+            return { ok: false, err: { item, err: "MULTIPLE_NOTES" } };
+          case "NO_NOTES":
+            log(`No notes found for sample at ${item.position}s, ignoring...`);
+            continue;
+          default:
+            assertUnreachable(noteResult.err);
+        }
+      }
+      const note = noteResult.val;
+
+      pitch = note.pitch - pitchOffset;
+    }
 
     result.push({
       source,
+      name,
       volume,
       pan,
       playrate,
@@ -81,56 +170,12 @@ function getSamples(samplePitch: number) {
     });
   }
 
-  return result;
+  return { ok: true, val: result };
 }
 
-type Sample = ReturnType<typeof getSamples>[number];
-
-function getItemNotes() {
-  const result = [];
-
-  for (const item of Item.getSelected()) {
-    const take = item.activeTake();
-    if (!take) continue;
-    if (!take.isMidi()) continue;
-
-    const notes = [];
-
-    let i = 0;
-    while (true) {
-      let [rv, selected, muted, startTick, endTick, chan, pitch, vel] =
-        reaper.MIDI_GetNote(take.obj, i);
-      if (!rv) break;
-
-      if (!muted && vel > 0) {
-        const startTime = reaper.MIDI_GetProjTimeFromPPQPos(
-          take.obj,
-          startTick,
-        );
-        const endTime = reaper.MIDI_GetProjTimeFromPPQPos(take.obj, endTick);
-
-        notes.push({
-          startTime,
-          endTime,
-          pitch,
-        });
-      }
-
-      i += 1;
-    }
-
-    result.push({
-      item,
-      take,
-      notes,
-    });
-  }
-
-  return result;
+function getSamplesSmart() {
+  Track.getSelected()[0]
 }
-
-type ItemNotes = ReturnType<typeof getItemNotes>[number];
-type Note = ReturnType<typeof getItemNotes>[number]["notes"][number];
 
 /** What to do about the playrate when pitching up/down */
 enum SamplePitchStyle {
@@ -224,40 +269,168 @@ function createSampleSequence(
   }
 }
 
-function createSampleSequences(
-  allItemNotes: ItemNotes[],
+function clearTrackTimeRange(track: Track, start: number, end: number) {
+  const MIN_ITEM_LENGTH = 0.0005;
+
+  for (const item of track.allItems()) {
+    const itemStart = item.position;
+    const itemEnd = item.position + item.length;
+
+    const itemCompletelyInsideRange = start <= itemStart && itemEnd <= end;
+    const itemHitsRangeStart = itemStart <= start && start < itemEnd;
+    const itemHitsRangeEnd = itemStart < end && end <= itemEnd;
+
+    const itemOverlapsRange =
+      itemCompletelyInsideRange || itemHitsRangeStart || itemHitsRangeEnd;
+    if (!itemOverlapsRange) continue;
+
+    if (itemCompletelyInsideRange) {
+      item.delete();
+    } else if (itemHitsRangeStart && itemHitsRangeEnd) {
+      const right = item.split(end);
+      const mid = item.split(start);
+      const left = item;
+      mid.delete();
+      if (left.length < MIN_ITEM_LENGTH) left.delete();
+      if (right.length < MIN_ITEM_LENGTH) right.delete();
+    } else if (itemHitsRangeStart) {
+      const right = item.split(start);
+      const left = item;
+      right.delete();
+      if (left.length < MIN_ITEM_LENGTH) left.delete();
+    } else if (itemHitsRangeEnd) {
+      const right = item.split(end);
+      const left = item;
+      left.delete();
+      if (right.length < MIN_ITEM_LENGTH) right.delete();
+    } else {
+      throw new Error("unreachable");
+    }
+  }
+}
+
+function sequenceTake(
+  take: MidiTake,
+  samples: Sample[],
+  options: {
+    selectedNotesOnly: boolean;
+    pitch: SamplePitchStyle;
+    extend: SampleExtendStyle;
+  },
+) {
+  const notes = [];
+  for (const note of take.iterNotes()) {
+    if (options.selectedNotesOnly && !note.selected) continue;
+    if (note.muted) continue;
+    if (note.vel === 0) continue;
+
+    const startTime = take.tickToProjectTime(note.startTick);
+    const endTime = take.tickToProjectTime(note.endTick);
+
+    notes.push({ ...note, startTime, endTime });
+  }
+  if (notes.length === 0) return;
+
+  const midiItem = take.getItem();
+  const midiTrack = midiItem.getTrack();
+
+  let seqTrack;
+  {
+    const targetTrackName = SEQUENCE_TRACK_NAME_PREFIX + midiTrack.name;
+    const targetTrackIdx = midiTrack.getIdx() + 1;
+
+    // try to find existing sequence track, found by the name prefix
+    const nextTrack = Track.getByIdx(targetTrackIdx);
+    if (nextTrack.name === targetTrackName) {
+      seqTrack = nextTrack;
+    }
+
+    // no existing sequencing track found, create a new one
+    seqTrack = Track.createAtIdx(targetTrackIdx);
+  }
+
+  if (options.selectedNotesOnly) {
+    // clear each note individually
+    for (const note of notes) {
+      clearTrackTimeRange(seqTrack, note.startTime, note.endTime);
+    }
+  } else {
+    // clear entire time range
+    const itemStart = midiItem.position;
+    const itemEnd = itemStart + midiItem.length;
+    clearTrackTimeRange(seqTrack, itemStart, itemEnd);
+  }
+
+  createSampleSequence(notes, samples, seqTrack, options);
+}
+
+function sequenceSelectedItems(
   samples: Sample[],
   options: {
     pitch: SamplePitchStyle;
     extend: SampleExtendStyle;
   },
 ) {
-  // group itemnotes by track
-  const trackItemNotes: LuaTable<MediaTrack, ItemNotes[]> = new LuaTable();
-  for (const itemNote of allItemNotes) {
-    const track = itemNote.item.getTrack();
+  for (const item of Item.getSelected()) {
+    const take = item.activeTake()?.asTypedTake();
+    if (take === undefined) continue;
+    if (take.TYPE !== "MIDI") continue;
 
-    if (trackItemNotes.get(track.obj) === null)
-      trackItemNotes.set(track.obj, []);
-    const x = trackItemNotes.get(track.obj);
-
-    x.push(itemNote);
-  }
-
-  // sequence the items
-  for (const [trackObj, itemNotes] of trackItemNotes) {
-    const track = new Track(trackObj);
-
-    // create a new track for sequencing
-    const sequencingTrackIdx = track.getIdx() + 1;
-    reaper.InsertTrackInProject(0, sequencingTrackIdx, 0);
-    const sequencingTrack = Track.getByIdx(sequencingTrackIdx);
-
-    for (const itemNote of itemNotes) {
-      createSampleSequence(itemNote.notes, samples, sequencingTrack, options);
-    }
+    sequenceTake(take, samples, { ...options, selectedNotesOnly: false });
   }
 }
+
+// function sequenceSelectedItems(
+//   samples: Sample[],
+//   track: Track,
+//   options: {
+//     pitch: SamplePitchStyle;
+//     extend: SampleExtendStyle;
+//   },
+// ) {
+//   const notes = [];
+//   for (const note of take.iterNotes()) {
+//     if (!note.selected) continue;
+//     if (note.muted) continue;
+//     if (note.vel === 0) continue;
+
+//     const startTime = take.tickToProjectTime(note.startTick);
+//     const endTime = take.tickToProjectTime(note.endTick);
+
+//     notes.push({ ...note, startTime, endTime });
+//   }
+//   if (notes.length === 0) return;
+
+//   // TODO: Clear out area in target track
+
+//   return createSampleSequence(notes, samples, track, options);
+// }
+
+// function createSampleSequences(
+//   take: MidiTake,
+//   samples: Sample[],
+//   options: {
+//     selectedNotesOnly: boolean;
+//     pitch: SamplePitchStyle;
+//     extend: SampleExtendStyle;
+//   },
+// ) {
+//   const notes = take.allNotes().filter(x => !options.selectedNotesOnly || x.selected);
+
+//   // sequence the items
+//   for (const [trackObj, itemNotes] of trackItemNotes) {
+//     const track = new Track(trackObj);
+
+//     // create a new track for sequencing
+//     const sequencingTrackIdx = track.getIdx() + 1;
+//     reaper.InsertTrackInProject(0, sequencingTrackIdx, 0);
+//     const sequencingTrack = Track.getByIdx(sequencingTrackIdx);
+
+//     for (const itemNote of itemNotes) {
+//       createSampleSequence(itemNote.notes, samples, sequencingTrack, options);
+//     }
+//   }
+// }
 
 function main() {
   // parameters

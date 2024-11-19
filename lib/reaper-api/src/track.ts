@@ -58,6 +58,22 @@ export class Track {
     return result;
   }
 
+  static createAtLastPosition() {
+    reaper.InsertTrackInProject(0, -1, 0);
+    const totalTracks = reaper.CountTracks(0);
+    return Track.getByIdx(totalTracks - 1);
+  }
+
+  static createAtIdx(idx: number) {
+    const totalTracks = reaper.CountTracks(0);
+    if (!(0 <= idx && idx < totalTracks))
+      throw new Error(`Track index out of bounds (${totalTracks}): ${idx}`);
+
+    // create at index
+    reaper.InsertTrackInProject(0, idx, 0);
+    return Track.getByIdx(idx);
+  }
+
   /** Returns new position if success, otherwise return nil */
   addFx(fx: AddFxParams, position?: number | number[]) {
     const fxname = stringifyAddFxParams(fx);
@@ -281,7 +297,7 @@ export class Track {
     return result;
   }
 
-  getName() {
+  get name() {
     const [ok, val] = reaper.GetSetMediaTrackInfo_String(
       this.obj,
       "P_NAME",
@@ -296,8 +312,7 @@ export class Track {
     }
     return val;
   }
-
-  setName(name: string) {
+  set name(name: string) {
     const [ok, val] = reaper.GetSetMediaTrackInfo_String(
       this.obj,
       "P_NAME",
@@ -336,6 +351,14 @@ export class Track {
       yield new Item(item);
     }
   }
+
+  allItems() {
+    const result = [];
+    for (const item of this.iterItems()) {
+      result.push(item);
+    }
+    return result;
+  }
 }
 
 export class Item {
@@ -373,6 +396,23 @@ export class Item {
   isEmpty() {
     const count = reaper.GetMediaItemNumTakes(this.obj);
     return count === 0;
+  }
+
+  /**
+   * Split the item at the position. Current item will become left
+   * item, and the right item will be returned.
+   */
+  split(pos: number): Item {
+    const rightItem = reaper.SplitMediaItem(this.obj, pos);
+    if (rightItem === null)
+      throw new Error(`failed to split item at position ${pos}s`);
+    return new Item(rightItem);
+  }
+
+  delete() {
+    const track = this.getTrack();
+    const rv = reaper.DeleteTrackMediaItem(track.obj, this.obj);
+    if (!rv) throw new Error("failed to delete item");
   }
 
   get color() {
@@ -449,6 +489,18 @@ export class Item {
     if (!rv) throw new Error(`failed to set item fade-out length`);
   }
 
+  get muted() {
+    return reaper.GetMediaItemInfo_Value(this.obj, "B_MUTE_ACTUAL") !== 0;
+  }
+  set muted(x: boolean) {
+    const rv = reaper.SetMediaItemInfo_Value(
+      this.obj,
+      "B_MUTE_ACTUAL",
+      x ? 1 : 0,
+    );
+    if (!rv) throw new Error(`failed to set item muted`);
+  }
+
   getTrack(): Track {
     const obj = reaper.GetMediaItemTrack(this.obj);
     return new Track(obj);
@@ -470,6 +522,14 @@ export class Take {
   isMidi() {
     const type = this.type();
     return type === "MIDI" || type === "MIDIPOOL";
+  }
+
+  asTypedTake(): MidiTake | AudioTake {
+    if (this.isMidi()) {
+      return new MidiTake(this.obj);
+    } else {
+      return new AudioTake(this.obj);
+    }
   }
 
   getSource() {
@@ -635,12 +695,8 @@ export class Take {
   }
 }
 
-export class MidiTake {
-  obj: MediaItem_Take;
-
-  constructor(obj: MediaItem_Take) {
-    this.obj = obj;
-  }
+export class MidiTake extends Take {
+  TYPE = "MIDI" as const;
 
   /** Return the active MIDI take that's being edited in the open MIDI editor (if open) */
   static active(): MidiTake | null {
@@ -665,6 +721,36 @@ export class MidiTake {
       noteLengthOverride: noteBeats === 0 ? null : noteBeats,
     };
   }
+
+  *iterNotes() {
+    let i = 0;
+    while (true) {
+      let [rv, selected, muted, startTick, endTick, chan, pitch, vel] =
+        reaper.MIDI_GetNote(this.obj, i);
+      if (!rv) break;
+
+      yield { selected, muted, startTick, endTick, chan, pitch, vel };
+
+      i += 1;
+    }
+  }
+
+  allNotes() {
+    const result = [];
+    for (const note of this.iterNotes()) {
+      result.push(note);
+    }
+    return result;
+  }
+
+  tickToProjectTime(tick: number): number {
+    return reaper.MIDI_GetProjTimeFromPPQPos(this.obj, tick);
+  }
+}
+
+/** TODO */
+export class AudioTake extends Take {
+  TYPE = "AUDIO" as const;
 }
 
 export class Source {

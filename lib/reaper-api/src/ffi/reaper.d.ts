@@ -7974,7 +7974,7 @@ declare namespace reaper {
    * ```
    * the original item becomes the left-hand split, the function returns the right-hand split (or NULL if the split failed)
    */
-  function SplitMediaItem(item: MediaItem, position: number): MediaItem;
+  function SplitMediaItem(item: MediaItem, position: number): MediaItem | null;
 
   /**
    * ```

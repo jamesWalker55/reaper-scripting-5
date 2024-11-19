@@ -2,11 +2,18 @@ AddCwdToImportPaths();
 
 import { encode } from "json";
 import { inspect } from "./inspect";
-import { getProjectRoutingInfo, Item, Track } from "./track";
+import { getProjectRoutingInfo, Item, MidiTake, Track } from "./track";
 import { copy } from "./clipboard";
 import * as Chunk from "./chunk";
 import * as Element from "./element";
-import { deferAsync, errorHandler, log, readFile, writeFile } from "./utils";
+import {
+  clearConsole,
+  deferAsync,
+  errorHandler,
+  log,
+  readFile,
+  writeFile,
+} from "./utils";
 import * as path from "./path/path";
 import { splitlines } from "./utilsLua";
 import { RS5K, RS5KMode } from "./rs5k";
@@ -22,11 +29,25 @@ function measureTime<T>(func: () => T): [number, T] {
 
 async function main() {
   // log("Hello world!")
-  const [rv, buf] = reaper.MIDI_GetAllEvts(
-    Item.getSelected()[0].activeTake()!.obj,
-  );
-  const x = parseBuf(buf);
-  log(`x: ${inspect(x)}`);
+  const item = Item.getSelected()[0];
+  if (!item) throw new Error("No selected item");
+
+  const take = item.activeTake()?.asTypedTake();
+  if (!take) throw new Error("No selected MIDI take");
+  if (take.TYPE !== "MIDI") throw new Error("No selected MIDI take");
+
+  clearConsole();
+  for (const note of take.iterNotes()) {
+    const startTime = take.tickToProjectTime(note.startTick);
+    const endTime = take.tickToProjectTime(note.endTick);
+
+    // log(`startTick = ${note.startTick}`);
+    // log(`endTick = ${note.endTick}`);
+    // log(`startTime = ${startTime} s`);
+    // log(`endTime = ${endTime} s`);
+    log(`pitch = ${note.pitch}`);
+  }
+  log();
   // log(inspect(buf))
 
   // const rs = new RS5K(new FX({ track: Track.getSelected()[0].obj }, 0));
