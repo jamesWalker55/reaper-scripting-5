@@ -74,6 +74,53 @@ export class Track {
     return Track.getByIdx(idx);
   }
 
+  isMaster() {
+    return this.getIdx() === -1;
+  }
+
+  /**
+   * For top-level tracks, this returns the master track.
+   * For the master track, this returns null.
+   */
+  getParent() {
+    const obj = reaper.GetParentTrack(this.obj);
+    if (obj === null) {
+      if (this.isMaster()) return null;
+
+      return Track.getMaster();
+    }
+    return new Track(obj);
+  }
+
+  getChildren() {
+    let idx = this.getIdx();
+    const isMaster = idx === -1;
+    if (!isMaster) {
+      const rootNextTrackDepth = this.getRawFolderDepth();
+      if (rootNextTrackDepth <= 0) return [];
+    }
+
+    const children = [];
+    let currentDepth = 0;
+
+    while (currentDepth >= 0) {
+      idx++;
+
+      let child;
+      try {
+        child = Track.getByIdx(idx);
+      } catch (e) {
+        // assume we have reached end of project track list
+        break;
+      }
+      if (currentDepth === 0) children.push(child);
+
+      currentDepth += child.getRawFolderDepth();
+    }
+
+    return children;
+  }
+
   /** Returns new position if success, otherwise return nil */
   addFx(fx: AddFxParams, position?: number | number[]) {
     const fxname = stringifyAddFxParams(fx);

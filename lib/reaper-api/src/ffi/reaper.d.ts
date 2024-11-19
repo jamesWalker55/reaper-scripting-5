@@ -2542,7 +2542,7 @@ declare namespace reaper {
    * MediaTrack _ = reaper.GetParentTrack(MediaTrack track)
    * ```
    */
-  function GetParentTrack(track: MediaTrack): MediaTrack;
+  function GetParentTrack(track: MediaTrack): MediaTrack | null;
 
   /**
    * ```

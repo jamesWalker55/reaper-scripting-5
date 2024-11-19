@@ -173,8 +173,86 @@ function getSamples(
   return { ok: true, val: result };
 }
 
-function getSamplesSmart() {
-  Track.getSelected()[0]
+function findSampleTrack(): {
+  sample: Track;
+  pitch: Track;
+} | null {
+  function locateSampleTrackPair(
+    track: Track,
+  ): { sample: Track; pitch: Track } | null {
+    log(`locateSampleTrackPair: track ${track.getIdx() + 1}`);
+
+    if (track.name === SAMPLE_TRACK_NAME) {
+      // assume this is the sample track
+      // search for pitch track nearby
+
+      const prevTrack = Track.getByIdx(track.getIdx() - 1);
+      if (prevTrack.name === PITCH_TRACK_NAME) {
+        return { sample: track, pitch: prevTrack };
+      }
+
+      const nextTrackDepth = track.getRawFolderDepth();
+      if (nextTrackDepth >= 0) {
+        const nextTrack = Track.getByIdx(track.getIdx() + 1);
+        if (nextTrack.name === PITCH_TRACK_NAME) {
+          return { sample: track, pitch: nextTrack };
+        }
+      }
+    }
+    // } else if (track.name === PITCH_TRACK_NAME) {
+    //   // assume this is the pitch track
+    //   // search for sample track nearby
+
+    //   const prevTrack = Track.getByIdx(track.getIdx() - 1);
+    //   if (prevTrack.name === SAMPLE_TRACK_NAME) {
+    //     return { pitch: track, sample: prevTrack };
+    //   }
+
+    //   const nextTrackDepth = track.getRawFolderDepth();
+    //   if (nextTrackDepth >= 0) {
+    //     const nextTrack = Track.getByIdx(track.getIdx() + 1);
+    //     if (nextTrack.name === SAMPLE_TRACK_NAME) {
+    //       return { pitch: track, sample: nextTrack };
+    //     }
+    //   }
+    // }
+
+    return null;
+  }
+
+  const checkedTracks: LuaSet<MediaTrack> = new LuaSet();
+
+  for (const track of Track.getSelected()) {
+    if (checkedTracks.has(track.obj)) continue;
+
+    // check if current track is sample track
+    checkedTracks.add(track.obj);
+    const pair = locateSampleTrackPair(track);
+    if (pair !== null) return pair;
+
+    // check children for sample tracks
+    for (const child of track.getChildren()) {
+      if (checkedTracks.has(child.obj)) continue;
+
+      checkedTracks.add(child.obj);
+      const pair = locateSampleTrackPair(child);
+      if (pair !== null) return pair;
+    }
+
+    // check siblings for sample tracks
+    const parent = track.getParent();
+    if (!parent) continue;
+
+    for (const sibling of parent.getChildren()) {
+      if (checkedTracks.has(sibling.obj)) continue;
+
+      checkedTracks.add(sibling.obj);
+      const pair = locateSampleTrackPair(sibling);
+      if (pair !== null) return pair;
+    }
+  }
+
+  return null;
 }
 
 /** What to do about the playrate when pitching up/down */
@@ -379,58 +457,6 @@ function sequenceSelectedItems(
     sequenceTake(take, samples, { ...options, selectedNotesOnly: false });
   }
 }
-
-// function sequenceSelectedItems(
-//   samples: Sample[],
-//   track: Track,
-//   options: {
-//     pitch: SamplePitchStyle;
-//     extend: SampleExtendStyle;
-//   },
-// ) {
-//   const notes = [];
-//   for (const note of take.iterNotes()) {
-//     if (!note.selected) continue;
-//     if (note.muted) continue;
-//     if (note.vel === 0) continue;
-
-//     const startTime = take.tickToProjectTime(note.startTick);
-//     const endTime = take.tickToProjectTime(note.endTick);
-
-//     notes.push({ ...note, startTime, endTime });
-//   }
-//   if (notes.length === 0) return;
-
-//   // TODO: Clear out area in target track
-
-//   return createSampleSequence(notes, samples, track, options);
-// }
-
-// function createSampleSequences(
-//   take: MidiTake,
-//   samples: Sample[],
-//   options: {
-//     selectedNotesOnly: boolean;
-//     pitch: SamplePitchStyle;
-//     extend: SampleExtendStyle;
-//   },
-// ) {
-//   const notes = take.allNotes().filter(x => !options.selectedNotesOnly || x.selected);
-
-//   // sequence the items
-//   for (const [trackObj, itemNotes] of trackItemNotes) {
-//     const track = new Track(trackObj);
-
-//     // create a new track for sequencing
-//     const sequencingTrackIdx = track.getIdx() + 1;
-//     reaper.InsertTrackInProject(0, sequencingTrackIdx, 0);
-//     const sequencingTrack = Track.getByIdx(sequencingTrackIdx);
-
-//     for (const itemNote of itemNotes) {
-//       createSampleSequence(itemNote.notes, samples, sequencingTrack, options);
-//     }
-//   }
-// }
 
 function main() {
   // parameters
