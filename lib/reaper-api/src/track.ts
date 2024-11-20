@@ -100,19 +100,21 @@ export class Track {
       if (rootNextTrackDepth <= 0) return [];
     }
 
-    const children = [];
+    const children: Track[] = [];
     let currentDepth = 0;
 
     while (currentDepth >= 0) {
       idx++;
 
-      let child;
+      let child: Track | null;
       try {
         child = Track.getByIdx(idx);
       } catch (e) {
         // assume we have reached end of project track list
-        break;
+        child = null;
       }
+      if (child === null) break;
+
       if (currentDepth === 0) children.push(child);
 
       currentDepth += child.getRawFolderDepth();

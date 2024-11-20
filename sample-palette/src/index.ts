@@ -1,14 +1,18 @@
 AddCwdToImportPaths();
 
+import { inspect } from "reaper-api/inspect";
 import * as Path from "reaper-api/path/path";
 import { Item, MidiTake, Source, Take, Track } from "reaper-api/track";
 import {
   assertUnreachable,
   errorHandler,
   log,
+  msgBox,
+  runMainAction,
   undoBlock,
 } from "reaper-api/utils";
 import { createContext, microUILoop, Option } from "reaper-microui";
+import { wrappedEnum } from "./widgets";
 
 // constants for finding tracks
 const SAMPLE_TRACK_NAME = "Samples";
@@ -460,10 +464,11 @@ function sequenceSelectedItems(
 
 function main() {
   // parameters
-  let sampleImportPitch: number = 60; // C4
+  // let sampleImportPitch: number = 60; // C4
   let samplePitchStyle: SamplePitchStyle = SamplePitchStyle.KeepRate;
   let sampleExtendStyle: SampleExtendStyle = SampleExtendStyle.Stretch;
   let samples: Sample[] = [];
+  let samplesTrackIdx: number | null = null;
 
   // gui code
   const ctx = createContext();
@@ -488,28 +493,67 @@ function main() {
 
       // sample collecting section
       {
-        ctx.layoutRow([90, -42, -1], 0);
+        ctx.layoutRow([-1], 0);
 
-        ctx.label("Sample pitch");
-        sampleImportPitch = ctx.slider(
-          "sampleImportPitch",
-          sampleImportPitch,
-          0,
-          127,
-          1,
-          "%d",
+        ctx.text(
+          `This script depends on having 2 adjacent tracks with very specific names.`,
         );
-        ctx.label(getNoteName(sampleImportPitch));
+        ctx.text(
+          `* ${inspect(
+            SAMPLE_TRACK_NAME,
+          )}: Track containing sliced audio samples.`,
+        );
+        ctx.text(
+          `* ${inspect(
+            PITCH_TRACK_NAME,
+          )}: Track containing MIDI notes at the same location as each audio sample. The note represents the pitch of that sample.`,
+        );
+        ctx.text(
+          `Create these 2 tracks then hit the button below to collect the samples to memory.`,
+        );
 
-        ctx.layoutRow([90, -1], 0);
+        if (ctx.button("Collect samples")) {
+          const tracks = findSampleTrack();
+          if (tracks === null) {
+            msgBox(
+              "Can't find samples!",
+              "Failed to find the sample track. Please try selecting the sample track before clicking on this button.",
+            );
+          } else {
+            const samplesResult = getSamples(tracks.sample, tracks.pitch);
+            if (!samplesResult.ok) {
+              const err = samplesResult.err;
 
-        ctx.layoutNext();
-        if (ctx.button("Load samples from selection")) {
-          samples = getSamples(sampleImportPitch);
+              switch (err.err) {
+                case "MULTIPLE_NOTES": {
+                  msgBox(
+                    "Can't determine pitch of sample",
+                    `Multiple notes found for the sample at ${
+                      err.item.position
+                    }s on track ${
+                      err.item.getTrack().getIdx() + 1
+                    }.\nPlease ensure only 1 note is placed at the location of the sample`,
+                  );
+                  undoBlock(
+                    "Sample Palette: Focus on sample with errors",
+                    -1,
+                    () => {
+                      runMainAction(40289); // unselect all items
+                      reaper.SetMediaItemSelected(err.item.obj, true); // select item
+                      runMainAction("_S&M_SCROLL_ITEM"); // scroll to item
+                    },
+                  );
+                  break;
+                }
+                default:
+                  assertUnreachable(err.err);
+              }
+            } else {
+              samples = samplesResult.val;
+              samplesTrackIdx = tracks.sample.getIdx();
+            }
+          }
         }
-
-        // ctx.label("Samples loaded:");
-        // ctx.label(string.format("%d", samples.length));
       }
 
       // add some space
@@ -521,58 +565,56 @@ function main() {
         ctx.layoutRow([90, -1], 0);
 
         ctx.label("Pitching mode:");
-        ctx.label(SamplePitchStyle[samplePitchStyle]);
-        ctx.layoutNext();
-        if (ctx.button("Keep rate")) {
-          samplePitchStyle = SamplePitchStyle.KeepRate;
-        }
-        ctx.layoutNext();
-        if (ctx.button("No stretching")) {
-          samplePitchStyle = SamplePitchStyle.NoStretching;
-        }
+        samplePitchStyle = wrappedEnum(
+          ctx,
+          [
+            { id: SamplePitchStyle.KeepRate, name: "Keep rate" },
+            { id: SamplePitchStyle.NoStretching, name: "No stretching" },
+          ],
+          samplePitchStyle,
+        );
 
         ctx.label("Extend mode:");
-        ctx.label(SampleExtendStyle[sampleExtendStyle]);
-        ctx.layoutNext();
-        if (ctx.button("Stretch")) {
-          sampleExtendStyle = SampleExtendStyle.Stretch;
-        }
-        ctx.layoutNext();
-        if (ctx.button("Truncate")) {
-          sampleExtendStyle = SampleExtendStyle.Truncate;
-        }
+        sampleExtendStyle = wrappedEnum(
+          ctx,
+          [
+            { id: SampleExtendStyle.Stretch, name: "Stretch" },
+            { id: SampleExtendStyle.Truncate, name: "Truncate" },
+          ],
+          sampleExtendStyle,
+        );
       }
 
-      // add some space
-      ctx.layoutRow([-1], 8);
-      ctx.layoutNext();
+      // // add some space
+      // ctx.layoutRow([-1], 8);
+      // ctx.layoutNext();
 
-      // sequencing section
-      {
-        ctx.layoutRow([-1], 0);
+      // // sequencing section
+      // {
+      //   ctx.layoutRow([-1], 0);
 
-        if (samples.length === 0) {
-          ctx.text(
-            "No samples loaded. Please load some samples before running this button!",
-          );
-        } else {
-          ctx.text(
-            string.format("Loaded %d samples, all good!", samples.length),
-          );
-        }
+      //   if (samples.length === 0) {
+      //     ctx.text(
+      //       "No samples loaded. Please load some samples before running this button!",
+      //     );
+      //   } else {
+      //     ctx.text(
+      //       string.format("Loaded %d samples, all good!", samples.length),
+      //     );
+      //   }
 
-        if (ctx.button("Sequence selected MIDI items") && samples.length > 0) {
-          undoBlock(SCRIPT_NAME, -1, () => {
-            const itemNotes = getItemNotes();
-            if (itemNotes.length === 0) return;
+      //   if (ctx.button("Sequence selected MIDI items") && samples.length > 0) {
+      //     undoBlock(SCRIPT_NAME, -1, () => {
+      //       const itemNotes = getItemNotes();
+      //       if (itemNotes.length === 0) return;
 
-            createSampleSequences(itemNotes, samples, {
-              pitch: samplePitchStyle,
-              extend: sampleExtendStyle,
-            });
-          });
-        }
-      }
+      //       createSampleSequences(itemNotes, samples, {
+      //         pitch: samplePitchStyle,
+      //         extend: sampleExtendStyle,
+      //       });
+      //     });
+      //   }
+      // }
 
       ctx.endWindow();
     }
