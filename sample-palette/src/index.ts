@@ -177,6 +177,29 @@ function getSamples(
   return { ok: true, val: result };
 }
 
+function groupSamples(samples: Sample[]): Record<string, Sample[]> {
+  const UNCATEGORIZED = "Uncategorized";
+
+  const result: Record<string, Sample[]> = {};
+
+  for (const sample of samples) {
+    const slashPos = sample.name.indexOf("/");
+    if (slashPos === -1) {
+      result[UNCATEGORIZED] ||= [];
+      result[UNCATEGORIZED].push(sample);
+    } else {
+      const category = sample.name.slice(0, slashPos).trim();
+      const newName = sample.name
+        .slice(slashPos + 1, sample.name.length)
+        .trim();
+      result[category] ||= [];
+      result[category].push({ ...sample, name: newName });
+    }
+  }
+
+  return result;
+}
+
 function findSampleTrack(): {
   sample: Track;
   pitch: Track;
@@ -474,6 +497,7 @@ function main() {
   let samplePitchStyle: SamplePitchStyle = SamplePitchStyle.KeepRate;
   let sampleExtendStyle: SampleExtendStyle = SampleExtendStyle.Stretch;
   let samples: Sample[] = [];
+  let sampleGroups: { name: string; samples: Sample[] }[] = [];
   let samplesTrackIdx: number | null = null;
 
   // gui code
@@ -557,10 +581,21 @@ function main() {
                   assertUnreachable(err.err);
               }
             } else {
-              samples = samplesResult.val;
+              const allSamples = samplesResult.val;
               samplesTrackIdx = tracks.sample.getIdx();
               log("Loaded samples:");
-              log(samples);
+              log(allSamples);
+
+              // update global samples
+              samples = allSamples;
+
+              // update grouped samples
+              sampleGroups = [];
+              for (const [group, samples] of Object.entries(
+                groupSamples(allSamples),
+              )) {
+                sampleGroups.push({ name: group, samples: samples });
+              }
             }
           }
         }
@@ -623,9 +658,7 @@ function main() {
         ctx.layoutRow([-1], 0);
 
         if (samples.length === 0) {
-          ctx.text(
-            "No samples loaded. Please load some samples before running this button!",
-          );
+          ctx.text("No samples loaded yet...");
         } else {
           ctx.text(
             string.format(
@@ -679,21 +712,49 @@ function main() {
           }
         }
 
-        wrappedButtons(
-          ctx,
-          "samples",
-          samples.map((s) => ({
+        if (sampleGroups.length > 1) {
+          // group the samples
+          sampleGroups.forEach((group, i) => {
+            // list all samples in a list
+            const choices = group.samples.map((s) => ({
+              name: s.name,
+              callback() {
+                if (group.samples.length === 0) return;
+
+                sequenceUsingSamples([s]);
+              },
+            }));
+            choices.push({
+              name: "RANDOM!",
+              callback() {
+                if (group.samples.length === 0) return;
+
+                sequenceUsingSamples(group.samples);
+              },
+            });
+            wrappedButtons(ctx, `samples-group${i}`, group.name, choices);
+          });
+        } else {
+          // list all samples in a list
+          const choices = samples.map((s) => ({
             name: s.name,
             callback() {
               if (samples.length === 0) return;
 
               sequenceUsingSamples([s]);
             },
-          })),
-        );
+          }));
+          if (samples.length > 0) {
+            choices.push({
+              name: "RANDOM!",
+              callback() {
+                if (samples.length === 0) return;
 
-        if (ctx.button("Sequence randomly!") && samples.length > 0) {
-          sequenceUsingSamples(samples);
+                sequenceUsingSamples(samples);
+              },
+            });
+          }
+          wrappedButtons(ctx, "samples", null, choices);
         }
       }
 

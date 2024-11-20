@@ -47,6 +47,7 @@ export function toggleButton(
 function wrappedToggleButtons(
   ctx: Context,
   sectionIdentifier: string,
+  label: string | null,
   buttons: {
     id: string;
     name: string;
@@ -61,12 +62,21 @@ function wrappedToggleButtons(
 
   // calculate available space for buttons
   const availableWidth = r.w + ctx.style.spacing;
+  let labelWidth = 0;
 
-  let response: { type: "enable" | "disable"; id: string } | null = null;
+  let response: { type: "enable" | "disable" | "solo"; id: string } | null =
+    null;
 
   ctx.layoutBeginColumn();
   {
     let remainingWidth = availableWidth;
+
+    // if there is a section name, subtract it from the initial row's width
+    if (label !== null) {
+      labelWidth = ctx.textWidth(ctx.style.font, label) + ctx.style.padding * 2;
+
+      remainingWidth -= labelWidth + ctx.style.spacing;
+    }
 
     // split the buttons into rows, based on the width of each button
     type Button = (typeof buttons)[number];
@@ -91,7 +101,16 @@ function wrappedToggleButtons(
     // layout each row
     let firstRow = true;
     for (const row of rows) {
-      if (row.length > 0) {
+      if (firstRow && label) {
+        // add section label if is first row
+        const widths = [labelWidth];
+        for (const x of row) {
+          widths.push(x.width);
+        }
+
+        ctx.layoutRow(widths, 0);
+        ctx.label(label);
+      } else if (row.length > 0) {
         // otherwise handle buttons normally (skip empty rows)
         const widths = [];
         for (const x of row) {
@@ -149,6 +168,7 @@ export function wrappedEnum<T extends number>(
   const res = wrappedToggleButtons(
     ctx,
     identifier,
+    null,
     choices.map((x) => ({ id: string.format("%d", x.id), name: x.name })),
     activeIds,
   );
@@ -161,6 +181,7 @@ export function wrappedEnum<T extends number>(
 export function wrappedButtons(
   ctx: Context,
   identifier: string,
+  sectionName: string | null,
   buttons: {
     name: string;
     callback: () => void;
@@ -175,7 +196,13 @@ export function wrappedButtons(
       id,
     };
   });
-  const res = wrappedToggleButtons(ctx, identifier, choices, new LuaSet());
+  const res = wrappedToggleButtons(
+    ctx,
+    identifier,
+    sectionName,
+    choices,
+    new LuaSet(),
+  );
   if (res?.type === "enable") {
     idCallback[res.id]();
   }
