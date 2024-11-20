@@ -265,6 +265,50 @@ function findSampleTrack(): {
   return null;
 }
 
+/** Converts 0.5 => -6.02dB */
+function scalarToDb(value: number) {
+  return 20 * Math.log10(value);
+}
+
+/** Converts -6dB => 0.501 */
+function dbToScalar(db: number) {
+  return Math.pow(10, db / 20);
+}
+
+function velocityToGain(vel: number) {
+  // reasamplomatic
+  // 127 => +0.0 => 1
+  // 117 => -0.7 => 0.9225714271547631
+  // 107 => -1.5 => 0.841395141645195
+  // 97 => -2.3 => 0.767361489361819
+  // 87 => -3.3 => 0.6839116472814294
+  // 77 => -4.4 => 0.6025595860743577
+  // 67 => -5.6 => 0.5248074602497727
+  // 57 => -7.0 => 0.44668359215096315
+  // 47 => -8.7 => 0.36728230049808475
+  // 37 => -10.9 => 0.2851018267503909
+  // 27 => -13.7 => 0.20653801558105297
+  // 17 => -17.9 => 0.1273503081016662
+  // 7 => -26.4 => 0.04786300923226385
+  // 3 => -36.0 => 0.015848931924611134
+
+  // phaseplant (modulating oscillator level)
+  // 127 => +0.0 => 1
+  // 117 => -0.8 => 0.9120108393559098
+  // 97 => -2.4 => 0.7585775750291838
+  // 87 => -3.3 => 0.6839116472814294
+  // 77 => -4.4 => 0.6025595860743577
+  // 67 => -5.6 => 0.5248074602497727
+  // 47 => -8.7 => 0.36728230049808475
+  // 37 => -10.8 => 0.28840315031266056
+  // 27 => -13.5 => 0.21134890398366465
+  // 17 => -17.5 => 0.1333521432163324
+  // 7 => -25.2 => 0.054954087385762455
+
+  // both are just linear multiplication, i.e. 0..127 == 0.0..1.0
+  return vel / 127.0;
+}
+
 /** What to do about the playrate when pitching up/down */
 enum SamplePitchStyle {
   KeepRate, // use the same playrate we originally captured
@@ -302,7 +346,7 @@ function createSampleSequence(
     item.position = note.startTime;
 
     // sample basic properties, offset etc
-    take.volume = sample.volume;
+    take.volume = sample.volume * velocityToGain(note.vel);
     take.pan = sample.pan;
     take.sourceStartOffset = sample.startOffset;
 
