@@ -769,7 +769,7 @@ function main() {
               },
             }));
             choices.push({
-              name: "RANDOM!",
+              name: "Random!",
               callback() {
                 if (group.samples.length === 0) return;
 
@@ -790,7 +790,7 @@ function main() {
           }));
           if (samples.length > 0) {
             choices.push({
-              name: "RANDOM!",
+              name: "Random!",
               callback() {
                 if (samples.length === 0) return;
 
@@ -799,6 +799,12 @@ function main() {
             });
           }
           wrappedButtons(ctx, "samples", null, choices);
+        }
+
+        if (samples.length > 0) {
+          if (ctx.button("Random!")) {
+            sequenceUsingSamples(samples);
+          }
         }
       }
 
