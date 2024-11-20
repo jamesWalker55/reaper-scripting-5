@@ -551,6 +551,14 @@ function main() {
   ctx.style.font = 1;
 
   microUILoop(ctx, (stop) => {
+    // hack: if space pressed, play/stop transport
+    {
+      const spacePressed = ctx._inputText.includes(" ");
+      if (spacePressed) {
+        runMainAction(40044); // Transport: Play/stop
+      }
+    }
+
     if (
       ctx.beginWindow(
         "Demo Window",
