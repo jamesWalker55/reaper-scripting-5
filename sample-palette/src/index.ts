@@ -12,7 +12,7 @@ import {
   undoBlock,
 } from "reaper-api/utils";
 import { createContext, microUILoop, Option } from "reaper-microui";
-import { wrappedEnum } from "./widgets";
+import { wrappedButtons, wrappedEnum } from "./widgets";
 
 // constants for finding tracks
 const SAMPLE_TRACK_NAME = "Samples";
@@ -335,15 +335,31 @@ function createSampleSequence(
 }
 
 function clearTrackTimeRange(track: Track, start: number, end: number) {
-  const MIN_ITEM_LENGTH = 0.0005;
+  // log(`clearTrackTimeRange(<Track ${track.getIdx()}>, ${start}, ${end})`);
+
+  // const MIN_ITEM_LENGTH = 0.0005;
+  const FLOAT_ERROR = 0.0000000001;
 
   for (const item of track.allItems()) {
     const itemStart = item.position;
     const itemEnd = item.position + item.length;
 
-    const itemCompletelyInsideRange = start <= itemStart && itemEnd <= end;
-    const itemHitsRangeStart = itemStart <= start && start < itemEnd;
-    const itemHitsRangeEnd = itemStart < end && end <= itemEnd;
+    // log(`  @ ${itemStart}..${itemEnd}`);
+    const itemCompletelyInsideRange =
+      start - FLOAT_ERROR <= itemStart && itemEnd <= end + FLOAT_ERROR;
+    const itemHitsRangeStart =
+      itemStart + FLOAT_ERROR < start && start < itemEnd - FLOAT_ERROR;
+    const itemHitsRangeEnd =
+      itemStart + FLOAT_ERROR < end && end < itemEnd - FLOAT_ERROR;
+    // log(`    itemStart = ${itemStart}`);
+    // log(`    itemEnd = ${itemEnd}`);
+    // log(`    start = ${start}`);
+    // log(`    end = ${end}`);
+    // log(`    itemStart - start = ${itemStart - start}`);
+    // log(`    itemEnd - end = ${itemEnd - end}`);
+    // log(`    itemCompletelyInsideRange = ${itemCompletelyInsideRange}`);
+    // log(`    itemHitsRangeStart = ${itemHitsRangeStart}`);
+    // log(`    itemHitsRangeEnd = ${itemHitsRangeEnd}`);
 
     const itemOverlapsRange =
       itemCompletelyInsideRange || itemHitsRangeStart || itemHitsRangeEnd;
@@ -356,18 +372,18 @@ function clearTrackTimeRange(track: Track, start: number, end: number) {
       const mid = item.split(start);
       const left = item;
       mid.delete();
-      if (left.length < MIN_ITEM_LENGTH) left.delete();
-      if (right.length < MIN_ITEM_LENGTH) right.delete();
+      // if (left.length < MIN_ITEM_LENGTH) left.delete();
+      // if (right.length < MIN_ITEM_LENGTH) right.delete();
     } else if (itemHitsRangeStart) {
       const right = item.split(start);
       const left = item;
       right.delete();
-      if (left.length < MIN_ITEM_LENGTH) left.delete();
+      // if (left.length < MIN_ITEM_LENGTH) left.delete();
     } else if (itemHitsRangeEnd) {
       const right = item.split(end);
       const left = item;
       left.delete();
-      if (right.length < MIN_ITEM_LENGTH) right.delete();
+      // if (right.length < MIN_ITEM_LENGTH) right.delete();
     } else {
       throw new Error("unreachable");
     }
@@ -408,10 +424,11 @@ function sequenceTake(
     const nextTrack = Track.getByIdx(targetTrackIdx);
     if (nextTrack.name === targetTrackName) {
       seqTrack = nextTrack;
+    } else {
+      // no existing sequencing track found, create a new one
+      seqTrack = Track.createAtIdx(targetTrackIdx);
+      seqTrack.name = targetTrackName;
     }
-
-    // no existing sequencing track found, create a new one
-    seqTrack = Track.createAtIdx(targetTrackIdx);
   }
 
   if (options.selectedNotesOnly) {
@@ -484,22 +501,24 @@ function main() {
       {
         ctx.layoutRow([-1], 0);
 
-        ctx.text(
-          `This script depends on having 2 adjacent tracks with very specific names.`,
-        );
-        ctx.text(
-          `* ${inspect(
-            SAMPLE_TRACK_NAME,
-          )}: Track containing sliced audio samples.`,
-        );
-        ctx.text(
-          `* ${inspect(
-            PITCH_TRACK_NAME,
-          )}: Track containing MIDI notes at the same location as each audio sample. The note represents the pitch of that sample.`,
-        );
-        ctx.text(
-          `Create these 2 tracks then hit the button below to collect the samples to memory.`,
-        );
+        if (ctx.header("Instructions")) {
+          ctx.text(
+            `This script depends on having 2 adjacent tracks with very specific names.`,
+          );
+          ctx.text(
+            `* ${inspect(
+              SAMPLE_TRACK_NAME,
+            )}: Track containing sliced audio samples.`,
+          );
+          ctx.text(
+            `* ${inspect(
+              PITCH_TRACK_NAME,
+            )}: Track containing MIDI notes at the same location as each audio sample. The note represents the pitch of that sample.`,
+          );
+          ctx.text(
+            `Create these 2 tracks then hit the button below to collect the samples to memory.`,
+          );
+        }
 
         if (ctx.button("Collect samples")) {
           const tracks = findSampleTrack();
@@ -540,6 +559,8 @@ function main() {
             } else {
               samples = samplesResult.val;
               samplesTrackIdx = tracks.sample.getIdx();
+              log("Loaded samples:");
+              log(samples);
             }
           }
         }
@@ -564,7 +585,7 @@ function main() {
           samplePitchStyle,
         );
 
-        ctx.label("Extend mode:");
+        ctx.label("Sample too short:");
         sampleExtendStyle = wrappedEnum(
           ctx,
           "sampleExtendStyle",
@@ -610,12 +631,12 @@ function main() {
             string.format(
               "Loaded %d samples from track %d, all good!",
               samples.length,
-              samplesTrackIdx,
+              samplesTrackIdx! + 1,
             ),
           );
         }
 
-        if (ctx.button("Sequence randomly!") && samples.length > 0) {
+        function sequenceUsingSamples(samples: Sample[]) {
           switch (sequenceTarget) {
             case SequenceTarget.SelectedNotes: {
               const take = MidiTake.active();
@@ -656,6 +677,23 @@ function main() {
             default:
               assertUnreachable(sequenceTarget);
           }
+        }
+
+        wrappedButtons(
+          ctx,
+          "samples",
+          samples.map((s) => ({
+            name: s.name,
+            callback() {
+              if (samples.length === 0) return;
+
+              sequenceUsingSamples([s]);
+            },
+          })),
+        );
+
+        if (ctx.button("Sequence randomly!") && samples.length > 0) {
+          sequenceUsingSamples(samples);
         }
       }
 
