@@ -184,7 +184,7 @@ function findSampleTrack(): {
   function locateSampleTrackPair(
     track: Track,
   ): { sample: Track; pitch: Track } | null {
-    log(`locateSampleTrackPair: track ${track.getIdx() + 1}`);
+    log(`locateSampleTrackPair(): checking track ${track.getIdx() + 1}`);
 
     if (track.name === SAMPLE_TRACK_NAME) {
       // assume this is the sample track
@@ -203,23 +203,6 @@ function findSampleTrack(): {
         }
       }
     }
-    // } else if (track.name === PITCH_TRACK_NAME) {
-    //   // assume this is the pitch track
-    //   // search for sample track nearby
-
-    //   const prevTrack = Track.getByIdx(track.getIdx() - 1);
-    //   if (prevTrack.name === SAMPLE_TRACK_NAME) {
-    //     return { pitch: track, sample: prevTrack };
-    //   }
-
-    //   const nextTrackDepth = track.getRawFolderDepth();
-    //   if (nextTrackDepth >= 0) {
-    //     const nextTrack = Track.getByIdx(track.getIdx() + 1);
-    //     if (nextTrack.name === SAMPLE_TRACK_NAME) {
-    //       return { pitch: track, sample: nextTrack };
-    //     }
-    //   }
-    // }
 
     return null;
   }
@@ -463,8 +446,14 @@ function sequenceSelectedItems(
 }
 
 function main() {
+  enum SequenceTarget {
+    SelectedNotes,
+    SelectedItems,
+  }
+
   // parameters
   // let sampleImportPitch: number = 60; // C4
+  let sequenceTarget: SequenceTarget = SequenceTarget.SelectedItems;
   let samplePitchStyle: SamplePitchStyle = SamplePitchStyle.KeepRate;
   let sampleExtendStyle: SampleExtendStyle = SampleExtendStyle.Stretch;
   let samples: Sample[] = [];
@@ -567,9 +556,10 @@ function main() {
         ctx.label("Pitching mode:");
         samplePitchStyle = wrappedEnum(
           ctx,
+          "samplePitchStyle",
           [
-            { id: SamplePitchStyle.KeepRate, name: "Keep rate" },
-            { id: SamplePitchStyle.NoStretching, name: "No stretching" },
+            { id: SamplePitchStyle.KeepRate, name: "Keep collected rate" },
+            { id: SamplePitchStyle.NoStretching, name: "Avoid stretching" },
           ],
           samplePitchStyle,
         );
@@ -577,44 +567,97 @@ function main() {
         ctx.label("Extend mode:");
         sampleExtendStyle = wrappedEnum(
           ctx,
+          "sampleExtendStyle",
           [
-            { id: SampleExtendStyle.Stretch, name: "Stretch" },
-            { id: SampleExtendStyle.Truncate, name: "Truncate" },
+            { id: SampleExtendStyle.Stretch, name: "Stretch sample to note" },
+            { id: SampleExtendStyle.Truncate, name: "Truncate note" },
           ],
           sampleExtendStyle,
         );
+
+        ctx.label("Target:");
+        sequenceTarget = wrappedEnum(
+          ctx,
+          "sequenceTarget",
+          [
+            {
+              id: SequenceTarget.SelectedItems,
+              name: "Selected items in arrange",
+            },
+            {
+              id: SequenceTarget.SelectedNotes,
+              name: "Selected notes in active MIDI editor",
+            },
+          ],
+          sequenceTarget,
+        );
       }
 
-      // // add some space
-      // ctx.layoutRow([-1], 8);
-      // ctx.layoutNext();
+      // add some space
+      ctx.layoutRow([-1], 8);
+      ctx.layoutNext();
 
-      // // sequencing section
-      // {
-      //   ctx.layoutRow([-1], 0);
+      // sequencing section
+      {
+        ctx.layoutRow([-1], 0);
 
-      //   if (samples.length === 0) {
-      //     ctx.text(
-      //       "No samples loaded. Please load some samples before running this button!",
-      //     );
-      //   } else {
-      //     ctx.text(
-      //       string.format("Loaded %d samples, all good!", samples.length),
-      //     );
-      //   }
+        if (samples.length === 0) {
+          ctx.text(
+            "No samples loaded. Please load some samples before running this button!",
+          );
+        } else {
+          ctx.text(
+            string.format(
+              "Loaded %d samples from track %d, all good!",
+              samples.length,
+              samplesTrackIdx,
+            ),
+          );
+        }
 
-      //   if (ctx.button("Sequence selected MIDI items") && samples.length > 0) {
-      //     undoBlock(SCRIPT_NAME, -1, () => {
-      //       const itemNotes = getItemNotes();
-      //       if (itemNotes.length === 0) return;
+        if (ctx.button("Sequence randomly!") && samples.length > 0) {
+          switch (sequenceTarget) {
+            case SequenceTarget.SelectedNotes: {
+              const take = MidiTake.active();
+              if (take === null) {
+                msgBox(
+                  "Error",
+                  "No active MIDI editor found. Please open a MIDI item before running this script!",
+                );
+                break;
+              }
 
-      //       createSampleSequences(itemNotes, samples, {
-      //         pitch: samplePitchStyle,
-      //         extend: sampleExtendStyle,
-      //       });
-      //     });
-      //   }
-      // }
+              undoBlock(
+                "Sample Palette: Sequence selected notes in active MIDI editor",
+                -1,
+                () => {
+                  sequenceTake(take, samples, {
+                    pitch: samplePitchStyle,
+                    extend: sampleExtendStyle,
+                    selectedNotesOnly: true,
+                  });
+                },
+              );
+              break;
+            }
+            case SequenceTarget.SelectedItems: {
+              undoBlock(
+                "Sample Palette: Sequence selected MIDI items",
+                -1,
+                () => {
+                  sequenceSelectedItems(samples, {
+                    pitch: samplePitchStyle,
+                    extend: sampleExtendStyle,
+                  });
+                },
+              );
+              break;
+            }
+            default:
+              assertUnreachable(sequenceTarget);
+          }
+        }
+      }
 
       ctx.endWindow();
     }

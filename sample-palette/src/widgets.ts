@@ -46,12 +46,15 @@ export function toggleButton(
 
 function wrappedToggleButtons(
   ctx: Context,
+  sectionIdentifier: string,
   buttons: {
     id: string;
     name: string;
   }[],
   activeIds: LuaSet<string>,
 ) {
+  ctx.pushId(sectionIdentifier);
+
   // "peek" the next layout
   const r = ctx.layoutNext();
   ctx.layoutSetNext(r, false);
@@ -127,11 +130,14 @@ function wrappedToggleButtons(
   }
   ctx.layoutEndColumn();
 
+  ctx.popId();
+
   return response;
 }
 
 export function wrappedEnum<T extends number>(
   ctx: Context,
+  identifier: string,
   choices: {
     id: T;
     name: string;
@@ -142,6 +148,7 @@ export function wrappedEnum<T extends number>(
   activeIds.add(string.format("%d", activeChoice));
   const res = wrappedToggleButtons(
     ctx,
+    identifier,
     choices.map((x) => ({ id: string.format("%d", x.id), name: x.name })),
     activeIds,
   );
@@ -153,6 +160,7 @@ export function wrappedEnum<T extends number>(
 
 export function wrappedButtons(
   ctx: Context,
+  identifier: string,
   buttons: {
     name: string;
     callback: () => void;
@@ -167,7 +175,7 @@ export function wrappedButtons(
       id,
     };
   });
-  const res = wrappedToggleButtons(ctx, choices, new LuaSet());
+  const res = wrappedToggleButtons(ctx, identifier, choices, new LuaSet());
   if (res?.type === "enable") {
     idCallback[res.id]();
   }
