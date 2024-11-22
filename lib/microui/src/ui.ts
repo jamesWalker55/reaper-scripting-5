@@ -1350,7 +1350,7 @@ export class Context<Font> {
       value = low + ((this.mousePos.x - base.x) * (high - low)) / base.w;
       if (step !== null && step !== 0) {
         value = Math.round((value - low) / step) * step + low;
-        value = Math.max(low, Math.min(value, high))
+        value = Math.max(low, Math.min(value, high));
       }
     }
     // clamp and store value, update res
@@ -1464,10 +1464,19 @@ export class Context<Font> {
     this.layoutEndColumn();
   }
 
-  textbox(identifier: string, buf: string, opt: Option = Option.None) {
+  textbox(
+    identifier: string,
+    buf: string,
+    opt: Option = Option.None,
+    responseHandler?: (res: Response | false, buf: string) => void,
+  ) {
     const id = this.getId(identifier);
     const r = this.layoutNext();
-    return this.textboxRaw(buf, null, id, r, opt);
+    const [res, newBuf] = this.textboxRaw(buf, null, id, r, opt);
+    if (responseHandler !== undefined) {
+      responseHandler(res, newBuf);
+    }
+    return newBuf;
   }
 
   beginPanel(name: string, opt: Option = Option.None) {

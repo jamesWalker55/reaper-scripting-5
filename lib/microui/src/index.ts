@@ -389,12 +389,17 @@ export function demoMultiWindow() {
       /* input textbox + submit button */
       let submitted = false;
       ctx.layoutRow([-70, -1], 0);
-      const [res, newVal] = ctx.textbox("textbox", logWindowTextboxInput);
-      logWindowTextboxInput = newVal;
-      if (res && (res & Response.Submit) !== 0) {
-        ctx.setFocus(ctx.lastId);
-        submitted = true;
-      }
+      logWindowTextboxInput = ctx.textbox(
+        "textbox",
+        logWindowTextboxInput,
+        Option.None,
+        (res) => {
+          if (res && (res & Response.Submit) !== 0) {
+            ctx.setFocus(ctx.lastId);
+            submitted = true;
+          }
+        },
+      );
       if (ctx.button("Submit")) {
         submitted = true;
       }
