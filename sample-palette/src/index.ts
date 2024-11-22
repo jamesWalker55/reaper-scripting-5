@@ -640,8 +640,8 @@ function main() {
             } else {
               const allSamples = samplesResult.val;
               samplesTrackIdx = tracks.sample.getIdx();
-              log("Loaded samples:");
-              log(allSamples);
+              // log("Loaded samples:");
+              // log(allSamples);
 
               // update global samples
               samples = allSamples;
