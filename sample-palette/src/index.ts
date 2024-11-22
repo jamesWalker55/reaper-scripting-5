@@ -548,6 +548,7 @@ function main() {
   let samples: Sample[] = [];
   let sampleGroups: { name: string; samples: Sample[] }[] = [];
   let samplesTrackIdx: number | null = null;
+  let firstLoop = true;
 
   // gui code
   const ctx = createContext();
@@ -556,6 +557,19 @@ function main() {
   ctx.style.font = 1;
 
   microUILoop(ctx, (stop) => {
+    if (firstLoop) {
+      // attach pin to window
+      if (
+        reaper.APIExists("JS_Window_Find") &&
+        reaper.APIExists("JS_Window_AttachTopmostPin")
+      ) {
+        const hwnd = reaper.JS_Window_Find("Sample Palette", true);
+        if (hwnd) {
+          reaper.JS_Window_AttachTopmostPin(hwnd);
+        }
+      }
+    }
+
     // hack: if space pressed, play/stop transport
     {
       const spacePressed = ctx._inputText.includes(" ");
@@ -824,6 +838,8 @@ function main() {
 
       ctx.endWindow();
     }
+
+    firstLoop = false;
   });
 }
 
