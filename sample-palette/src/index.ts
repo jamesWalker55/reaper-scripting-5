@@ -207,7 +207,7 @@ function findSampleTrack(): {
   function locateSampleTrackPair(
     track: Track,
   ): { sample: Track; pitch: Track } | null {
-    log(`locateSampleTrackPair(): checking track ${track.getIdx() + 1}`);
+    // log(`locateSampleTrackPair(): checking track ${track.getIdx() + 1}`);
 
     if (track.name === SAMPLE_TRACK_NAME) {
       // assume this is the sample track
@@ -313,6 +313,7 @@ function velocityToGain(vel: number) {
 enum SamplePitchStyle {
   KeepRate, // use the same playrate we originally captured
   NoStretching, // adjust the playrate to follow the pitch (ignore the captured rate)
+  Fit, // adjust the playrate to follow the pitch (ignore the captured rate)
 }
 
 /** What to do when the sample is shorter than the note */
@@ -370,6 +371,11 @@ function createSampleSequence(
           break;
         case SamplePitchStyle.NoStretching:
           playrate = Math.pow(2, toPitch / 12);
+          break;
+        case SamplePitchStyle.Fit:
+          playrate =
+            (sample.endOffset - sample.startOffset) /
+            (note.endTime - note.startTime);
           break;
         default:
           assertUnreachable(options.pitch);
@@ -536,7 +542,6 @@ function main() {
   }
 
   // parameters
-  // let sampleImportPitch: number = 60; // C4
   let sequenceTarget: SequenceTarget = SequenceTarget.SelectedItems;
   let samplePitchStyle: SamplePitchStyle = SamplePitchStyle.KeepRate;
   let sampleExtendStyle: SampleExtendStyle = SampleExtendStyle.Stretch;
@@ -661,13 +666,14 @@ function main() {
       {
         ctx.layoutRow([90, -1], 0);
 
-        ctx.label("Pitching mode:");
+        ctx.label("Playrate:");
         samplePitchStyle = wrappedEnum(
           ctx,
           "samplePitchStyle",
           [
             { id: SamplePitchStyle.KeepRate, name: "Keep collected rate" },
             { id: SamplePitchStyle.NoStretching, name: "Avoid stretching" },
+            { id: SamplePitchStyle.Fit, name: "Stretch entire sample to note" },
           ],
           samplePitchStyle,
         );
