@@ -3,6 +3,7 @@
 /// <reference path="./clipboard.d.ts" />
 /// <reference path="./demo.d.ts" />
 /// <reference path="./element.d.ts" />
+/// <reference path="./extstate.d.ts" />
 /// <reference path="./fx.d.ts" />
 /// <reference path="./ini.d.ts" />
 /// <reference path="./inspect.d.ts" />
