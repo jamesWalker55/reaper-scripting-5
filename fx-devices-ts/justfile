@@ -1,0 +1,10 @@
+tstl := "node_modules/typescript-to-lua/dist/tstl.js"
+
+watch:
+    bun "{{tstl}}" --watch
+
+build:
+    bun "{{tstl}}"
+
+publish:
+    cd .. && just publish fx-devices-ts fx-devices-ts/dist
