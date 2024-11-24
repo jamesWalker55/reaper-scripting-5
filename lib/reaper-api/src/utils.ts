@@ -250,3 +250,26 @@ export function runMidiAction(
     reaper.MIDIEditor_LastFocused_OnCommand(action, target?.listview || false);
   }
 }
+
+export function getActionContext() {
+  const [
+    is_new_value,
+    filename,
+    sectionID,
+    cmdID,
+    mode,
+    resolution,
+    val,
+    contextstr,
+  ] = reaper.get_action_context();
+
+  const action =
+    sectionID === -1
+      ? null
+      : {
+          sectionID,
+          cmdID,
+        };
+
+  return { filename, action };
+}
