@@ -1,5 +1,3 @@
-AddCwdToImportPaths();
-
 import { encode } from "json";
 import { OSType } from "reaper-api/ffi";
 import { errorHandler, log } from "reaper-api/utils";
