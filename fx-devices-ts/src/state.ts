@@ -1,0 +1,46 @@
+import { Section } from "reaper-api/extstate";
+
+const config = Section("JW_FXDEVICES_TS");
+
+const DEFAULT_COLORS = {
+  Window_BG: 0x000000ff,
+  Track_Modulator_Section_BG: 0x111111ff,
+  Track_Modulator_Individual_BG: 0x191919ff,
+  Track_Modulator_Knob: 0x444444ff,
+  FX_Devices_Bg: 0x151515ff,
+  FX_Layer_Container_BG: 0x262626ff,
+  Space_Between_FXs: 0x131313ff,
+  Morph_A: 0x22222266,
+  Morph_B: 0x78787877,
+  Layer_Solo: 0xdadf37ff,
+  Layer_Mute: 0xbe0101ff,
+  FX_Adder_VST: 0x6fb74bff,
+  FX_Adder_VST3: 0xc3dc5cff,
+  FX_Adder_JS: 0x9348a9ff,
+  FX_Adder_AU: 0x526d97ff,
+  FX_Adder_CLAP: 0xb62424ff,
+  FX_Adder_LV2: 0xffa500ff,
+  PLink: 0x1e90ffff,
+  PLink_Edge_DarkBG: 0x1e90ffff,
+  PLink_Edge_LightBG: 0x191970ff,
+  RDM_BG: 0x141414ff,
+  RDM_VTab: 0x252525ff,
+  RDM_VTab_Highlight: 0x12345655,
+  RDM_VTab_Highlight_Edge: 0x184673ff,
+  RDM_PadOff: 0xff,
+  RDM_PadOn: 0x123456ff,
+  RDM_Pad_Highlight: 0x256bb155,
+  RDM_Play: 0xff,
+  RDM_Solo: 0xff,
+  RDM_Mute: 0xff,
+  RDM_DnDFX: 0x00b4d8ff,
+  RDM_DnD_Move: 0xff0000ff,
+  Container_Accent_Clr: 0x49cc85ff,
+  Container_Accent_Clr_Not_Focused: 0x49cc8577,
+  Accent_Clr: 0x49cc85ff,
+  Accent_Clr_Not_Focused: 0x49cc8577,
+  FX_Title_Clr: 0x222222ff,
+  FX_Title_Clr_Outline: 0x555555ff,
+};
+
+type Colors = typeof DEFAULT_COLORS;
