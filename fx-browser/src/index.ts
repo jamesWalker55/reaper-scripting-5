@@ -190,6 +190,35 @@ function Manager(
   };
 }
 
+const VirtualKeyboard = (() => {
+  const MAIN_SECTION_ID = 0;
+  const ACTION_SEND_TO_VKB = 40637;
+  const ACTION_SHOW_VKB = 40377;
+
+  return {
+    isSendToVKB() {
+      const state = reaper.GetToggleCommandStateEx(
+        MAIN_SECTION_ID,
+        ACTION_SEND_TO_VKB,
+      );
+      return state === 1;
+    },
+    isVKBVisible() {
+      const state = reaper.GetToggleCommandStateEx(
+        MAIN_SECTION_ID,
+        ACTION_SHOW_VKB,
+      );
+      return state === 1;
+    },
+    toggleSendToVKB() {
+      reaper.Main_OnCommand(ACTION_SEND_TO_VKB, 0);
+    },
+    toggleVKBVisible() {
+      reaper.Main_OnCommand(ACTION_SHOW_VKB, 0);
+    },
+  };
+})();
+
 function getScreenViewport() {
   ensureAPI("SWS Extensions", "JS_Window_GetViewportFromRect");
 
@@ -333,42 +362,13 @@ function main() {
     }
   })();
 
-  const virtualKeyboard = (() => {
-    const MAIN_SECTION_ID = 0;
-    const ACTION_SEND_TO_VKB = 40637;
-    const ACTION_SHOW_VKB = 40377;
-
-    return {
-      isSendToVKB() {
-        const state = reaper.GetToggleCommandStateEx(
-          MAIN_SECTION_ID,
-          ACTION_SEND_TO_VKB,
-        );
-        return state === 1;
-      },
-      isVKBVisible() {
-        const state = reaper.GetToggleCommandStateEx(
-          MAIN_SECTION_ID,
-          ACTION_SHOW_VKB,
-        );
-        return state === 1;
-      },
-      toggleSendToVKB() {
-        reaper.Main_OnCommand(ACTION_SEND_TO_VKB, 0);
-      },
-      toggleVKBVisible() {
-        reaper.Main_OnCommand(ACTION_SHOW_VKB, 0);
-      },
-    };
-  })();
-
   let manager = Manager();
   let query = "";
   let firstLoop = true;
   let optionsEnabled = false;
   let verticalLayout = false;
   let queryIsFocused = false;
-  let initialSendToVKB = virtualKeyboard.isSendToVKB();
+  let initialSendToVKB = VirtualKeyboard.isSendToVKB();
 
   {
     const WINDOW_WIDTH = 600;
@@ -484,15 +484,15 @@ function main() {
             if (queryIsFocused) {
               // inputbox has been focused
               // turn off vkb send if it is on
-              initialSendToVKB = virtualKeyboard.isSendToVKB();
+              initialSendToVKB = VirtualKeyboard.isSendToVKB();
               if (initialSendToVKB) {
-                virtualKeyboard.toggleSendToVKB();
+                VirtualKeyboard.toggleSendToVKB();
               }
             } else {
               // inputbox has been unfocused
               // turn on vkb send if it was on initially
-              if (initialSendToVKB && !virtualKeyboard.isSendToVKB()) {
-                virtualKeyboard.toggleSendToVKB();
+              if (initialSendToVKB && !VirtualKeyboard.isSendToVKB()) {
+                VirtualKeyboard.toggleSendToVKB();
               }
             }
           }
@@ -606,8 +606,8 @@ function main() {
     },
     () => {
       // on exit, ensure vkb send is reverted
-      if (initialSendToVKB && !virtualKeyboard.isSendToVKB()) {
-        virtualKeyboard.toggleSendToVKB();
+      if (initialSendToVKB && !VirtualKeyboard.isSendToVKB()) {
+        VirtualKeyboard.toggleSendToVKB();
       }
     },
   );
