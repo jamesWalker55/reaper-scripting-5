@@ -1,5 +1,3 @@
-AddCwdToImportPaths();
-
 import {
   AddFxParams,
   generateTakeContainerFxidx,
