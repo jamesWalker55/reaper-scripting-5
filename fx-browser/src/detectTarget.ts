@@ -2,7 +2,7 @@ import {
   parseTakeContainerFxidx,
   parseTrackContainerFxidx,
 } from "reaper-api/fx";
-import { Item } from "reaper-api/item";
+import { Item } from "reaper-api/track";
 
 const OS = reaper.GetOS();
 

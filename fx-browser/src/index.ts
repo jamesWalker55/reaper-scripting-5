@@ -7,8 +7,7 @@ import {
 } from "reaper-api/fx";
 import { inspect } from "reaper-api/inspect";
 import { FXFolderItemType } from "reaper-api/installedFx";
-import { Take } from "reaper-api/item";
-import { Track } from "reaper-api/track";
+import { Take, Track } from "reaper-api/track";
 import { assertUnreachable, ensureAPI, errorHandler } from "reaper-api/utils";
 import { createContext, Option, Response } from "reaper-microui";
 import { getCategories } from "./categories";
@@ -237,8 +236,7 @@ function main() {
             if (trackIdx === 0) {
               return `Master Track${fxpathName}`;
             } else {
-              const trackName = track.getName();
-              return `Track ${trackIdx} ${inspect(trackName)}${fxpathName}`;
+              return `Track ${trackIdx} ${inspect(track.name)}${fxpathName}`;
             }
           },
           addFx(fx: AddFxParams) {
@@ -287,7 +285,7 @@ function main() {
         return {
           getDisplayName() {
             const trackIdx = track.getIdx() + 1;
-            const takeName = take.getName();
+            const takeName = take.name;
             return `Take ${inspect(
               takeName,
             )} (on Track ${trackIdx})${fxpathName}`;
