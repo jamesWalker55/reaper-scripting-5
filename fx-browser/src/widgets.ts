@@ -418,6 +418,43 @@ export function toggleButton(
   return [state, rightClicked];
 }
 
+/** Different controls for FX list */
+export function toggleButtonAlt(
+  ctx: Context,
+  label: string,
+  state: boolean,
+): [boolean, boolean] {
+  const id = ctx.getId(label);
+  const r = ctx.layoutNext();
+  ctx.updateControl(id, r, 0);
+
+  // handle left click
+  const leftClicked = ctx.mousePressed === MouseButton.Left && ctx.focus === id;
+  // handle right click
+  if (ctx.mousePressed === MouseButton.Right && ctx.focus === id) {
+    state = !state;
+  }
+
+  // draw
+  if (state) {
+    const originalButton = ctx.style.colors[ColorId.Button];
+    const originalButtonHover = ctx.style.colors[ColorId.ButtonHover];
+    const originalButtonFocus = ctx.style.colors[ColorId.ButtonFocus];
+    ctx.style.colors[ColorId.Button] = TOGGLE_BUTTON_COLOR_NORMAL;
+    ctx.style.colors[ColorId.ButtonHover] = TOGGLE_BUTTON_COLOR_HOVER;
+    ctx.style.colors[ColorId.ButtonFocus] = TOGGLE_BUTTON_COLOR_FOCUS;
+    ctx.drawControlFrame(id, r, ColorId.Button, 0);
+    ctx.style.colors[ColorId.Button] = originalButton;
+    ctx.style.colors[ColorId.ButtonHover] = originalButtonHover;
+    ctx.style.colors[ColorId.ButtonFocus] = originalButtonFocus;
+  } else {
+    ctx.drawControlFrame(id, r, ColorId.Button, 0);
+  }
+  ctx.drawControlText(label, r, ColorId.Text, 0);
+
+  return [state, leftClicked];
+}
+
 export function wrappedToggleButtons(
   ctx: Context,
   label: string | null,
@@ -498,7 +535,7 @@ export function wrappedToggleButtons(
       for (const element of row) {
         ctx.pushId(element.button.id);
         const oldActive = activeIds.has(element.button.id);
-        const [newActive, rightClicked] = toggleButton(
+        const [newActive, leftClicked] = toggleButtonAlt(
           ctx,
           element.button.name,
           activeIds.has(element.button.id),
@@ -506,7 +543,7 @@ export function wrappedToggleButtons(
         ctx.popId();
 
         // handle mouse click
-        if (rightClicked) {
+        if (leftClicked) {
           response = {
             type: "solo",
             id: element.button.id,
