@@ -8,7 +8,7 @@ function main() {
   const selectedTracks = Track.getSelected();
   if (selectedTracks.length === 0) return;
 
-  const trackNames = selectedTracks.map((x) => x.getName());
+  const trackNames = selectedTracks.map((x) => x.name);
 
   copy(trackNames.join("\n"));
 }

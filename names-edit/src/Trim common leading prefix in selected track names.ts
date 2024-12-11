@@ -26,7 +26,7 @@ function main() {
   const selectedTracks = Track.getSelected();
   if (0 <= selectedTracks.length && selectedTracks.length <= 1) return;
 
-  const trackNames = selectedTracks.map((x) => strip(x.getName()));
+  const trackNames = selectedTracks.map((x) => strip(x.name));
 
   // find common prefix among non-empty track names
   const prefixLength = commonPrefixLength(
@@ -40,7 +40,7 @@ function main() {
 
     const newName = name.slice(prefixLength, name.length);
 
-    track.setName(newName);
+    track.name = newName;
   }
 }
 

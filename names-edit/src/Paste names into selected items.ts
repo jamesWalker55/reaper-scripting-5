@@ -1,25 +1,28 @@
 AddCwdToImportPaths();
 
 import { paste } from "reaper-api/clipboard";
-import { Track } from "reaper-api/track";
+import { Item, Track } from "reaper-api/track";
 import { errorHandler } from "reaper-api/utils";
 import { splitlines, strip } from "reaper-api/utilsLua";
 
 function main() {
-  const selectedTracks = Track.getSelected();
-  if (selectedTracks.length === 0) return;
+  const selectedItems = Item.getSelected();
+  if (selectedItems.length === 0) return;
 
   const clipboard = paste();
   const names = splitlines(clipboard);
 
   // zip track and clipboard names, whichever one is shorter
-  for (let i = 0; i < selectedTracks.length; i++) {
+  for (let i = 0; i < selectedItems.length; i++) {
     if (i >= names.length) break;
 
-    const track = selectedTracks[i];
+    const item = selectedItems[i];
+    const take = item.activeTake();
+    if (take === null) continue;
+
     const name = strip(names[i]);
 
-    track.setName(name);
+    take.name = name;
   }
 }
 
