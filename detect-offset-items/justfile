@@ -5,3 +5,6 @@ watch:
 
 build:
     bun "{{tstl}}"
+
+publish:
+    cd .. && just publish detect-offset-items detect-offset-items/dist
