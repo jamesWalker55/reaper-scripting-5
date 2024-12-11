@@ -73,14 +73,14 @@ function main() {
           for (const track of Track.iterAll()) {
             for (const item of track.iterItems()) {
               const itemPos = checkItemEnds
-                ? item.getPosition() + item.getLength()
+                ? item.position + item.length
                 : checkItemSnapOffset
-                ? item.getPosition() + item.getSnapOffset()
-                : item.getPosition();
+                ? item.position + item.snapOffset
+                : item.position;
               const gridPos = reaper.BR_GetClosestGridDivision(itemPos);
               const posDiff = Math.abs(itemPos - gridPos);
 
-              const color = item.getColor();
+              const color = item.color;
 
               const inThreshold = thresholdInclusive
                 ? thresholdLow <= posDiff && posDiff <= thresholdHigh
@@ -95,7 +95,7 @@ function main() {
                   // store color to database
                   originalItemColors.set(item.obj, color);
                   // set color to HIGHLIGHT_COLOR
-                  item.setColor(HIGHLIGHT_COLOR);
+                  item.color = HIGHLIGHT_COLOR;
                   anyItemColorChanged = true;
                 }
               } else {
@@ -103,7 +103,7 @@ function main() {
                 // revert color to original if is HIGHLIGHT_COLOR
                 if (color && colorsEqual(color, HIGHLIGHT_COLOR)) {
                   const originalColor = originalItemColors.get(item.obj);
-                  item.setColor(originalColor);
+                  item.color = originalColor;
                   anyItemColorChanged = true;
                 }
               }
@@ -182,10 +182,10 @@ function main() {
       // revert all colors that are currently using the HIGHLIGHT_COLOR
       for (const track of Track.iterAll()) {
         for (const item of track.iterItems()) {
-          const currentColor = item.getColor();
+          const currentColor = item.color;
           if (currentColor && colorsEqual(currentColor, HIGHLIGHT_COLOR)) {
             const oldColor = originalItemColors.get(item.obj);
-            item.setColor(oldColor);
+            item.color = oldColor;
           }
         }
       }
