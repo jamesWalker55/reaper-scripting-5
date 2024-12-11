@@ -1,5 +1,5 @@
 {
-  "name": "track-names-edit",
+  "name": "names-edit",
   "module": "src/index.ts",
   "type": "module",
   "dependencies": {},

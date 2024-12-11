@@ -7,4 +7,4 @@ build:
     bun "{{tstl}}"
 
 publish:
-    cd .. && just publish track-names-edit track-names-edit/dist
+    cd .. && just publish names-edit names-edit/dist
