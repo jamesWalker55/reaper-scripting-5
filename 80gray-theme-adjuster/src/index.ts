@@ -518,11 +518,126 @@ function main() {
             break;
           }
           case Tabs.MCP: {
-            ctx.label(activeTab);
+            ctx.layoutRow([-1], 0);
+            ctx.label("Mixer panel settings");
+
+            ctx.layoutRow([-1], 0);
+            ctx.label("General settings:");
+            ctx.layoutRow([-1], 152);
+            ctx.beginPanel("general");
+            {
+              ctx.layoutRow([-1], 0);
+              ctx.label("Panel width:");
+              ctx.layoutRow([-PARAM_RESET_WIDTH, -1], 0);
+              paramSlider(P.MCP_WIDTH, { format: "%d px" });
+              paramReset(P.MCP_WIDTH);
+
+              ctx.layoutRow([-1], 0);
+              ctx.label("Master panel width:");
+              ctx.layoutRow([-PARAM_RESET_WIDTH, -1], 0);
+              paramSlider(P.MASTER_MCP_WIDTH, { format: "%d px" });
+              paramReset(P.MASTER_MCP_WIDTH);
+
+              ctx.layoutRow([-1], 0);
+              ctx.label("Folder indent:");
+              ctx.layoutRow([-PARAM_RESET_WIDTH, -1], 0);
+              paramSlider(P.MCP_FOLDER_INDENT, { format: "%d px" });
+              paramReset(P.MCP_FOLDER_INDENT);
+            }
+            ctx.endPanel();
+
+            ctx.layoutRow([-1], 0);
+            ctx.label("Meter:");
+            ctx.layoutRow([-1], 82);
+            ctx.beginPanel("meter");
+            {
+              ctx.layoutRow([-1], 0);
+              ctx.label("Show dB scales...");
+              paramCheckbox(P.MCP_METER_TEXT_IN_BG, "In background");
+              paramCheckbox(P.MCP_METER_TEXT_IN_FG, "On top of meters");
+            }
+            ctx.endPanel();
+
+            ctx.layoutRow([-1], 0);
+            ctx.label("Routing diagram:");
+            ctx.layoutRow([-1], 110);
+            ctx.beginPanel("routing-diagram");
+            {
+              ctx.layoutRow([-1], 0);
+              ctx.label("Height:");
+              ctx.layoutRow([-PARAM_RESET_WIDTH, -1], 0);
+              paramSlider(P.MCP_DIAGRAM_HEIGHT, { format: "%d px" });
+              paramReset(P.MCP_DIAGRAM_HEIGHT);
+
+              ctx.layoutRow([-1], 0);
+              ctx.label("Max rows displayed in diagram:");
+              ctx.layoutRow([-PARAM_RESET_WIDTH, -1], 0);
+              paramSlider(P.MCP_DIAGRAM_MAX_ROWS, { format: "%d rows" });
+              paramReset(P.MCP_DIAGRAM_MAX_ROWS);
+            }
+            ctx.endPanel();
+
             break;
           }
           case Tabs.Transport: {
-            ctx.label(activeTab);
+            ctx.layoutRow([-1], 0);
+            ctx.label("Transport settings");
+
+            ctx.layoutRow([-1], 0);
+            ctx.label("General settings:");
+            ctx.layoutRow([-1], 56);
+            ctx.beginPanel("general");
+            {
+              ctx.layoutRow([60, -PARAM_RESET_WIDTH, -1], 0);
+              ctx.label("Height");
+              paramSlider(P.TRANS_HEIGHT, { format: "%d px" });
+              paramReset(P.TRANS_HEIGHT);
+
+              ctx.layoutRow([-1], 0);
+              paramCheckbox(P.TRANS_SHOW_PAUSE_BUTTON, "Show pause button");
+            }
+            ctx.endPanel();
+
+            ctx.layoutRow([-1], 0);
+            ctx.label("Selection diagram:");
+            ctx.layoutRow([-1], 160);
+            ctx.beginPanel("general");
+            {
+              ctx.layoutRow([60, -PARAM_RESET_WIDTH, -1], 0);
+
+              ctx.label("Width");
+              paramSlider(P.TRANS_SEL_W, { format: "%d px" });
+              paramReset(P.TRANS_SEL_W);
+
+              ctx.label("Height");
+              paramSlider(P.TRANS_SEL_H, { format: "%d px" });
+              paramReset(P.TRANS_SEL_H);
+
+              ctx.label("Text height");
+              paramSlider(P.TRANS_SEL_TEXT_H, { format: "%d px" });
+              paramReset(P.TRANS_SEL_TEXT_H);
+
+              // some space
+              ctx.layoutRow([-1], 4);
+              ctx.layoutNext();
+
+              ctx.layoutRow([-1], 0);
+              ctx.text(
+                "If the diagram shows some clipping text on the left side, please adjust the following clip length to fix it:",
+              );
+
+              // some space
+              ctx.layoutRow([-1], 4);
+              ctx.layoutNext();
+
+              ctx.layoutRow([60, -PARAM_RESET_WIDTH, -1], 0);
+
+              ctx.label("Clip left");
+              paramSlider(P.TRANS_SEL_LABEL_W, { format: "%d px" });
+              paramReset(P.TRANS_SEL_LABEL_W);
+            }
+            ctx.endPanel();
+
             break;
           }
           default:
