@@ -14,7 +14,20 @@ import {
   errorHandler,
   log,
 } from "reaper-api/utils";
-import { createContext, microUILoop, Option, Response } from "reaper-microui";
+import {
+  createContext,
+  microUILoop,
+  Option,
+  Response,
+  ReaperContext as Context,
+  MouseButton,
+  ColorId,
+  rgba,
+  Rect,
+  Color,
+  expandRect,
+  rect,
+} from "reaper-microui";
 
 const windowConfig = (() => {
   const section = Section("80gray-theme-adjuster");
@@ -70,7 +83,93 @@ function getWindowInfo() {
   return { dock, x, y, w, h };
 }
 
+function drawActiveTabFrame(ctx: Context, r: Rect, color: Color) {
+  ctx.drawRect({ x: r.x + 1, y: r.y, w: r.w - 2, h: 1 }, color);
+  // ctx.drawRect({ x: r.x + 1, y: r.y + r.h - 1, w: r.w - 2, h: 1 }, color);
+  ctx.drawRect({ x: r.x, y: r.y, w: 1, h: r.h }, color);
+  ctx.drawRect({ x: r.x + r.w - 1, y: r.y, w: 1, h: r.h }, color);
+}
+
+function drawInactiveTabFrame(ctx: Context, r: Rect, color: Color) {
+  // ctx.drawRect({ x: r.x + 1, y: r.y, w: r.w - 2, h: 1 }, color);
+  ctx.drawRect({ x: r.x, y: r.y + r.h - 1, w: r.w, h: 1 }, color);
+  // ctx.drawRect({ x: r.x, y: r.y, w: 1, h: r.h }, color);
+  // ctx.drawRect({ x: r.x + r.w - 1, y: r.y, w: 1, h: r.h }, color);
+}
+
+function tabsWidget<T extends string>(
+  ctx: Context,
+  identifier: string,
+  tabs: T[],
+  activeTab: T,
+): T {
+  ctx.pushId(identifier);
+  {
+    const allTabsRect = ctx.layoutNext();
+    const availableSpace = allTabsRect.w + ctx.style.spacing;
+    const tabWidth = availableSpace / tabs.length;
+
+    tabs.forEach((tab, i) => {
+      const id = ctx.getId(tab);
+      const r = rect(tabWidth * i, allTabsRect.y, tabWidth, allTabsRect.h);
+      ctx.updateControl(id, r, 0);
+
+      // handle left click
+      if (ctx.mousePressed === MouseButton.Left && ctx.focus === id) {
+        activeTab = tab;
+      }
+
+      // draw
+      if (tab === activeTab) {
+        // draw fill
+        const color: Color | null =
+          ctx.focus === id
+            ? rgba(115, 115, 115, 1.0)
+            : ctx.hover === id
+            ? rgba(75, 75, 75, 1.0)
+            : null;
+
+        if (color !== null) ctx.drawRect(r, color);
+
+        // draw border
+        if (ctx.style.colors[ColorId.Border].a > 0) {
+          drawActiveTabFrame(ctx, r, ctx.style.colors[ColorId.Border]);
+        }
+
+        // draw text
+        ctx.drawControlText(tab, r, ColorId.Text, 0);
+      } else {
+        // draw fill
+        const color: Color | null =
+          ctx.focus === id
+            ? rgba(80, 80, 80, 1.0)
+            : ctx.hover === id
+            ? rgba(60, 60, 60, 1.0)
+            : rgba(30, 30, 30, 1.0);
+
+        if (color !== null) {
+          ctx.drawRect(r, color);
+        }
+
+        // draw border
+        if (ctx.style.colors[ColorId.Border].a > 0) {
+          drawInactiveTabFrame(ctx, r, ctx.style.colors[ColorId.Border]);
+        }
+
+        // draw text
+        ctx.drawControlText(tab, r, ColorId.Text, 0);
+      }
+    });
+  }
+  ctx.popId();
+
+  return activeTab;
+}
+
 function main() {
+  // font size
+  const REM = 14;
+
   // initialize gfx
   {
     const WINDOW_DEFAULT_WIDTH = 600;
@@ -87,12 +186,15 @@ function main() {
       windowConfig.windowX || WINDOW_DEFAULT_X,
       windowConfig.windowY || WINDOW_DEFAULT_Y,
     );
-    gfx.setfont(1, "Arial", 12);
+    gfx.setfont(1, "Arial", REM);
   }
 
   // create microui context
   const ctx = createContext();
   ctx.style.font = 1;
+
+  // persistent variables
+  let activeTab = "Track Panel";
 
   // GUI loop
   microUILoop(
@@ -111,6 +213,14 @@ function main() {
           win.rect.w = gfx.w;
           win.rect.h = gfx.h;
         }
+
+        ctx.layoutRow([-1], 0);
+        activeTab = tabsWidget(
+          ctx,
+          "tabs",
+          ["Track Panel", "Mixer Panel", "Transport"],
+          activeTab,
+        );
 
         // // top title bar
         // {

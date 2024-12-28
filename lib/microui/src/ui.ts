@@ -172,7 +172,7 @@ function intersectRects(r1: Rect, r2: Rect): Rect {
   return { x: x1, y: y1, w: x2 - x1, h: y2 - y1 };
 }
 
-function expandRect(rect: Rect, n: number): Rect {
+export function expandRect(rect: Rect, n: number): Rect {
   return {
     x: rect.x - n,
     y: rect.y - n,
