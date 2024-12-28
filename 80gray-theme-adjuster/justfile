@@ -5,6 +5,3 @@ watch:
 
 build:
     bun "{{tstl}}"
-
-publish:
-    cd .. && just publish 80gray-theme-adjuster 80gray-theme-adjuster/dist
