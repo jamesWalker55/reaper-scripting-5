@@ -25689,10 +25689,10 @@ declare namespace gfx {
    */
   function dock(
     v: number,
-    wx?: boolean,
-    wy?: boolean,
-    ww?: boolean,
-    wh?: boolean,
+    wx?: number,
+    wy?: number,
+    ww?: number,
+    wh?: number,
   ):
     | LuaMultiReturn<[number]>
     | LuaMultiReturn<[number, number]>

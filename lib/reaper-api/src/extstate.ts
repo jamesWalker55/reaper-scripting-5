@@ -1,5 +1,5 @@
 /**
- * Set a ext state.
+ * Set a ext state. Defaults to permanent.
  *
  * WARNING: An empty string is the same as setting as null!
  */

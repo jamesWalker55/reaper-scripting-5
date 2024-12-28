@@ -21,7 +21,7 @@
     "strict": true
   },
   "tstl": {
-    "luaBundle": "JW FX Browser.lua",
+    "luaBundle": "80gray_theme_adjuster.lua",
     "luaBundleEntry": "src/index.ts",
     "luaTarget": "5.4",
     "luaLibImport": "require-minimal",
