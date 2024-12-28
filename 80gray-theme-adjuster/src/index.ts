@@ -31,7 +31,7 @@ import {
 
 const SCRIPT_VERSION = "v1.0";
 
-const windowConfig = (() => {
+const config = (() => {
   const section = Section("80gray-theme-adjuster");
 
   function getConfigNumber(name: string): number | null {
@@ -44,40 +44,51 @@ const windowConfig = (() => {
     return num;
   }
 
-  class WindowConfig {
+  class ThemeAdjusterConfig {
     get windowX(): number | null {
       return getConfigNumber("windowX");
     }
-    set windowX(val: number | number) {
+    set windowX(val: number | null) {
       section.set("windowX", val !== null ? val.toString() : val);
     }
     get windowY(): number | null {
       return getConfigNumber("windowY");
     }
-    set windowY(val: number | number) {
+    set windowY(val: number | null) {
       section.set("windowY", val !== null ? val.toString() : val);
     }
     get windowW(): number | null {
       return getConfigNumber("windowW");
     }
-    set windowW(val: number | number) {
+    set windowW(val: number | null) {
       section.set("windowW", val !== null ? val.toString() : val);
     }
     get windowH(): number | null {
       return getConfigNumber("windowH");
     }
-    set windowH(val: number | number) {
+    set windowH(val: number | null) {
       section.set("windowH", val !== null ? val.toString() : val);
     }
     get windowDock(): number | null {
       return getConfigNumber("windowDock");
     }
-    set windowDock(val: number | number) {
+    set windowDock(val: number | null) {
       section.set("windowDock", val !== null ? val.toString() : val);
+    }
+    get activeTab(): Tabs | null {
+      const text = section.get("activeTab");
+      if (text === null) return null;
+
+      if (!Object.values(Tabs).includes(text as Tabs)) return null;
+
+      return text as Tabs;
+    }
+    set activeTab(val: Tabs | null) {
+      section.set("activeTab", val);
     }
   }
 
-  return new WindowConfig();
+  return new ThemeAdjusterConfig();
 })();
 
 function getWindowInfo() {
@@ -253,6 +264,13 @@ enum P {
   TRANS_SEL_TEXT_H = "p_trans_sel_text_h",
 }
 
+enum Tabs {
+  General = "General",
+  TCP = "Track Panel",
+  MCP = "Mixer Panel",
+  Transport = "Transport",
+}
+
 function main() {
   // font size
   const REM = 14;
@@ -267,11 +285,11 @@ function main() {
 
     gfx.init(
       "80gray Theme Adjuster",
-      windowConfig.windowW || WINDOW_DEFAULT_WIDTH,
-      windowConfig.windowH || WINDOW_DEFAULT_HEIGHT,
-      windowConfig.windowDock || WINDOW_DEFAULT_DOCK,
-      windowConfig.windowX || WINDOW_DEFAULT_X,
-      windowConfig.windowY || WINDOW_DEFAULT_Y,
+      config.windowW || WINDOW_DEFAULT_WIDTH,
+      config.windowH || WINDOW_DEFAULT_HEIGHT,
+      config.windowDock || WINDOW_DEFAULT_DOCK,
+      config.windowX || WINDOW_DEFAULT_X,
+      config.windowY || WINDOW_DEFAULT_Y,
     );
     gfx.setfont(1, "Arial", REM);
   }
@@ -281,13 +299,7 @@ function main() {
   ctx.style.font = 1;
 
   // persistent variables
-  enum Tabs {
-    General = "General",
-    TCP = "Track Panel",
-    MCP = "Mixer Panel",
-    Transport = "Transport",
-  }
-  let activeTab = Tabs.General;
+  let activeTab: Tabs = config.activeTab || Tabs.TCP;
   themeHasChanged();
   let themeParams = getThemeParameters();
   let needLayoutRefresh = false;
@@ -683,11 +695,12 @@ function main() {
       // on exit, save window position and dock state
       const wnd = getWindowInfo();
 
-      windowConfig.windowDock = wnd.dock;
-      windowConfig.windowX = wnd.x;
-      windowConfig.windowY = wnd.y;
-      windowConfig.windowW = wnd.w;
-      windowConfig.windowH = wnd.h;
+      config.windowDock = wnd.dock;
+      config.windowX = wnd.x;
+      config.windowY = wnd.y;
+      config.windowW = wnd.w;
+      config.windowH = wnd.h;
+      config.activeTab = activeTab;
     },
   );
 }
