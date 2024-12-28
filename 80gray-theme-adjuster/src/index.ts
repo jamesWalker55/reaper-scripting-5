@@ -310,9 +310,6 @@ enum Tabs {
 }
 
 function main() {
-  // font size
-  const REM = 14;
-
   // initialize gfx
   {
     const WINDOW_DEFAULT_WIDTH = 400;
@@ -329,7 +326,8 @@ function main() {
       config.windowX || WINDOW_DEFAULT_X,
       config.windowY || WINDOW_DEFAULT_Y,
     );
-    gfx.setfont(1, "Arial", REM);
+    gfx.setfont(1, "Arial", 14);
+    gfx.setfont(2, "Arial", 24);
   }
 
   // create microui context
@@ -419,6 +417,11 @@ function main() {
         themeParams = getThemeParameters();
       }
 
+      // make sure all theme parameters are found
+      const allThemeParamsFound = Object.values(P).some(
+        (name) => !(name in themeParams),
+      );
+
       if (
         ctx.beginWindow(
           "Demo Window",
@@ -431,6 +434,29 @@ function main() {
           const win = ctx.getCurrentContainer();
           win.rect.w = gfx.w;
           win.rect.h = gfx.h;
+        }
+
+        if (allThemeParamsFound) {
+          ctx.layoutRow([-1], 16);
+          ctx.layoutNext();
+
+          const oldFont = ctx.style.font;
+          ctx.style.font = 2;
+
+          ctx.layoutRow([-1], 0);
+          ctx.text(
+            "WARNING: Some theme parameters are not found, this script may not work correctly!",
+          );
+
+          ctx.layoutRow([-1], 16);
+          ctx.layoutNext();
+
+          ctx.text("Please make sure both the theme and script are up to date!");
+
+          ctx.style.font = oldFont;
+
+          ctx.layoutRow([-1], 16);
+          ctx.layoutNext();
         }
 
         // tabs display
