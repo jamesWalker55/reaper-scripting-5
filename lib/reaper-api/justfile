@@ -34,11 +34,15 @@ copy-files:
         # Determine the destination directory
         DST_PATH="$DST_DIR/$REL_PATH"
 
+        # Find relative path of original file from link's directory
+        LINK_TARGET=$(realpath -s --relative-to="$(dirname "$DST_PATH")" "$FILE")
+
         # Create the destination directory if it doesn't exist
         mkdir -p "$(dirname "$DST_PATH")"
 
         # Copy the file to the destination directory
-        cp -f "$FILE" "$DST_PATH"
+        rm "$DST_PATH"
+        pwsh -c "New-Item -Path \"$DST_PATH\" -ItemType SymbolicLink -Value \"$LINK_TARGET\""
     done
 
     echo "All .d.ts files have been copied successfully."
