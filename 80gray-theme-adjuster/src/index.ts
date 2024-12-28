@@ -282,11 +282,12 @@ function main() {
 
   // persistent variables
   enum Tabs {
+    General = "General",
     TCP = "Track Panel",
     MCP = "Mixer Panel",
     Transport = "Transport",
   }
-  let activeTab = Tabs.TCP;
+  let activeTab = Tabs.General;
   themeHasChanged();
   let themeParams = getThemeParameters();
   let needLayoutRefresh = false;
@@ -387,7 +388,7 @@ function main() {
         activeTab = tabsWidget(
           ctx,
           "tabs",
-          [Tabs.TCP, Tabs.MCP, Tabs.Transport],
+          [Tabs.General, Tabs.TCP, Tabs.MCP, Tabs.Transport],
           activeTab,
         );
 
@@ -398,6 +399,18 @@ function main() {
         ctx.style.colors[ColorId.PanelBG] = rgba(45, 45, 45, 1.0);
 
         switch (activeTab) {
+          case Tabs.General: {
+            ctx.layoutRow([-1], 0);
+            ctx.label("General settings");
+
+            ctx.layoutRow([-1], 0);
+            ctx.label("Scale fonts:");
+            ctx.layoutRow([-PARAM_RESET_WIDTH, -1], 0);
+            paramSlider(P.SCALE_FONT, { format: "%d%%" });
+            paramReset(P.SCALE_FONT);
+
+            break;
+          }
           case Tabs.TCP: {
             ctx.layoutRow([-1], 0);
             ctx.label("Track panel settings");
