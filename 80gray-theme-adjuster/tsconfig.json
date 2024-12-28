@@ -21,7 +21,7 @@
     "strict": true
   },
   "tstl": {
-    "luaBundle": "80gray_theme_adjuster.lua",
+    "luaBundle": "80gray Theme Adjuster.lua",
     "luaBundleEntry": "src/index.ts",
     "luaTarget": "5.4",
     "luaLibImport": "require-minimal",
