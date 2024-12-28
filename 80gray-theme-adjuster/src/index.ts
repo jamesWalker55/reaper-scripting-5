@@ -213,7 +213,7 @@ function getThemeParameters() {
     const [name, description, currentValue, defaultValue, minValue, maxValue] =
       reaper.ThemeLayout_GetParameter(i);
 
-    if (name === null) return result;
+    if (name === null) break;
 
     result[name] = {
       id: i,
@@ -226,10 +226,48 @@ function getThemeParameters() {
 
     i += 1;
   }
+
+  const nativeParams = [
+    { name: "gamma", id: -1000 },
+    { name: "highlightbg", id: -1003 },
+    { name: "midtonebg", id: -1002 },
+    { name: "shadowbg", id: -1001 },
+    { name: "saturation", id: -1004 },
+    { name: "tint", id: -1005 },
+    { name: "color_apply_all", id: -1006 },
+  ];
+  for (const native of nativeParams) {
+    const [name, description, currentValue, defaultValue, minValue, maxValue] =
+      reaper.ThemeLayout_GetParameter(native.id);
+
+    if (name === null)
+      throw new Error("Failed to get native color-adjustment controls");
+
+    result[native.name] = {
+      id: native.id,
+      description,
+      currentValue,
+      defaultValue,
+      minValue,
+      maxValue,
+    };
+  }
+
+  return result;
 }
 
 /** Known params for the 80gray theme */
 enum P {
+  // native params
+  NATIVE_TINT = "tint",
+  NATIVE_SATURATION = "saturation",
+  NATIVE_HIGHLIGHT_BG = "highlightbg",
+  NATIVE_MIDTONE_BG = "midtonebg",
+  NATIVE_SHADOW_BG = "shadowbg",
+  NATIVE_GAMMA = "gamma",
+  NATIVE_COLOR_APPLY_ALL = "color_apply_all",
+
+  // my own params
   SCALE_UI = "p_scale_ui",
   SCALE_FONT = "p_scale_font",
   TCP_TINT = "p_tcp_tint",
@@ -419,6 +457,45 @@ function main() {
             ctx.layoutSetNext(r, false);
 
             ctx.label("General settings");
+
+            ctx.layoutRow([-1], 0);
+            ctx.label("Color adjustment:");
+            ctx.layoutRow([-1], 180);
+            ctx.beginPanel("color-adjust");
+            {
+              ctx.layoutRow([80, -PARAM_RESET_WIDTH, -1], 0);
+
+              ctx.label("Tint");
+              paramSlider(P.NATIVE_TINT, { format: "%d" });
+              paramReset(P.NATIVE_TINT);
+
+              ctx.label("Saturation");
+              paramSlider(P.NATIVE_SATURATION, { format: "%d" });
+              paramReset(P.NATIVE_SATURATION);
+
+              ctx.label("Highlight BG");
+              paramSlider(P.NATIVE_HIGHLIGHT_BG, { format: "%d" });
+              paramReset(P.NATIVE_HIGHLIGHT_BG);
+
+              ctx.label("Midtone BG");
+              paramSlider(P.NATIVE_MIDTONE_BG, { format: "%d" });
+              paramReset(P.NATIVE_MIDTONE_BG);
+
+              ctx.label("Shadow BG");
+              paramSlider(P.NATIVE_SHADOW_BG, { format: "%d" });
+              paramReset(P.NATIVE_SHADOW_BG);
+
+              ctx.label("Gamma");
+              paramSlider(P.NATIVE_GAMMA, { format: "%d" });
+              paramReset(P.NATIVE_GAMMA);
+
+              ctx.layoutRow([-1], 0);
+              paramCheckbox(
+                P.NATIVE_COLOR_APPLY_ALL,
+                "Also affect project custom colors",
+              );
+            }
+            ctx.endPanel();
 
             ctx.layoutRow([-1], 0);
             ctx.label("Scale fonts:");
