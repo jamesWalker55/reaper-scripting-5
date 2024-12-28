@@ -413,6 +413,11 @@ function main() {
         switch (activeTab) {
           case Tabs.General: {
             ctx.layoutRow([-1], 0);
+
+            // peek layout width
+            const r = ctx.layoutNext();
+            ctx.layoutSetNext(r, false);
+
             ctx.label("General settings");
 
             ctx.layoutRow([-1], 0);
@@ -420,6 +425,34 @@ function main() {
             ctx.layoutRow([-PARAM_RESET_WIDTH, -1], 0);
             paramSlider(P.SCALE_FONT, { format: "%d%%" });
             paramReset(P.SCALE_FONT);
+
+            ctx.layoutRow([-1], 0);
+            ctx.label("[HACK] Scale UI:");
+            ctx.text(
+              "Things may look weird with this option! This option is intended for debugging purposes and causes weird gaps between elements.",
+            );
+            ctx.layoutRow([-PARAM_RESET_WIDTH, -1], 0);
+            paramSlider(P.SCALE_UI, { format: "%d%%" });
+            paramReset(P.SCALE_UI);
+
+            const buttonWidth = r.w / 6 - ctx.style.spacing;
+            ctx.layoutRow(
+              [
+                buttonWidth,
+                buttonWidth,
+                buttonWidth,
+                buttonWidth,
+                buttonWidth,
+                buttonWidth,
+              ],
+              0,
+            );
+            if (ctx.button("50%")) setParam(P.SCALE_UI, 50);
+            if (ctx.button("100%")) setParam(P.SCALE_UI, 100);
+            if (ctx.button("125%")) setParam(P.SCALE_UI, 125);
+            if (ctx.button("150%")) setParam(P.SCALE_UI, 150);
+            if (ctx.button("175%")) setParam(P.SCALE_UI, 175);
+            if (ctx.button("200%")) setParam(P.SCALE_UI, 200);
 
             break;
           }
