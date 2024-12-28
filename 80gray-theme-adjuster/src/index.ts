@@ -159,7 +159,10 @@ function tabsWidget<T extends string>(
         }
 
         // draw text
+        const oldTextColor = ctx.style.colors[ColorId.Text];
+        ctx.style.colors[ColorId.Text] = rgba(140, 140, 140, 1.0);
         ctx.drawControlText(tab, r, ColorId.Text, 0);
+        ctx.style.colors[ColorId.Text] = oldTextColor;
       }
     });
   }
@@ -222,6 +225,7 @@ enum P {
   TCP_METER_WIDTH = "p_tcp_meter_width",
   TCP_METER_TEXT_IN_BG = "p_tcp_meter_text_in_bg",
   TCP_METER_TEXT_IN_FG = "p_tcp_meter_text_in_fg",
+  TCP_METER_TEXT_ONLY_IF_TALL = "p_tcp_meter_text_only_if_tall",
   TCP_FOLDER_INDENT = "p_tcp_folder_indent",
   TCP_INDICATOR_WIDTH = "p_tcp_indicator_width",
   TCP_INDICATOR_SHOW_RECARM = "p_tcp_indicator_show_recarm",
@@ -255,8 +259,8 @@ function main() {
 
   // initialize gfx
   {
-    const WINDOW_DEFAULT_WIDTH = 350;
-    const WINDOW_DEFAULT_HEIGHT = 500;
+    const WINDOW_DEFAULT_WIDTH = 400;
+    const WINDOW_DEFAULT_HEIGHT = 800;
     const WINDOW_DEFAULT_DOCK = 0;
     const WINDOW_DEFAULT_X = 100;
     const WINDOW_DEFAULT_Y = 50;
@@ -390,35 +394,56 @@ function main() {
         // tabs content
         ctx.layoutRow([-1], -25);
         ctx.beginPanel(`tab-contents-${activeTab}`);
+        const oldPanelBG = ctx.style.colors[ColorId.PanelBG];
+        ctx.style.colors[ColorId.PanelBG] = rgba(45, 45, 45, 1.0);
 
         switch (activeTab) {
           case Tabs.TCP: {
-            ctx.label(activeTab);
+            ctx.layoutRow([-1], 0);
+            ctx.label("Track panel settings");
 
             ctx.layoutRow([-1], 0);
-            ctx.layoutRow([50, -PARAM_RESET_WIDTH, -1], 0);
-            ctx.label("Tint");
-            paramSlider(P.TCP_TINT, { format: "%d %%" });
-            paramReset(P.TCP_TINT);
-
-            // TCP_FOLDER_INDENT = "p_tcp_folder_indent",
-
-            // TCP_FXLIST_WIDTH = "p_tcp_fxlist_width",
-            // TCP_FXLIST_COLUMNS = "p_tcp_fxlist_columns",
-            // TCP_HORIZONTAL_TEXT_HACK = "p_tcp_horizontal_text_hack",
-            // TCP_NO_FADE = "p_tcp_no_fade",
-            // TCP_MAX_RECINPUT_WIDTH = "p_tcp_max_recinput_width",
-            // TCP_HIGH_CONTRAST = "p_tcp_high_contrast",
-            // TCP_SINGLE_ROW_PAN_IO = "p_tcp_single_row_pan_io",
-            // TCP_PERMANENT_REC_SECTION = "p_tcp_permanent_rec_section",
-            // TCP_FXPARM_COL_WIDTH = "p_tcp_fxparm_col_width",
-
-            ctx.layoutRow([-1], 0);
-            ctx.label("Meter settings");
-            ctx.layoutRow([-1], 110);
-            ctx.beginPanel(`tab-contents-${activeTab}`);
+            ctx.label("General settings:");
+            ctx.layoutRow([-1], 56);
+            ctx.beginPanel("general");
             {
-              ctx.layoutRow([50, -PARAM_RESET_WIDTH, -1], 0);
+              ctx.layoutRow([-1], 0);
+              paramCheckbox(
+                P.TCP_SINGLE_ROW_PAN_IO,
+                "Show pan and routing controls in single row mode",
+              );
+              hint(
+                '"single row": When track is too short to show 2nd row of buttons',
+              );
+              paramCheckbox(
+                P.TCP_PERMANENT_REC_SECTION,
+                "Always show extra recording buttons (monitor, input FX)",
+              );
+              hint("Show 'input monitor' and 'input FX' even when not armed");
+            }
+            ctx.endPanel();
+
+            ctx.layoutRow([-1], 0);
+            ctx.label("FX list:");
+            ctx.layoutRow([-1], 56);
+            ctx.beginPanel("fxlist");
+            {
+              ctx.layoutRow([60, -PARAM_RESET_WIDTH, -1], 0);
+              ctx.label("Width");
+              paramSlider(P.TCP_FXLIST_WIDTH, { format: "%d px" });
+              paramReset(P.TCP_FXLIST_WIDTH);
+              ctx.label("Columns");
+              paramSlider(P.TCP_FXLIST_COLUMNS, { format: "%d columns" });
+              paramReset(P.TCP_FXLIST_COLUMNS);
+            }
+            ctx.endPanel();
+
+            ctx.layoutRow([-1], 0);
+            ctx.label("Meter:");
+            ctx.layoutRow([-1], 129);
+            ctx.beginPanel("meter");
+            {
+              ctx.layoutRow([60, -PARAM_RESET_WIDTH, -1], 0);
               ctx.label("Width");
               paramSlider(P.TCP_METER_WIDTH, { format: "%d px" });
               paramReset(P.TCP_METER_WIDTH);
@@ -427,46 +452,69 @@ function main() {
               ctx.label("Show dB scales...");
               paramCheckbox(P.TCP_METER_TEXT_IN_BG, "In background");
               paramCheckbox(P.TCP_METER_TEXT_IN_FG, "On top of meters");
+              paramCheckbox(
+                P.TCP_METER_TEXT_ONLY_IF_TALL,
+                "...Only if the panel is tall enough",
+              );
+              hint('"tall enough": When the panel shows more than 2 rows');
             }
             ctx.endPanel();
 
             ctx.layoutRow([-1], 0);
-            ctx.label("Selection indicator");
+            ctx.label("Selection indicator:");
+            ctx.layoutRow([-1], 57);
+            ctx.beginPanel("selection-indicator");
             {
-              const param = themeParams[P.TCP_INDICATOR_WIDTH];
-              const currentWidth = param?.currentValue || 0;
-              const wasEnabled = currentWidth > 0;
+              ctx.layoutRow([60, -PARAM_RESET_WIDTH, -1], 0);
+              ctx.label("Width:");
+              paramSlider(P.TCP_INDICATOR_WIDTH, { format: "%d px" });
+              paramReset(P.TCP_INDICATOR_WIDTH);
 
-              if (wasEnabled) {
-                ctx.layoutRow([100, 40, -1], 0);
-              } else {
-                ctx.layoutRow([-1], 0);
-              }
-
-              const shouldEnable = ctx.checkbox("Enabled", wasEnabled);
-
-              if (shouldEnable && !wasEnabled) {
-                setParam(P.TCP_INDICATOR_WIDTH, 3);
-              } else if (!shouldEnable && wasEnabled) {
-                setParam(P.TCP_INDICATOR_WIDTH, 0);
-              }
-
-              if (shouldEnable && wasEnabled) {
-                ctx.label("Width:");
-
-                paramSlider(P.TCP_INDICATOR_WIDTH, { min: 1, format: "%d px" });
-
-                ctx.layoutRow([-1], 0);
-                paramCheckbox(
-                  P.TCP_INDICATOR_SHOW_RECARM,
-                  "Show recording-armed status",
-                );
-              } else {
-                ctx.layoutRow([-1], 0);
-              }
+              ctx.layoutRow([-1], 0);
+              paramCheckbox(
+                P.TCP_INDICATOR_SHOW_RECARM,
+                "Show record-armed status",
+              );
+              hint("Tracks armed for recording will use different colors");
             }
+            ctx.endPanel();
 
-            ctx.text("hello world");
+            ctx.layoutRow([-1], 0);
+            ctx.label("Tweaks:");
+            ctx.layoutRow([-1], 202);
+            ctx.beginPanel("tweaks");
+            {
+              ctx.layoutRow([60, -PARAM_RESET_WIDTH, -1], 0);
+              ctx.label("Tint");
+              paramSlider(P.TCP_TINT, { format: "%d %%" });
+              hint(
+                "Make the background color more similar to the track's custom color",
+              );
+              paramReset(P.TCP_TINT);
+
+              ctx.layoutRow([-1], 0);
+              paramCheckbox(P.TCP_HIGH_CONTRAST, "Higher contrast text");
+              paramCheckbox(P.TCP_NO_FADE, "Disable text fade-out effect");
+              paramCheckbox(
+                P.TCP_HORIZONTAL_TEXT_HACK,
+                "[Hack] Force text to be horizontal",
+              );
+              hint("Doesn't work on some systems (just makes text disappear)");
+
+              ctx.layoutRow([-1], 0);
+              ctx.label("Limit width of record-input text:");
+              ctx.layoutRow([-PARAM_RESET_WIDTH, -1], 0);
+              paramSlider(P.TCP_MAX_RECINPUT_WIDTH, { format: "%d px" });
+              paramReset(P.TCP_MAX_RECINPUT_WIDTH);
+
+              ctx.layoutRow([-1], 0);
+              ctx.label("FX parameters column width:");
+              ctx.layoutRow([-PARAM_RESET_WIDTH, -1], 0);
+              paramSlider(P.TCP_FXPARM_COL_WIDTH, { format: "%d px" });
+              paramReset(P.TCP_FXPARM_COL_WIDTH);
+            }
+            ctx.endPanel();
+
             break;
           }
           case Tabs.MCP: {
@@ -480,6 +528,8 @@ function main() {
           default:
             assertUnreachable(activeTab);
         }
+
+        ctx.style.colors[ColorId.PanelBG] = oldPanelBG;
 
         ctx.endPanel();
 
