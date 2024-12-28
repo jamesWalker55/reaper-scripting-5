@@ -166,6 +166,87 @@ function tabsWidget<T extends string>(
   return activeTab;
 }
 
+const themeHasChanged = (() => {
+  let prevTheme = "";
+
+  return () => {
+    const newTheme = reaper.GetLastColorThemeFile();
+    if (newTheme !== prevTheme) {
+      prevTheme = newTheme;
+      return true;
+    } else {
+      return false;
+    }
+  };
+})();
+
+type Parameter = {
+  id: number;
+  description: string;
+  currentValue: number;
+  defaultValue: number;
+  minValue: number;
+  maxValue: number;
+};
+
+function getThemeParameters() {
+  const result: Record<string, Parameter | undefined> = {};
+
+  let i = 0;
+  while (true) {
+    const [name, description, currentValue, defaultValue, minValue, maxValue] =
+      reaper.ThemeLayout_GetParameter(i);
+
+    if (name === null) return result;
+
+    result[name] = {
+      id: i,
+      description,
+      currentValue,
+      defaultValue,
+      minValue,
+      maxValue,
+    };
+
+    i += 1;
+  }
+}
+
+/** Known params for the 80gray theme */
+enum P {
+  SCALE_UI = "p_scale_ui",
+  SCALE_FONT = "p_scale_font",
+  TCP_TINT = "p_tcp_tint",
+  TCP_METER_WIDTH = "p_tcp_meter_width",
+  TCP_METER_TEXT_IN_BG = "p_tcp_meter_text_in_bg",
+  TCP_METER_TEXT_IN_FG = "p_tcp_meter_text_in_fg",
+  TCP_FOLDER_INDENT = "p_tcp_folder_indent",
+  TCP_INDICATOR_WIDTH = "p_tcp_indicator_width",
+  TCP_INDICATOR_SHOW_RECARM = "p_tcp_indicator_show_recarm",
+  TCP_FXLIST_WIDTH = "p_tcp_fxlist_width",
+  TCP_FXLIST_COLUMNS = "p_tcp_fxlist_columns",
+  TCP_HORIZONTAL_TEXT_HACK = "p_tcp_horizontal_text_hack",
+  TCP_NO_FADE = "p_tcp_no_fade",
+  TCP_MAX_RECINPUT_WIDTH = "p_tcp_max_recinput_width",
+  TCP_HIGH_CONTRAST = "p_tcp_high_contrast",
+  TCP_SINGLE_ROW_PAN_IO = "p_tcp_single_row_pan_io",
+  TCP_PERMANENT_REC_SECTION = "p_tcp_permanent_rec_section",
+  TCP_FXPARM_COL_WIDTH = "p_tcp_fxparm_col_width",
+  MCP_WIDTH = "p_mcp_width",
+  MCP_DIAGRAM_HEIGHT = "p_mcp_diagram_height",
+  MCP_DIAGRAM_MAX_ROWS = "p_mcp_diagram_max_rows",
+  MCP_METER_TEXT_IN_BG = "p_mcp_meter_text_in_bg",
+  MCP_METER_TEXT_IN_FG = "p_mcp_meter_text_in_fg",
+  MCP_FOLDER_INDENT = "p_mcp_folder_indent",
+  MASTER_MCP_WIDTH = "p_master_mcp_width",
+  TRANS_HEIGHT = "p_trans_height",
+  TRANS_SHOW_PAUSE_BUTTON = "p_trans_show_pause_button",
+  TRANS_SEL_W = "p_trans_sel_w",
+  TRANS_SEL_H = "p_trans_sel_h",
+  TRANS_SEL_LABEL_W = "p_trans_sel_label_w",
+  TRANS_SEL_TEXT_H = "p_trans_sel_text_h",
+}
+
 function main() {
   // font size
   const REM = 14;
@@ -194,12 +275,93 @@ function main() {
   ctx.style.font = 1;
 
   // persistent variables
-  let activeTab = "Track Panel";
+  enum Tabs {
+    TCP = "Track Panel",
+    MCP = "Mixer Panel",
+    Transport = "Transport",
+  }
+  let activeTab = Tabs.TCP;
+  themeHasChanged();
+  let themeParams = getThemeParameters();
+  let needLayoutRefresh = false;
+  let hintText = "";
+
+  // helper functions
+  function hint(text: string) {
+    const shouldShowHint = ctx.focus === ctx.lastId || ctx.hover === ctx.lastId;
+    if (shouldShowHint) {
+      hintText = text;
+    }
+  }
+
+  // param widgets
+  function setParam(key: P, value: number | boolean) {
+    if (!(key in themeParams)) {
+      throw new Error(`Set theme parameter does not exist: ${encode(key)}`);
+    }
+
+    const param = themeParams[key]!;
+
+    const needChange =
+      typeof value === "boolean"
+        ? value !== (param.currentValue !== 0)
+        : Math.round(value) !== Math.round(param.currentValue);
+
+    if (needChange) {
+      const numValue: number =
+        typeof value === "boolean" ? (value ? 1 : 0) : value;
+
+      reaper.ThemeLayout_SetParameter(param.id, numValue, true);
+      param.currentValue = numValue;
+      needLayoutRefresh = true;
+    }
+  }
+  function paramCheckbox(key: P, label: string) {
+    const param = themeParams[key];
+    const currentValue = Math.round(param?.currentValue || 0);
+
+    const newValue = ctx.checkbox(label, currentValue === 1);
+
+    if (param) setParam(key, newValue);
+  }
+  function paramSlider(
+    key: P,
+    opt?: { min?: number; max?: number; format?: string },
+  ) {
+    const param = themeParams[key];
+    const currentValue = Math.round(param?.currentValue || 0);
+    const minValue = Math.round(opt?.min || param?.minValue || 0);
+    const maxValue = Math.round(opt?.max || param?.maxValue || 1);
+    const format = opt?.format || "%d";
+
+    const newValue = Math.round(
+      ctx.slider(key, currentValue, minValue, maxValue, 1, format),
+    );
+    hint("Shift-click sliders to type numbers manually");
+
+    if (param) setParam(key, newValue);
+  }
+  const PARAM_RESET_WIDTH = 24;
+  function paramReset(key: P) {
+    const param = themeParams[key];
+    ctx.pushId(`param-reset-${key}`);
+    const clicked = ctx.button("R");
+    ctx.popId();
+    if (clicked && param) {
+      setParam(key, param.defaultValue);
+    }
+  }
 
   // GUI loop
   microUILoop(
     ctx,
     (stop) => {
+      // reset variables if needed
+      hintText = "";
+      if (themeHasChanged()) {
+        themeParams = getThemeParameters();
+      }
+
       if (
         ctx.beginWindow(
           "Demo Window",
@@ -214,13 +376,115 @@ function main() {
           win.rect.h = gfx.h;
         }
 
+        // tabs display
         ctx.layoutRow([-1], 0);
         activeTab = tabsWidget(
           ctx,
           "tabs",
-          ["Track Panel", "Mixer Panel", "Transport"],
+          [Tabs.TCP, Tabs.MCP, Tabs.Transport],
           activeTab,
         );
+
+        // tabs content
+        ctx.layoutRow([-1], -25);
+        ctx.beginPanel(`tab-contents-${activeTab}`);
+
+        switch (activeTab) {
+          case Tabs.TCP: {
+            ctx.label(activeTab);
+
+            ctx.layoutRow([-1], 0);
+            ctx.label("Tint");
+            ctx.layoutRow([-PARAM_RESET_WIDTH, -1], 0);
+            paramSlider(P.TCP_TINT);
+            paramReset(P.TCP_TINT);
+
+            // TCP_FOLDER_INDENT = "p_tcp_folder_indent",
+
+            // TCP_INDICATOR_SHOW_RECARM = "p_tcp_indicator_show_recarm",
+            // TCP_FXLIST_WIDTH = "p_tcp_fxlist_width",
+            // TCP_FXLIST_COLUMNS = "p_tcp_fxlist_columns",
+            // TCP_HORIZONTAL_TEXT_HACK = "p_tcp_horizontal_text_hack",
+            // TCP_NO_FADE = "p_tcp_no_fade",
+            // TCP_MAX_RECINPUT_WIDTH = "p_tcp_max_recinput_width",
+            // TCP_HIGH_CONTRAST = "p_tcp_high_contrast",
+            // TCP_SINGLE_ROW_PAN_IO = "p_tcp_single_row_pan_io",
+            // TCP_PERMANENT_REC_SECTION = "p_tcp_permanent_rec_section",
+            // TCP_FXPARM_COL_WIDTH = "p_tcp_fxparm_col_width",
+
+            ctx.layoutRow([-1], 0);
+            ctx.label("Meter width");
+            ctx.layoutRow([-PARAM_RESET_WIDTH, -1], 0);
+            paramSlider(P.TCP_METER_WIDTH, { format: "%d px" });
+            paramReset(P.TCP_METER_WIDTH);
+
+            ctx.layoutRow([-1], 0);
+            ctx.label("Show dB scales...");
+            paramCheckbox(P.TCP_METER_TEXT_IN_BG, "In background");
+            paramCheckbox(P.TCP_METER_TEXT_IN_FG, "On top of meters");
+
+            ctx.label("Selection indicator");
+            {
+              const param = themeParams[P.TCP_INDICATOR_WIDTH];
+              const currentWidth = param?.currentValue || 0;
+              const wasEnabled = currentWidth > 0;
+
+              if (wasEnabled) {
+                ctx.layoutRow([100, 40, -1], 0);
+              } else {
+                ctx.layoutRow([-1], 0);
+              }
+
+              const shouldEnable = ctx.checkbox("Enabled", wasEnabled);
+
+              if (shouldEnable && !wasEnabled) {
+                setParam(P.TCP_INDICATOR_WIDTH, 3);
+              } else if (!shouldEnable && wasEnabled) {
+                setParam(P.TCP_INDICATOR_WIDTH, 0);
+              }
+
+              if (shouldEnable && wasEnabled) {
+                ctx.label("Width:");
+
+                paramSlider(P.TCP_INDICATOR_WIDTH, { min: 1, format: "%d px" });
+
+                ctx.layoutRow([-1], 0);
+                paramCheckbox(
+                  P.TCP_INDICATOR_SHOW_RECARM,
+                  "Show recording-armed status",
+                );
+              } else {
+                ctx.layoutRow([-1], 0);
+              }
+            }
+
+            ctx.text("hello world");
+            break;
+          }
+          case Tabs.MCP: {
+            ctx.label(activeTab);
+            break;
+          }
+          case Tabs.Transport: {
+            ctx.label(activeTab);
+            break;
+          }
+          default:
+            assertUnreachable(activeTab);
+        }
+
+        ctx.endPanel();
+
+        {
+          const versionText = "v1.0 - kotll / jisai";
+          const versionWidth = ctx.textWidth(ctx.style.font, versionText);
+          ctx.layoutRow([-versionWidth - ctx.style.spacing * 2, -1], 0);
+
+          ctx.label(hintText);
+          ctx.label("v1.0 - kotll / jisai");
+        }
+
+        // ctx.text(encode(themeParams[Param.TCP_HIGH_CONTRAST]));
 
         // // top title bar
         // {
@@ -393,6 +657,11 @@ function main() {
         //   // exit after adding fx
         //   stop();
         // }
+
+        if (needLayoutRefresh) {
+          reaper.ThemeLayout_RefreshAll();
+          needLayoutRefresh = false;
+        }
 
         ctx.endWindow();
       }
