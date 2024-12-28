@@ -29,6 +29,8 @@ import {
   rect,
 } from "reaper-microui";
 
+const SCRIPT_VERSION = "v1.0";
+
 const windowConfig = (() => {
   const section = Section("80gray-theme-adjuster");
 
@@ -121,15 +123,15 @@ function tabsWidget<T extends string>(
 
       // draw
       if (tab === activeTab) {
-        // draw fill
-        const color: Color | null =
-          ctx.focus === id
-            ? rgba(115, 115, 115, 1.0)
-            : ctx.hover === id
-            ? rgba(75, 75, 75, 1.0)
-            : null;
+        // // draw fill
+        // const color: Color | null =
+        //   ctx.focus === id
+        //     ? rgba(115, 115, 115, 1.0)
+        //     : ctx.hover === id
+        //     ? rgba(75, 75, 75, 1.0)
+        //     : null;
 
-        if (color !== null) ctx.drawRect(r, color);
+        // if (color !== null) ctx.drawRect(r, color);
 
         // draw border
         if (ctx.style.colors[ColorId.Border].a > 0) {
@@ -253,8 +255,8 @@ function main() {
 
   // initialize gfx
   {
-    const WINDOW_DEFAULT_WIDTH = 600;
-    const WINDOW_DEFAULT_HEIGHT = 702;
+    const WINDOW_DEFAULT_WIDTH = 350;
+    const WINDOW_DEFAULT_HEIGHT = 500;
     const WINDOW_DEFAULT_DOCK = 0;
     const WINDOW_DEFAULT_X = 100;
     const WINDOW_DEFAULT_Y = 50;
@@ -337,7 +339,7 @@ function main() {
     const newValue = Math.round(
       ctx.slider(key, currentValue, minValue, maxValue, 1, format),
     );
-    hint("Shift-click sliders to type numbers manually");
+    hint("Shift-click sliders to type in numbers manually");
 
     if (param) setParam(key, newValue);
   }
@@ -394,14 +396,13 @@ function main() {
             ctx.label(activeTab);
 
             ctx.layoutRow([-1], 0);
+            ctx.layoutRow([50, -PARAM_RESET_WIDTH, -1], 0);
             ctx.label("Tint");
-            ctx.layoutRow([-PARAM_RESET_WIDTH, -1], 0);
-            paramSlider(P.TCP_TINT);
+            paramSlider(P.TCP_TINT, { format: "%d %%" });
             paramReset(P.TCP_TINT);
 
             // TCP_FOLDER_INDENT = "p_tcp_folder_indent",
 
-            // TCP_INDICATOR_SHOW_RECARM = "p_tcp_indicator_show_recarm",
             // TCP_FXLIST_WIDTH = "p_tcp_fxlist_width",
             // TCP_FXLIST_COLUMNS = "p_tcp_fxlist_columns",
             // TCP_HORIZONTAL_TEXT_HACK = "p_tcp_horizontal_text_hack",
@@ -413,16 +414,23 @@ function main() {
             // TCP_FXPARM_COL_WIDTH = "p_tcp_fxparm_col_width",
 
             ctx.layoutRow([-1], 0);
-            ctx.label("Meter width");
-            ctx.layoutRow([-PARAM_RESET_WIDTH, -1], 0);
-            paramSlider(P.TCP_METER_WIDTH, { format: "%d px" });
-            paramReset(P.TCP_METER_WIDTH);
+            ctx.label("Meter settings");
+            ctx.layoutRow([-1], 110);
+            ctx.beginPanel(`tab-contents-${activeTab}`);
+            {
+              ctx.layoutRow([50, -PARAM_RESET_WIDTH, -1], 0);
+              ctx.label("Width");
+              paramSlider(P.TCP_METER_WIDTH, { format: "%d px" });
+              paramReset(P.TCP_METER_WIDTH);
+
+              ctx.layoutRow([-1], 0);
+              ctx.label("Show dB scales...");
+              paramCheckbox(P.TCP_METER_TEXT_IN_BG, "In background");
+              paramCheckbox(P.TCP_METER_TEXT_IN_FG, "On top of meters");
+            }
+            ctx.endPanel();
 
             ctx.layoutRow([-1], 0);
-            ctx.label("Show dB scales...");
-            paramCheckbox(P.TCP_METER_TEXT_IN_BG, "In background");
-            paramCheckbox(P.TCP_METER_TEXT_IN_FG, "On top of meters");
-
             ctx.label("Selection indicator");
             {
               const param = themeParams[P.TCP_INDICATOR_WIDTH];
@@ -475,8 +483,9 @@ function main() {
 
         ctx.endPanel();
 
+        // footer section
         {
-          const versionText = "v1.0 - kotll / jisai";
+          const versionText = `${SCRIPT_VERSION} - kotll / jisai`;
           const versionWidth = ctx.textWidth(ctx.style.font, versionText);
           ctx.layoutRow([-versionWidth - ctx.style.spacing * 2, -1], 0);
 
