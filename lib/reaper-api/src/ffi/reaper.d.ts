@@ -30,7 +30,7 @@ declare type ImGui_TextFilter = {
   readonly [opaqueTypeTag]: "ImGui_TextFilter";
 };
 declare type ImGui_Viewport = { readonly [opaqueTypeTag]: "ImGui_Viewport" };
-declare type KbdSectionInfo = { readonly [opaqueTypeTag]: "KbdSectionInfo" };
+declare type KbdSectionInfo = { readonly [opaqueTypeTag]: "KbdSectionInfo" } | number;
 declare type LICE_IBitmap = { readonly [opaqueTypeTag]: "LICE_IBitmap" };
 declare type MediaItem = { readonly [opaqueTypeTag]: "MediaItem" };
 declare type MediaItem_Take = { readonly [opaqueTypeTag]: "MediaItem_Take" };
