@@ -8,8 +8,7 @@ import {
   log,
 } from "reaper-api/utils";
 import { setCommandState } from "./utils";
-import * as imgui from "./imgui";
-import { im } from "./imgui";
+import { im, WindowFlags } from "./imgui";
 import { Track } from "reaper-api/track";
 
 function main() {
@@ -29,11 +28,11 @@ function main() {
           ctx,
           "My window",
           true,
-          im.WindowFlags_NoScrollWithMouse |
-            im.WindowFlags_NoScrollbar |
-            im.WindowFlags_MenuBar |
-            im.WindowFlags_NoCollapse |
-            im.WindowFlags_NoNav,
+          WindowFlags.NoScrollWithMouse |
+            WindowFlags.NoScrollbar |
+            WindowFlags.MenuBar |
+            WindowFlags.NoCollapse |
+            WindowFlags.NoNav,
         );
         if (!open) {
           if (visible) im.End(ctx);
