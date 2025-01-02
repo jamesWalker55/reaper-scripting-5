@@ -9,13 +9,11 @@ import {
 } from "reaper-api/utils";
 import { setCommandState } from "./utils";
 import * as imgui from "./imgui";
+import { im } from "./imgui";
 import { Track } from "reaper-api/track";
 
 function main() {
-  const ctx = reaper.ImGui_CreateContext(
-    "FX Devices TS",
-    reaper.ImGui_ConfigFlags_DockingEnable(),
-  );
+  const ctx = im.CreateContext("FX Devices TS", im.ConfigFlags_DockingEnable);
 
   setCommandState(true);
 
@@ -27,18 +25,18 @@ function main() {
     (stop) => {
       // start base window
       {
-        const [visible, open] = reaper.ImGui_Begin(
+        const [visible, open] = im.Begin(
           ctx,
           "My window",
           true,
-          imgui.WindowFlags.NoScrollWithMouse |
-            imgui.WindowFlags.NoScrollbar |
-            imgui.WindowFlags.MenuBar |
-            imgui.WindowFlags.NoCollapse |
-            imgui.WindowFlags.NoNav,
+          im.WindowFlags_NoScrollWithMouse |
+            im.WindowFlags_NoScrollbar |
+            im.WindowFlags_MenuBar |
+            im.WindowFlags_NoCollapse |
+            im.WindowFlags_NoNav,
         );
         if (!open) {
-          if (visible) reaper.ImGui_End(ctx);
+          if (visible) im.End(ctx);
           return stop();
         }
         if (!visible) return;
@@ -46,24 +44,24 @@ function main() {
 
       // update local state
       currentTrack = Track.getLastTouched();
-      mods = reaper.ImGui_GetKeyMods(ctx);
+      mods = im.GetKeyMods(ctx);
 
       // handle no active track
       if (currentTrack === null) {
-        reaper.ImGui_Text(ctx, "Select a track to start");
-        reaper.ImGui_End(ctx);
+        im.Text(ctx, "Select a track to start");
+        im.End(ctx);
         return;
       }
 
-      reaper.gmem_attach
+      reaper.gmem_attach;
 
-      reaper.ImGui_Text(ctx, "Hello World!");
-      if (reaper.ImGui_Button(ctx, "cool button")) {
+      im.Text(ctx, "Hello World!");
+      if (im.Button(ctx, "cool button")) {
         log("Cool button pressed!");
       }
 
       // end base window
-      reaper.ImGui_End(ctx);
+      im.End(ctx);
     },
     () => {
       // on exit
@@ -72,18 +70,18 @@ function main() {
   );
 
   // while (true) {
-  //   const [visible, open] = reaper.ImGui_Begin(ctx, "My window", true);
+  //   const [visible, open] = im.Begin(ctx, "My window", true);
   //   if (!open) {
   //     break;
   //   }
 
   //   if (visible) {
-  //     reaper.ImGui_Text(ctx, "Hello World!");
-  //     if (reaper.ImGui_Button(ctx, "cool button")) {
+  //     im.Text(ctx, "Hello World!");
+  //     if (im.Button(ctx, "cool button")) {
   //       log("Cool button pressed!");
   //     }
 
-  //     reaper.ImGui_End(ctx);
+  //     im.End(ctx);
   //   }
 
   //   await deferAsync();
