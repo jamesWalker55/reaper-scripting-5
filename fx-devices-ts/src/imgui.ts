@@ -592,6 +592,13 @@ type Imgui = {
     : (typeof reaper)[K];
 };
 
+type ReaperWithoutImgui = {
+  [K in ReaperKey as K extends `ImGui_${string}`
+    ? never
+    : K]: (typeof reaper)[K];
+};
+export const r: ReaperWithoutImgui = reaper;
+
 export const im = (() => {
   const im: Partial<Imgui> = {};
 

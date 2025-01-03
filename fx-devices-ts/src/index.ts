@@ -14,6 +14,7 @@ import {
   im,
   Mod,
   MouseButton,
+  r,
   StyleVar,
   WindowFlags,
   withStyle,
@@ -22,11 +23,28 @@ import { Track } from "reaper-api/track";
 import { HEIGHT as FX_LAYOUT_HEIGHT } from "./layout";
 import { inspect } from "reaper-api/inspect";
 
+enum DragDropType {
+  DeviceHeader = "DeviceHeader",
+}
+
 function getDragDropPayload(ctx: ImGui_Context) {
   const [active, type, payload, isPreview, isDelivery] =
     im.GetDragDropPayload(ctx);
-  return { active, type, payload, isPreview, isDelivery };
+
+  if (!active) return null;
+
+  if (!(type in DragDropType))
+    throw new Error("Unknown drag-drop payload type");
+
+  return { type: type as DragDropType, payload, isPreview, isDelivery };
 }
+
+const DEFAULT_COLORS = {
+  mainBg: 0x818181ff,
+  deviceBg: 0xa5a5a5ff,
+  deviceEmptyBg: 0xa5a5a5ff,
+};
+type ColorScheme = typeof DEFAULT_COLORS;
 
 function main() {
   const ctx = im.CreateContext("FX Devices TS", im.ConfigFlags_DockingEnable);
@@ -40,6 +58,7 @@ function main() {
     (stop) => {
       // start base window
       {
+        im.PushStyleColor(ctx, Color.WindowBg, DEFAULT_COLORS.mainBg);
         const [visible, open] = im.Begin(
           ctx,
           "My window",
@@ -50,11 +69,16 @@ function main() {
             WindowFlags.NoCollapse |
             WindowFlags.NoNav,
         );
-        if (!open) {
-          if (visible) im.End(ctx);
+        if (!open && visible) {
+          im.PopStyleColor(ctx);
+          im.End(ctx);
           return stop();
         }
+
+        if (!open) return stop();
         if (!visible) return;
+
+        im.PopStyleColor(ctx);
       }
 
       // local state
@@ -65,14 +89,11 @@ function main() {
         im.End(ctx);
         return;
       }
-      const fxCount = track.getFxCount();
       const allFx = track.getAllFx();
       const mods: Mod = im.GetKeyMods(ctx);
 
       // menu bar
-      {
-        im.BeginMenuBar(ctx);
-
+      if (im.BeginMenuBar(ctx)) {
         im.Text(ctx, track.name);
 
         im.EndMenuBar(ctx);
@@ -80,38 +101,69 @@ function main() {
 
       const temp = [];
 
-      im.BeginChild(
-        ctx,
-        "fx devices",
-        undefined,
-        FX_LAYOUT_HEIGHT,
-        undefined,
-        WindowFlags.HorizontalScrollbar,
-      );
-      {
-        im.PushStyleColor(
-          ctx,
-          Color.DragDropTarget,
-          im.ColorConvertDouble4ToU32(1.0, 0.0, 0.0, 1.0),
-        );
+      im.PushStyleColor(ctx, Color.ChildBg, 0xff00ffff);
 
+      if (
+        im.BeginChild(
+          ctx,
+          "fx devices",
+          undefined,
+          FX_LAYOUT_HEIGHT + im.GetStyleVar(ctx, StyleVar.ScrollbarSize)[0],
+          undefined,
+          WindowFlags.HorizontalScrollbar,
+        )
+      ) {
         for (const fx of allFx) {
           im.PushID(ctx, fx.fxidx.toString());
 
           temp.push(im.GetCursorPos(ctx));
 
-          im.Button(ctx, fx.getName());
+          if (
+            im.BeginChild(
+              ctx,
+              "device",
+              200,
+              FX_LAYOUT_HEIGHT,
+              undefined,
+              WindowFlags.NoScrollbar,
+            )
+          ) {
+            im.Text(ctx, "asdgaasjkdbjashdjkashdsk");
+            im.Text(ctx, "123easd");
+
+            im.Button(ctx, fx.getName());
+
+            im.Text(ctx, "123easd");
+            im.Text(ctx, "123easd");
+            im.Text(ctx, "123easd");
+            im.Text(ctx, "123easd");
+            im.Text(ctx, "123easd");
+            im.Text(ctx, "123easd");
+            im.Text(ctx, "123easd");
+            im.Text(ctx, "123easd");
+            im.Text(ctx, "123easd");
+
+            im.EndChild(ctx);
+          }
 
           // make draggable
           if (im.BeginDragDropSource(ctx)) {
-            log("im.BeginDragDropSource", reaper.time_precise());
-            im.SetDragDropPayload(ctx, "deviceheader", fx.fxidx.toString());
+            log("im.BeginDragDropSource", r.time_precise());
+            im.SetDragDropPayload(
+              ctx,
+              DragDropType.DeviceHeader,
+              fx.fxidx.toString(),
+            );
             im.EndDragDropSource(ctx);
           }
 
           // make drag target
           if (im.BeginDragDropTarget(ctx)) {
-            const [ok, payload] = im.AcceptDragDropPayload(ctx, "test", "");
+            const [ok, payload] = im.AcceptDragDropPayload(
+              ctx,
+              DragDropType.DeviceHeader,
+              "",
+            );
             if (ok) {
               log(`payload ${inspect(payload)} accepted by FX ${fx.fxidx}`);
             }
@@ -127,39 +179,41 @@ function main() {
           // delay destroying the button by 1 frame; this allows the "accept payload"
           // section to actually execute
           (wasDraggingLastFrame || im.IsMouseDragging(ctx, MouseButton.Left)) &&
-          getDragDropPayload(ctx).type === "deviceheader"
+          getDragDropPayload(ctx)?.type === DragDropType.DeviceHeader
         ) {
           im.SetCursorPos(ctx, 0, 0);
           im.Button(ctx, "Floating thing");
 
-          // make drag target
-          if (im.BeginDragDropTarget(ctx)) {
-            const [ok, payload] = im.AcceptDragDropPayload(
-              ctx,
-              "deviceheader",
-              "",
-            );
-            if (ok) {
-              log(`payload ${inspect(payload)} accepted by floating thing`);
+          // hide the drag drop border
+          im.PushStyleColor(
+            ctx,
+            Color.DragDropTarget,
+            im.ColorConvertDouble4ToU32(1.0, 0.0, 0.0, 1.0),
+          );
+          {
+            // make drag target
+            if (im.BeginDragDropTarget(ctx)) {
+              const [ok, payload] = im.AcceptDragDropPayload(
+                ctx,
+                DragDropType.DeviceHeader,
+                "",
+              );
+              if (ok) {
+                log(`payload ${inspect(payload)} accepted by floating thing`);
+              }
+              im.EndDragDropTarget(ctx);
             }
-            im.EndDragDropTarget(ctx);
           }
+          im.PopStyleColor(ctx);
         }
 
-        im.PopStyleColor(ctx);
+        im.EndChild(ctx);
       }
-      im.EndChild(ctx);
 
       im.Text(ctx, inspect(temp));
-      im.Text(ctx, inspect(temp));
-      im.Text(ctx, inspect(temp));
-      im.Text(ctx, inspect(temp));
-      im.Text(ctx, inspect(temp));
+      im.Text(ctx, inspect(getDragDropPayload(ctx)));
 
-      im.Text(ctx, "Hello World!");
-      if (im.Button(ctx, "cool button")) {
-        log("Cool button pressed!");
-      }
+      im.PopStyleColor(ctx);
 
       // end base window
       im.End(ctx);
