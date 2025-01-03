@@ -11,49 +11,54 @@ build:
 # Manually copy some files to dist
 # Written by ChatGPT
 copy-files:
-    #!bash
+    #!pwsh
+
+    # Define source and destination directories
+    $SRC_DIR = "src"
+    $DST_DIR = "dist"
+
+    # Ensure the destination directory exists
+    if (-Not (Test-Path -Path $DST_DIR)) {
+        New-Item -ItemType Directory -Path $DST_DIR
+    }
 
     # == Copy package.json
 
-    mkdir -p dist
-    cp -f package.json dist/package.json
-
-    echo "package.json has been copied successfully."
+    Copy-Item -Path "package.json" -Destination "$DST_DIR/package.json" -Force
+    Write-Output "package.json has been copied successfully."
 
     # == Copy declaration files
 
-    # Define the source and destination directories
-    SRC_DIR="src"
-    DST_DIR="dist"
+    # Get all .d.ts files in the source directory
+    $files = Get-ChildItem -Path $SRC_DIR -Recurse -Filter "*.d.ts"
 
-    # Find all .d.ts files in the source directory
-    find "$SRC_DIR" -name '*.d.ts' | while read -r FILE; do
-        # Determine the relative path of the file
-        REL_PATH="${FILE#$SRC_DIR/}"
+    foreach ($file in $files) {
+        # Determine the relative path of the file from the src dir
+        $relPath = Resolve-Path -Path $file -Relative -RelativeBasePath $SRC_DIR
 
-        # Determine the destination directory
-        DST_PATH="$DST_DIR/$REL_PATH"
+        # Determine the destination path
+        $dstPath = Join-Path -Path $DST_DIR -ChildPath $relPath
 
-        # # Find relative path of original file from link's directory
-        # LINK_TARGET=$(realpath -s --relative-to="$(dirname "$DST_PATH")" "$FILE")
+        # Ensure the destination directory exists
+        $dstDir = Split-Path -Path $dstPath -Parent
+        if (-Not (Test-Path -Path $dstDir)) {
+            New-Item -ItemType Directory -Path $dstDir -Force
+        }
 
-        # Create the destination directory if it doesn't exist
-        mkdir -p "$(dirname "$DST_PATH")"
+        # Copy the file using a hard link
+        if (Test-Path -Path $dstPath) {
+            Remove-Item -Path $dstPath -Force
+        }
+        New-Item -ItemType HardLink -Path $dstPath -Value $file.FullName
+    }
 
-        # Copy the file to the destination directory
-        rm "$DST_PATH"
-        pwsh -c "New-Item -Path \"$DST_PATH\" -ItemType HardLink -Value \"$FILE\""
-    done
+    Write-Output "All .d.ts files have been copied successfully."
 
-    echo "All .d.ts files have been copied successfully."
+    # == Copy plugins directory
 
-    # == Copy plugin/ dir
+    $pluginsSrc = "plugins"
+    $pluginsDst = "dist"
 
-    # Define the source and destination directories
-    SRC_DIR="plugins"
-    DST_DIR="dist/"
+    Copy-Item -Path $pluginsSrc -Destination $pluginsDst -Recurse -Force
+    Write-Output "The plugins directory has been copied successfully."
 
-    # Copy the source directory to the destination directory
-    cp -rf "$SRC_DIR" "$DST_DIR"
-
-    echo "The plugins directory has been copied successfully."

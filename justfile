@@ -41,3 +41,7 @@ publish package path:
 
 publish-new package path:
   {{REAPER_INDEXER}} publish --repo "{{INDEX_REPOSITORY}}" --identifier "{{package}}" "{{path}}" --new
+
+reaper-path := "C:/Programs/REAPER Portable/reaper.exe"
+reaper:
+    "{{reaper-path}}" -newinst
