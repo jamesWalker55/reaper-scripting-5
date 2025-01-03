@@ -202,6 +202,7 @@ export enum CommandType {
   Rect,
   Text,
   Icon,
+  Custom,
 }
 
 type JumpCommand = { type: CommandType.Jump; dstIdx: number | null };
@@ -220,13 +221,18 @@ type IconCommand = {
   id: IconId;
   color: Color;
 };
+type CustomCommand = {
+  type: CommandType.Custom;
+  draw: (clip: Rect | null) => void;
+};
 
 type Command<Font> =
   | JumpCommand
   | ClipCommand
   | RectCommand
   | TextCommand<Font>
-  | IconCommand;
+  | IconCommand
+  | CustomCommand;
 
 export type TextWidthFunc<Font> = (
   font: Font,

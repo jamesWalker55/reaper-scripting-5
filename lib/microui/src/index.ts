@@ -340,6 +340,10 @@ export function microUILoop(
           }
           break;
         }
+        case CommandType.Custom: {
+          cmd.draw(currentClip);
+          break;
+        }
         default:
           error(`unhandled command type: ${cmd}`);
       }
