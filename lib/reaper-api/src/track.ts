@@ -80,6 +80,10 @@ export class Track {
     return Track.getByIdx(idx);
   }
 
+  guid(): string {
+    return reaper.GetTrackGUID(this.obj);
+  }
+
   isMaster() {
     return this.getIdx() === -1;
   }

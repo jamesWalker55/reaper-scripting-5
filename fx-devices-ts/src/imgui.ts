@@ -691,6 +691,12 @@ export enum Mod {
   Cmd = isMacOS ? im.Mod_Ctrl : im.Mod_Super,
 }
 
+export enum MouseButton {
+  Left = im.MouseButton_Left,
+  Middle = im.MouseButton_Middle,
+  Right = im.MouseButton_Right,
+}
+
 export enum Color {
   Border = im.Col_Border,
   BorderShadow = im.Col_BorderShadow,
@@ -751,15 +757,70 @@ export enum Color {
   WindowBg = im.Col_WindowBg,
 }
 
-export function withStyleColor<T>(
+export enum StyleVar {
+  Alpha = im.StyleVar_Alpha,
+  ButtonTextAlign = im.StyleVar_ButtonTextAlign,
+  CellPadding = im.StyleVar_CellPadding,
+  ChildBorderSize = im.StyleVar_ChildBorderSize,
+  ChildRounding = im.StyleVar_ChildRounding,
+  DisabledAlpha = im.StyleVar_DisabledAlpha,
+  FrameBorderSize = im.StyleVar_FrameBorderSize,
+  FramePadding = im.StyleVar_FramePadding,
+  FrameRounding = im.StyleVar_FrameRounding,
+  GrabMinSize = im.StyleVar_GrabMinSize,
+  GrabRounding = im.StyleVar_GrabRounding,
+  IndentSpacing = im.StyleVar_IndentSpacing,
+  ItemInnerSpacing = im.StyleVar_ItemInnerSpacing,
+  ItemSpacing = im.StyleVar_ItemSpacing,
+  PopupBorderSize = im.StyleVar_PopupBorderSize,
+  PopupRounding = im.StyleVar_PopupRounding,
+  ScrollbarRounding = im.StyleVar_ScrollbarRounding,
+  ScrollbarSize = im.StyleVar_ScrollbarSize,
+  SelectableTextAlign = im.StyleVar_SelectableTextAlign,
+  SeparatorTextAlign = im.StyleVar_SeparatorTextAlign,
+  SeparatorTextBorderSize = im.StyleVar_SeparatorTextBorderSize,
+  SeparatorTextPadding = im.StyleVar_SeparatorTextPadding,
+  TabBarBorderSize = im.StyleVar_TabBarBorderSize,
+  TabBorderSize = im.StyleVar_TabBorderSize,
+  TabRounding = im.StyleVar_TabRounding,
+  TableAngledHeadersAngle = im.StyleVar_TableAngledHeadersAngle,
+  TableAngledHeadersTextAlign = im.StyleVar_TableAngledHeadersTextAlign,
+  WindowBorderSize = im.StyleVar_WindowBorderSize,
+  WindowMinSize = im.StyleVar_WindowMinSize,
+  WindowPadding = im.StyleVar_WindowPadding,
+  WindowRounding = im.StyleVar_WindowRounding,
+  WindowTitleAlign = im.StyleVar_WindowTitleAlign,
+}
+
+export function withStyle<T>(
   ctx: ImGui_Context,
-  styles: { id: Color; rgba: number }[],
+  styles: (
+    | { var: StyleVar; a: number; b?: number }
+    | { color: Color; rgba: number }
+  )[],
   func: () => T,
 ): T {
+  let varCount = 0;
+  let colorCount = 0;
+
   for (const style of styles) {
-    im.PushStyleColor(ctx, style.id, style.rgba);
+    if ("var" in style) {
+      if ("b" in style) {
+        im.PushStyleVar(ctx, style.var, style.a, style.b);
+      } else {
+        im.PushStyleVar(ctx, style.var, style.a);
+      }
+      varCount += 1;
+    } else {
+      im.PushStyleColor(ctx, style.color, style.rgba);
+      colorCount += 1;
+    }
   }
+
   const rv = func();
-  im.PopStyleColor(ctx, styles.length);
+
+  if (colorCount > 0) im.PopStyleColor(ctx, colorCount);
+  if (varCount > 0) im.PopStyleVar(ctx, varCount);
+
   return rv;
 }
