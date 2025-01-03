@@ -17,6 +17,9 @@ export const setCommandState: (active: boolean) => void = (() => {
         action.cmdID,
         active ? 1 : 0,
       );
+      if (ctx.action) {
+        reaper.RefreshToolbar2(ctx.action.sectionID, ctx.action.cmdID);
+      }
     };
   }
 })();

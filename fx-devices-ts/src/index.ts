@@ -1,6 +1,7 @@
 import { encode } from "json";
 import { OSType } from "reaper-api/ffi";
 import {
+  clearConsole,
   deferAsync,
   deferLoop,
   errorHandler,
@@ -18,11 +19,22 @@ import {
   withStyle,
 } from "./imgui";
 import { Track } from "reaper-api/track";
+import { HEIGHT as FX_LAYOUT_HEIGHT } from "./layout";
+import { inspect } from "reaper-api/inspect";
+
+function getDragDropPayload(ctx: ImGui_Context) {
+  const [active, type, payload, isPreview, isDelivery] =
+    im.GetDragDropPayload(ctx);
+  return { active, type, payload, isPreview, isDelivery };
+}
 
 function main() {
   const ctx = im.CreateContext("FX Devices TS", im.ConfigFlags_DockingEnable);
 
-  setCommandState(true);
+  // setCommandState(true);
+
+  let x = 0;
+  let wasDraggingLastFrame = false;
 
   deferLoop(
     (stop) => {
@@ -66,55 +78,83 @@ function main() {
         im.EndMenuBar(ctx);
       }
 
-      const [maxX, maxY] = im.GetContentRegionMax(ctx);
-      const framepadding = im.StyleVar_FramePadding;
-      const BorderSize = im.StyleVar_FrameBorderSize;
-      const FrameRounding = im.StyleVar_FrameRounding;
-      const BtnTxtAlign = im.StyleVar_ButtonTextAlign;
-      const payload = (() => {
-        const [active, type, payload, isPreview, isDelivery] =
-          im.GetDragDropPayload(ctx);
-        return { active, type, payload, isPreview, isDelivery };
-      })();
+      const temp = [];
 
-      withStyle(
+      im.BeginChild(
         ctx,
-        [
-          // Child Frame for all FX Devices
-          { var: StyleVar.FramePadding, a: 0, b: 3 },
-          // Child Border size
-          { var: StyleVar.ChildBorderSize, a: 0 },
-          // todo: custom colors
-          // { color: Color.ChildBg, rgba: customColors.Window_BG || 0x000000ff },
-        ],
-        () => {
-          im.BeginChild(
-            ctx,
-            "fx devices",
-            maxX,
-            260,
-            undefined,
-            WindowFlags.HorizontalScrollbar,
-          );
+        "fx devices",
+        undefined,
+        FX_LAYOUT_HEIGHT,
+        undefined,
+        WindowFlags.HorizontalScrollbar,
+      );
+      {
+        im.PushStyleColor(
+          ctx,
+          Color.DragDropTarget,
+          im.ColorConvertDouble4ToU32(1.0, 0.0, 0.0, 1.0),
+        );
 
-          for (let i = 0; i < 2; i++) {
-            im.Spacing(ctx);
+        for (const fx of allFx) {
+          im.PushID(ctx, fx.fxidx.toString());
+
+          temp.push(im.GetCursorPos(ctx));
+
+          im.Button(ctx, fx.getName());
+
+          // make draggable
+          if (im.BeginDragDropSource(ctx)) {
+            log("im.BeginDragDropSource", reaper.time_precise());
+            im.SetDragDropPayload(ctx, "deviceheader", fx.fxidx.toString());
+            im.EndDragDropSource(ctx);
           }
 
-          // "cursor" refers to imgui's output position, NOT the mouse!
-          const cursorStartX = im.GetCursorStartPos(ctx)[0];
-          const [winL, winT] = im.GetCursorScreenPos(ctx)
-          const height = 220;
-          const winB = winT + height;
+          // make drag target
+          if (im.BeginDragDropTarget(ctx)) {
+            const [ok, payload] = im.AcceptDragDropPayload(ctx, "test", "");
+            if (ok) {
+              log(`payload ${inspect(payload)} accepted by FX ${fx.fxidx}`);
+            }
+            im.EndDragDropTarget(ctx);
+          }
 
-          const asd = im.GetWindowDrawList(ctx);
-          // im.GetScrollX(ctx)
+          im.PopID(ctx);
 
-          im.EndChild(ctx);
-        },
-      );
-      im.PushStyleVar(ctx, framepadding, 0, 3); // StyleVar#1 (Child Frame for all FX Devices)
-      im.PopStyleVar(ctx);
+          im.SameLine(ctx);
+        }
+
+        if (
+          // delay destroying the button by 1 frame; this allows the "accept payload"
+          // section to actually execute
+          (wasDraggingLastFrame || im.IsMouseDragging(ctx, MouseButton.Left)) &&
+          getDragDropPayload(ctx).type === "deviceheader"
+        ) {
+          im.SetCursorPos(ctx, 0, 0);
+          im.Button(ctx, "Floating thing");
+
+          // make drag target
+          if (im.BeginDragDropTarget(ctx)) {
+            const [ok, payload] = im.AcceptDragDropPayload(
+              ctx,
+              "deviceheader",
+              "",
+            );
+            if (ok) {
+              log(`payload ${inspect(payload)} accepted by floating thing`);
+            }
+            im.EndDragDropTarget(ctx);
+          }
+        }
+
+        im.PopStyleColor(ctx);
+      }
+      im.EndChild(ctx);
+
+      im.Text(ctx, inspect(temp));
+      im.Text(ctx, inspect(temp));
+      im.Text(ctx, inspect(temp));
+      im.Text(ctx, inspect(temp));
+      im.Text(ctx, inspect(temp));
 
       im.Text(ctx, "Hello World!");
       if (im.Button(ctx, "cool button")) {
@@ -123,10 +163,13 @@ function main() {
 
       // end base window
       im.End(ctx);
+
+      // update persistent vars
+      wasDraggingLastFrame = im.IsMouseDragging(ctx, MouseButton.Left);
     },
     () => {
       // on exit
-      setCommandState(false);
+      // setCommandState(false);
     },
   );
 
