@@ -101,8 +101,6 @@ function main() {
 
       const temp = [];
 
-      im.PushStyleColor(ctx, Color.ChildBg, 0xff00ffff);
-
       if (
         im.BeginChild(
           ctx,
@@ -133,6 +131,9 @@ function main() {
 
             im.Button(ctx, fx.getName());
 
+            im.Text(ctx, "123easd");
+            im.Text(ctx, "123easd");
+            im.Text(ctx, "123easd");
             im.Text(ctx, "123easd");
             im.Text(ctx, "123easd");
             im.Text(ctx, "123easd");
@@ -212,8 +213,6 @@ function main() {
 
       im.Text(ctx, inspect(temp));
       im.Text(ctx, inspect(getDragDropPayload(ctx)));
-
-      im.PopStyleColor(ctx);
 
       // end base window
       im.End(ctx);
