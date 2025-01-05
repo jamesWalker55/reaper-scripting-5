@@ -268,7 +268,7 @@ enum P {
   NATIVE_COLOR_APPLY_ALL = "color_apply_all",
 
   // my own params
-  VERSION = "p_version",
+  VERSION = "p_80gray_version",
   SCALE_UI = "p_scale_ui",
   SCALE_FONT = "p_scale_font",
   TCP_TINT = "p_tcp_tint",
