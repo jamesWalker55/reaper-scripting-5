@@ -293,6 +293,9 @@ enum P {
   MCP_METER_TEXT_IN_BG = "p_mcp_meter_text_in_bg",
   MCP_METER_TEXT_IN_FG = "p_mcp_meter_text_in_fg",
   MCP_FOLDER_INDENT = "p_mcp_folder_indent",
+  MCP_INDICATOR_WIDTH = "p_mcp_indicator_width",
+  MCP_INDICATOR_SHOW_RECARM = "p_mcp_indicator_show_recarm",
+  MCP_TINT = "p_mcp_tint",
   MASTER_MCP_WIDTH = "p_master_mcp_width",
   TRANS_HEIGHT = "p_trans_height",
   TRANS_SHOW_PAUSE_BUTTON = "p_trans_show_pause_button",
@@ -720,6 +723,25 @@ function main() {
             ctx.endPanel();
 
             ctx.layoutRow([-1], 0);
+            ctx.label("Selection indicator:");
+            ctx.layoutRow([-1], 57);
+            ctx.beginPanel("selection-indicator");
+            {
+              ctx.layoutRow([60, -PARAM_RESET_WIDTH, -1], 0);
+              ctx.label("Width:");
+              paramSlider(P.MCP_INDICATOR_WIDTH, { format: "%d px" });
+              paramReset(P.MCP_INDICATOR_WIDTH);
+
+              ctx.layoutRow([-1], 0);
+              paramCheckbox(
+                P.MCP_INDICATOR_SHOW_RECARM,
+                "Show record-armed status",
+              );
+              hint("Tracks armed for recording will use different colors");
+            }
+            ctx.endPanel();
+
+            ctx.layoutRow([-1], 0);
             ctx.label("Routing diagram:");
             ctx.layoutRow([-1], 110);
             ctx.beginPanel("routing-diagram");
@@ -735,6 +757,21 @@ function main() {
               ctx.layoutRow([-PARAM_RESET_WIDTH, -1], 0);
               paramSlider(P.MCP_DIAGRAM_MAX_ROWS, { format: "%d rows" });
               paramReset(P.MCP_DIAGRAM_MAX_ROWS);
+            }
+            ctx.endPanel();
+
+            ctx.layoutRow([-1], 0);
+            ctx.label("Tweaks:");
+            ctx.layoutRow([-1], 35);
+            ctx.beginPanel("tweaks");
+            {
+              ctx.layoutRow([60, -PARAM_RESET_WIDTH, -1], 0);
+              ctx.label("Tint");
+              paramSlider(P.MCP_TINT, { format: "%d %%" });
+              hint(
+                "Make the background color more similar to the track's custom color",
+              );
+              paramReset(P.MCP_TINT);
             }
             ctx.endPanel();
 
