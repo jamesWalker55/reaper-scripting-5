@@ -29,7 +29,7 @@ import {
   rect,
 } from "reaper-microui";
 
-const SCRIPT_VERSION = "v1.0";
+const THEME_VERSION = 200;
 
 const config = (() => {
   const section = Section("80gray-theme-adjuster");
@@ -268,6 +268,7 @@ enum P {
   NATIVE_COLOR_APPLY_ALL = "color_apply_all",
 
   // my own params
+  VERSION = "p_version",
   SCALE_UI = "p_scale_ui",
   SCALE_FONT = "p_scale_font",
   TCP_TINT = "p_tcp_tint",
@@ -421,9 +422,12 @@ function main() {
       }
 
       // make sure all theme parameters are found
-      const allThemeParamsFound = Object.values(P).some(
+      const someThemeParamsMissing = Object.values(P).some(
         (name) => !(name in themeParams),
       );
+      const hasVersionParam = P.VERSION in themeParams;
+      const scriptVersionMatchesTheme =
+        themeParams[P.VERSION]?.currentValue === THEME_VERSION;
 
       if (
         ctx.beginWindow(
@@ -439,7 +443,34 @@ function main() {
           win.rect.h = gfx.h;
         }
 
-        if (allThemeParamsFound) {
+        if (!scriptVersionMatchesTheme) {
+          const oldFont = ctx.style.font;
+
+          ctx.style.font = 2;
+          ctx.layoutRow([-1], 0);
+
+          if (hasVersionParam) {
+            ctx.text(
+              `ERROR: The theme's version (${
+                themeParams[P.VERSION]?.currentValue
+              }) does not match this script's version (${THEME_VERSION})`,
+            );
+            ctx.text(
+              `Please make sure both the theme and script are up to date.`,
+            );
+          } else {
+            ctx.text(
+              `ERROR: This adjuster script does not support the current theme.`,
+            );
+            ctx.text(`Please load the 80gray theme to adjust its settings.`);
+          }
+
+          ctx.style.font = oldFont;
+
+          return ctx.endWindow();
+        }
+
+        if (someThemeParamsMissing) {
           ctx.layoutRow([-1], 16);
           ctx.layoutNext();
 
@@ -454,7 +485,8 @@ function main() {
           ctx.layoutRow([-1], 16);
           ctx.layoutNext();
 
-          ctx.text("Please make sure both the theme and script are up to date!");
+          ctx.layoutRow([-1], 0);
+          ctx.text("Please contact the developer about this error!");
 
           ctx.style.font = oldFont;
 
@@ -848,12 +880,12 @@ function main() {
 
         // footer section
         {
-          const versionText = `${SCRIPT_VERSION} - kotll / jisai`;
+          const versionText = `v${THEME_VERSION / 100} - kotll / jisai`;
           const versionWidth = ctx.textWidth(ctx.style.font, versionText);
           ctx.layoutRow([-versionWidth - ctx.style.spacing * 2, -1], 0);
 
           ctx.label(hintText);
-          ctx.label("v1.0 - kotll / jisai");
+          ctx.label(versionText);
         }
 
         if (needLayoutRefresh) {
