@@ -1,35 +1,24 @@
 import { decode, encode } from "json";
 import { copy, paste } from "reaper-api/clipboard";
 import { Section } from "reaper-api/extstate";
-import {
-  AddFxParams,
-  generateTakeContainerFxidx,
-  generateTrackContainerFxidx,
-} from "reaper-api/fx";
 import { inspect } from "reaper-api/inspect";
-import { FXFolderItemType } from "reaper-api/installedFx";
-import { Take, Track } from "reaper-api/track";
 import {
   assertUnreachable,
-  ensureAPI,
   errorHandler,
   log,
-  msgBox,
   processError,
 } from "reaper-api/utils";
 import {
+  Color,
+  ColorId,
+  ReaperContext as Context,
   createContext,
   microUILoop,
-  Option,
-  Response,
-  ReaperContext as Context,
   MouseButton,
-  ColorId,
-  rgba,
+  Option,
   Rect,
-  Color,
-  expandRect,
   rect,
+  rgba,
 } from "reaper-microui";
 
 const THEME_VERSION = 200;
