@@ -1,4 +1,5 @@
-import { encode } from "json";
+import { decode, encode } from "json";
+import { copy, paste } from "reaper-api/clipboard";
 import { Section } from "reaper-api/extstate";
 import {
   AddFxParams,
@@ -13,6 +14,8 @@ import {
   ensureAPI,
   errorHandler,
   log,
+  msgBox,
+  processError,
 } from "reaper-api/utils";
 import {
   createContext,
@@ -352,6 +355,59 @@ function main() {
       hintText = text;
     }
   }
+  function serialiseSettings() {
+    const result: Partial<Record<P, number>> = {};
+
+    for (const key of Object.values(P)) {
+      if (!(key in themeParams))
+        throw new Error(`Failed to copy missing parameter: ${encode(key)}`);
+      if (key === P.VERSION) continue; // skip version param
+
+      const param = themeParams[key]!;
+
+      result[key] = param.currentValue;
+    }
+
+    return encode(result);
+  }
+  function applySettings(text: string) {
+    let settings;
+    try {
+      settings = decode(text);
+    } catch (err) {
+      throw new Error(`Clipboard contains invalid JSON: ${err}`);
+    }
+
+    if (Array.isArray(settings))
+      throw new Error(
+        `Expected clipboard to contain a JSON object, but instead contains an array`,
+      );
+    if (typeof settings !== "object" || settings === null)
+      throw new Error(
+        `Expected clipboard to contain a JSON object, but instead contains a ${typeof settings}`,
+      );
+
+    for (const key of Object.values(P)) {
+      if (key === P.VERSION) continue; // skip version param
+
+      if (!(key in settings)) {
+        log(`[WARNING] Parameter missing from clipboard: ${key}`);
+        continue;
+      }
+
+      const savedValue = settings[key as keyof typeof settings] as unknown;
+      if (typeof savedValue !== "number") {
+        log(
+          `[WARNING] Clipboard parameter "${key}" does not contain a number: ${inspect(
+            savedValue,
+          )}`,
+        );
+        continue;
+      }
+
+      setParam(key, savedValue);
+    }
+  }
 
   // param widgets
   function setParam(key: P, value: number | boolean) {
@@ -504,7 +560,7 @@ function main() {
         );
 
         // tabs content
-        ctx.layoutRow([-1], -25);
+        ctx.layoutRow([-1], -50);
         ctx.beginPanel(`tab-contents-${activeTab}`);
         const oldPanelBG = ctx.style.colors[ColorId.PanelBG];
         ctx.style.colors[ColorId.PanelBG] = rgba(45, 45, 45, 1.0);
@@ -882,10 +938,33 @@ function main() {
         {
           const versionText = `v${THEME_VERSION / 100} - kotll / jisai`;
           const versionWidth = ctx.textWidth(ctx.style.font, versionText);
-          ctx.layoutRow([-versionWidth - ctx.style.spacing * 2, -1], 0);
-
-          ctx.label(hintText);
+          const anchorRight = -versionWidth - ctx.style.spacing * 2;
+          const buttonWidth = 80;
+          ctx.layoutRow([buttonWidth, buttonWidth, anchorRight, -1], 0);
+          if (ctx.button("Copy all")) {
+            const settings = serialiseSettings();
+            copy(settings);
+          }
+          hint("Copy all theme settings to clipboard (Needs SWS extensions)");
+          if (ctx.button("Paste all")) {
+            const settings = paste();
+            try {
+              applySettings(settings);
+            } catch (error) {
+              log(
+                "Failed to apply settings from clipboard due to the following error:",
+              );
+              processError(error).print();
+            }
+          }
+          hint(
+            "Paste all theme settings from clipboard (Needs SWS extensions)",
+          );
+          ctx.layoutNext();
           ctx.label(versionText);
+
+          ctx.layoutRow([-1], 0);
+          ctx.label(hintText);
         }
 
         if (needLayoutRefresh) {

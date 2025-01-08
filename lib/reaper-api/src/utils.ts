@@ -127,74 +127,65 @@ export function assertUnreachable(x: never): never {
   throw new Error("Didn't expect to get here");
 }
 
-export function errorHandler(func: () => void | Promise<void>) {
-  function stringOrInspect(obj: unknown): string {
-    if (typeof obj === "string") {
-      return obj;
-    } else {
-      return inspect(obj);
-    }
+function stringOrInspect(obj: unknown): string {
+  if (typeof obj === "string") {
+    return obj;
+  } else {
+    return inspect(obj);
+  }
+}
+
+export function processError(e: unknown) {
+  let name = "error";
+  let msg: string | null = null;
+  let stack: string | null = null;
+  if (typeof e === "object" && e !== null) {
+    if ("message" in e) msg = stringOrInspect(e.message);
+    if ("name" in e) name = stringOrInspect(e.name);
+    if ("stack" in e) stack = stringOrInspect(e.stack);
+  } else {
+    msg = stringOrInspect(e);
   }
 
+  return {
+    name,
+    msg,
+    stack,
+    print() {
+      if (msg === null) {
+        log(`error: ${name}`);
+      } else {
+        log(`${name}: ${msg}`);
+      }
+
+      if (stack !== null) {
+        log(stack);
+      }
+    },
+    raise() {
+      if (msg === null) {
+        error(`error: ${name}`);
+      } else {
+        error(`${name}: ${msg}`);
+      }
+    },
+  };
+}
+
+export function errorHandler(func: () => void | Promise<void>) {
   try {
     const rv = func();
     if (rv) {
       rv.catch((e) => {
-        let name = "error";
-        let msg: string | null = null;
-        let stack: string | null = null;
-        if (typeof e === "object" && e !== null) {
-          if ("message" in e) msg = stringOrInspect(e.message);
-          if ("name" in e) name = stringOrInspect(e.name);
-          if ("stack" in e) stack = stringOrInspect(e.stack);
-        } else {
-          msg = stringOrInspect(e);
-        }
-
-        if (msg === null) {
-          log(`error: ${name}`);
-        } else {
-          log(`${name}: ${msg}`);
-        }
-
-        if (stack !== null) {
-          log(stack);
-        }
-
-        if (msg === null) {
-          error(`error: ${name}`);
-        } else {
-          error(`${name}: ${msg}`);
-        }
+        const err = processError(e);
+        err.print();
+        err.raise();
       });
     }
   } catch (e) {
-    let name = "error";
-    let msg: string | null = null;
-    let stack: string | null = null;
-    if (typeof e === "object" && e !== null) {
-      if ("message" in e) msg = stringOrInspect(e.message);
-      if ("name" in e) name = stringOrInspect(e.name);
-      if ("stack" in e) stack = stringOrInspect(e.stack);
-    } else {
-      msg = stringOrInspect(e);
-    }
-
-    if (msg === null) {
-      log(`error: ${name}`);
-    } else {
-      log(`${name}: ${msg}`);
-    }
-
-    if (stack !== null) {
-      log(stack);
-    }
-
-    if (msg === null) {
-      error(`error: ${name}`);
-    } else {
-      error(`${name}: ${msg}`);
-    }
+    const err = processError(e);
+    err.print();
+    err.raise();
   }
 }
 
