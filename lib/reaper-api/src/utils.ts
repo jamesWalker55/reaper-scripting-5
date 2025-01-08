@@ -6,7 +6,7 @@ export function ensureAPI(source: string, functionName: string) {
 
   const msg = `${source} is required for this script to work! (missing function: ${functionName})`;
   msgBox("Missing extensions", msg);
-  error(msg);
+  throw new Error(msg);
 }
 
 export function log(...args: any[]) {
