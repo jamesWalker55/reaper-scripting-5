@@ -1,5 +1,3 @@
-AddCwdToImportPaths();
-
 import * as path from "reaper-api/path/path";
 import { Track } from "reaper-api/track";
 import { errorHandler } from "reaper-api/utils";
