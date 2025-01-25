@@ -1,7 +1,21 @@
+import { TypedSection } from "reaper-api/extstate";
 import * as path from "reaper-api/path/path";
 import { Track } from "reaper-api/track";
 import { errorHandler } from "reaper-api/utils";
 import { createContext, microUILoop, Option } from "reaper-microui";
+
+const config = TypedSection("detect-offset-items", {
+  windowX: "number",
+  windowY: "number",
+  windowW: "number",
+  windowH: "number",
+  windowDock: "number",
+});
+
+function getWindowInfo() {
+  const [dock, x, y, w, h] = gfx.dock(-1, 0, 0, 0, 0);
+  return { dock, x, y, w, h };
+}
 
 function getScriptName() {
   const [
@@ -36,7 +50,14 @@ const NUMBER_FORMAT = "%.12f s";
 
 function main() {
   // UI setup
-  gfx.init(getScriptName(), 360, 210);
+  gfx.init(
+    getScriptName(),
+    config.windowW || 360,
+    config.windowH || 210,
+    config.windowDock || 0,
+    config.windowX || 100,
+    config.windowY || 50,
+  );
   gfx.setfont(1, "Arial", 14);
   const ctx = createContext();
   ctx.style.font = 1;
@@ -188,6 +209,17 @@ function main() {
         }
       }
       reaper.UpdateArrange();
+
+      // save window position and dock state
+      {
+        const wnd = getWindowInfo();
+
+        config.windowDock = wnd.dock;
+        config.windowX = wnd.x;
+        config.windowY = wnd.y;
+        config.windowW = wnd.w;
+        config.windowH = wnd.h;
+      }
     },
   );
 }
