@@ -69,79 +69,74 @@ export function Section(section: string) {
   };
 }
 
-type EncodeTypeName = "string" | "number" | "json";
 type EncodeTypeMap = {
   string: string;
   number: number;
-  json: object;
+  json: any;
 };
 
-export function TypedSection<T extends Record<string, EncodeTypeName>>(
+const SETTERS: {
+  [K in keyof EncodeTypeMap]: (
+    section: string,
+    key: string,
+    permanent: boolean,
+  ) => (value: EncodeTypeMap[K] | null) => void;
+} = {
+  string(section, key, permanent) {
+    return (value) => set(section, key, value, permanent);
+  },
+  number(section, key, permanent) {
+    return (value) => set(section, key, value?.toString() || null, permanent);
+  },
+  json(section, key, permanent) {
+    return (value) =>
+      set(
+        section,
+        key,
+        value === null || value === undefined ? null : JSON.encode(value),
+        permanent,
+      );
+  },
+};
+
+const GETTERS: {
+  [K in keyof EncodeTypeMap]: (
+    section: string,
+    key: string,
+  ) => () => EncodeTypeMap[K] | null;
+} = {
+  string(section, key) {
+    return () => get(section, key);
+  },
+  number(section, key) {
+    return () => tonumber(get(section, key)) || null;
+  },
+  json(section, key) {
+    return () => {
+      const text = get(section, key);
+      if (text === null) return null;
+
+      return JSON.decode(text);
+    };
+  },
+};
+
+type TypedSection<Config extends Record<string, keyof EncodeTypeMap>> = {
+  [K in keyof Config]: EncodeTypeMap[Config[K]];
+};
+
+export function TypedSection<T extends Record<string, keyof EncodeTypeMap>>(
   section: string,
   config: T,
-) {
-  type ConfigType<K extends keyof T> = EncodeTypeMap[T[K]];
+): TypedSection<T> {
+  const rv: Partial<TypedSection<T>> = {};
 
-  return {
-    /**
-     * Set a ext state.
-     *
-     * WARNING: An empty string is the same as setting as null!
-     */
-    set<K extends string & keyof T>(
-      key: K,
-      value: ConfigType<K> | null,
-      permanent?: boolean,
-    ) {
-      const configTypeName: EncodeTypeName = config[key];
+  for (const [key, value] of Object.entries(config)) {
+    Object.defineProperty(rv, key, {
+      get: GETTERS[value](section, key),
+      set: SETTERS[value](section, key, true),
+    });
+  }
 
-      switch (configTypeName) {
-        case "string": {
-          const typedValue = value as EncodeTypeMap["string"] | null;
-          set(section, key, typedValue, permanent);
-          break;
-        }
-        case "number": {
-          const typedValue = value as EncodeTypeMap["number"] | null;
-          set(section, key, typedValue?.toString() || null, permanent);
-          break;
-        }
-        case "json": {
-          const typedValue = value as EncodeTypeMap["json"] | null;
-          set(section, key, JSON.encode(typedValue), permanent);
-          break;
-        }
-        default:
-          assertUnreachable(configTypeName);
-      }
-    },
-    /**
-     * This returns a string or null.
-     *
-     * Conditions for returning null:
-     * - key is not set
-     * - key is set to an empty string (length 0)
-     */
-    get<K extends string & keyof T>(key: K): ConfigType<K> | null {
-      const configTypeName: EncodeTypeName = config[key];
-
-      switch (configTypeName) {
-        case "string": {
-          const value = get(section, key);
-          return value as ConfigType<K> | null;
-        }
-        case "number": {
-          const value = tonumber(get(section, key)) || null;
-          return value as ConfigType<K> | null;
-        }
-        case "json": {
-          const value = get(section, key);
-          if (value === null) return null;
-          return JSON.decode(value) as ConfigType<K> | null;
-        }
-        default:
-          assertUnreachable(configTypeName);
-      }
-    },
-  };
+  return rv as TypedSection<T>;
 }
