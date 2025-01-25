@@ -21,7 +21,8 @@
     "strict": true
   },
   "tstl": {
-    "luaPlugins": [{ "name": "reaper-api/plugins/importFixPlugin.js" }],
+    "luaBundle": "Detect (Highlight) Offset Items.lua",
+    "luaBundleEntry": "src/index.ts",
     "luaTarget": "5.4",
     "luaLibImport": "require-minimal",
     "noImplicitGlobalVariables": true
