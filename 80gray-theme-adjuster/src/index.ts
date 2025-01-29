@@ -306,6 +306,11 @@ enum Tabs {
 }
 
 function main() {
+  // gfx.ext_retina = 1.0;
+  // log("gfx.ext_retina:", gfx.ext_retina);
+
+  const scale = 2.0;
+
   // initialize gfx
   {
     const WINDOW_DEFAULT_WIDTH = 400;
@@ -484,8 +489,8 @@ function main() {
         // resize window to gfx bounds
         {
           const win = ctx.getCurrentContainer();
-          win.rect.w = gfx.w;
-          win.rect.h = gfx.h;
+          win.rect.w = gfx.w / 2.0;
+          win.rect.h = gfx.h / 2.0;
         }
 
         if (!scriptVersionMatchesTheme) {

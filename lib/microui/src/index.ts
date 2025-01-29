@@ -58,6 +58,8 @@ export function microUILoop(
   func: (stop: () => void) => void,
   cleanup?: () => void,
 ) {
+  const scale = 2.0;
+
   const downKeys = {
     // mouse
     left: false,
@@ -120,7 +122,7 @@ export function microUILoop(
       gfx.mouse_wheel = 0;
       gfx.mouse_hwheel = 0;
 
-      ctx.inputMouseMove(gfx.mouse_x, gfx.mouse_y);
+      ctx.inputMouseMove(gfx.mouse_x / scale, gfx.mouse_y / scale);
 
       downKeys.left = (gfx.mouse_cap & MouseCap.LeftMouse) !== 0;
       downKeys.middle = (gfx.mouse_cap & MouseCap.MiddleMouse) !== 0;
@@ -154,7 +156,12 @@ export function microUILoop(
     for (const cmd of ctx.iterCommands()) {
       switch (cmd.type) {
         case CommandType.Clip: {
-          currentClip = cmd.rect;
+          currentClip = {
+            x: cmd.rect.x * scale,
+            y: cmd.rect.y * scale,
+            w: cmd.rect.w * scale,
+            h: cmd.rect.h * scale,
+          };
           break;
         }
         case CommandType.Rect: {
@@ -164,18 +171,25 @@ export function microUILoop(
           gfx.b = cmd.color.b / 255;
           gfx.a = cmd.color.a / 255;
 
-          gfx.rect(cmd.rect.x, cmd.rect.y, cmd.rect.w, cmd.rect.h);
+          gfx.rect(
+            cmd.rect.x * scale,
+            cmd.rect.y * scale,
+            cmd.rect.w * scale,
+            cmd.rect.h * scale,
+          );
           break;
         }
         case CommandType.Text: {
+          const pos = { x: cmd.pos.x * scale, y: cmd.pos.y * scale };
+
           // set color
           gfx.r = cmd.color.r / 255;
           gfx.g = cmd.color.g / 255;
           gfx.b = cmd.color.b / 255;
           gfx.a = cmd.color.a / 255;
 
-          gfx.x = cmd.pos.x;
-          gfx.y = cmd.pos.y;
+          gfx.x = pos.x;
+          gfx.y = pos.y;
 
           // set font
           gfx.setfont(cmd.font);
@@ -186,12 +200,10 @@ export function microUILoop(
             width += 1;
             height += 1;
 
-            const clipLeft = cmd.pos.x < currentClip.x;
-            const clipRight =
-              cmd.pos.x + width >= currentClip.x + currentClip.w;
-            const clipTop = cmd.pos.y < currentClip.y;
-            const clipBottom =
-              cmd.pos.y + height >= currentClip.y + currentClip.h;
+            const clipLeft = pos.x < currentClip.x;
+            const clipRight = pos.x + width >= currentClip.x + currentClip.w;
+            const clipTop = pos.y < currentClip.y;
+            const clipBottom = pos.y + height >= currentClip.y + currentClip.h;
 
             if (!clipLeft && !clipRight && !clipTop && !clipBottom) {
               gfx.drawstr(cmd.str);
@@ -241,8 +253,8 @@ export function microUILoop(
                 gfx.mode = Mode.AdditiveBlend;
 
                 // use fractional part of command position for correct rendering
-                gfx.x = cmd.pos.x % 1;
-                gfx.y = cmd.pos.y % 1;
+                gfx.x = pos.x % 1;
+                gfx.y = pos.y % 1;
 
                 gfx.dest = 0; // buffer #0
                 gfx.drawstr(cmd.str, 0);
@@ -262,8 +274,8 @@ export function microUILoop(
                   0.0,
                   // src
                   // account for fractional part of command position for correct rendering
-                  currentClip.x - cmd.pos.x + (cmd.pos.x % 1),
-                  currentClip.y - cmd.pos.y + (cmd.pos.y % 1),
+                  currentClip.x - pos.x + (pos.x % 1),
+                  currentClip.y - pos.y + (pos.y % 1),
                   currentClip.w,
                   currentClip.h,
                   // dst
@@ -287,14 +299,21 @@ export function microUILoop(
           break;
         }
         case CommandType.Icon: {
+          const rect = {
+            x: cmd.rect.x * scale,
+            y: cmd.rect.y * scale,
+            w: cmd.rect.w * scale,
+            h: cmd.rect.h * scale,
+          };
+
           // set color
           gfx.r = cmd.color.r / 255;
           gfx.g = cmd.color.g / 255;
           gfx.b = cmd.color.b / 255;
           gfx.a = cmd.color.a / 255;
 
-          gfx.x = cmd.rect.x;
-          gfx.y = cmd.rect.y;
+          gfx.x = rect.x;
+          gfx.y = rect.y;
           // TODO: Handle:
           // cmd.font
           // Clipping rect
@@ -303,8 +322,8 @@ export function microUILoop(
               gfx.drawstr(
                 "✕",
                 DrawStrFlags.CenterHorizontally | DrawStrFlags.CenterVertically,
-                cmd.rect.x + cmd.rect.w,
-                cmd.rect.y + cmd.rect.h,
+                rect.x + rect.w,
+                rect.y + rect.h,
               );
               break;
             }
@@ -312,8 +331,8 @@ export function microUILoop(
               gfx.drawstr(
                 "✓",
                 DrawStrFlags.CenterHorizontally | DrawStrFlags.CenterVertically,
-                cmd.rect.x + cmd.rect.w,
-                cmd.rect.y + cmd.rect.h,
+                rect.x + rect.w,
+                rect.y + rect.h,
               );
               break;
             }
@@ -321,8 +340,8 @@ export function microUILoop(
               gfx.drawstr(
                 "▸",
                 DrawStrFlags.CenterHorizontally | DrawStrFlags.CenterVertically,
-                cmd.rect.x + cmd.rect.w,
-                cmd.rect.y + cmd.rect.h,
+                rect.x + rect.w,
+                rect.y + rect.h,
               );
               break;
             }
@@ -330,8 +349,8 @@ export function microUILoop(
               gfx.drawstr(
                 "▾",
                 DrawStrFlags.CenterHorizontally | DrawStrFlags.CenterVertically,
-                cmd.rect.x + cmd.rect.w,
-                cmd.rect.y + cmd.rect.h,
+                rect.x + rect.w,
+                rect.y + rect.h,
               );
               break;
             }
