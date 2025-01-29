@@ -322,13 +322,11 @@ function main() {
       config.windowX || WINDOW_DEFAULT_X,
       config.windowY || WINDOW_DEFAULT_Y,
     );
-    gfx.setfont(1, "Arial", 14);
-    gfx.setfont(2, "Arial", 24);
   }
 
   // create microui context
   const ctx = createContext();
-  ctx.style.font = 1;
+  ctx.style.font = ["Arial", 14];
 
   // persistent variables
   let activeTab: Tabs = config.activeTab || Tabs.TCP;
@@ -491,7 +489,7 @@ function main() {
         if (!scriptVersionMatchesTheme) {
           const oldFont = ctx.style.font;
 
-          ctx.style.font = 2;
+          ctx.style.font = ["Arial", 24];
           ctx.layoutRow([-1], 0);
 
           if (hasVersionParam) {
@@ -520,7 +518,7 @@ function main() {
           ctx.layoutNext();
 
           const oldFont = ctx.style.font;
-          ctx.style.font = 2;
+          ctx.style.font = ["Arial", 24];
 
           ctx.layoutRow([-1], 0);
           ctx.text(

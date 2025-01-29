@@ -15,33 +15,33 @@ import {
 
 export * from "./ui";
 
-export type ReaperContext = Context<number>;
+export type ReaperFont = [string, number] | [string, number, string];
+export type ReaperContext = Context<ReaperFont>;
 
 /**
  * Create a new microUI context.
  *
- * You must run gfx.init and gfx.setfont before calling this. E.g.:
+ * You must run gfx.init before calling this. E.g.:
  *
  *     gfx.init("My window", 260, 450);
- *     gfx.setfont(1, "Arial", 12);
  *
  * Afterwards, use {@link microUILoop} to run the main GUI loop.
  */
 export function createContext(): ReaperContext {
-  return new Context(
+  return new Context<ReaperFont>(
     (font, str, len) => {
       if (len !== undefined) {
         str = str.slice(0, len);
       }
-      gfx.setfont(font);
+      gfx.setfont(1, font[0], font[1], font[2]);
       const [width, _] = gfx.measurestr(str);
       return width;
     },
     (font) => {
-      gfx.setfont(font);
+      gfx.setfont(1, font[0], font[1], font[2]);
       return gfx.texth;
     },
-    createDefaultStyle(0),
+    createDefaultStyle(["Arial", 14]),
   );
 }
 
@@ -178,7 +178,7 @@ export function microUILoop(
           gfx.y = cmd.pos.y;
 
           // set font
-          gfx.setfont(cmd.font);
+          gfx.setfont(1, cmd.font[0], cmd.font[1], cmd.font[2]);
 
           if (currentClip) {
             let [width, height] = gfx.measurestr(cmd.str);
@@ -355,10 +355,9 @@ export function microUILoop(
 
 export function demoMultiWindow() {
   gfx.init("Test window", 500, 500);
-  gfx.setfont(1, "Arial", 12);
 
   const ctx = createContext();
-  ctx.style.font = 1;
+  ctx.style.font = ["Arial", 12];
 
   const bgColor = [90, 95, 100];
   const checks = [true, false, true];
@@ -595,10 +594,9 @@ export function demoMultiWindow() {
 
 export function demoSingleWindow() {
   gfx.init("80gray Theme Adjuster", 260, 450);
-  gfx.setfont(1, "Arial", 12);
 
   const ctx = createContext();
-  ctx.style.font = 1;
+  ctx.style.font = ["Arial", 12];
 
   const bgColor = [90, 95, 100];
   const checks = [true, false, true];
@@ -728,10 +726,9 @@ export function demoSingleWindow() {
 
 export function demoSimple() {
   gfx.init("My Window", 260, 450);
-  gfx.setfont(1, "Arial", 12);
 
   const ctx = createContext();
-  ctx.style.font = 1;
+  ctx.style.font = ["Arial", 12];
 
   const checks = [true, false, true];
 

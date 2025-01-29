@@ -58,9 +58,8 @@ function main() {
     config.windowX || 100,
     config.windowY || 50,
   );
-  gfx.setfont(1, "Arial", 14);
   const ctx = createContext();
-  ctx.style.font = 1;
+  ctx.style.font = ["Arial", 14];
 
   // Logic
   let frameskipLeft = FRAMESKIP;
