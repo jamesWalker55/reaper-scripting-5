@@ -457,7 +457,10 @@ function main() {
   // GUI loop
   microUILoop(
     ctx,
-    (stop) => {
+    (stop, opt) => {
+      // opt.scale = 2.0;
+      opt.scale = 1.0;
+
       // reset variables if needed
       hintText = "";
       if (themeHasChanged()) {
@@ -482,8 +485,8 @@ function main() {
         // resize window to gfx bounds
         {
           const win = ctx.getCurrentContainer();
-          win.rect.w = gfx.w;
-          win.rect.h = gfx.h;
+          win.rect.w = gfx.w / opt.scale;
+          win.rect.h = gfx.h / opt.scale;
         }
 
         if (!scriptVersionMatchesTheme) {
