@@ -17,7 +17,9 @@ import { wrappedButtons, wrappedEnum } from "./widgets";
 // constants for finding tracks
 const SAMPLE_TRACK_NAME = "Samples";
 const PITCH_TRACK_NAME = "Samples Pitch";
-const SEQUENCE_TRACK_NAME_PREFIX = "SP: ";
+const SAMPLE_TRACK_PREFIX = "[S]";
+const PITCH_TRACK_PREFIX = "[MIDI]";
+const SEQUENCE_TRACK_NAME_PREFIX = "[SP] ";
 
 type Result<T, E> = { ok: true; val: T } | { ok: false; err: E };
 
@@ -463,6 +465,64 @@ function clearTrackTimeRange(track: Track, start: number, end: number) {
   }
 }
 
+/** Account for item looping and get all notes (within bounds) */
+function getItemNotes(take: MidiTake) {
+  const item = take.getItem();
+  const itemLoop = item.loop;
+  const itemStart = item.position;
+  const itemEnd = itemStart + item.length;
+
+  const takePPQLength = reaper.BR_GetMidiSourceLenPPQ(take.obj);
+  if (takePPQLength === -1) throw new Error("take is not MIDI");
+
+  // ALL notes in the item
+  const unloopedNotes = Array.from(take.iterNotes());
+
+  // filter notes, and also account for item loop
+  const notes = [];
+
+  let loopPPQOffset = 0.0;
+  let anyNotePastRightSide = false;
+
+  while (true) {
+    for (const note of unloopedNotes) {
+      log(loopPPQOffset, takePPQLength);
+      let noteStart = take.tickToProjectTime(note.startTick + loopPPQOffset);
+      let noteEnd = take.tickToProjectTime(note.endTick + loopPPQOffset);
+
+      // check if note is within item bounds
+
+      // note is past left side
+      if (noteEnd <= itemStart) {
+        continue;
+      }
+      // note is past right side
+      if (itemEnd <= noteStart) {
+        anyNotePastRightSide = true;
+        continue;
+      }
+
+      // note is inside/clipping the item
+
+      // trim the note
+
+      if (noteStart < itemStart) {
+        noteStart = itemStart;
+      }
+      if (noteEnd >= itemEnd) {
+        noteEnd = itemEnd;
+      }
+
+      notes.push({ ...note, startTime: noteStart, endTime: noteEnd });
+    }
+    if (!itemLoop || anyNotePastRightSide) break;
+
+    loopPPQOffset += takePPQLength;
+  }
+
+  return notes;
+}
+
 function sequenceTake(
   take: MidiTake,
   samples: Sample[],
@@ -473,15 +533,12 @@ function sequenceTake(
   },
 ) {
   const notes = [];
-  for (const note of take.iterNotes()) {
+  for (const note of getItemNotes(take)) {
     if (options.selectedNotesOnly && !note.selected) continue;
     if (note.muted) continue;
     if (note.vel === 0) continue;
 
-    const startTime = take.tickToProjectTime(note.startTick);
-    const endTime = take.tickToProjectTime(note.endTick);
-
-    notes.push({ ...note, startTime, endTime });
+    notes.push(note);
   }
   if (notes.length === 0) return;
 

@@ -582,6 +582,14 @@ export class Item {
     if (!rv) throw new Error(`failed to set item muted`);
   }
 
+  get loop() {
+    return reaper.GetMediaItemInfo_Value(this.obj, "B_LOOPSRC") !== 0;
+  }
+  set loop(x: boolean) {
+    const rv = reaper.SetMediaItemInfo_Value(this.obj, "B_LOOPSRC", x ? 1 : 0);
+    if (!rv) throw new Error(`failed to set item loop`);
+  }
+
   getTrack(): Track {
     const obj = reaper.GetMediaItemTrack(this.obj);
     return new Track(obj);
