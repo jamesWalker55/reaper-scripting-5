@@ -943,8 +943,9 @@ export class FXParam {
 export type ModulationInfo = {
   // active: boolean; // let presence of hash indicate active/inactive
   // visible: boolean, // whether the modulation window is shown, i don't care
+  /** range from 0.0 to 1.0 */
   baseline: number;
-  // audio control signal
+  /** audio control signal */
   acs: {
     chan: number;
     stereo: boolean;
@@ -967,17 +968,31 @@ export type ModulationInfo = {
     strength: number;
     free: boolean; // "Phase reset" in modulation window
   } | null;
-  // parameter link (to midi or other fx param)
+  /** parameter link (to midi or other fx param) */
   plink: {
     offset: number;
     scale: number;
-    // target is FX:
+
+    /**
+     * 'effect', will be '-100' if linked to MIDI
+     *
+     * set when target is FX
+     */
     fxidx: number; // 'effect', will be '-100' if linked to MIDI
+    /**
+     * param idx
+     *
+     * set when target is FX
+     */
     param: number; // param idx
-    // target is MIDI:
+
+    /** set when target is MIDI */
     midi_bus: number;
+    /** set when target is MIDI */
     midi_chan: number;
+    /** set when target is MIDI */
     midi_msg: number;
+    /** set when target is MIDI */
     midi_msg2: number;
   } | null;
   // MIDI/OSC Learn
