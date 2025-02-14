@@ -205,16 +205,6 @@ function getSamples(): Result<
   };
 }
 
-/** Converts 0.5 => -6.02dB */
-function scalarToDb(value: number) {
-  return 20 * Math.log10(value);
-}
-
-/** Converts -6dB => 0.501 */
-function dbToScalar(db: number) {
-  return Math.pow(10, db / 20);
-}
-
 function velocityToGain(vel: number) {
   // reasamplomatic
   // 127 => +0.0 => 1
