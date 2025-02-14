@@ -553,8 +553,7 @@ function main() {
   // gui code
   const ctx = createContext();
   gfx.init("Sample Palette", 460, 280);
-  gfx.setfont(1, "Arial", 14);
-  ctx.style.font = 1;
+  ctx.style.font = ["Arial", 14];
 
   microUILoop(ctx, (stop) => {
     if (firstLoop) {
