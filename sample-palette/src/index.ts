@@ -751,50 +751,27 @@ function main() {
           }
         }
 
-        if (sampleGroups.length > 1) {
-          // group the samples
-          sampleGroups.forEach((group, i) => {
-            // list all samples in a list
-            const choices = group.samples.map((s) => ({
-              name: s.name,
-              callback() {
-                if (group.samples.length === 0) return;
-
-                sequenceUsingSamples([s]);
-              },
-            }));
-            choices.push({
-              name: "Random!",
-              callback() {
-                if (group.samples.length === 0) return;
-
-                sequenceUsingSamples(group.samples);
-              },
-            });
-            wrappedButtons(ctx, `samples-group${i}`, group.name, choices);
-          });
-        } else {
+        // group the samples
+        sampleGroups.forEach((group, i) => {
           // list all samples in a list
-          const choices = samples.map((s) => ({
+          const choices = group.samples.map((s) => ({
             name: s.name,
             callback() {
-              if (samples.length === 0) return;
+              if (group.samples.length === 0) return;
 
               sequenceUsingSamples([s]);
             },
           }));
-          if (samples.length > 0) {
-            choices.push({
-              name: "Random!",
-              callback() {
-                if (samples.length === 0) return;
+          choices.push({
+            name: "Random!",
+            callback() {
+              if (group.samples.length === 0) return;
 
-                sequenceUsingSamples(samples);
-              },
-            });
-          }
-          wrappedButtons(ctx, "samples", null, choices);
-        }
+              sequenceUsingSamples(group.samples);
+            },
+          });
+          wrappedButtons(ctx, `samples-group${i}`, group.name, choices);
+        });
 
         if (samples.length > 0) {
           if (ctx.button("Random!")) {
