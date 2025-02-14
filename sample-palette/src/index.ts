@@ -47,14 +47,11 @@ function getNotesInTrack(pitchTrack: Track) {
     if (!take) continue;
     if (take.TYPE !== "MIDI") continue;
 
-    for (const note of take.iterNotes()) {
+    for (const note of getItemNotes(take)) {
       if (note.muted) continue;
       if (note.vel === 0) continue;
 
-      const startTime = take.tickToProjectTime(note.startTick);
-      const endTime = take.tickToProjectTime(note.endTick);
-
-      notes.push({ ...note, startTime, endTime });
+      notes.push(note);
     }
   }
 
@@ -105,20 +102,36 @@ type Sample = {
   pitch: number;
 };
 
-function getSamples(
-  sampleTrack: Track,
-  pitchTrack: Track,
-): Result<Sample[], { item: Item; err: "MULTIPLE_NOTES" }> {
-  const notes = getNotesInTrack(pitchTrack);
+function getSamples(): Result<
+  {
+    name: string;
+    samples: Sample[];
+  }[],
+  { item: Item; err: "MULTIPLE_NOTES" }
+> {
+  const trackNotesMap: Record<number, ReturnType<typeof getNotesInTrack>> = {};
 
-  const result: Sample[] = [];
+  const sampleGroups: Record<string, Sample[]> = {};
+  const groupOrder: string[] = [];
 
-  for (const item of sampleTrack.iterItems()) {
-    if (item.muted) continue;
-
+  for (const item of Item.getSelected()) {
     const take = item.activeTake()?.asTypedTake();
     if (!take) continue;
     if (take.TYPE !== "AUDIO") continue;
+
+    const track = item.getTrack();
+
+    const notes = (() => {
+      const pitchTrackIdx = track.getIdx() + 1;
+      if (pitchTrackIdx in trackNotesMap) {
+        return trackNotesMap[pitchTrackIdx];
+      } else {
+        const pitchTrack = Track.getByIdx(pitchTrackIdx);
+        const notes = getNotesInTrack(pitchTrack);
+        trackNotesMap[pitchTrackIdx] = notes;
+        return notes;
+      }
+    })();
 
     const source = take.getSource();
 
@@ -162,7 +175,14 @@ function getSamples(
       pitch = note.pitch - pitchOffset;
     }
 
-    result.push({
+    // use the track name as the group name
+    const groupName = `${track.getIdx()}: ${track.name}`;
+    if (!(groupName in sampleGroups)) {
+      sampleGroups[groupName] = [];
+      groupOrder.push(groupName);
+    }
+
+    sampleGroups[groupName].push({
       source,
       name,
       volume,
@@ -176,95 +196,13 @@ function getSamples(
     });
   }
 
-  return { ok: true, val: result };
-}
-
-function groupSamples(samples: Sample[]): Record<string, Sample[]> {
-  const UNCATEGORIZED = "Uncategorized";
-
-  const result: Record<string, Sample[]> = {};
-
-  for (const sample of samples) {
-    const slashPos = sample.name.indexOf("/");
-    if (slashPos === -1) {
-      result[UNCATEGORIZED] ||= [];
-      result[UNCATEGORIZED].push(sample);
-    } else {
-      const category = sample.name.slice(0, slashPos).trim();
-      const newName = sample.name
-        .slice(slashPos + 1, sample.name.length)
-        .trim();
-      result[category] ||= [];
-      result[category].push({ ...sample, name: newName });
-    }
-  }
-
-  return result;
-}
-
-function findSampleTrack(): {
-  sample: Track;
-  pitch: Track;
-} | null {
-  function locateSampleTrackPair(
-    track: Track,
-  ): { sample: Track; pitch: Track } | null {
-    // log(`locateSampleTrackPair(): checking track ${track.getIdx() + 1}`);
-
-    if (track.name === SAMPLE_TRACK_NAME) {
-      // assume this is the sample track
-      // search for pitch track nearby
-
-      const prevTrack = Track.getByIdx(track.getIdx() - 1);
-      if (prevTrack.name === PITCH_TRACK_NAME) {
-        return { sample: track, pitch: prevTrack };
-      }
-
-      const nextTrackDepth = track.getRawFolderDepth();
-      if (nextTrackDepth >= 0) {
-        const nextTrack = Track.getByIdx(track.getIdx() + 1);
-        if (nextTrack.name === PITCH_TRACK_NAME) {
-          return { sample: track, pitch: nextTrack };
-        }
-      }
-    }
-
-    return null;
-  }
-
-  const checkedTracks: LuaSet<MediaTrack> = new LuaSet();
-
-  for (const track of Track.getSelected()) {
-    if (checkedTracks.has(track.obj)) continue;
-
-    // check if current track is sample track
-    checkedTracks.add(track.obj);
-    const pair = locateSampleTrackPair(track);
-    if (pair !== null) return pair;
-
-    // check children for sample tracks
-    for (const child of track.getChildren()) {
-      if (checkedTracks.has(child.obj)) continue;
-
-      checkedTracks.add(child.obj);
-      const pair = locateSampleTrackPair(child);
-      if (pair !== null) return pair;
-    }
-
-    // check siblings for sample tracks
-    const parent = track.getParent();
-    if (!parent) continue;
-
-    for (const sibling of parent.getChildren()) {
-      if (checkedTracks.has(sibling.obj)) continue;
-
-      checkedTracks.add(sibling.obj);
-      const pair = locateSampleTrackPair(sibling);
-      if (pair !== null) return pair;
-    }
-  }
-
-  return null;
+  return {
+    ok: true,
+    val: groupOrder.map((groupName) => ({
+      name: groupName,
+      samples: sampleGroups[groupName],
+    })),
+  };
 }
 
 /** Converts 0.5 => -6.02dB */
@@ -465,7 +403,11 @@ function clearTrackTimeRange(track: Track, start: number, end: number) {
   }
 }
 
-/** Account for item looping and get all notes (within bounds) */
+/**
+ * Account for item looping and get all notes (within bounds).
+ *
+ * Also account for item pitch
+ */
 function getItemNotes(take: MidiTake) {
   const item = take.getItem();
   const itemLoop = item.loop;
@@ -486,7 +428,6 @@ function getItemNotes(take: MidiTake) {
 
   while (true) {
     for (const note of unloopedNotes) {
-      log(loopPPQOffset, takePPQLength);
       let noteStart = take.tickToProjectTime(note.startTick + loopPPQOffset);
       let noteEnd = take.tickToProjectTime(note.endTick + loopPPQOffset);
 
@@ -513,7 +454,14 @@ function getItemNotes(take: MidiTake) {
         noteEnd = itemEnd;
       }
 
-      notes.push({ ...note, startTime: noteStart, endTime: noteEnd });
+      notes.push({
+        ...note,
+        startTime: noteStart,
+        endTime: noteEnd,
+        startTick: note.startTick + loopPPQOffset,
+        endTick: note.endTick + loopPPQOffset,
+        pitch: note.pitch + Math.round(take.pitch),
+      });
     }
     if (!itemLoop || anyNotePastRightSide) break;
 
@@ -604,7 +552,6 @@ function main() {
   let sampleExtendStyle: SampleExtendStyle = SampleExtendStyle.Stretch;
   let samples: Sample[] = [];
   let sampleGroups: { name: string; samples: Sample[] }[] = [];
-  let samplesTrackIdx: number | null = null;
   let firstLoop = true;
 
   // gui code
@@ -672,58 +619,36 @@ function main() {
         }
 
         if (ctx.button("Collect samples")) {
-          const tracks = findSampleTrack();
-          if (tracks === null) {
-            msgBox(
-              "Can't find samples!",
-              "Failed to find the sample track. Please try selecting the sample track before clicking on this button.",
-            );
-          } else {
-            const samplesResult = getSamples(tracks.sample, tracks.pitch);
-            if (!samplesResult.ok) {
-              const err = samplesResult.err;
+          const res = getSamples();
+          if (!res.ok) {
+            const err = res.err;
 
-              switch (err.err) {
-                case "MULTIPLE_NOTES": {
-                  msgBox(
-                    "Can't determine pitch of sample",
-                    `Multiple notes found for the sample at ${
-                      err.item.position
-                    }s on track ${
-                      err.item.getTrack().getIdx() + 1
-                    }.\nPlease ensure only 1 note is placed at the location of the sample`,
-                  );
-                  undoBlock(
-                    "Sample Palette: Focus on sample with errors",
-                    -1,
-                    () => {
-                      runMainAction(40289); // unselect all items
-                      reaper.SetMediaItemSelected(err.item.obj, true); // select item
-                      runMainAction("_S&M_SCROLL_ITEM"); // scroll to item
-                    },
-                  );
-                  break;
-                }
-                default:
-                  assertUnreachable(err.err);
+            switch (err.err) {
+              case "MULTIPLE_NOTES": {
+                msgBox(
+                  "Can't determine pitch of sample",
+                  `Multiple notes found for the sample at ${
+                    err.item.position
+                  }s on track ${
+                    err.item.getTrack().getIdx() + 1
+                  }.\nPlease ensure only 1 note is placed at the location of the sample`,
+                );
+                undoBlock(
+                  "Sample Palette: Focus on sample with errors",
+                  -1,
+                  () => {
+                    runMainAction(40289); // unselect all items
+                    reaper.SetMediaItemSelected(err.item.obj, true); // select item
+                    runMainAction("_S&M_SCROLL_ITEM"); // scroll to item
+                  },
+                );
+                break;
               }
-            } else {
-              const allSamples = samplesResult.val;
-              samplesTrackIdx = tracks.sample.getIdx();
-              // log("Loaded samples:");
-              // log(allSamples);
-
-              // update global samples
-              samples = allSamples;
-
-              // update grouped samples
-              sampleGroups = [];
-              for (const [group, samples] of Object.entries(
-                groupSamples(allSamples),
-              )) {
-                sampleGroups.push({ name: group, samples: samples });
-              }
+              default:
+                assertUnreachable(err.err);
             }
+          } else {
+            sampleGroups = res.val;
           }
         }
       }
@@ -789,11 +714,7 @@ function main() {
           ctx.text("No samples loaded yet...");
         } else {
           ctx.text(
-            string.format(
-              "Loaded %d samples from track %d, all good!",
-              samples.length,
-              samplesTrackIdx! + 1,
-            ),
+            string.format("Loaded %d samples, all good!", samples.length),
           );
         }
 
