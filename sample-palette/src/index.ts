@@ -661,26 +661,26 @@ function main() {
       // sample collecting section
       {
         ctx.layoutRow([-1], 0);
-
         if (ctx.header("Instructions")) {
-          ctx.text(
-            `This script depends on having 2 adjacent tracks with very specific names.`,
-          );
-          ctx.text(
-            `* ${inspect(
-              SAMPLE_TRACK_NAME,
-            )}: Track containing sliced audio samples.`,
-          );
-          ctx.text(
-            `* ${inspect(
-              PITCH_TRACK_NAME,
-            )}: Track containing MIDI notes at the same location as each audio sample. The note represents the pitch of that sample.`,
-          );
-          ctx.text(
-            `Create these 2 tracks then hit the button below to collect the samples to memory.`,
-          );
+          const parts = [
+            `To use this script, there are 2 steps involved.`,
+            `1. Sample collection: You cut and slice samples to be used by this script, these samples will be added to an internal "palette" used by the script.`,
+            `For each sample you want to collect, create a MIDI item containing the sample's pitch as a MIDI note. Place that item on the track below the sample. Finally select the samples and click on "Collect samples"`,
+            `2. Creating slice sequences: You write a MIDI melody, then use this script to automatically place samples at each MIDI note.`,
+            `This depends on the "Target" mode you selected below. For "Selected items in arrange", select a MIDI item then click on a sample button. For "Selected samples", you need to have an existing sample sequence; select samples in the sequence and press a sample button to update the selected samples.`,
+          ];
+          for (const x of parts) {
+            // text
+            ctx.layoutRow([-1], 0);
+            ctx.text(x);
+
+            // add some space
+            ctx.layoutRow([-1], 8);
+            ctx.layoutNext();
+          }
         }
 
+        ctx.layoutRow([-1], 0);
         if (ctx.button("Collect samples")) {
           const res = getSamples();
           if (!res.ok) {
