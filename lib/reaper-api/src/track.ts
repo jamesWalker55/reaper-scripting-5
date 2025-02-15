@@ -590,6 +590,13 @@ export class Item {
     if (!rv) throw new Error(`failed to set item loop`);
   }
 
+  get selected() {
+    return reaper.IsMediaItemSelected(this.obj);
+  }
+  set selected(x: boolean) {
+    reaper.SetMediaItemSelected(this.obj, x);
+  }
+
   getTrack(): Track {
     const obj = reaper.GetMediaItemTrack(this.obj);
     return new Track(obj);

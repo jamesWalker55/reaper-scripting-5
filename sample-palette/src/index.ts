@@ -37,6 +37,76 @@ function randInt(min: number, max: number) {
   return rangeRand + min;
 }
 
+/**
+ * Account for item looping and get all notes (within bounds).
+ *
+ * Also account for item pitch
+ */
+function getItemNotes(take: MidiTake) {
+  const item = take.getItem();
+  const itemLoop = item.loop;
+  const itemStart = item.position;
+  const itemEnd = itemStart + item.length;
+
+  const takePPQLength = reaper.BR_GetMidiSourceLenPPQ(take.obj);
+  if (takePPQLength === -1) throw new Error("take is not MIDI");
+
+  // ALL notes in the item
+  const unloopedNotes = Array.from(take.iterNotes());
+
+  // filter notes, and also account for item loop
+  const notes = [];
+
+  let loopPPQOffset = 0.0;
+  let anyNotePastRightSide = false;
+
+  while (true) {
+    for (const note of unloopedNotes) {
+      let noteStart = take.tickToProjectTime(note.startTick + loopPPQOffset);
+      let noteEnd = take.tickToProjectTime(note.endTick + loopPPQOffset);
+
+      // check if note is within item bounds
+
+      // note is past left side
+      if (noteEnd <= itemStart) {
+        continue;
+      }
+      // note is past right side
+      if (itemEnd <= noteStart) {
+        anyNotePastRightSide = true;
+        continue;
+      }
+
+      // note is inside/clipping the item
+
+      // trim the note
+
+      if (noteStart < itemStart) {
+        noteStart = itemStart;
+      }
+      if (noteEnd >= itemEnd) {
+        noteEnd = itemEnd;
+      }
+
+      notes.push({
+        ...note,
+        startTime: noteStart,
+        endTime: noteEnd,
+        startTick: note.startTick + loopPPQOffset,
+        endTick: note.endTick + loopPPQOffset,
+        pitch: note.pitch + Math.round(take.pitch),
+      });
+    }
+    if (!itemLoop || anyNotePastRightSide) break;
+
+    loopPPQOffset += takePPQLength;
+  }
+
+  return notes;
+}
+
+type Note = ReturnType<typeof getItemNotes>[number];
+
 function getNotesInTrack(pitchTrack: Track) {
   const notes = [];
 
@@ -60,8 +130,6 @@ function getNotesInTrack(pitchTrack: Track) {
 
   return notes;
 }
-
-type Note = ReturnType<typeof getNotesInTrack>[number];
 
 function mainNoteInTimeRange(
   notes: Note[],
@@ -264,6 +332,8 @@ function createSampleSequence(
   if (samples.length === 0)
     throw new Error("cannot create sequence with no samples");
 
+  const result = [];
+
   for (const note of notes) {
     // get a random sample, equal distribution for now
     const sample = samples[randInt(0, samples.length - 1)];
@@ -272,6 +342,9 @@ function createSampleSequence(
     const item = new Item(reaper.AddMediaItemToTrack(track.obj));
     const take = new Take(reaper.AddTakeToMediaItem(item.obj));
     reaper.SetMediaItemTake_Source(take.obj, sample.source.obj);
+
+    // return the item later
+    result.push({ item, take, sample });
 
     // move item to under the note
     item.position = note.startTime;
@@ -335,6 +408,8 @@ function createSampleSequence(
     item.fadeInLength = sample.fadeInLength / playrate;
     item.fadeOutLength = sample.fadeOutLength / playrate;
   }
+
+  return result;
 }
 
 function clearTrackTimeRange(track: Track, start: number, end: number) {
@@ -391,74 +466,6 @@ function clearTrackTimeRange(track: Track, start: number, end: number) {
       throw new Error("unreachable");
     }
   }
-}
-
-/**
- * Account for item looping and get all notes (within bounds).
- *
- * Also account for item pitch
- */
-function getItemNotes(take: MidiTake) {
-  const item = take.getItem();
-  const itemLoop = item.loop;
-  const itemStart = item.position;
-  const itemEnd = itemStart + item.length;
-
-  const takePPQLength = reaper.BR_GetMidiSourceLenPPQ(take.obj);
-  if (takePPQLength === -1) throw new Error("take is not MIDI");
-
-  // ALL notes in the item
-  const unloopedNotes = Array.from(take.iterNotes());
-
-  // filter notes, and also account for item loop
-  const notes = [];
-
-  let loopPPQOffset = 0.0;
-  let anyNotePastRightSide = false;
-
-  while (true) {
-    for (const note of unloopedNotes) {
-      let noteStart = take.tickToProjectTime(note.startTick + loopPPQOffset);
-      let noteEnd = take.tickToProjectTime(note.endTick + loopPPQOffset);
-
-      // check if note is within item bounds
-
-      // note is past left side
-      if (noteEnd <= itemStart) {
-        continue;
-      }
-      // note is past right side
-      if (itemEnd <= noteStart) {
-        anyNotePastRightSide = true;
-        continue;
-      }
-
-      // note is inside/clipping the item
-
-      // trim the note
-
-      if (noteStart < itemStart) {
-        noteStart = itemStart;
-      }
-      if (noteEnd >= itemEnd) {
-        noteEnd = itemEnd;
-      }
-
-      notes.push({
-        ...note,
-        startTime: noteStart,
-        endTime: noteEnd,
-        startTick: note.startTick + loopPPQOffset,
-        endTick: note.endTick + loopPPQOffset,
-        pitch: note.pitch + Math.round(take.pitch),
-      });
-    }
-    if (!itemLoop || anyNotePastRightSide) break;
-
-    loopPPQOffset += takePPQLength;
-  }
-
-  return notes;
 }
 
 function sequenceTake(
@@ -530,14 +537,80 @@ function sequenceSelectedItems(
   }
 }
 
+function getMidiMappedSamples() {
+  const trackNotesMap: Record<number, ReturnType<typeof getNotesInTrack>> = {};
+
+  const result = [];
+
+  for (const item of Item.getSelected()) {
+    const take = item.activeTake()?.asTypedTake();
+    if (!take) continue;
+    if (take.TYPE !== "AUDIO") continue;
+
+    const track = item.getTrack();
+    if (!track.name.startsWith(SEQUENCE_TRACK_NAME_PREFIX)) continue;
+
+    const pitchTrackIdx = track.getIdx() - 1;
+    if (pitchTrackIdx < 0) continue; // invalid sample track
+
+    // get MIDI notes in the corresponding pitch track
+    const pitchTrack = Track.getByIdx(pitchTrackIdx);
+    getNotesInTrack(pitchTrack);
+    const notes = (() => {
+      if (pitchTrackIdx in trackNotesMap) {
+        return trackNotesMap[pitchTrackIdx];
+      } else {
+        const pitchTrack = Track.getByIdx(pitchTrackIdx);
+        const notes = getNotesInTrack(pitchTrack);
+        trackNotesMap[pitchTrackIdx] = notes;
+        return notes;
+      }
+    })();
+
+    // find the note that is closest to the selected sample
+    const note = (() => {
+      const SIMILAR_THRESHOLD = 0.001; // seconds
+      const matchingNotes = notes.filter((note) => {
+        const closeEnough =
+          Math.abs(item.position - note.startTime) <= SIMILAR_THRESHOLD;
+
+        return closeEnough;
+      });
+      if (matchingNotes.length === 0) {
+        // no matching notes found
+        // skip this sample
+        log(
+          `WARN: No notes found for sample at ${item.position}: ${take.name}`,
+        );
+        return null;
+      }
+
+      // at least 1 match found
+      // find the note with the closest duration
+      return matchingNotes.sort((a, b) => {
+        const aLength = a.endTime - a.startTime;
+        const bLength = b.endTime - b.startTime;
+        const aDiff = Math.abs(aLength - item.length);
+        const bDiff = Math.abs(bLength - item.length);
+        return aDiff - bDiff;
+      })[0];
+    })();
+    if (note === null) continue;
+
+    result.push({ item, note, track });
+  }
+
+  return result;
+}
+
 function main() {
   enum SequenceTarget {
-    SelectedNotes,
-    SelectedItems,
+    SelectedMIDIItems,
+    SelectedAudioSamples,
   }
 
   // parameters
-  let sequenceTarget: SequenceTarget = SequenceTarget.SelectedItems;
+  let sequenceTarget: SequenceTarget = SequenceTarget.SelectedMIDIItems;
   let samplePitchStyle: SamplePitchStyle = SamplePitchStyle.KeepRate;
   let sampleExtendStyle: SampleExtendStyle = SampleExtendStyle.Stretch;
   let samples: Sample[] = [];
@@ -680,12 +753,12 @@ function main() {
           "sequenceTarget",
           [
             {
-              id: SequenceTarget.SelectedItems,
+              id: SequenceTarget.SelectedMIDIItems,
               name: "Selected items in arrange",
             },
             {
-              id: SequenceTarget.SelectedNotes,
-              name: "Selected notes in active MIDI editor",
+              id: SequenceTarget.SelectedAudioSamples,
+              name: "Selected samples",
             },
           ],
           sequenceTarget,
@@ -710,30 +783,38 @@ function main() {
 
         function sequenceUsingSamples(samples: Sample[]) {
           switch (sequenceTarget) {
-            case SequenceTarget.SelectedNotes: {
-              const take = MidiTake.active();
-              if (take === null) {
-                msgBox(
-                  "Error",
-                  "No active MIDI editor found. Please open a MIDI item before running this script!",
-                );
-                break;
-              }
+            case SequenceTarget.SelectedAudioSamples: {
+              const mappedSamples = getMidiMappedSamples();
+              if (mappedSamples.length === 0) break;
 
               undoBlock(
-                "Sample Palette: Sequence selected notes in active MIDI editor",
+                "Sample Palette: Update sources for selected samples",
                 -1,
                 () => {
-                  sequenceTake(take, samples, {
-                    pitch: samplePitchStyle,
-                    extend: sampleExtendStyle,
-                    selectedNotesOnly: true,
-                  });
+                  // delete the selected samples
+                  for (const { item, note, track } of mappedSamples) {
+                    item.delete();
+
+                    const sequence = createSampleSequence(
+                      [note],
+                      samples,
+                      track,
+                      {
+                        pitch: samplePitchStyle,
+                        extend: sampleExtendStyle,
+                      },
+                    );
+                    // re-select the items
+                    for (const { item } of sequence) {
+                      item.selected = true;
+                    }
+                  }
                 },
               );
+
               break;
             }
-            case SequenceTarget.SelectedItems: {
+            case SequenceTarget.SelectedMIDIItems: {
               undoBlock(
                 "Sample Palette: Sequence selected MIDI items",
                 -1,
