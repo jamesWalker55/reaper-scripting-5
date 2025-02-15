@@ -611,7 +611,7 @@ function main() {
 
   // parameters
   let sequenceTarget: SequenceTarget = SequenceTarget.SelectedMIDIItems;
-  let samplePitchStyle: SamplePitchStyle = SamplePitchStyle.KeepRate;
+  let samplePitchStyle: SamplePitchStyle = SamplePitchStyle.NoStretching;
   let sampleExtendStyle: SampleExtendStyle = SampleExtendStyle.Stretch;
   let samples: Sample[] = [];
   let sampleGroups: { name: string; samples: Sample[] }[] = [];
