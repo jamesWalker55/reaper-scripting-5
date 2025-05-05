@@ -15,6 +15,11 @@ import {
   vec2,
 } from "reaper-microui";
 
+/**
+ * Edit of the `microUILoop` function to add:
+ * - Press ESC key to quit
+ * - Mouse wheel scrolls horizontally
+ */
 export function microUILoop(
   ctx: ReaperContext,
   func: (stop: () => void) => void,
@@ -144,7 +149,7 @@ export function microUILoop(
           gfx.y = cmd.pos.y;
 
           // set font
-          gfx.setfont(cmd.font);
+          gfx.setfont(1, cmd.font[0], cmd.font[1], cmd.font[2]);
 
           if (currentClip) {
             let [width, height] = gfx.measurestr(cmd.str);
@@ -304,6 +309,10 @@ export function microUILoop(
             default:
               error(`unhandled icon type: ${cmd}`);
           }
+          break;
+        }
+        case CommandType.Custom: {
+          cmd.draw(currentClip);
           break;
         }
         default:

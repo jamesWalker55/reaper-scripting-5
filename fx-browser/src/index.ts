@@ -387,10 +387,9 @@ function main() {
       windowPos.y,
     );
   }
-  gfx.setfont(1, "Arial", 12);
 
   const ctx = createContext();
-  ctx.style.font = 1;
+  ctx.style.font = ["Arial", 12];
 
   microUILoop(
     ctx,
@@ -471,11 +470,12 @@ function main() {
           }
 
           ctx.layoutRow([-1], 0);
-          const [rv, newQuery] = ctx.textbox("query", query);
-          query = newQuery;
-          if (rv === Response.Change) {
-            manager.setQuery(query);
-          }
+          ctx.textbox("query", query, undefined, (res, buf) => {
+            query = buf;
+            if (res === Response.Change) {
+              manager.setQuery(query);
+            }
+          });
 
           // virtual keyboard shit
           const oldQueryIsFocused = queryIsFocused;
