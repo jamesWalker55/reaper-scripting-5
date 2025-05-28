@@ -66,7 +66,7 @@ function startUI() {
   // Params
   let inputOldBpm = string.format("%d", currentBpm);
   let inputNewBpm = string.format("%d", currentBpm);
-  let inputItemsReversed = true;
+  let inputItemsReversed = false;
   let inputSubmit = false;
 
   microUILoop(
