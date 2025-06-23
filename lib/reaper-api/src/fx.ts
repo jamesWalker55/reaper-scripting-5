@@ -380,6 +380,32 @@ class ReaperFXChain {
         assertUnreachable(this.obj);
     }
   }
+
+  Delete(fxidx: number): boolean {
+    switch (this.obj.type) {
+      case "track": {
+        return reaper.TrackFX_Delete(this.obj.track, fxidx);
+      }
+      case "take": {
+        return reaper.TakeFX_Delete(this.obj.take, fxidx);
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
+
+  EndParamEdit(fxidx: number, param: number): boolean {
+    switch (this.obj.type) {
+      case "track": {
+        return reaper.TrackFX_EndParamEdit(this.obj.track, fxidx, param);
+      }
+      case "take": {
+        return reaper.TakeFX_EndParamEdit(this.obj.take, fxidx, param);
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
 }
 
 export class FX {
@@ -409,7 +435,7 @@ export class FX {
     return guid;
   }
 
-  private getParameter(param: number): FXParam {
+  private getParameterUnchecked(param: number): FXParam {
     switch (this.obj.type) {
       case "track": {
         return new FXParam({ track: this.obj.track }, this.fxidx, param);
@@ -422,11 +448,19 @@ export class FX {
     }
   }
 
+  getParameter(param: number): FXParam {
+    const totalCount = this.chain.GetNumParams(this.fxidx);
+    if (!(0 <= param && param < totalCount))
+      throw new Error(`Param index ${param} out of bounds of ${totalCount}`);
+
+    return this.getParameterUnchecked(param);
+  }
+
   getParameters() {
     const totalCount = this.chain.GetNumParams(this.fxidx);
     const result = [];
     for (let i = 0; i < totalCount; i++) {
-      result.push(this.getParameter(i));
+      result.push(this.getParameterUnchecked(i));
     }
     return result;
   }
