@@ -47,6 +47,80 @@ export type Q3Band = {
   // solo: number; // non-automatable
 };
 
+export function isQ3Band(x: unknown): x is Q3Band {
+  if (typeof x !== "object" || x === null) return false;
+  if (Array.isArray(x)) return false;
+
+  return (
+    "version" in x &&
+    x.version === 3 &&
+    "used" in x &&
+    typeof x.used === "number" &&
+    0.0 <= x.used &&
+    x.used <= 1.0 &&
+    "enabled" in x &&
+    typeof x.enabled === "number" &&
+    0.0 <= x.enabled &&
+    x.enabled <= 1.0 &&
+    "frequency" in x &&
+    typeof x.frequency === "number" &&
+    0.0 <= x.frequency &&
+    x.frequency <= 1.0 &&
+    "gain" in x &&
+    typeof x.gain === "number" &&
+    0.0 <= x.gain &&
+    x.gain <= 1.0 &&
+    "dynamic_range" in x &&
+    typeof x.dynamic_range === "number" &&
+    0.0 <= x.dynamic_range &&
+    x.dynamic_range <= 1.0 &&
+    "dynamics_enabled" in x &&
+    typeof x.dynamics_enabled === "number" &&
+    0.0 <= x.dynamics_enabled &&
+    x.dynamics_enabled <= 1.0 &&
+    "threshold" in x &&
+    typeof x.threshold === "number" &&
+    0.0 <= x.threshold &&
+    x.threshold <= 1.0 &&
+    "q" in x &&
+    typeof x.q === "number" &&
+    0.0 <= x.q &&
+    x.q <= 1.0 &&
+    "shape" in x &&
+    typeof x.shape === "number" &&
+    0.0 <= x.shape &&
+    x.shape <= 1.0 &&
+    "slope" in x &&
+    typeof x.slope === "number" &&
+    0.0 <= x.slope &&
+    x.slope <= 1.0 &&
+    "stereo_placement" in x &&
+    typeof x.stereo_placement === "number" &&
+    0.0 <= x.stereo_placement &&
+    x.stereo_placement <= 1.0 &&
+    "speakers" in x &&
+    typeof x.speakers === "number" &&
+    0.0 <= x.speakers &&
+    x.speakers <= 1.0
+  );
+}
+
+export const NOOP_Q3: Q3Band = {
+  version: 3,
+  used: 0,
+  enabled: 1,
+  frequency: 0.5,
+  gain: 0.5,
+  dynamic_range: 0.5,
+  dynamics_enabled: 0,
+  threshold: 1.0,
+  q: 0.5,
+  shape: 0.0,
+  slope: 0.5,
+  stereo_placement: 0.5,
+  speakers: 0.0,
+};
+
 /**
  * Index ranges from 0..=23
  */
@@ -146,6 +220,125 @@ export type Q4Band = {
   spectral_enabled: number;
   spectral_density: number;
   // solo: number; // non-automatable
+};
+
+export function isQ4Band(x: unknown): x is Q4Band {
+  if (typeof x !== "object" || x === null) return false;
+  if (Array.isArray(x)) return false;
+
+  return (
+    "version" in x &&
+    x.version === 4 &&
+    "used" in x &&
+    typeof x.used === "number" &&
+    0.0 <= x.used &&
+    x.used <= 1.0 &&
+    "enabled" in x &&
+    typeof x.enabled === "number" &&
+    0.0 <= x.enabled &&
+    x.enabled <= 1.0 &&
+    "frequency" in x &&
+    typeof x.frequency === "number" &&
+    0.0 <= x.frequency &&
+    x.frequency <= 1.0 &&
+    "gain" in x &&
+    typeof x.gain === "number" &&
+    0.0 <= x.gain &&
+    x.gain <= 1.0 &&
+    "q" in x &&
+    typeof x.q === "number" &&
+    0.0 <= x.q &&
+    x.q <= 1.0 &&
+    "shape" in x &&
+    typeof x.shape === "number" &&
+    0.0 <= x.shape &&
+    x.shape <= 1.0 &&
+    "slope" in x &&
+    typeof x.slope === "number" &&
+    0.0 <= x.slope &&
+    x.slope <= 1.0 &&
+    "stereo_placement" in x &&
+    typeof x.stereo_placement === "number" &&
+    0.0 <= x.stereo_placement &&
+    x.stereo_placement <= 1.0 &&
+    "speakers" in x &&
+    typeof x.speakers === "number" &&
+    0.0 <= x.speakers &&
+    x.speakers <= 1.0 &&
+    "dynamic_range" in x &&
+    typeof x.dynamic_range === "number" &&
+    0.0 <= x.dynamic_range &&
+    x.dynamic_range <= 1.0 &&
+    "dynamics_enabled" in x &&
+    typeof x.dynamics_enabled === "number" &&
+    0.0 <= x.dynamics_enabled &&
+    x.dynamics_enabled <= 1.0 &&
+    "dynamics_auto" in x &&
+    typeof x.dynamics_auto === "number" &&
+    0.0 <= x.dynamics_auto &&
+    x.dynamics_auto <= 1.0 &&
+    "threshold" in x &&
+    typeof x.threshold === "number" &&
+    0.0 <= x.threshold &&
+    x.threshold <= 1.0 &&
+    "attack" in x &&
+    typeof x.attack === "number" &&
+    0.0 <= x.attack &&
+    x.attack <= 1.0 &&
+    "release" in x &&
+    typeof x.release === "number" &&
+    0.0 <= x.release &&
+    x.release <= 1.0 &&
+    "external_side_chain" in x &&
+    typeof x.external_side_chain === "number" &&
+    0.0 <= x.external_side_chain &&
+    x.external_side_chain <= 1.0 &&
+    "side_chain_filtering" in x &&
+    typeof x.side_chain_filtering === "number" &&
+    0.0 <= x.side_chain_filtering &&
+    x.side_chain_filtering <= 1.0 &&
+    "side_chain_low_frequency" in x &&
+    typeof x.side_chain_low_frequency === "number" &&
+    0.0 <= x.side_chain_low_frequency &&
+    x.side_chain_low_frequency <= 1.0 &&
+    "side_chain_high_frequency" in x &&
+    typeof x.side_chain_high_frequency === "number" &&
+    0.0 <= x.side_chain_high_frequency &&
+    x.side_chain_high_frequency <= 1.0 &&
+    "spectral_enabled" in x &&
+    typeof x.spectral_enabled === "number" &&
+    0.0 <= x.spectral_enabled &&
+    x.spectral_enabled <= 1.0 &&
+    "spectral_density" in x &&
+    typeof x.spectral_density === "number" &&
+    0.0 <= x.spectral_density &&
+    x.spectral_density <= 1.0
+  );
+}
+
+export const NOOP_Q4: Q4Band = {
+  version: 4,
+  used: 0,
+  enabled: 1,
+  frequency: 0.5,
+  gain: 0.5,
+  q: 0.5,
+  shape: 0.0,
+  slope: 0.5,
+  stereo_placement: 0.5,
+  speakers: 0.0,
+  dynamic_range: 0.5,
+  dynamics_enabled: 0,
+  dynamics_auto: 1,
+  threshold: 1.0,
+  attack: 0.5,
+  release: 0.5,
+  external_side_chain: 0,
+  side_chain_filtering: 0,
+  side_chain_low_frequency: 0.0,
+  side_chain_high_frequency: 1.0,
+  spectral_enabled: 0,
+  spectral_density: 0.5,
 };
 
 /**
