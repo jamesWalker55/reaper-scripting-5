@@ -12,6 +12,7 @@ import {
   errorHandler,
   log,
   readFile,
+  undoBlock,
   writeFile,
 } from "./utils";
 import * as path from "./path/path";
@@ -28,26 +29,87 @@ function measureTime<T>(func: () => T): [number, T] {
 }
 
 async function main() {
-  // log("Hello world!")
-  const item = Item.getSelected()[0];
-  if (!item) throw new Error("No selected item");
+  undoBlock("Randomize value of selected envelope/automation points", 1, () => {
+    const env = reaper.GetSelectedEnvelope(0);
+    for (
+      let autoItemIdx = -1;
+      autoItemIdx < reaper.CountAutomationItems(env);
+      autoItemIdx++
+    ) {
+      const pointCount = reaper.CountEnvelopePointsEx(
+        env,
+        autoItemIdx | 0x10000000,
+      );
+      for (let i = 0; i < pointCount; i++) {
+        const [retval, time, value, shape, tension, selected] =
+          reaper.GetEnvelopePointEx(env, autoItemIdx | 0x10000000, i);
+        if (!retval)
+          throw new Error(
+            `Failed to get point ${i} in automation item ${autoItemIdx}`,
+          );
+        if (!selected) continue;
 
-  const take = item.activeTake()?.asTypedTake();
-  if (!take) throw new Error("No selected MIDI take");
-  if (take.TYPE !== "MIDI") throw new Error("No selected MIDI take");
+        const newValue = math.random();
+        reaper.SetEnvelopePointEx(
+          env,
+          autoItemIdx,
+          i,
+          undefined,
+          newValue,
+          undefined,
+          undefined,
+          undefined,
+          true,
+        );
+      }
+      reaper.Envelope_SortPointsEx(env, autoItemIdx);
+    }
+  });
 
-  clearConsole();
-  for (const note of take.iterNotes()) {
-    const startTime = take.tickToProjectTime(note.startTick);
-    const endTime = take.tickToProjectTime(note.endTick);
+  // reaper.GetSetAutomationItemInfo;
 
-    // log(`startTick = ${note.startTick}`);
-    // log(`endTick = ${note.endTick}`);
-    // log(`startTime = ${startTime} s`);
-    // log(`endTime = ${endTime} s`);
-    log(`pitch = ${note.pitch}`);
-  }
-  log();
+  // const lyrics = [];
+  // for (const item of Item.getSelected()) {
+  //   const [_, notes] = reaper.GetSetMediaItemInfo_String(
+  //     item.obj,
+  //     "P_NOTES",
+  //     "",
+  //     false,
+  //   );
+  //   const qnStart = reaper.TimeMap2_timeToQN(0, item.position);
+  //   const qnEnd = reaper.TimeMap2_timeToQN(0, item.position + item.length);
+  //   const trackIdx = item.getTrack().getIdx();
+
+  //   lyrics.push({ notes, qnStart, qnEnd, trackIdx });
+  // }
+  // lyrics.sort((a, b) => a.qnStart - b.qnStart);
+
+  // for (const x of lyrics) {
+  //   log(x);
+  // }
+
+  // copy(encode(lyrics))
+
+  // // log("Hello world!")
+  // const item = Item.getSelected()[0];
+  // if (!item) throw new Error("No selected item");
+
+  // const take = item.activeTake()?.asTypedTake();
+  // if (!take) throw new Error("No selected MIDI take");
+  // if (take.TYPE !== "MIDI") throw new Error("No selected MIDI take");
+
+  // clearConsole();
+  // for (const note of take.iterNotes()) {
+  //   const startTime = take.tickToProjectTime(note.startTick);
+  //   const endTime = take.tickToProjectTime(note.endTick);
+
+  //   // log(`startTick = ${note.startTick}`);
+  //   // log(`endTick = ${note.endTick}`);
+  //   // log(`startTime = ${startTime} s`);
+  //   // log(`endTime = ${endTime} s`);
+  //   log(`pitch = ${note.pitch}`);
+  // }
+  // log();
   // log(inspect(buf))
 
   // const rs = new RS5K(new FX({ track: Track.getSelected()[0].obj }, 0));

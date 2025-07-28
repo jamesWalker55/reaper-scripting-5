@@ -1,0 +1,13 @@
+{
+  "name": "script-dump",
+  "module": "src/index.ts",
+  "type": "module",
+  "dependencies": {},
+  "devDependencies": {
+    "json": "link:json.lua",
+    "lua-types": "^2.13.1",
+    "reaper-api": "link:reaper-api",
+    "typescript": "^5.7.3",
+    "typescript-to-lua": "^1.30.1"
+  }
+}

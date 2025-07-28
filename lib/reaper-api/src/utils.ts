@@ -264,3 +264,17 @@ export function getActionContext() {
 
   return { filename, action };
 }
+
+export function getScriptPath() {
+  // e.g. "D:\Programming\reaper-scripting-5\...\script.lua"
+  const scriptPath = getActionContext().filename;
+  const [parent, filename] = path.split(scriptPath);
+  const [stem, ext] = path.splitext(filename);
+  return {
+    fullpath: scriptPath,
+    parentdir: parent,
+    filename: filename,
+    stem,
+    ext,
+  };
+}
