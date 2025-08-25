@@ -22,8 +22,8 @@
   },
   "tstl": {
     // Uncomment to bundle into one file
-    // "luaBundle": "Output Script.lua",
-    // "luaBundleEntry": "src/index.ts",
+    "luaBundle": "JWPatcher.lua",
+    "luaBundleEntry": "src/index.ts",
     "luaPlugins": [{ "name": "reaper-api/plugins/importFixPlugin.js" }],
     "luaTarget": "5.4",
     "luaLibImport": "require-minimal",
