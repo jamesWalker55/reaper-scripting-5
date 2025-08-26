@@ -181,6 +181,67 @@ export function parseFxidx(
     x = x + (prev.xlast + 1) * (xi + 1);
   }
 }
+export function generateFxidx(
+  opt: { path: number[]; flags: number } & (
+    | { track: MediaTrack }
+    | { take: MediaItem_Take }
+  ),
+) {
+  // all flags + the container flag
+  const flags = opt.flags | 0x2000000;
+  const path = opt.path;
+
+  if (path.length === 0) {
+    throw new Error("invalid input - path must be non-empty");
+  } else if (path.length === 1) {
+    // handle single level (non-container path)
+    return path[0] + opt.flags - (opt.flags & 0x2000000);
+  }
+
+  const ai = path[0];
+  const a = ai + 1;
+
+  const alen =
+    "track" in opt
+      ? (flags & 0x1000000) === 0
+        ? reaper.TrackFX_GetCount(opt.track)
+        : reaper.TrackFX_GetRecCount(opt.track)
+      : reaper.TakeFX_GetCount(opt.take);
+
+  // two variables will be used and updated in the loop:
+  let x = a;
+  let xlast = alen;
+
+  for (let i = 1; true; i++) {
+    const xi = path[i];
+
+    // update x
+    const prevX = x;
+    x = x + (xlast + 1) * (xi + 1);
+
+    if (i === path.length - 1) return x;
+
+    const [ok, xlenStr] =
+      "track" in opt
+        ? reaper.TrackFX_GetNamedConfigParm(
+            opt.track,
+            flags + prevX,
+            "container_count",
+          )
+        : reaper.TakeFX_GetNamedConfigParm(
+            opt.take,
+            flags + prevX,
+            "container_count",
+          );
+    if (!ok) {
+      error("invalid container fxidx: not a container");
+    }
+    const xlen = parseInt(xlenStr);
+
+    // update xlast
+    xlast = xlast + (xlast + 1) * xlen;
+  }
+}
 
 // container indexing functions from:
 // https://forum.cockos.com/showthread.php?p=2714770#post2714770
@@ -229,6 +290,7 @@ export function parseTrackContainerFxidx(
     addr_sc = addr_sc * (n + 1);
   }
 }
+/** @deprecated Use generateFxidx instead */
 export function generateTrackContainerFxidx(
   track: MediaTrack,
   allidx: number[],
@@ -297,6 +359,7 @@ export function parseTakeContainerFxidx(
     addr_sc = addr_sc * (n + 1);
   }
 }
+/** @deprecated Use generateFxidx instead */
 export function generateTakeContainerFxidx(
   take: MediaItem_Take,
   allidx: number[],
