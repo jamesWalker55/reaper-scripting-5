@@ -62,9 +62,130 @@ export function stringifyAddFxParams(params: AddFxParams): string {
   }
 }
 
+/**
+ * The logic was derived from the following:
+ * ```
+ * Ai = 0-based index of root container in track
+ * Alen = num. of FX in this track
+ * Bi = 0-based index of level 2 container
+ * Blen = num. of FX in this level 2 container
+ * Ci = 0-based index of level 3 container
+ * Clen = num. of FX in this level 3 container
+ * Di = 0-based index of level 4 container
+ * Dlen = num. of FX in this level 4 container
+ * Ei = 0-based index of level 5 container
+ * Elen = num. of FX in this level 5 container
+ *
+ * A = Ai + 1
+ * Alast = Alen
+ *
+ * B = A + (Alast + 1) * (Bi + 1)
+ * Blast = Alast + (Alast + 1) * Blen
+ *
+ * C = B + (Blast + 1) * (Ci + 1)
+ * Clast = Blast + (Blast + 1) * Clen
+ *
+ * D = C + (Clast + 1) * (Di + 1)
+ * Dlast = Clast + (Clast + 1) * Dlen
+ *
+ * E = D + (Dlast + 1) * (Ei + 1)
+ * E = ... (lots of term re-arranging)
+ * E = (
+ *   (Ai + 1) + (Alen + 1) * (
+ *     (Bi + 1) + (Blen + 1) * (
+ *       (Ci + 1) + (Clen + 1) * (
+ *         (Di + 1) + (Dlen + 1) * (
+ *           (Ei + 1)
+ *         )
+ *       )
+ *     )
+ *   )
+ * )
+ * ```
+ * Therefore, the remainder of (fxidx % FX count) is the 1-based fxidx in the current level.
+ */
+export function parseFxidx(
+  opt:
+    | { track: MediaTrack; fxidx: number }
+    | { take: MediaItem_Take; fxidx: number },
+): { path: number[]; flags: number } {
+  const flags = opt.fxidx - (opt.fxidx & 0x0ffffff);
+  let fxidx = opt.fxidx & 0x0ffffff;
+
+  // only proceed if the container flag is set
+  if ((flags & 0x2000000) === 0) return { path: [fxidx], flags };
+
+  // first level is track-level
+  const alen =
+    "track" in opt
+      ? (flags & 0x1000000) === 0
+        ? reaper.TrackFX_GetCount(opt.track)
+        : reaper.TrackFX_GetRecCount(opt.track)
+      : reaper.TakeFX_GetCount(opt.take);
+
+  // calculate variables for track root
+  const ai = (fxidx % (alen + 1)) - 1;
+  const arest = Math.floor(fxidx / (alen + 1));
+  if (ai < 0)
+    throw new Error("invalid container fxidx: root track fx index is negative");
+  if (arest < 0)
+    throw new Error("invalid container fxidx: track-level xrest is invalid");
+
+  // a container fxidx must have at least 2 levels/depth, but for safety let's handle 1 level/depth anyway
+  if (arest === 0) return { path: [ai], flags };
+
+  // x will be the current level fxidx
+  // xi is 0-based index in current level
+  // xlen is total FX count in current level
+  // xlast is thing for calculation, see the formula in function doc comment
+  let x = ai + 1;
+  const stack = [{ xi: ai, xlen: alen, xlast: alen, xrest: arest }];
+
+  while (true) {
+    const prev = stack[stack.length - 1];
+
+    const [ok, xlenStr] =
+      "track" in opt
+        ? reaper.TrackFX_GetNamedConfigParm(
+            opt.track,
+            flags + x,
+            "container_count",
+          )
+        : reaper.TakeFX_GetNamedConfigParm(
+            opt.take,
+            flags + x,
+            "container_count",
+          );
+    if (!ok) {
+      error("invalid container fxidx: not a container");
+    }
+    const xlen = parseInt(xlenStr);
+
+    const xi = (prev.xrest % (xlen + 1)) - 1;
+    const xrest = Math.floor(prev.xrest / (xlen + 1));
+    if (xi < 0)
+      throw new Error(
+        "invalid container fxidx: container inner fx index is negative",
+      );
+    if (xrest < 0)
+      throw new Error(
+        "invalid container fxidx: container level xrest is invalid",
+      );
+
+    const xlast = prev.xlast + (prev.xlast + 1) * xlen;
+    stack.push({ xi, xlen, xlast, xrest });
+
+    // if no rest, that means it's the end of stack
+    if (xrest === 0) return { path: stack.map((x) => x.xi), flags };
+
+    x = x + (prev.xlast + 1) * (xi + 1);
+  }
+}
+
 // container indexing functions from:
 // https://forum.cockos.com/showthread.php?p=2714770#post2714770
 // does not work with recFX
+/** @deprecated Use parseFxidx instead */
 export function parseTrackContainerFxidx(
   track: MediaTrack,
   fxidx: number,
@@ -132,6 +253,7 @@ export function generateTrackContainerFxidx(
   }
   return rv;
 }
+/** @deprecated Use parseFxidx instead */
 export function parseTakeContainerFxidx(
   take: MediaItem_Take,
   fxidx: number,
