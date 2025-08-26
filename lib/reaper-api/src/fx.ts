@@ -559,6 +559,72 @@ export class FX {
     }
   }
 
+  /** Create a new FX on the same target object, targeting a new FX idx */
+  private cloneWithFxidx(fxidx: number): FX {
+    switch (this.obj.type) {
+      case "track":
+        return new FX({ track: this.obj.track }, fxidx);
+      case "take":
+        return new FX({ take: this.obj.take }, fxidx);
+      default:
+        return this.obj satisfies never;
+    }
+  }
+
+  isContainer(): boolean {
+    return this.getType() === "Container";
+  }
+
+  /** Get the parent container FX if any */
+  parentContainer(): FX | null {
+    const rv = this.chain.GetNamedConfigParm(this.fxidx, "parent_container");
+    if (rv === null) return null;
+
+    const fxidx = tonumber(rv);
+    if (fxidx === undefined)
+      throw new Error(
+        `failed to parse parent_container fxidx of FX ${
+          this.fxidx
+        } ${this.getType()} "${this.getName()}"`,
+      );
+
+    return this.cloneWithFxidx(fxidx);
+  }
+
+  /** If this is a container, return all FX inside it. Otherwise, return null */
+  childrenFX(): FX[] | null {
+    const rv = this.chain.GetNamedConfigParm(this.fxidx, "container_count");
+    if (rv === null) return null;
+
+    const count = tonumber(rv);
+    if (count === undefined)
+      throw new Error(
+        `failed to parse container_count fxidx of FX ${
+          this.fxidx
+        } ${this.getType()} "${this.getName()}"`,
+      );
+
+    const children = [];
+
+    for (let i = 0; i < count; i++) {
+      const key = `container_item.${i}`;
+      const rv = this.chain.GetNamedConfigParm(this.fxidx, key);
+      if (rv === null) return null;
+
+      const fxidx = tonumber(rv);
+      if (fxidx === undefined)
+        throw new Error(
+          `failed to parse ${key} fxidx of FX ${
+            this.fxidx
+          } ${this.getType()} "${this.getName()}"`,
+        );
+
+      children.push(this.cloneWithFxidx(fxidx));
+    }
+
+    return children;
+  }
+
   protected getElement(): Element {
     switch (this.obj.type) {
       case "track": {
