@@ -213,6 +213,25 @@ export class Track {
     return new FX({ track: this.obj }, idx);
   }
 
+  /** Number of recording FX. For master track, returns monitoring FX instead. */
+  getRecFxCount() {
+    return reaper.TrackFX_GetRecCount(this.obj);
+  }
+
+  /** Return all recording FX. For master track, returns monitoring FX instead. */
+  getAllRecFx() {
+    const count = this.getRecFxCount();
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      result.push(new FX({ track: this.obj }, i + 0x1000000));
+    }
+    return result;
+  }
+
+  getRecFx(idx: number) {
+    return new FX({ track: this.obj }, idx + 0x1000000);
+  }
+
   /**
    * Raw folder depth value from Reaper's API. Value indicates the change
    * in depth in folder structure. E.g. '1' means next track will be a folder
