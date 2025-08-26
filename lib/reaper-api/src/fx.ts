@@ -64,6 +64,7 @@ export function stringifyAddFxParams(params: AddFxParams): string {
 
 // container indexing functions from:
 // https://forum.cockos.com/showthread.php?p=2714770#post2714770
+// does not work with recFX
 export function parseTrackContainerFxidx(
   track: MediaTrack,
   fxidx: number,
