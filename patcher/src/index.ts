@@ -72,9 +72,12 @@ type GraphNode = {
    */
   outputs: AudioSource[][];
 };
-type Graph = GraphNode[];
+type Graph = {
+  fx: GraphNode[];
+  ext: GraphNode;
+};
 
-function createGraph(location: FX | Track) {
+function createGraph(location: FX | Track): Graph {
   let allFx: FX[];
   let chCount: number;
   if ("fxidx" in location) {
@@ -100,7 +103,7 @@ function createGraph(location: FX | Track) {
   }
 
   // nodes are in list, index corresponding to fx list
-  const graph: Graph = [];
+  const graph: GraphNode[] = [];
   // node that represents the external audio
   // meanings are slightly complicated if you think too hard about it
   // * inputs: left side of the graph, before the first FX
@@ -183,10 +186,14 @@ function createGraph(location: FX | Track) {
     extNode.outputs[pin].push(...sources);
   });
 
-  return { graph, ext: extNode };
+  const rv = { fx: graph, ext: extNode };
+
+  checkGraphCorrectBidirectional(rv);
+
+  return rv;
 }
 
-function printGraph(graph: Graph, ext: GraphNode) {
+function printGraph(graph: Graph) {
   function srcToName(src: number | null) {
     if (typeof src === "number") {
       return `fx${src}`;
@@ -234,13 +241,13 @@ function printGraph(graph: Graph, ext: GraphNode) {
     if (outputs.length > 0) log(outputs.join("\n"));
   }
 
-  graph.forEach((node, i) => {
-    printNode(i, node);
+  graph.fx.forEach((fx, i) => {
+    printNode(i, fx);
   });
-  printNode(null, ext, { reverseArrows: true });
+  printNode(null, graph.ext, { reverseArrows: true });
 }
 
-function graphToMermaid(graph: Graph, ext: GraphNode) {
+function graphToMermaid(graph: Graph) {
   function srcToName(src: number | null, isDest: boolean) {
     if (typeof src === "number") {
       return `fx${src}`;
@@ -258,8 +265,8 @@ function graphToMermaid(graph: Graph, ext: GraphNode) {
   // for normal nodes, inputs point rightwards
 
   log(`flowchart LR`);
-  graph.forEach((node, src) => {
-    const inputs = node.inputs.flatMap((sources, i) =>
+  graph.fx.forEach((fx, src) => {
+    const inputs = fx.inputs.flatMap((sources, i) =>
       sources.map((source) => {
         const name = srcToName(src, true);
         const sourceName = srcToName(source.src, false);
@@ -274,7 +281,7 @@ function graphToMermaid(graph: Graph, ext: GraphNode) {
 
   // for ext node, outputs point rightwards
 
-  const inputs = ext.outputs.flatMap((sources, i) =>
+  const inputs = graph.ext.outputs.flatMap((sources, i) =>
     sources.map((source) => {
       const name = srcToName(null, true);
       const sourceName = srcToName(source.src, false);
@@ -287,7 +294,7 @@ function graphToMermaid(graph: Graph, ext: GraphNode) {
   }
 }
 
-function checkGraphCorrectBidirectional(graph: Graph, ext: GraphNode) {
+function checkGraphCorrectBidirectional(graph: Graph) {
   function generateLinkId(from: AudioSource, to: AudioSource) {
     const fromName = from.src === null ? "extin" : `fxout${from.src}`;
     const toName = to.src === null ? "extout" : `fxin${to.src}`;
@@ -297,8 +304,8 @@ function checkGraphCorrectBidirectional(graph: Graph, ext: GraphNode) {
   const from = new LuaSet();
   const to = new LuaSet();
 
-  for (let src = 0; src < graph.length; src++) {
-    const node = graph[src];
+  for (let src = 0; src < graph.fx.length; src++) {
+    const node = graph.fx[src];
     // inputs -> this node
     for (let ch = 0; ch < node.inputs.length; ch++) {
       for (const input of node.inputs[ch]) {
@@ -316,14 +323,14 @@ function checkGraphCorrectBidirectional(graph: Graph, ext: GraphNode) {
   // ext node
   {
     // outputs -> ext
-    for (let ch = 0; ch < ext.outputs.length; ch++) {
-      for (const output of ext.outputs[ch]) {
+    for (let ch = 0; ch < graph.ext.outputs.length; ch++) {
+      for (const output of graph.ext.outputs[ch]) {
         from.add(generateLinkId(output, { src: null, ch }));
       }
     }
     // ext -> inputs
-    for (let ch = 0; ch < ext.inputs.length; ch++) {
-      for (const input of ext.inputs[ch]) {
+    for (let ch = 0; ch < graph.ext.inputs.length; ch++) {
+      for (const input of graph.ext.inputs[ch]) {
         to.add(generateLinkId({ src: null, ch }, input));
       }
     }
@@ -347,10 +354,10 @@ async function main() {
       log("no location");
       continue;
     }
-    const asd = createGraph(loc);
-    // printGraph(asd.graph, asd.ext);
-    // graphToMermaid(asd.graph, asd.ext);
-    // log(checkGraphCorrectBidirectional(asd.graph, asd.ext));
+    const graph = createGraph(loc);
+    printGraph(graph);
+    // graphToMermaid(graph);
+    // log(checkGraphCorrectBidirectional(graph));
   }
 }
 
