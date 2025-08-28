@@ -7,6 +7,7 @@ import {
   parseTrackContainerFxidx,
   parseFxidx,
   generateFxidx,
+  FXParallel,
 } from "reaper-api/fx";
 import { Track } from "reaper-api/track";
 import { deferAsync, errorHandler, log } from "reaper-api/utils";
@@ -32,22 +33,153 @@ function getWorkingLocation() {
   return { location: parent, focus: fx };
 }
 
-function getFxPaths(
-  fx: FX,
-  fxpath: number[],
-): { fxidx: number; fxpath: number[]; name: string }[] {
-  const rv = [{ fxidx: fx.fxidx, fxpath: fxpath, name: fx.getName() }];
+const BIT32_ODD = 0b01010101010101010101010101010101;
+const BIT32_EVEN = 0b10101010101010101010101010101010;
 
-  const children = fx.childrenFX();
-  if (!children) return rv;
+// // prettier-ignore
+// type Arr128<T> = [
+//   T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+//   T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+//   T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+//   T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+//   T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+//   T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+//   T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+//   T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+// ];
 
-  for (let i = 0; i < children.length; i++) {
-    const child = children[i];
-    const childpaths = getFxPaths(child, [...fxpath, i]);
-    rv.push(...childpaths);
+/**
+ * 'src === null' indicates track's audio input (e.g. folder child tracks)
+ */
+type AudioSource = {
+  /**
+   * fx index, or null for incoming/outgoing audio
+   */
+  src: number | null;
+  /**
+   * channel pin number
+   */
+  ch: number;
+};
+
+function asdf(location: FX | Track) {
+  let allFx: FX[];
+  let chCount: number;
+  if ("fxidx" in location) {
+    const rv = location.childrenFX();
+    if (rv === null)
+      throw new Error(`working location is not a container: ${location.fxidx}`);
+
+    allFx = rv;
+    chCount = location.getContainerChannelInfo().internal;
+  } else {
+    allFx = location.getAllFx();
+    chCount = location.channelCount;
   }
 
-  return rv;
+  /**
+   * array to keep track of which channel has audio from which source during iteration
+   *
+   *     ch[ channel index ][ multiple audio sources ]
+   */
+  const ch: AudioSource[][] = [];
+  for (let i = 0; i < chCount; i++) {
+    ch.push([{ src: null, ch: i }]);
+  }
+
+  type GraphNode = {
+    /**
+     * `inputs[ pin idx ][ multiple audio sources ]`
+     */
+    inputs: AudioSource[][];
+    /**
+     * `outputs[ pin idx ][ multiple audio sources ]`
+     */
+    outputs: AudioSource[][];
+  };
+  // nodes are in list, index corresponding to fx list
+  const graph: GraphNode[] = [];
+  // node that represents the external audio
+  // meanings are slightly complicated if you think too hard about it
+  // * inputs: left side of the graph, before the first FX
+  // * outputs: right side of the graph, after the last FX
+  const extNode: GraphNode = { inputs: [], outputs: [] };
+  for (let i = 0; i < chCount; i++) {
+    extNode.inputs.push([]);
+    extNode.outputs.push([]);
+  }
+
+  // for each FX, create node and build graph
+  allFx.forEach((fx, i) => {
+    // create node for this FX
+    const node: GraphNode = { inputs: [], outputs: [] };
+    graph.push(node);
+
+    const io = fx.getIOInfo();
+    const isParallel = fx.parallel !== FXParallel.None;
+    const isInstrument = fx.isInstrument();
+
+    // handle inputs
+    for (let pin = 0; pin < io.inputPins; pin++) {
+      const receivingSources: AudioSource[] = [];
+      node.inputs.push(receivingSources);
+
+      // todo: handle parallel shit
+      // may need to make `ch` like `ch[ fx index ][ channel index ][ multiple audio sources ]
+      if (isParallel) throw new Error("todo: handle parallel fx");
+
+      const receivingChs = fx.getInputPinMappingsFor(pin);
+      for (const receivingCh of receivingChs) {
+        receivingSources.push(...ch[receivingCh]);
+
+        // also update `output` of previous FX nodes
+        for (const inputSource of ch[receivingCh]) {
+          if (inputSource.src === null) {
+            extNode.inputs[inputSource.ch].push({ src: i, ch: pin });
+          } else {
+            graph[inputSource.src].outputs[inputSource.ch].push({
+              src: i,
+              ch: pin,
+            });
+          }
+        }
+      }
+    }
+
+    // handle outputs
+    for (let pin = 0; pin < io.outputPins; pin++) {
+      // construct arrays, won't be populated until we iterate to later FXs
+      const outputSources: AudioSource[] = [];
+      node.outputs.push(outputSources);
+
+      // update `ch` to track what sources are on what track
+      const outputChs = fx.getOutputPinMappingsFor(pin);
+      for (const targetCh of outputChs) {
+        if (isParallel || isInstrument) {
+          // will merge with previous output, append source
+          ch[targetCh].push({ src: i, ch: pin });
+        } else {
+          // will replace previous output
+          ch[targetCh] = [{ src: i, ch: pin }];
+        }
+      }
+    }
+  });
+
+  // finally, iterate through channel sources and set output of nodes
+  ch.forEach((sources, pin) => {
+    // for FX, add external outputs
+    for (const source of sources) {
+      if (source.src === null) continue;
+
+      graph[source.src].outputs[source.ch].push({ src: null, ch: pin });
+    }
+
+    // then, add all `ch` to the extNode output
+    extNode.outputs[pin].push(...sources);
+  });
+
+  return { graph, ext: extNode };
 }
 
 async function main() {
@@ -55,73 +187,12 @@ async function main() {
     await deferAsync();
     log("==============================");
 
-    // const loc = getWorkingLocation();
-    // if (loc) {
-    //   loc.focus = loc?.focus?.fxidx as any
-    //   loc.location = loc?.location?.fxidx as any
-    // }
-    // log("loc", loc);
-
-    // const fx = getLastTouchedFx();
-    // if (!fx) {
-    //   log("no fx");
-    //   continue;
-    // }
-
-    const track = Track.getLastTouched();
-    if (!track) {
-      log("no track");
+    const loc = getWorkingLocation()?.location || Track.getLastTouched();
+    if (loc === null) {
+      log("no location");
       continue;
     }
-
-    function agshdas(paths: ReturnType<typeof getFxPaths>) {
-      // fxidx to path obj
-      const pathmap = Object.fromEntries(
-        paths.map((x) => [x.fxidx & 0x0ffffff, x]),
-      );
-      const maxIdx = Math.max(0, ...paths.map((x) => x.fxidx & 0x0ffffff));
-      for (let i = 0; i <= maxIdx; i++) {
-        const pathobj = pathmap[i];
-        if (!pathobj) {
-          // log(i);
-          continue;
-        }
-
-        const { fxidx, fxpath, name } = pathobj;
-        const parsed = parseFxidx({ track: track!.obj, fxidx });
-        const regen = generateFxidx({
-          track: track!.obj,
-          path: parsed.path,
-          flags: parsed.flags,
-        });
-        log(
-          i,
-          fxpath,
-          parseFxidx({ track: track!.obj, fxidx }).path,
-          fxidx & 0x0ffffff,
-          regen & 0x0ffffff,
-          // (fxidx & 0xf000000).toString(2),
-        );
-      }
-    }
-    {
-      log("= FX");
-      const paths = track.getAllFx().flatMap((fx, i) => getFxPaths(fx, [i]));
-      agshdas(paths);
-      // paths.sort((a, b) => a.fxidx - b.fxidx);
-      // for (const { fxidx, fxpath, name } of paths) {
-      //   log(fxpath, fxidx & 0x0ffffff, name);
-      // }
-    }
-    {
-      log("= Rec FX");
-      const paths = track.getAllRecFx().flatMap((fx, i) => getFxPaths(fx, [i]));
-      agshdas(paths);
-      // paths.sort((a, b) => a.fxidx - b.fxidx);
-      // for (const { fxidx, fxpath, name } of paths) {
-      //   log(fxpath, fxidx & 0x0ffffff, name);
-      // }
-    }
+    log(encode(asdf(loc)));
   }
 }
 
