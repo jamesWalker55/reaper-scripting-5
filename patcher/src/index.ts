@@ -77,7 +77,30 @@ type Graph = {
   ext: GraphNode;
 };
 
-function createGraph(location: FX | Track): Graph {
+function createGraph(
+  location: FX | Track,
+  opt?: {
+    /**
+     * In FL Studio, disabled FX's output remain connected to the next FX.
+     * However in Reaper, disabling FX may change the routing of audio.
+     *
+     * By default, we will retain Reaper's behaviour by making disabled FX
+     * have no outgoing connections.
+     *
+     * If this is disabled, this restores outgoing connections to disabled
+     * FX. **This will also validate that enabling/disabling the FX won't
+     * affect the audio routing, and throw an error otherwise.**
+     */
+    disconnectedDisabledFX?: boolean;
+  },
+): Graph {
+  // default values for options
+  {
+    opt ||= {};
+    if (opt.disconnectedDisabledFX === undefined)
+      opt.disconnectedDisabledFX = true;
+  }
+
   let allFx: FX[];
   let chCount: number;
   if ("fxidx" in location) {
@@ -91,6 +114,25 @@ function createGraph(location: FX | Track): Graph {
     allFx = location.getAllFx();
     chCount = location.channelCount;
   }
+
+  // // group any parallel FXs
+  // const groupedFx = allFx.reduce((acc, fx) => {
+  //   if (fx.parallel !== FXParallel.None) {
+  //     if (acc.length === 0) {
+  //       acc.push([fx]);
+  //     } else {
+  //       const prevEle = acc[acc.length - 1];
+  //       if (Array.isArray(prevEle)) {
+  //         prevEle.push(fx);
+  //       } else {
+  //         acc[acc.length - 1] = [prevEle, fx];
+  //       }
+  //     }
+  //   } else {
+  //     acc.push(fx);
+  //   }
+  //   return acc;
+  // }, [] as (FX | FX[])[]);
 
   /**
    * array to keep track of which channel has audio from which source during iteration
@@ -159,6 +201,43 @@ function createGraph(location: FX | Track): Graph {
       // construct arrays, won't be populated until we iterate to later FXs
       const outgoingSources: AudioSource[] = [];
       node.outputs.push(outgoingSources);
+
+      // handle disabled fx
+      if (!fx.enabled) {
+        if (opt.disconnectedDisabledFX) {
+          // remove all outgoing connections from the fx (by skipping the following code)
+          continue;
+        } else {
+          // we want to keep outgoing connections, so let's verify that the audio routing
+          // won't change when we enable/disable this fx
+          //
+          // if the plugin has:
+          // * 4 inputs -> 2 normal inputs + 2 sidechain inputs
+          // * 2 outputs
+          //
+          // we only see 4 input channels, we don't know which is the "main" input channels
+          //
+          // current idea: if the output pins overlap with the input pins, then it passes -
+          //
+          // e.g. this will pass:
+          //       Pin
+          //     -> 0 ->
+          //     -> 1 ->
+          //     -> 2
+          //     -> 3
+          //
+          // e.g. this will NOT pass:
+          //       Pin
+          //     -> 0
+          //     -> 1
+          //     -> 2
+          //     -> 3
+          //        4 ->
+          //        5 ->
+
+          // TODO: Implement checking
+        }
+      }
 
       // update `ch` to track what sources are on what track
       const outgoingPins = fx.getOutputPinMappingsFor(pin);
