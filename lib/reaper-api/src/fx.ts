@@ -648,6 +648,36 @@ class ReaperFXChain {
         assertUnreachable(this.obj);
     }
   }
+
+  GetEnabled(fxidx: number) {
+    switch (this.obj.type) {
+      case "track": {
+        const rv = reaper.TrackFX_GetEnabled(this.obj.track, fxidx);
+        return rv;
+      }
+      case "take": {
+        const rv = reaper.TakeFX_GetEnabled(this.obj.take, fxidx);
+        return rv;
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
+
+  SetEnabled(fxidx: number, enabled: boolean) {
+    switch (this.obj.type) {
+      case "track": {
+        reaper.TrackFX_SetEnabled(this.obj.track, fxidx, enabled);
+        break;
+      }
+      case "take": {
+        reaper.TakeFX_SetEnabled(this.obj.take, fxidx, enabled);
+        break;
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
 }
 
 export enum FXParallel {
@@ -788,6 +818,13 @@ export class FX {
     const x = tonumber(this.chain.GetNamedConfigParm(this.fxidx, "parallel"));
     if (x === undefined) throw new Error("failed to get FX parallel");
     return x as FXParallel;
+  }
+
+  get enabled() {
+    return this.chain.GetEnabled(this.fxidx);
+  }
+  set enabled(x: boolean) {
+    this.chain.SetEnabled(this.fxidx, x);
   }
 
   isInstrument() {
