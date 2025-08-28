@@ -344,6 +344,12 @@ function checkGraphCorrectBidirectional(graph: Graph) {
       throw new Error("something wrong with graph generation!");
     }
   }
+  for (const x of outgoing) {
+    if (!incoming.has(x)) {
+      log({ incoming, outgoing });
+      throw new Error("something wrong with graph generation!");
+    }
+  }
 }
 
 async function main() {
