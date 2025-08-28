@@ -262,9 +262,9 @@ function graphToMermaid(graph: Graph) {
     }
   }
 
-  // we only consider rightwards arrows
+  // we only consider outgoing data
 
-  // for normal nodes, inputs point rightwards
+  // for normal nodes, inputs are outgoing
 
   log(`flowchart LR`);
   graph.fx.forEach((fx, src) => {
@@ -272,7 +272,11 @@ function graphToMermaid(graph: Graph) {
       sources.map((source) => {
         const name = srcToName(src, true);
         const sourceName = srcToName(source.src, false);
-        return `${sourceName} -->|ch${source.ch} -> ${i}| ${name}`;
+        if (source.ch !== i) {
+          return `${sourceName} -->|ch${source.ch} -> ${i}| ${name}`;
+        } else {
+          return `${sourceName} -->|ch${i}| ${name}`;
+        }
       }),
     );
 
@@ -281,13 +285,17 @@ function graphToMermaid(graph: Graph) {
     }
   });
 
-  // for ext node, outputs point rightwards
+  // for ext node, outputs are outgoing
 
   const inputs = graph.ext.outputs.flatMap((sources, i) =>
     sources.map((source) => {
       const name = srcToName(null, true);
       const sourceName = srcToName(source.src, false);
-      return `${sourceName} -->|ch${source.ch} -> ${i}| ${name}`;
+      if (source.ch !== i) {
+        return `${sourceName} -->|ch${source.ch} -> ${i}| ${name}`;
+      } else {
+        return `${sourceName} -->|ch${i}| ${name}`;
+      }
     }),
   );
 
@@ -363,8 +371,8 @@ async function main() {
       continue;
     }
     const graph = createGraph(loc);
-    printGraph(graph);
-    // graphToMermaid(graph);
+    // printGraph(graph);
+    graphToMermaid(graph);
     // log(checkGraphCorrectBidirectional(graph));
   }
 }
