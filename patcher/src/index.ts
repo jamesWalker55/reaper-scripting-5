@@ -287,6 +287,56 @@ function graphToMermaid(graph: Graph, ext: GraphNode) {
   }
 }
 
+function checkGraphCorrectBidirectional(graph: Graph, ext: GraphNode) {
+  function generateLinkId(from: AudioSource, to: AudioSource) {
+    const fromName = from.src === null ? "extin" : `fxout${from.src}`;
+    const toName = to.src === null ? "extout" : `fxin${to.src}`;
+    return `${fromName}ch${from.ch}->${toName}${to.ch}`;
+  }
+
+  const from = new LuaSet();
+  const to = new LuaSet();
+
+  for (let src = 0; src < graph.length; src++) {
+    const node = graph[src];
+    // inputs -> this node
+    for (let ch = 0; ch < node.inputs.length; ch++) {
+      for (const input of node.inputs[ch]) {
+        from.add(generateLinkId(input, { src, ch }));
+      }
+    }
+    // this node -> outputs
+    for (let ch = 0; ch < node.outputs.length; ch++) {
+      for (const output of node.outputs[ch]) {
+        to.add(generateLinkId({ src, ch }, output));
+      }
+    }
+  }
+
+  // ext node
+  {
+    // outputs -> ext
+    for (let ch = 0; ch < ext.outputs.length; ch++) {
+      for (const output of ext.outputs[ch]) {
+        from.add(generateLinkId(output, { src: null, ch }));
+      }
+    }
+    // ext -> inputs
+    for (let ch = 0; ch < ext.inputs.length; ch++) {
+      for (const input of ext.inputs[ch]) {
+        to.add(generateLinkId({ src: null, ch }, input));
+      }
+    }
+  }
+
+  for (const x of from) {
+    if (!to.has(x)) {
+      log({ from, to });
+      throw new Error("something wrong with graph generation!");
+    }
+  }
+}
+
 async function main() {
   while (true) {
     await deferAsync();
@@ -299,7 +349,8 @@ async function main() {
     }
     const asd = createGraph(loc);
     // printGraph(asd.graph, asd.ext);
-    graphToMermaid(asd.graph, asd.ext);
+    // graphToMermaid(asd.graph, asd.ext);
+    // log(checkGraphCorrectBidirectional(asd.graph, asd.ext));
   }
 }
 
