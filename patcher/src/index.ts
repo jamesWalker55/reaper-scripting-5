@@ -240,6 +240,53 @@ function printGraph(graph: Graph, ext: GraphNode) {
   printNode(null, ext, { reverseArrows: true });
 }
 
+function graphToMermaid(graph: Graph, ext: GraphNode) {
+  function srcToName(src: number | null, isDest: boolean) {
+    if (typeof src === "number") {
+      return `fx${src}`;
+    } else {
+      if (isDest) {
+        return `EXT_OUT`;
+      } else {
+        return `EXT_IN`;
+      }
+    }
+  }
+
+  // we only consider rightwards arrows
+
+  // for normal nodes, inputs point rightwards
+
+  log(`flowchart LR`);
+  graph.forEach((node, src) => {
+    const inputs = node.inputs.flatMap((sources, i) =>
+      sources.map((source) => {
+        const name = srcToName(src, true);
+        const sourceName = srcToName(source.src, false);
+        return `${sourceName} -->|ch${source.ch} -> ${i}| ${name}`;
+      }),
+    );
+
+    for (const line of inputs) {
+      log(line);
+    }
+  });
+
+  // for ext node, outputs point rightwards
+
+  const inputs = ext.outputs.flatMap((sources, i) =>
+    sources.map((source) => {
+      const name = srcToName(null, true);
+      const sourceName = srcToName(source.src, false);
+      return `${sourceName} -->|ch${source.ch} -> ${i}| ${name}`;
+    }),
+  );
+
+  for (const line of inputs) {
+    log(line);
+  }
+}
+
 async function main() {
   while (true) {
     await deferAsync();
@@ -251,7 +298,8 @@ async function main() {
       continue;
     }
     const asd = createGraph(loc);
-    printGraph(asd.graph, asd.ext);
+    // printGraph(asd.graph, asd.ext);
+    graphToMermaid(asd.graph, asd.ext);
   }
 }
 
