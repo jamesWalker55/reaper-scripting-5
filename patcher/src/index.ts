@@ -62,7 +62,19 @@ type AudioSource = {
   ch: number;
 };
 
-function asdf(location: FX | Track) {
+type GraphNode = {
+  /**
+   * `inputs[ pin idx ][ multiple audio sources ]`
+   */
+  inputs: AudioSource[][];
+  /**
+   * `outputs[ pin idx ][ multiple audio sources ]`
+   */
+  outputs: AudioSource[][];
+};
+type Graph = GraphNode[];
+
+function createGraph(location: FX | Track) {
   let allFx: FX[];
   let chCount: number;
   if ("fxidx" in location) {
@@ -87,18 +99,8 @@ function asdf(location: FX | Track) {
     ch.push([{ src: null, ch: i }]);
   }
 
-  type GraphNode = {
-    /**
-     * `inputs[ pin idx ][ multiple audio sources ]`
-     */
-    inputs: AudioSource[][];
-    /**
-     * `outputs[ pin idx ][ multiple audio sources ]`
-     */
-    outputs: AudioSource[][];
-  };
   // nodes are in list, index corresponding to fx list
-  const graph: GraphNode[] = [];
+  const graph: Graph = [];
   // node that represents the external audio
   // meanings are slightly complicated if you think too hard about it
   // * inputs: left side of the graph, before the first FX
@@ -182,6 +184,60 @@ function asdf(location: FX | Track) {
   return { graph, ext: extNode };
 }
 
+function printGraph(graph: Graph, ext: GraphNode) {
+  function srcToName(src: number | null) {
+    if (typeof src === "number") {
+      return `fx${src}`;
+    } else {
+      return `EXT`;
+    }
+  }
+
+  function printNode(
+    src: number | null,
+    node: GraphNode,
+    opt?: { reverseArrows?: boolean },
+  ) {
+    const name = srcToName(src);
+    const inputs = node.inputs
+      .map((sources, i) => {
+        if (sources.length === 0) return null;
+
+        const sourceNames = sources.map(
+          (source) => `${srcToName(source.src)}>${source.ch}`,
+        );
+        if (opt?.reverseArrows === true) {
+          return `  i${i} -> ${sourceNames.join(", ")}`;
+        } else {
+          return `  i${i} <- ${sourceNames.join(" + ")}`;
+        }
+      })
+      .filter((x) => x !== null);
+    const outputs = node.outputs
+      .map((sources, i) => {
+        if (sources.length === 0) return null;
+
+        const sourceNames = sources.map(
+          (source) => `${srcToName(source.src)}>${source.ch}`,
+        );
+        if (opt?.reverseArrows === true) {
+          return `  o${i} <- ${sourceNames.join(" + ")}`;
+        } else {
+          return `  o${i} -> ${sourceNames.join(", ")}`;
+        }
+      })
+      .filter((x) => x !== null);
+    log(name);
+    if (inputs.length > 0) log(inputs.join("\n"));
+    if (outputs.length > 0) log(outputs.join("\n"));
+  }
+
+  graph.forEach((node, i) => {
+    printNode(i, node);
+  });
+  printNode(null, ext, { reverseArrows: true });
+}
+
 async function main() {
   while (true) {
     await deferAsync();
@@ -192,7 +248,8 @@ async function main() {
       log("no location");
       continue;
     }
-    log(encode(asdf(loc)));
+    const asd = createGraph(loc);
+    printGraph(asd.graph, asd.ext);
   }
 }
 
