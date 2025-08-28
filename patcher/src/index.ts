@@ -115,7 +115,7 @@ function createGraph(location: FX | Track): Graph {
   }
 
   // for each FX, create node and build graph
-  allFx.forEach((fx, i) => {
+  allFx.forEach((fx, src) => {
     // create node for this FX
     const node: GraphNode = { inputs: [], outputs: [] };
     graph.push(node);
@@ -126,24 +126,24 @@ function createGraph(location: FX | Track): Graph {
 
     // handle inputs
     for (let pin = 0; pin < io.inputPins; pin++) {
-      const receivingSources: AudioSource[] = [];
-      node.inputs.push(receivingSources);
+      const incomingSources: AudioSource[] = [];
+      node.inputs.push(incomingSources);
 
       // todo: handle parallel shit
       // may need to make `ch` like `ch[ fx index ][ channel index ][ multiple audio sources ]
       if (isParallel) throw new Error("todo: handle parallel fx");
 
-      const receivingChs = fx.getInputPinMappingsFor(pin);
-      for (const receivingCh of receivingChs) {
-        receivingSources.push(...ch[receivingCh]);
+      const incomingPins = fx.getInputPinMappingsFor(pin);
+      for (const incomingPin of incomingPins) {
+        incomingSources.push(...ch[incomingPin]);
 
         // also update `output` of previous FX nodes
-        for (const inputSource of ch[receivingCh]) {
-          if (inputSource.src === null) {
-            extNode.inputs[inputSource.ch].push({ src: i, ch: pin });
+        for (const incomingSource of ch[incomingPin]) {
+          if (incomingSource.src === null) {
+            extNode.inputs[incomingSource.ch].push({ src: src, ch: pin });
           } else {
-            graph[inputSource.src].outputs[inputSource.ch].push({
-              src: i,
+            graph[incomingSource.src].outputs[incomingSource.ch].push({
+              src: src,
               ch: pin,
             });
           }
@@ -154,18 +154,18 @@ function createGraph(location: FX | Track): Graph {
     // handle outputs
     for (let pin = 0; pin < io.outputPins; pin++) {
       // construct arrays, won't be populated until we iterate to later FXs
-      const outputSources: AudioSource[] = [];
-      node.outputs.push(outputSources);
+      const outgoingSources: AudioSource[] = [];
+      node.outputs.push(outgoingSources);
 
       // update `ch` to track what sources are on what track
-      const outputChs = fx.getOutputPinMappingsFor(pin);
-      for (const targetCh of outputChs) {
+      const outgoingPins = fx.getOutputPinMappingsFor(pin);
+      for (const outgoingPin of outgoingPins) {
         if (isParallel || isInstrument) {
           // will merge with previous output, append source
-          ch[targetCh].push({ src: i, ch: pin });
+          ch[outgoingPin].push({ src: src, ch: pin });
         } else {
           // will replace previous output
-          ch[targetCh] = [{ src: i, ch: pin }];
+          ch[outgoingPin] = [{ src: src, ch: pin }];
         }
       }
     }
@@ -173,7 +173,7 @@ function createGraph(location: FX | Track): Graph {
 
   // finally, iterate through channel sources and set output of nodes
   ch.forEach((sources, pin) => {
-    // for FX, add external outputs
+    // update outgoing sources for all nodes
     for (const source of sources) {
       if (source.src === null) {
         extNode.inputs[source.ch].push({ src: null, ch: pin });
@@ -183,7 +183,9 @@ function createGraph(location: FX | Track): Graph {
     }
 
     // then, add all `ch` to the extNode output
-    extNode.outputs[pin].push(...sources);
+    if (extNode.outputs[pin].length > 0)
+      throw new Error("this should be empty, logic error!");
+    extNode.outputs[pin] = sources;
   });
 
   const rv = { fx: graph, ext: extNode };
@@ -301,44 +303,44 @@ function checkGraphCorrectBidirectional(graph: Graph) {
     return `${fromName}ch${from.ch}->${toName}${to.ch}`;
   }
 
-  const from = new LuaSet();
-  const to = new LuaSet();
+  const incoming = new LuaSet();
+  const outgoing = new LuaSet();
 
   for (let src = 0; src < graph.fx.length; src++) {
     const node = graph.fx[src];
-    // inputs -> this node
+    // inputs -> <this node>
     for (let ch = 0; ch < node.inputs.length; ch++) {
       for (const input of node.inputs[ch]) {
-        from.add(generateLinkId(input, { src, ch }));
+        incoming.add(generateLinkId(input, { src, ch }));
       }
     }
-    // this node -> outputs
+    // <this node> -> outputs
     for (let ch = 0; ch < node.outputs.length; ch++) {
       for (const output of node.outputs[ch]) {
-        to.add(generateLinkId({ src, ch }, output));
+        outgoing.add(generateLinkId({ src, ch }, output));
       }
     }
   }
 
   // ext node
   {
-    // outputs -> ext
+    // outputs -> <ext>
     for (let ch = 0; ch < graph.ext.outputs.length; ch++) {
       for (const output of graph.ext.outputs[ch]) {
-        from.add(generateLinkId(output, { src: null, ch }));
+        incoming.add(generateLinkId(output, { src: null, ch }));
       }
     }
-    // ext -> inputs
+    // <ext> -> inputs
     for (let ch = 0; ch < graph.ext.inputs.length; ch++) {
       for (const input of graph.ext.inputs[ch]) {
-        to.add(generateLinkId({ src: null, ch }, input));
+        outgoing.add(generateLinkId({ src: null, ch }, input));
       }
     }
   }
 
-  for (const x of from) {
-    if (!to.has(x)) {
-      log({ from, to });
+  for (const x of incoming) {
+    if (!outgoing.has(x)) {
+      log({ incoming, outgoing });
       throw new Error("something wrong with graph generation!");
     }
   }
