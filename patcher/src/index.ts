@@ -135,6 +135,9 @@ function createGraph(location: FX | Track): Graph {
 
       const incomingPins = fx.getInputPinMappingsFor(pin);
       for (const incomingPin of incomingPins) {
+        // pins may be set larger than track count (e.g. fabfilter pro-q's sidechain inputs)
+        if (incomingPin >= ch.length) continue;
+
         incomingSources.push(...ch[incomingPin]);
 
         // also update `output` of previous FX nodes
@@ -160,6 +163,9 @@ function createGraph(location: FX | Track): Graph {
       // update `ch` to track what sources are on what track
       const outgoingPins = fx.getOutputPinMappingsFor(pin);
       for (const outgoingPin of outgoingPins) {
+        // pins may be set larger than track count (e.g. fabfilter pro-q's sidechain inputs)
+        if (outgoingPin >= ch.length) continue;
+
         if (isParallel || isInstrument) {
           // will merge with previous output, append source
           ch[outgoingPin].push({ src: src, ch: pin });
