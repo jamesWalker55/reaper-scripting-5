@@ -172,9 +172,11 @@ function createGraph(location: FX | Track) {
   ch.forEach((sources, pin) => {
     // for FX, add external outputs
     for (const source of sources) {
-      if (source.src === null) continue;
-
-      graph[source.src].outputs[source.ch].push({ src: null, ch: pin });
+      if (source.src === null) {
+        extNode.inputs[source.ch].push({ src: null, ch: pin });
+      } else {
+        graph[source.src].outputs[source.ch].push({ src: null, ch: pin });
+      }
     }
 
     // then, add all `ch` to the extNode output
