@@ -511,7 +511,7 @@ class ReaperFXChain {
           fxidx,
           param,
         );
-        if (min === null) error("failed to get param value");
+        if (min === null) throw new Error("failed to get param value");
         return [rv, min, max, mid] as [number, number, number, number];
       }
       case "take": {
@@ -520,7 +520,7 @@ class ReaperFXChain {
           fxidx,
           param,
         );
-        if (min === null) error("failed to get param value");
+        if (min === null) throw new Error("failed to get param value");
         return [rv, min, max, mid] as [number, number, number, number];
       }
       default:
@@ -592,6 +592,68 @@ class ReaperFXChain {
         assertUnreachable(this.obj);
     }
   }
+
+  /**
+   * Add 0x1000000 to pin index in order to access the second 64 bits of mappings independent of the first 64 bits.
+   */
+  GetPinMappings(
+    fxidx: number,
+    isoutput: boolean,
+    pin: number,
+  ): [number, number] {
+    switch (this.obj.type) {
+      case "track": {
+        const [low32, high32] = reaper.TrackFX_GetPinMappings(
+          this.obj.track,
+          fxidx,
+          isoutput ? 1 : 0,
+          pin,
+        );
+        return [low32, high32];
+      }
+      case "take": {
+        const [low32, high32] = reaper.TakeFX_GetPinMappings(
+          this.obj.take,
+          fxidx,
+          isoutput ? 1 : 0,
+          pin,
+        );
+        return [low32, high32];
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
+
+  /** type is plugin type, e.g. 3 for VST, 8 for container */
+  GetIOSize(fxidx: number) {
+    switch (this.obj.type) {
+      case "track": {
+        const [type, inputPins, outputPins] = reaper.TrackFX_GetIOSize(
+          this.obj.track,
+          fxidx,
+        );
+        if (type === 0) throw new Error("failed to get io size");
+        return { type, inputPins, outputPins };
+      }
+      case "take": {
+        const [type, inputPins, outputPins] = reaper.TakeFX_GetIOSize(
+          this.obj.take,
+          fxidx,
+        );
+        if (type === 0) throw new Error("failed to get io size");
+        return { type, inputPins, outputPins };
+      }
+      default:
+        assertUnreachable(this.obj);
+    }
+  }
+}
+
+export enum FXParallel {
+  None = 0,
+  Parallel = 1,
+  ParallelWithMidi = 2,
 }
 
 export class FX {
@@ -700,26 +762,40 @@ export class FX {
   /** Return the "true" plugin name, ignoring the user renamed title */
   getOriginalName() {
     const name = this.chain.GetNamedConfigParm(this.fxidx, "fx_name");
-    if (!name) error("failed to get FX name");
+    if (name === null) throw new Error("failed to get FX name");
     return name;
   }
 
   getIdent() {
     const ident = this.chain.GetNamedConfigParm(this.fxidx, "fx_ident");
-    if (!ident) error("failed to get FX ident");
+    if (ident === null) throw new Error("failed to get FX ident");
     return ident;
   }
 
   getType() {
     const type = this.chain.GetNamedConfigParm(this.fxidx, "fx_type");
-    if (!type) error("failed to get FX type");
+    if (type === null) throw new Error("failed to get FX type");
     return type;
   }
 
   getPDCLatency() {
     const pdc = this.chain.GetNamedConfigParm(this.fxidx, "pdc");
-    if (!pdc) error("failed to get FX pdc");
+    if (pdc === null) throw new Error("failed to get FX pdc");
     return pdc;
+  }
+
+  get parallel() {
+    const x = tonumber(this.chain.GetNamedConfigParm(this.fxidx, "parallel"));
+    if (x === undefined) throw new Error("failed to get FX parallel");
+    return x as FXParallel;
+  }
+
+  isInstrument() {
+    const x = tonumber(
+      this.chain.GetNamedConfigParm(this.fxidx, "is_instrument"),
+    );
+    if (x === undefined) throw new Error("failed to get FX is_instrument");
+    return x === 1;
   }
 
   /** 0x1000000 is used to indicate flags and shit, so remove that part */
@@ -758,6 +834,30 @@ export class FX {
 
   isContainer(): boolean {
     return this.getType() === "Container";
+  }
+
+  getContainerChannelInfo() {
+    const internal = tonumber(
+      this.chain.GetNamedConfigParm(this.fxidx, "container_nch"),
+    );
+    const input = tonumber(
+      this.chain.GetNamedConfigParm(this.fxidx, "container_nch_in"),
+    );
+    const output = tonumber(
+      this.chain.GetNamedConfigParm(this.fxidx, "container_nch_out"),
+    );
+    const feedback = tonumber(
+      this.chain.GetNamedConfigParm(this.fxidx, "container_nch_feedback"),
+    );
+
+    if (internal === undefined) throw new Error("failed to get container_nch");
+    if (input === undefined) throw new Error("failed to get container_nch_in");
+    if (output === undefined)
+      throw new Error("failed to get container_nch_out");
+    if (feedback === undefined)
+      throw new Error("failed to get container_nch_feedback");
+
+    return { internal, input, output, feedback };
   }
 
   /** Get the parent container FX if any */
@@ -808,6 +908,94 @@ export class FX {
     }
 
     return children;
+  }
+
+  parseFxidx(): { path: number[]; flags: number } {
+    switch (this.obj.type) {
+      case "track":
+        return parseFxidx({ track: this.obj.track, fxidx: this.fxidx });
+      case "take":
+        return parseFxidx({ take: this.obj.take, fxidx: this.fxidx });
+      default:
+        return this.obj satisfies never;
+    }
+  }
+
+  private static parsePinMappings(
+    o0: number,
+    o32: number,
+    o64: number,
+    o96: number,
+  ): number[] {
+    const pins: number[] = [];
+
+    if (o0 > 0) {
+      for (let i = 0; i < 32; i++) {
+        if ((o0 & (1 << i)) !== 0) {
+          pins.push(i);
+        }
+      }
+    }
+
+    if (o32 > 0) {
+      for (let i = 0; i < 32; i++) {
+        if ((o32 & (1 << i)) !== 0) {
+          pins.push(i + 32);
+        }
+      }
+    }
+
+    if (o64 > 0) {
+      for (let i = 0; i < 32; i++) {
+        if ((o64 & (1 << i)) !== 0) {
+          pins.push(i + 64);
+        }
+      }
+    }
+
+    if (o96 > 0) {
+      for (let i = 0; i < 32; i++) {
+        if ((o96 & (1 << i)) !== 0) {
+          pins.push(i + 96);
+        }
+      }
+    }
+
+    return pins;
+  }
+
+  /**
+   * @param pin 0-based index of pin (0..128)
+   * @returns List of channel indexes, 0-based
+   */
+  getInputPinMappingsFor(pin: number): number[] {
+    // 'o' means 'offset'
+    const [o0, o32] = this.chain.GetPinMappings(this.fxidx, false, pin);
+    const [o64, o96] = this.chain.GetPinMappings(
+      this.fxidx,
+      false,
+      pin + 0x1000000,
+    );
+    return FX.parsePinMappings(o0, o32, o64, o96);
+  }
+
+  /**
+   * @param pin 0-based index of pin (0..128)
+   * @returns List of channel indexes, 0-based
+   */
+  getOutputPinMappingsFor(pin: number): number[] {
+    // 'o' means 'offset'
+    const [o0, o32] = this.chain.GetPinMappings(this.fxidx, true, pin);
+    const [o64, o96] = this.chain.GetPinMappings(
+      this.fxidx,
+      true,
+      pin + 0x1000000,
+    );
+    return FX.parsePinMappings(o0, o32, o64, o96);
+  }
+
+  getIOInfo() {
+    return this.chain.GetIOSize(this.fxidx);
   }
 
   protected getElement(): Element {

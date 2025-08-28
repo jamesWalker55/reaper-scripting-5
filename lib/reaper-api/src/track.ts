@@ -427,6 +427,15 @@ export class Track {
     }
   }
 
+  /** number of track channels, 2-128, even numbers only */
+  get channelCount() {
+    return reaper.GetMediaTrackInfo_Value(this.obj, "I_NCHAN");
+  }
+  set channelCount(val: number) {
+    const ok = reaper.SetMediaTrackInfo_Value(this.obj, "I_NCHAN", val);
+    if (!ok) throw new Error(`failed to set channelCount to ${val}`);
+  }
+
   delete() {
     reaper.DeleteTrack(this.obj);
   }
