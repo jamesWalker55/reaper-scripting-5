@@ -218,7 +218,7 @@ function printGraph(graph: Graph) {
         if (opt?.reverseArrows === true) {
           return `  i${i} -> ${sourceNames.join(", ")}`;
         } else {
-          return `  i${i} <- ${sourceNames.join(" + ")}`;
+          return `  ${sourceNames.join(" + ")} -> i${i}`;
         }
       })
       .filter((x) => x !== null);
@@ -230,7 +230,7 @@ function printGraph(graph: Graph) {
           (source) => `${srcToName(source.src)}>${source.ch}`,
         );
         if (opt?.reverseArrows === true) {
-          return `  o${i} <- ${sourceNames.join(" + ")}`;
+          return `  ${sourceNames.join(" + ")} -> o${i}`;
         } else {
           return `  o${i} -> ${sourceNames.join(", ")}`;
         }
