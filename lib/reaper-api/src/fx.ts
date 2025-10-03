@@ -176,7 +176,8 @@ export function parseFxidx(
     stack.push({ xi, xlen, xlast, xrest });
 
     // if no rest, that means it's the end of stack
-    if (xrest === 0) return { path: stack.map((x) => x.xi), flags };
+    if (xrest === 0)
+      return { path: stack.map((x) => x.xi), flags: flags | 0x2000000 };
 
     x = x + (prev.xlast + 1) * (xi + 1);
   }
