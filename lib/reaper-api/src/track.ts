@@ -143,12 +143,12 @@ export class Track {
 
       if (typeof position === "number") {
         const obj = parseFxidx({ track: this.obj, fxidx: position });
-        return { ...obj, fxidxNoPath: position & 0x0ffffff };
+        return { ...obj, fxidxNoFlags: position & 0x0ffffff };
       } else {
         const obj = { path: [...position.path], flags: position.flags };
-        const fxidxNoPath =
+        const fxidxNoFlags =
           generateFxidx({ track: this.obj, ...position }) & 0x0ffffff;
-        return { ...obj, fxidxNoPath };
+        return { ...obj, fxidxNoFlags };
       }
     })();
 
@@ -162,7 +162,7 @@ export class Track {
         fxname,
         (pos.flags & 0x1000000) !== 0 ? true : false,
         // TODO: Check if adding flags is correct
-        -1000 - (pos.fxidxNoPath + (pos.flags - (pos.flags & 0x1000000))),
+        -1000 - (pos.fxidxNoFlags + (pos.flags - (pos.flags & 0x1000000))),
       );
     }
     if (rv === -1) return null;
