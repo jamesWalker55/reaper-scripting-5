@@ -219,7 +219,7 @@ export function generateFxidx(
     const prevX = x;
     x = x + (xlast + 1) * (xi + 1);
 
-    if (i === path.length - 1) return x;
+    if (i === path.length - 1) return x + flags;
 
     const [ok, xlenStr] =
       "track" in opt
