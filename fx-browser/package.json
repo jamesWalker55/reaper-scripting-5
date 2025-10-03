@@ -2,12 +2,14 @@
   "name": "fx-browser",
   "module": "src/index.ts",
   "type": "module",
-  "dependencies": { "reaper-microui": "link:reaper-microui" },
+  "dependencies": {
+    "reaper-microui": "link:reaper-microui"
+  },
   "devDependencies": {
     "json": "link:json.lua",
     "lua-types": "^2.13.1",
     "reaper-api": "link:reaper-api",
-    "typescript": "5.6.2",
-    "typescript-to-lua": "^1.27.0"
+    "typescript": "^5.9.3",
+    "typescript-to-lua": "^1.32.0"
   }
 }
