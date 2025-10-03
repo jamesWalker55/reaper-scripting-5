@@ -1,5 +1,6 @@
 import { inspect } from "./inspect";
 import * as path from "./path/path";
+import { splitlines } from "./utilsLua";
 
 export function ensureAPI(source: string, functionName: string) {
   if (reaper.APIExists(functionName)) return;
@@ -29,6 +30,18 @@ export function log(...args: any[]) {
   }
 
   reaper.ShowConsoleMsg("\n");
+}
+
+export function dbg<T>(x: T): T {
+  const traceback = splitlines(debug.traceback());
+  // line 0 is 'stack traceback:'
+  // line 1 is this `dbg` function
+  // line 2 is the function that called this
+  const callingFuncName = traceback[2].trim();
+
+  log(`[${callingFuncName}] = ${inspect(x)}`);
+
+  return x;
 }
 
 export function clearConsole() {
