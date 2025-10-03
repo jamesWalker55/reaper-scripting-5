@@ -97,14 +97,38 @@ function getFXTargetWin(): FXTarget | null {
   if (focusedFxChain) {
     // we are currently focused on an fx chain, try to use `GetTouchedOrFocusedFX`
 
-    // NOTE: `GetTouchedOrFocusedFX` will not detect the focused FX chain if the FX chain is empty, so you can't add FX to an empty fx chain
-    const listview = reaper.JS_Window_FindChildByID(focusedFxChain, 1076);
-    if (!listview)
-      throw new Error("failed to find listview object in FX Chain window");
+    // {
+    //   // NOTE: `GetTouchedOrFocusedFX` will not detect the focused FX chain if the FX chain is empty, so you can't add FX to an empty fx chain
+    //   //
+    //   // ```
+    //   // const children = reaper
+    //   //   .JS_Window_ListAllChild(focusedFxChain)[1]
+    //   //   .split(",")
+    //   //   .map((x) => reaper.JS_Window_HandleFromAddress(x as any))
+    //   //   .map((hwnd) => ({
+    //   //     "Title": reaper.JS_Window_GetTitle(hwnd),
+    //   //     "ClassName": reaper.JS_Window_GetClassName(hwnd),
+    //   //     "USERDATA": reaper.JS_Window_GetLong(hwnd, "USERDATA"),
+    //   //     "ID": reaper.JS_Window_GetLong(hwnd, "ID"),
+    //   //     "EXSTYLE": reaper.JS_Window_GetLong(hwnd, "EXSTYLE"),
+    //   //     "STYLE": reaper.JS_Window_GetLong(hwnd, "STYLE"),
+    //   //   }));
+    //   //
+    //   // ClassName = "SysListView32",
+    //   // EXSTYLE = 516.0,
+    //   // ID = 1076.0,
+    //   // STYLE = 1342259273.0,
+    //   // Title = "List1",
+    //   // USERDATA = 0.0
+    //   // ```
+    //   const listview = reaper.JS_Window_FindChildByID(focusedFxChain, 1076);
+    //   if (!listview)
+    //     throw new Error("failed to find listview object in FX Chain window");
 
-    const fxCount = reaper.JS_ListView_GetItemCount(listview);
-    const fxChainIsEmpty = fxCount === 0;
-    // TODO: Handle something when fxchain is empty, GetTouchedOrFocusedFX is not to be trusted
+    //   const fxCount = reaper.JS_ListView_GetItemCount(listview);
+    //   const fxChainIsEmpty = fxCount === 0;
+    //   // TODO: Handle something when fxchain is empty, GetTouchedOrFocusedFX is not to be trusted
+    // }
 
     const [ok, trackidx, itemidx, takeidx, fxidx, parm] =
       reaper.GetTouchedOrFocusedFX(1);
