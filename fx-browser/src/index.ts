@@ -1,8 +1,4 @@
-import {
-  AddFxParams,
-  generateTakeContainerFxidx,
-  generateTrackContainerFxidx,
-} from "reaper-api/fx";
+import { AddFxParams, generateFxidx } from "reaper-api/fx";
 import { inspect } from "reaper-api/inspect";
 import { FXFolderItemType } from "reaper-api/installedFx";
 import { Take, Track } from "reaper-api/track";
@@ -249,8 +245,8 @@ function main() {
       throw new Error("Please click on a track before running this script!");
 
     const fxpathName =
-      fxTarget.fxpath.length > 0
-        ? ` > FX ${fxTarget.fxpath.map((x) => x + 1).join(" > ")}`
+      fxTarget.fxpath.path.length > 0
+        ? ` > FX ${fxTarget.fxpath.path.map((x) => x + 1).join(" > ")}`
         : "";
 
     switch (fxTarget.target) {
@@ -267,17 +263,18 @@ function main() {
             }
           },
           addFx(fx: AddFxParams) {
-            const destpath = [...fxTarget.fxpath];
+            const destpath = [...fxTarget.fxpath.path];
 
             // append FX count to the end of the path
-            if (fxTarget.fxpath.length === 0) {
+            if (destpath.length === 0) {
               const count = track.getFxCount();
               destpath.push(count);
             } else {
-              const destContainerFxid = generateTrackContainerFxidx(
-                track.obj,
-                fxTarget.fxpath,
-              );
+              const destContainerFxid = generateFxidx({
+                track: track.obj,
+                path: fxTarget.fxpath.path,
+                flags: fxTarget.fxpath.flags,
+              });
               const [ok, count] = reaper.TrackFX_GetNamedConfigParm(
                 track.obj,
                 destContainerFxid,
@@ -285,15 +282,20 @@ function main() {
               );
               if (!ok)
                 throw new Error(
-                  `failed to get container_count for ${inspect(
-                    fxTarget.fxpath,
-                  )}`,
+                  `failed to get container_count for ${inspect({
+                    ...fxTarget.fxpath,
+                    flags: `0x${fxTarget.fxpath.flags.toString(16)}`,
+                    destContainerFxid: `0x${destContainerFxid.toString(16)}`,
+                  })}`,
                 );
 
               destpath.push(parseInt(count));
             }
 
-            const newPos = track.addFx(fx, destpath);
+            const newPos = track.addFx(fx, {
+              path: destpath,
+              flags: fxTarget.fxpath.flags,
+            });
             if (newPos === null) {
               throw new Error(
                 `failed to add fx ${inspect(fx)} to dest ${destpath}`,
@@ -318,17 +320,17 @@ function main() {
             )} (on Track ${trackIdx})${fxpathName}`;
           },
           addFx(fx: AddFxParams) {
-            const destpath = [...fxTarget.fxpath];
+            const destpath = [...fxTarget.fxpath.path];
 
             // append FX count to the end of the path
-            if (fxTarget.fxpath.length === 0) {
+            if (destpath.length === 0) {
               const count = take.getFxCount();
               destpath.push(count);
             } else {
-              const destContainerFxid = generateTakeContainerFxidx(
-                take.obj,
-                fxTarget.fxpath,
-              );
+              const destContainerFxid = generateFxidx({
+                take: take.obj,
+                ...fxTarget.fxpath,
+              });
               const [ok, count] = reaper.TakeFX_GetNamedConfigParm(
                 take.obj,
                 destContainerFxid,
@@ -344,7 +346,10 @@ function main() {
               destpath.push(parseInt(count));
             }
 
-            const newPos = take.addFx(fx, destpath);
+            const newPos = take.addFx(fx, {
+              path: destpath,
+              flags: fxTarget.fxpath.flags,
+            });
             if (newPos === null) {
               throw new Error(
                 `failed to add fx ${inspect(fx)} to dest ${destpath}`,

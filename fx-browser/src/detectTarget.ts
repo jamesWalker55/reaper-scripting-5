@@ -1,6 +1,7 @@
 import {
   parseTakeContainerFxidx,
   parseTrackContainerFxidx,
+  parseFxidx,
 } from "reaper-api/fx";
 import { Item } from "reaper-api/track";
 
@@ -74,13 +75,17 @@ function arrangementIsFocusedWin(): boolean {
 }
 
 export type FXTarget =
-  | { target: "track"; track: MediaTrack; fxpath: number[] }
+  | {
+      target: "track";
+      track: MediaTrack;
+      fxpath: { path: number[]; flags: number };
+    }
   | {
       target: "take";
       track: MediaTrack;
       item: MediaItem;
       take: MediaItem_Take;
-      fxpath: number[];
+      fxpath: { path: number[]; flags: number };
     };
 
 function getFXTargetWin(): FXTarget | null {
@@ -105,14 +110,15 @@ function getFXTargetWin(): FXTarget | null {
       reaper.GetTouchedOrFocusedFX(1);
     if (!ok) throw new Error("failed to get last touched/focused FX");
 
-    const track = reaper.GetTrack(0, trackidx);
+    const track =
+      trackidx === -1 ? reaper.GetMasterTrack(0) : reaper.GetTrack(0, trackidx);
     if (!track) throw new Error(`failed to get track ${trackidx}`);
 
     if (itemidx === -1) {
       // target the parent of the fx
       // can be an empty list (represents root fxchain)
-      const fxpath = parseTrackContainerFxidx(track, fxidx);
-      fxpath.pop();
+      const fxpath = parseFxidx({ track, fxidx });
+      fxpath.path.pop();
 
       return {
         target: "track",
@@ -133,8 +139,8 @@ function getFXTargetWin(): FXTarget | null {
 
       // target the parent of the fx
       // can be an empty list (represents root fxchain)
-      const fxpath = parseTakeContainerFxidx(take, fxidx);
-      fxpath.pop();
+      const fxpath = parseFxidx({ take, fxidx });
+      fxpath.path.pop();
 
       return {
         target: "take",
@@ -163,7 +169,10 @@ function getFXTargetWin(): FXTarget | null {
           track: track,
           item: item.obj,
           take: take.obj,
-          fxpath: [],
+          fxpath: {
+            path: [],
+            flags: 0,
+          },
         };
       }
     }
@@ -176,7 +185,10 @@ function getFXTargetWin(): FXTarget | null {
   return {
     target: "track",
     track,
-    fxpath: [],
+    fxpath: {
+      path: [],
+      flags: 0,
+    },
   };
 }
 
@@ -193,6 +205,9 @@ export function getFXTarget(): FXTarget | null {
   return {
     target: "track",
     track,
-    fxpath: [],
+    fxpath: {
+      path: [],
+      flags: 0,
+    },
   };
 }
