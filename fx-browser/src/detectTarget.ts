@@ -142,7 +142,22 @@ function getFXTargetWin(): FXTarget | null {
       // target the parent of the fx
       // can be an empty list (represents root fxchain)
       const fxpath = parseFxidx({ track, fxidx });
-      fxpath.path.pop();
+      {
+        const [rv, fxtype] = reaper.TrackFX_GetNamedConfigParm(
+          track,
+          fxidx,
+          "fx_type",
+        );
+        if (!rv) throw new Error(`failed to get fx_type of fxidx ${fxidx}`);
+
+        // if a container is focused, make the container the target
+        // otherwise, use the fx's parent container as the target
+        if (fxtype === "Container") {
+          fxpath.flags = fxpath.flags | 0x2000000;
+        } else {
+          fxpath.path.pop();
+        }
+      }
 
       return {
         target: "track",
@@ -164,7 +179,22 @@ function getFXTargetWin(): FXTarget | null {
       // target the parent of the fx
       // can be an empty list (represents root fxchain)
       const fxpath = parseFxidx({ take, fxidx });
-      fxpath.path.pop();
+      {
+        const [rv, fxtype] = reaper.TakeFX_GetNamedConfigParm(
+          take,
+          fxidx,
+          "fx_type",
+        );
+        if (!rv) throw new Error(`failed to get fx_type of fxidx ${fxidx}`);
+
+        // if a container is focused, make the container the target
+        // otherwise, use the fx's parent container as the target
+        if (fxtype === "Container") {
+          fxpath.flags = fxpath.flags | 0x2000000;
+        } else {
+          fxpath.path.pop();
+        }
+      }
 
       return {
         target: "take",
