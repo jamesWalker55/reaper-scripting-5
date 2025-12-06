@@ -21,9 +21,10 @@
     "strict": true
   },
   "tstl": {
-    // Uncomment to bundle into one file
+    // Bundling is handled by justfile CLI arguments
     // "luaBundle": "Output Script.lua",
     // "luaBundleEntry": "src/index.ts",
+
     "luaPlugins": [{ "name": "reaper-api/plugins/importFixPlugin.js" }],
     "luaTarget": "5.4",
     "luaLibImport": "require-minimal",
