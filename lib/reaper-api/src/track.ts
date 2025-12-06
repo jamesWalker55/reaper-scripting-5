@@ -888,6 +888,18 @@ export class Source {
     return length;
   }
 
+  /** Find the highest parent of this source. If no parent, just return current source */
+  findRootParent() {
+    let source: Source = this;
+    while (true) {
+      const parent = source.getParent();
+      if (parent === null) return source;
+
+      source = parent;
+    }
+  }
+
+  /** Get parent of this source, returns null if no parent */
   getParent() {
     const parent = reaper.GetMediaSourceParent(this.obj);
     if (parent === null) return null;
