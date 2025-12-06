@@ -1,0 +1,68 @@
+targets = ["soothe2_x64%.vst3"]
+
+[panel]
+width = 169.53125
+color = -1480405505
+
+[title]
+width = 120
+color = 572662527
+override_text = ""
+
+[[parameters]]
+  fx_id = 4
+  fx_name = "depth"
+  x = 20
+  y = 60
+  widget_type = "knob"
+  hide_widget = true
+
+  [parameters.value]
+  font_size = 12
+  font_family = "Arial"
+  font_weight = "normal"
+  align = "top"
+  position = "top"
+  x = 0
+  y = -3.23
+
+  [parameters.label]
+  font_family = "Arial"
+  font_size = 12
+  font_weight = "bold"
+  text_override = "depth"
+  format = "%0.2f %%"
+  align = "bottom"
+  position = "bottom"
+  x = 0
+  y = 1.57
+
+  [[parameters.drawings]]
+  type = 'pie'
+  color = [154, 173, 183]
+  angle_min = 0.75
+  angle_max = 2.25
+  radius_outer = 35.0
+  radius_inner = -1.1
+
+  [[parameters.drawings]]
+  type = 'pie'
+  color = [255, 255, 255]
+  angle_min = 0.75
+  angle_max = '0.75 + 1.5 * p'
+  radius_outer = 35.0
+  radius_inner = -1.1
+
+  [[parameters.drawings]]
+  type = 'circle'
+  radius = 31.0
+  color = [61, 61, 61]
+
+  [[parameters.drawings]]
+  type = 'rect'
+  x = 17.6
+  y = 70.6
+  width = 35.0
+  height = 12.0
+  color = [200, 215, 222]
+  rounding = 3.0

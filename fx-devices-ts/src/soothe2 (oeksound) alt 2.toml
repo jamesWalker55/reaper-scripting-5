@@ -1,0 +1,100 @@
+# List of supported plugins.
+# Every plugin must map parameters
+[[supported_fx]]
+type = "VST3"
+ident = "soothe2_x64.vst3"
+[[supported_fx.parameters]]
+mode = "3:3357091"
+depth = "4:95472323"
+sharpness = "5:576378177"
+attack = "7:740224584"
+release = "8:1090594823"
+
+[[supported_fx]]
+type = "VST3"
+ident = "soothe2_x64%.vst3"
+ident_pattern = true
+[[supported_fx.parameters]]
+mode = "3:3357091"
+depth = "4:95472323"
+sharpness = "5:576378177"
+attack = "7:740224584"
+release = "8:1090594823"
+
+[[supported_fx]]
+type = "VST"
+ident = "FabFilter Pro-Q 3.dll"
+[[supported_fx.parameters]]
+mode = "3"
+depth = "4"
+sharpness = "5"
+attack = "7"
+release = "8"
+
+[config]
+parameters = ["mode", "depth", "sharpness", "selectivity", "attack", "release"]
+# analyser_before = true
+# analyser_after = true
+
+[layout]
+width = 170
+color = "rgb(255, 0, 0)"
+engine = "stock"
+
+[[elements]]
+  fx_id = 4
+  fx_name = "depth"
+  x = 20
+  y = 60
+  widget_type = "knob"
+  hide_widget = true
+
+  [parameters.value]
+  font_size = 12
+  font_family = "Arial"
+  font_weight = "normal"
+  align = "top"
+  position = "top"
+  x = 0
+  y = -3.23
+
+  [parameters.label]
+  font_family = "Arial"
+  font_size = 12
+  font_weight = "bold"
+  text_override = "depth"
+  format = "%0.2f %%"
+  align = "bottom"
+  position = "bottom"
+  x = 0
+  y = 1.57
+
+  [[parameters.drawings]]
+  type = 'pie'
+  color = [154, 173, 183]
+  angle_min = 0.75
+  angle_max = 2.25
+  radius_outer = 35.0
+  radius_inner = -1.1
+
+  [[parameters.drawings]]
+  type = 'pie'
+  color = [255, 255, 255]
+  angle_min = 0.75
+  angle_max = '0.75 + 1.5 * p'
+  radius_outer = 35.0
+  radius_inner = -1.1
+
+  [[parameters.drawings]]
+  type = 'circle'
+  radius = 31.0
+  color = [61, 61, 61]
+
+  [[parameters.drawings]]
+  type = 'rect'
+  x = 17.6
+  y = 70.6
+  width = 35.0
+  height = 12.0
+  color = [200, 215, 222]
+  rounding = 3.0
