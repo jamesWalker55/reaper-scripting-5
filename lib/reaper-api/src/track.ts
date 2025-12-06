@@ -7,6 +7,82 @@ import {
 } from "./fx";
 import { inspect } from "./inspect";
 
+export type RazorEditExt = {
+  // Start time in seconds
+  start: number;
+  // End time in seconds
+  end: number;
+  // Envelope GUID if this edit is in an envelope lane
+  envGUID?: string;
+  // Y-positioning if this is fixed-item-lane or free-item-positioning track, between 0.0--1.0
+  // E.g. 0.0
+  yTop: number;
+  // Y-positioning if this is fixed-item-lane or free-item-positioning track, between 0.0--1.0
+  // E.g. 1.0
+  yBottom: number;
+};
+export type RazorEditMin = Omit<RazorEditExt, "yTop" | "yBottom">;
+export type RazorEdit = RazorEditMin | RazorEditExt;
+
+function parseRazorEditsExt(data: string): RazorEdit[] {
+  if (data.length === 0) return [];
+
+  const rv: RazorEditExt[] = [];
+
+  for (const item of data.split(",")) {
+    const [start, end, envGUID, yTop, yBottom] = string.match(
+      item,
+      `(%d+%.%d+)%s+(%d+%.%d+)%s+"([^"]*)"%s+(%d+%.%d+)%s+(%d+%.%d+)`,
+    );
+    if (start === undefined) {
+      // matching failed
+      throw new Error(`failed to parse razor edit data: ${inspect(item)}`);
+    }
+
+    rv.push({
+      start: parseFloat(start),
+      end: parseFloat(end),
+      envGUID: envGUID.length === 0 ? undefined : envGUID,
+      yTop: parseFloat(yTop),
+      yBottom: parseFloat(yBottom),
+    });
+  }
+
+  return rv.map((x) =>
+    x.yTop === 0.0 && x.yBottom === 1.0
+      ? {
+          start: x.start,
+          end: x.end,
+          envGUID: x.envGUID,
+        }
+      : x,
+  );
+}
+
+function serializeRazorEditsExt(edits: RazorEdit[]): string {
+  const parts: string[] = [];
+
+  for (const x of edits) {
+    const row = string.format(
+      `%.14f %.14f "%s" %f %f`,
+      x.start,
+      x.end,
+      x.envGUID || "",
+      "yTop" in x ? x.yTop : 0.0,
+      "yBottom" in x ? x.yBottom : 1.0,
+    );
+    parts.push(row);
+  }
+
+  return parts.join(",");
+}
+
+export enum FolderCompact {
+  Normal = 0,
+  Collapsed = 1,
+  FullyCollapsed = 2,
+}
+
 export class Track {
   obj: MediaTrack;
 
@@ -351,6 +427,17 @@ export class Track {
     if (!rv) throw new Error(`failed to set item color to ${inspect(x)}`);
   }
 
+  get folderCompact() {
+    return reaper.GetMediaTrackInfo_Value(
+      this.obj,
+      "I_FOLDERCOMPACT",
+    ) as FolderCompact;
+  }
+  set folderCompact(val: FolderCompact) {
+    const ok = reaper.SetMediaTrackInfo_Value(this.obj, "I_FOLDERCOMPACT", val);
+    if (!ok) throw new Error("failed to set folder compact");
+  }
+
   getReceives() {
     const category = TrackRoutingCategory.Receive;
 
@@ -417,6 +504,29 @@ export class Track {
   set channelCount(val: number) {
     const ok = reaper.SetMediaTrackInfo_Value(this.obj, "I_NCHAN", val);
     if (!ok) throw new Error(`failed to set channelCount to ${val}`);
+  }
+
+  getRazorEdits() {
+    const [ok, rv] = reaper.GetSetMediaTrackInfo_String(
+      this.obj,
+      "P_RAZOREDITS_EXT",
+      "",
+      false,
+    );
+    if (!ok) throw new Error("failed to get razor edits");
+
+    return parseRazorEditsExt(rv);
+  }
+
+  setRazorEdits(edits: RazorEdit[]) {
+    const editsText = serializeRazorEditsExt(edits);
+    const [ok, _] = reaper.GetSetMediaTrackInfo_String(
+      this.obj,
+      "P_RAZOREDITS_EXT",
+      editsText,
+      true,
+    );
+    if (!ok) throw new Error("failed to set razor edits");
   }
 
   delete() {
