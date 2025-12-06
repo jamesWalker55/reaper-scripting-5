@@ -2,24 +2,189 @@ AddCwdToImportPaths();
 
 import { encode } from "json";
 import { OSType } from "reaper-api/ffi";
+import { inspect } from "reaper-api/inspect";
 import { errorHandler, log } from "reaper-api/utils";
 
-function main() {
-  log("Hello, world!");
+const MIDI_OUTPUT_NAME = "nanoKEY2";
 
-  const os = reaper.GetOS();
-  log(`Your OS is: ${os}`);
-  if (os === OSType.Win64) {
-    log(`You are using Windows 64-bit!`);
-  } else {
-    log(`You are using an unknown OS`);
+function getOutputPort() {
+  for (let i = 0; i < reaper.GetNumMIDIOutputs(); i++) {
+    const [ok, name] = reaper.GetMIDIOutputName(i, "");
+    if (name !== MIDI_OUTPUT_NAME) continue;
+
+    if (!ok) log(`WARN: Device ${inspect(MIDI_OUTPUT_NAME)} is inactive`);
+    return i;
   }
 
-  const hwnd = reaper.GetMainHwnd();
-  log(`Main HWND is: ${hwnd}`);
+  return null;
+}
 
-  const info = reaper.get_action_context();
-  log(`reaper.get_action_context() = ${encode(info)}`);
+function bytestring(bytes: number[]): string {
+  const rv: string[] = [];
+
+  bytes.forEach((x, i) => {
+    let char;
+    try {
+      char = string.char(x);
+    } catch (e) {
+      throw new Error(
+        `failed to encode bytestring, byte at ${i} is out of range: ${x}`,
+      );
+    }
+    rv.push(char);
+  });
+
+  return rv.join("");
+}
+
+enum ButtonSpeed {
+  Immediate = 0,
+  Fast = 1,
+  Normal = 2,
+  Slow = 3,
+}
+
+enum VelocityCurve {
+  Light = 0,
+  Normal = 1,
+  Heavy = 2,
+  Const = 3,
+}
+
+enum ButtonBehaviour {
+  Momentary = 0,
+  Toggle = 1,
+}
+
+const DEFAULT_SCENE = {
+  midiChannel: 0,
+  pitchBendSpeed: ButtonSpeed.Normal,
+  transpose: 64, // 64 +/- 12
+  velocityCurve: VelocityCurve.Normal,
+  velocityConstantValue: 100,
+  modEnable: 1,
+  modCC: 1, // mod wheel
+  modBehaviour: ButtonBehaviour.Momentary,
+  modOff: 0,
+  modOn: 127,
+  modSpeed: ButtonSpeed.Normal,
+  sustainEnable: 1,
+  sustainCC: 64, // sustain
+  sustainBehaviour: ButtonBehaviour.Momentary,
+  sustainOff: 0,
+  sustainOn: 127,
+  sustainSpeed: ButtonSpeed.Normal,
+};
+type Scene = typeof DEFAULT_SCENE;
+
+function between(x: number, min: number, max: number) {
+  if (min <= x && x <= max) return x;
+  throw new Error(`input ${x} is out of range ${min}..=${max}`);
+}
+
+function serializeScene(x: Scene): number[] {
+  // initialise empty array
+  const data = [];
+  for (let i = 0; i < 64; i++) data.push(0xff);
+
+  data[0] = between(x.midiChannel, 0, 15);
+  data[2] = between(x.pitchBendSpeed, 0, 3);
+  data[8] = between(x.transpose, 64 - 12, 64 + 12);
+  data[9] = between(x.velocityCurve, 0, 3);
+  data[10] = between(x.velocityConstantValue, 1, 127);
+  data[16] = between(x.modEnable, 0, 1);
+  data[17] = between(x.modCC, 0, 127);
+  data[18] = between(x.modBehaviour, 0, 1);
+  data[19] = between(x.modOff, 0, 127);
+  data[20] = between(x.modOn, 0, 127);
+  data[21] = between(x.modSpeed, 0, 3);
+  data[24] = between(x.sustainEnable, 0, 1);
+  data[25] = between(x.sustainCC, 0, 127);
+  data[26] = between(x.sustainBehaviour, 0, 1);
+  data[27] = between(x.sustainOff, 0, 127);
+  data[28] = between(x.sustainOn, 0, 127);
+  data[29] = between(x.sustainSpeed, 0, 3);
+
+  log("data", data);
+
+  // convert data format to midi
+  const midiData = [];
+  // process first 63 bytes
+  for (let i = 0; i < 7 * 9; i += 7) {
+    const b1 =
+      ((data[i + 0] & 0b10000000) !== 0 ? 0b00000001 : 0) +
+      ((data[i + 1] & 0b10000000) !== 0 ? 0b00000010 : 0) +
+      ((data[i + 2] & 0b10000000) !== 0 ? 0b00000100 : 0) +
+      ((data[i + 3] & 0b10000000) !== 0 ? 0b00001000 : 0) +
+      ((data[i + 4] & 0b10000000) !== 0 ? 0b00010000 : 0) +
+      ((data[i + 5] & 0b10000000) !== 0 ? 0b00100000 : 0) +
+      ((data[i + 6] & 0b10000000) !== 0 ? 0b01000000 : 0);
+    midiData.push(b1);
+    midiData.push(data[i + 0] & 0b01111111);
+    midiData.push(data[i + 1] & 0b01111111);
+    midiData.push(data[i + 2] & 0b01111111);
+    midiData.push(data[i + 3] & 0b01111111);
+    midiData.push(data[i + 4] & 0b01111111);
+    midiData.push(data[i + 5] & 0b01111111);
+    midiData.push(data[i + 6] & 0b01111111);
+  }
+  // it should have 72 bytes now
+  if (midiData.length !== 72) throw new Error("midiData validation error");
+  // last byte into 2 bytes
+  {
+    const b = data[63];
+    midiData.push((b & 0b10000000) !== 0 ? 0b00000001 : 0);
+    midiData.push(b & 0b01111111);
+  }
+  // it should have 72 bytes now
+
+  log("midiData", midiData);
+
+  return midiData;
+}
+
+function createSceneDataDumpMessage(x: Scene): number[] {
+  const msg = [];
+
+  // Exclusive Header  g;Global Channel  [Hex]
+  msg.push(0xf0, 0x42, 0x40);
+  // Software Project (nanoKEY2: 000111H, Sub ID: 01)
+  msg.push(0x00, 0x01, 0x11, 0x01);
+  // Data Dump Command  (Host<->Controller, Variable Format)
+  msg.push(0x7f);
+  // Num of Data (1+74 Bytes : 1001011)
+  msg.push(0x4b);
+  // Scene Data Dump
+  msg.push(0x40);
+  // Data
+  msg.push(...serializeScene(x));
+  // End of Exclusive (EOX)
+  msg.push(0xf7);
+
+  return msg;
+}
+
+function main() {
+  const scene = { ...DEFAULT_SCENE };
+  scene.transpose = 64 + 6;
+  scene.velocityCurve = VelocityCurve.Const;
+  const msg = createSceneDataDumpMessage(scene);
+  log("msg.length", msg.length);
+  log("msg", msg);
+
+  const port = getOutputPort();
+  log("output port:", port);
+  if (port === null) throw new Error("failed to get midi output port");
+
+  reaper.SendMIDIMessageToHardware(port, bytestring(msg));
+  log("sent!");
+
+  // for (let i = 0; i < 256; i++) {
+  //   reaper.SendMIDIMessageToHardware(i, bytestring(msg));
+  // }
+  // log("sent!");
+
+  // log(msg.map((x) => x.toString(16).padStart(2, "0")).join(" "));
 }
 
 errorHandler(main);
