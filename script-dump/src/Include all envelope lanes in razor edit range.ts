@@ -10,10 +10,17 @@ function getRange() {
   const startCounts: LuaMap<number, number> = new LuaMap();
   const endCounts: LuaMap<number, number> = new LuaMap();
 
+  let firstTrackIdx: number | null = null;
+  let lastTrackIdx: number | null = null;
+
   for (const track of Track.iterAll()) {
     for (const edit of track.getRazorEdits()) {
       startCounts.set(edit.start, (startCounts.get(edit.start) || 0) + 1);
       endCounts.set(edit.end, (endCounts.get(edit.end) || 0) + 1);
+
+      const idx = track.getIdx();
+      if (firstTrackIdx === null) firstTrackIdx = idx;
+      lastTrackIdx = idx;
     }
   }
 
@@ -28,8 +35,14 @@ function getRange() {
   }
 
   if (commonStart.count === 0 || commonEnd.count === 0) return null;
+  if (firstTrackIdx === null || lastTrackIdx === null) return null;
 
-  return { start: commonStart.pos, end: commonEnd.pos };
+  return {
+    start: commonStart.pos,
+    end: commonEnd.pos,
+    firstIdx: firstTrackIdx,
+    lastIdx: lastTrackIdx,
+  };
 }
 
 function main() {
@@ -39,7 +52,9 @@ function main() {
   // reaper removes razor edits in collapsed track envelopes
   // expand parent tracks recursively
   const tracksToExpand: LuaSet<number> = new LuaSet();
-  for (const track of Track.iterAll()) {
+  for (let idx = range.firstIdx; idx <= range.lastIdx; idx++) {
+    const track = Track.getByIdx(idx);
+
     const envCount = reaper.CountTrackEnvelopes(track.obj);
     if (envCount === 0) continue;
 
@@ -54,50 +69,52 @@ function main() {
   }
   tracksToExpand.delete(-1); // delete master track
 
-  undoBlock("Expand all tracks containing envelopes", 1 | 4, () => {
-    // expand all tracks recursively containing envelopes
-    // because reaper doesn't let you create razor areas in collapsed envelopes
-    for (const idx of tracksToExpand) {
-      Track.getByIdx(idx).folderCompact = FolderCompact.Normal;
-    }
-  });
+  undoBlock(
+    "Expand tracks in razor edit area containing envelopes",
+    1 | 4,
+    () => {
+      // expand all tracks recursively containing envelopes
+      // because reaper doesn't let you create razor areas in collapsed envelopes
+      for (const idx of tracksToExpand) {
+        Track.getByIdx(idx).folderCompact = FolderCompact.Normal;
+      }
+    },
+  );
 
   // for some reason IMMEDIATELY adding razor edits to collapsed envelopes will not work
   // we need to defer adding razor edits
   reaper.defer(() => {
-    undoBlock(
-      "Expand razor edit range to all tracks and envelopes",
-      1 | 4,
-      () => {
-        // clear all razor edits
-        runMainAction(CMD_RAZOR_EDIT_CLEAR_ALL_AREAS);
+    undoBlock("Include all envelope lanes in razor edit range", 1 | 4, () => {
+      // clear all razor edits
+      runMainAction(CMD_RAZOR_EDIT_CLEAR_ALL_AREAS);
 
-        for (const track of Track.iterAll()) {
-          const edits: RazorEdit[] = [];
+      for (let idx = range.firstIdx; idx <= range.lastIdx; idx++) {
+        const track = Track.getByIdx(idx);
 
-          edits.push({ start: range.start, end: range.end });
+        const edits: RazorEdit[] = [];
 
-          // reaper.env;
-          for (let i = 0; i < reaper.CountTrackEnvelopes(track.obj); i++) {
-            const env = reaper.GetTrackEnvelope(track.obj, i);
-            const [ok, guid] = reaper.GetSetEnvelopeInfo_String(
-              env,
-              "GUID",
-              "",
-              false,
-            );
-            if (!ok) {
-              log("failed to get envelope GUID");
-              continue;
-            }
+        edits.push({ start: range.start, end: range.end });
 
-            edits.push({ envGUID: guid, start: range.start, end: range.end });
+        // reaper.env;
+        for (let i = 0; i < reaper.CountTrackEnvelopes(track.obj); i++) {
+          const env = reaper.GetTrackEnvelope(track.obj, i);
+          const [ok, guid] = reaper.GetSetEnvelopeInfo_String(
+            env,
+            "GUID",
+            "",
+            false,
+          );
+          if (!ok) {
+            log("failed to get envelope GUID");
+            continue;
           }
 
-          track.setRazorEdits(edits);
+          edits.push({ envGUID: guid, start: range.start, end: range.end });
         }
-      },
-    );
+
+        track.setRazorEdits(edits);
+      }
+    });
   });
 }
 
