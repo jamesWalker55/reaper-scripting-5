@@ -1,11 +1,10 @@
-AddCwdToImportPaths();
-
-import { encode } from "json";
-import { OSType } from "reaper-api/ffi";
+import * as json from "json";
+import { Section } from "reaper-api/extstate";
 import { inspect } from "reaper-api/inspect";
 import { errorHandler, log } from "reaper-api/utils";
 
 const MIDI_OUTPUT_NAME = "nanoKEY2";
+const SECTION = Section("nanoKEY2");
 
 function getOutputPort() {
   for (let i = 0; i < reaper.GetNumMIDIOutputs(); i++) {
@@ -16,7 +15,7 @@ function getOutputPort() {
     return i;
   }
 
-  return null;
+  throw new Error("failed to get midi output port");
 }
 
 function bytestring(bytes: number[]): string {
@@ -37,26 +36,26 @@ function bytestring(bytes: number[]): string {
   return rv.join("");
 }
 
-enum ButtonSpeed {
+export enum ButtonSpeed {
   Immediate = 0,
   Fast = 1,
   Normal = 2,
   Slow = 3,
 }
 
-enum VelocityCurve {
+export enum VelocityCurve {
   Light = 0,
   Normal = 1,
   Heavy = 2,
   Const = 3,
 }
 
-enum ButtonBehaviour {
+export enum ButtonBehaviour {
   Momentary = 0,
   Toggle = 1,
 }
 
-const DEFAULT_SCENE = {
+export const DEFAULT_SCENE = {
   midiChannel: 0,
   pitchBendSpeed: ButtonSpeed.Normal,
   transpose: 64, // 64 +/- 12
@@ -75,7 +74,28 @@ const DEFAULT_SCENE = {
   sustainOn: 127,
   sustainSpeed: ButtonSpeed.Normal,
 };
-type Scene = typeof DEFAULT_SCENE;
+export type Scene = typeof DEFAULT_SCENE;
+
+/** Get scene data stored in Reaper's extdata */
+export function loadScene(): Scene {
+  const data = SECTION.get("scene");
+  if (data === null) return { ...DEFAULT_SCENE };
+  if (data.length === 0) return { ...DEFAULT_SCENE };
+
+  try {
+    const scene = json.decode(data);
+    serializeScene(scene as any); // try to make it error
+    return scene as Scene;
+  } catch (e) {
+    log(`malformed scene in extdata: ${e}`);
+    return { ...DEFAULT_SCENE };
+  }
+}
+
+/** Store scene data to Reaper's extdata */
+export function saveScene(x: Scene) {
+  SECTION.set("scene", json.encode(x));
+}
 
 function between(x: number, min: number, max: number) {
   if (min <= x && x <= max) return x;
@@ -143,11 +163,11 @@ function serializeScene(x: Scene): number[] {
   return midiData;
 }
 
-function createSceneDataDumpMessage(x: Scene): number[] {
+function createSceneDataDumpMessage(x: Scene, channel: number = 0): number[] {
   const msg = [];
 
   // Exclusive Header  g;Global Channel  [Hex]
-  msg.push(0xf0, 0x42, 0x40);
+  msg.push(0xf0, 0x42, 0x40 + channel);
   // Software Project (nanoKEY2: 000111H, Sub ID: 01)
   msg.push(0x00, 0x01, 0x11, 0x01);
   // Data Dump Command  (Host<->Controller, Variable Format)
@@ -164,27 +184,55 @@ function createSceneDataDumpMessage(x: Scene): number[] {
   return msg;
 }
 
-function main() {
-  const scene = { ...DEFAULT_SCENE };
-  scene.transpose = 64 + 6;
-  scene.velocityCurve = VelocityCurve.Const;
-  const msg = createSceneDataDumpMessage(scene);
-  log("msg.length", msg.length);
-  log("msg", msg);
+/** Update the device to use the scene */
+export function pushSceneToDevice(x: Scene) {
+  const msg = createSceneDataDumpMessage(x);
 
   const port = getOutputPort();
-  log("output port:", port);
-  if (port === null) throw new Error("failed to get midi output port");
 
   reaper.SendMIDIMessageToHardware(port, bytestring(msg));
-  log("sent!");
-
-  // for (let i = 0; i < 256; i++) {
-  //   reaper.SendMIDIMessageToHardware(i, bytestring(msg));
-  // }
-  // log("sent!");
-
-  // log(msg.map((x) => x.toString(16).padStart(2, "0")).join(" "));
 }
 
-errorHandler(main);
+/** Save whatever setting is on device as default */
+export function commitDeviceScene(channel: number = 0) {
+  const msg = [];
+
+  // Exclusive Header  g;Global Channel  [Hex]
+  msg.push(0xf0, 0x42, 0x40 + channel);
+  // Software Project (nanoKEY2: 000111H, Sub ID: 01)
+  msg.push(0x00, 0x01, 0x11, 0x01);
+  // Data Dump Command  (Host->Controller, 2Bytes Format)
+  msg.push(0x1f);
+  // Scene Data Write Request
+  msg.push(0x11);
+  //
+  msg.push(0x00);
+  // End of Exclusive (EOX)
+  msg.push(0xf7);
+
+  const port = getOutputPort();
+
+  reaper.SendMIDIMessageToHardware(port, bytestring(msg));
+}
+
+/** Restore state to whatever setting was saved in device memory */
+export function restoreDeviceScene(channel: number = 0) {
+  const msg = [];
+
+  // Exclusive Header  g;Global Channel  [Hex]
+  msg.push(0xf0, 0x42, 0x40 + channel);
+  // Software Project (nanoKEY2: 000111H, Sub ID: 01)
+  msg.push(0x00, 0x01, 0x11, 0x01);
+  // Data Dump Command  (Host->Controller, 2Bytes Format)
+  msg.push(0x1f);
+  // Scene Change Request
+  msg.push(0x14);
+  //
+  msg.push(0x00);
+  // End of Exclusive (EOX)
+  msg.push(0xf7);
+
+  const port = getOutputPort();
+
+  reaper.SendMIDIMessageToHardware(port, bytestring(msg));
+}
