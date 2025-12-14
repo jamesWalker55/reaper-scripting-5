@@ -1323,6 +1323,17 @@ export class FXParam {
     }
   }
 
+  getFx(): FX {
+    switch (this.chain.obj.type) {
+      case "track":
+        return new FX({ track: this.chain.obj.track }, this.fxidx);
+      case "take":
+        return new FX({ take: this.chain.obj.take }, this.fxidx);
+      default:
+        return this.chain.obj satisfies never;
+    }
+  }
+
   getIdent() {
     const rv = this.chain.GetParamIdent(this.fxidx, this.param);
     if (!rv) error("param object is no longer valid");
@@ -1354,9 +1365,6 @@ export class FXParam {
 
     const modInfo: ModulationInfo = {
       baseline: this._parseParamConfig(`mod.baseline`, 0),
-      acs: null,
-      lfo: null,
-      plink: null,
     };
 
     const lfoActive = this._parseParamConfig(`lfo.active`, 0) === 1;
@@ -1411,8 +1419,8 @@ export class FXParam {
 
     this._setParamConfig(`mod.baseline`, modInfo.baseline);
 
-    this._setParamConfig(`lfo.active`, modInfo.lfo !== null);
-    if (modInfo.lfo !== null) {
+    this._setParamConfig(`lfo.active`, modInfo.lfo !== undefined);
+    if (modInfo.lfo !== undefined) {
       this._setParamConfig(`lfo.dir`, modInfo.lfo.dir);
       this._setParamConfig(`lfo.phase`, modInfo.lfo.phase);
       this._setParamConfig(`lfo.speed`, modInfo.lfo.speed);
@@ -1422,8 +1430,8 @@ export class FXParam {
       this._setParamConfig(`lfo.shape`, modInfo.lfo.shape);
     }
 
-    this._setParamConfig(`acs.active`, modInfo.acs !== null);
-    if (modInfo.acs !== null) {
+    this._setParamConfig(`acs.active`, modInfo.acs !== undefined);
+    if (modInfo.acs !== undefined) {
       this._setParamConfig(`acs.dir`, modInfo.acs.dir);
       this._setParamConfig(`acs.strength`, modInfo.acs.strength);
       this._setParamConfig(`acs.attack`, modInfo.acs.attack);
@@ -1436,20 +1444,34 @@ export class FXParam {
       this._setParamConfig(`acs.y2`, modInfo.acs.y2);
     }
 
-    this._setParamConfig(`plink.active`, modInfo.plink !== null);
+    this._setParamConfig(`plink.active`, modInfo.plink !== undefined);
     if (modInfo.plink) {
       this._setParamConfig(`plink.scale`, modInfo.plink.scale);
       this._setParamConfig(`plink.offset`, modInfo.plink.offset);
       this._setParamConfig(`plink.effect`, modInfo.plink.fxidx);
-      this._setParamConfig(`plink.param`, modInfo.plink.param);
-      this._setParamConfig(`plink.midi_bus`, modInfo.plink.midi_bus);
-      this._setParamConfig(`plink.midi_chan`, modInfo.plink.midi_chan);
-      this._setParamConfig(`plink.midi_msg`, modInfo.plink.midi_msg);
-      this._setParamConfig(`plink.midi_msg2`, modInfo.plink.midi_msg2);
+
+      if (modInfo.plink.param !== undefined)
+        this._setParamConfig(`plink.param`, modInfo.plink.param);
+
+      if ("midi_bus" in modInfo.plink) {
+        this._setParamConfig(`plink.midi_bus`, modInfo.plink.midi_bus);
+        this._setParamConfig(`plink.midi_chan`, modInfo.plink.midi_chan);
+        this._setParamConfig(`plink.midi_msg`, modInfo.plink.midi_msg);
+        this._setParamConfig(`plink.midi_msg2`, modInfo.plink.midi_msg2);
+      }
     }
 
     return modInfo;
   }
+}
+
+export enum LFOShape {
+  Sine = 0,
+  Square = 1,
+  SawL = 2,
+  SawR = 3,
+  Triangle = 4,
+  Random = 5,
 }
 
 export type ModulationInfo = {
@@ -1458,7 +1480,7 @@ export type ModulationInfo = {
   /** range from 0.0 to 1.0 */
   baseline: number;
   /** audio control signal */
-  acs: {
+  acs?: {
     chan: number;
     stereo: boolean;
     attack: number;
@@ -1470,45 +1492,49 @@ export type ModulationInfo = {
     // the curve point control
     x2: number;
     y2: number;
-  } | null;
-  lfo: {
-    shape: number; // an enum in 0-5
+  };
+  lfo?: {
+    shape: LFOShape; // an enum in 0-5
     dir: 1 | 0 | -1;
     phase: number;
     tempoSync: boolean;
     speed: number;
     strength: number;
     free: boolean; // "Phase reset" in modulation window
-  } | null;
+  };
   /** parameter link (to midi or other fx param) */
-  plink: {
-    offset: number;
-    scale: number;
+  plink?:
+    | {
+        offset: number;
+        scale: number;
+        /**
+         * 'effect', will be '-100' if linked to MIDI
+         *
+         * set when target is FX
+         */
+        fxidx: number; // 'effect', will be '-100' if linked to MIDI
 
-    /**
-     * 'effect', will be '-100' if linked to MIDI
-     *
-     * set when target is FX
-     */
-    fxidx: number; // 'effect', will be '-100' if linked to MIDI
-    /**
-     * param idx
-     *
-     * set when target is FX
-     */
-    param: number; // param idx
-
-    /** set when target is MIDI */
-    midi_bus: number;
-    /** set when target is MIDI */
-    midi_chan: number;
-    /** set when target is MIDI */
-    midi_msg: number;
-    /** set when target is MIDI */
-    midi_msg2: number;
-  } | null;
+        /**
+         * param idx
+         *
+         * set when target is FX
+         */
+        param?: number; // param idx
+      } & (
+        | {
+            /** set when target is MIDI */
+            midi_bus: number;
+            /** set when target is MIDI */
+            midi_chan: number;
+            /** set when target is MIDI */
+            midi_msg: number;
+            /** set when target is MIDI */
+            midi_msg2: number;
+          }
+        | {}
+      );
   // MIDI/OSC Learn
-  // I don't have a MIDI controller so I can't test this
+  // I have no fucking clue what this is
   // learn: {
   //   midi1: number;
   //   midi2: number;
@@ -1517,6 +1543,45 @@ export type ModulationInfo = {
   //   flags: number;
   // };
 };
+
+// prettier-ignore
+export function isModulationInfo(x: unknown): x is ModulationInfo {
+  return (
+    (typeof x === "object" && x !== null)
+    && ("baseline" in x && typeof x.baseline === "number")
+    && ("acs" in x ? typeof x.acs === "object" && x.acs !== null && (
+         ('chan' in x.acs && typeof x.acs.chan === "number")
+      && ('stereo' in x.acs && typeof x.acs.stereo === "boolean")
+      && ('attack' in x.acs && typeof x.acs.attack === "number")
+      && ('release' in x.acs && typeof x.acs.release === "number")
+      && ('minVol' in x.acs && typeof x.acs.minVol === "number")
+      && ('maxVol' in x.acs && typeof x.acs.maxVol === "number")
+      && ('strength' in x.acs && typeof x.acs.strength === "number")
+      && ('dir' in x.acs && [1, 0, -1].includes(x.acs.dir as any))
+      && ('x2' in x.acs && typeof x.acs.x2 === "number")
+      && ('y2' in x.acs && typeof x.acs.y2 === "number")
+    ) : true)
+    && ("lfo" in x ? typeof x.lfo === "object" && x.lfo !== null && (
+         ('shape' in x.lfo && typeof x.lfo.shape === "number" && x.lfo.shape in LFOShape)
+      && ('dir' in x.lfo && [1, 0, -1].includes(x.lfo.dir as any))
+      && ('phase' in x.lfo && typeof x.lfo.phase === "number")
+      && ('tempoSync' in x.lfo && typeof x.lfo.tempoSync === "boolean")
+      && ('speed' in x.lfo && typeof x.lfo.speed === "number")
+      && ('strength' in x.lfo && typeof x.lfo.strength === "number")
+      && ('free' in x.lfo && typeof x.lfo.free === "boolean")
+    ) : true)
+    && ("plink" in x ? typeof x.plink === "object" && x.plink !== null && (
+         ('offset' in x.plink && typeof x.plink.offset === "number")
+      && ('scale' in x.plink && typeof x.plink.scale === "number")
+      && ('fxidx' in x.plink && typeof x.plink.fxidx === "number")
+      && ('param' in x.plink ? typeof x.plink.param === "number" : true)
+      && ('midi_bus' in x.plink ? typeof x.plink.midi_bus === "number" : true)
+      && ('midi_chan' in x.plink ? typeof x.plink.midi_chan === "number" : true)
+      && ('midi_msg' in x.plink ? typeof x.plink.midi_msg === "number" : true)
+      && ('midi_msg2' in x.plink ? typeof x.plink.midi_msg2 === "number" : true)
+    ) : true)
+  )
+}
 
 export function getLastTouchedFx() {
   const [retval, trackidx, itemidx, takeidx, fxidx, parm] =
@@ -1538,5 +1603,28 @@ export function getLastTouchedFx() {
     const item = reaper.GetTrackMediaItem(track, itemidx);
     const take = reaper.GetTake(item, takeidx);
     return new FX({ take }, fxidx);
+  }
+}
+
+export function getLastTouchedFxParam(): FXParam | null {
+  const [retval, trackidx, itemidx, takeidx, fxidx, parm] =
+    reaper.GetTouchedOrFocusedFX(0);
+  if (!retval) return null;
+
+  const isMaster = trackidx === -1;
+  const track = isMaster
+    ? reaper.GetMasterTrack(0)
+    : reaper.GetTrack(0, trackidx);
+  if (track === null)
+    error(
+      `failed to get track belonging to last-touched fx: track ${trackidx}`,
+    );
+
+  if (itemidx === -1) {
+    return new FXParam({ track }, fxidx, parm);
+  } else {
+    const item = reaper.GetTrackMediaItem(track, itemidx);
+    const take = reaper.GetTake(item, takeidx);
+    return new FXParam({ take }, fxidx, parm);
   }
 }
