@@ -1,7 +1,7 @@
 import * as json from "json";
 import { Section } from "reaper-api/extstate";
 import { inspect } from "reaper-api/inspect";
-import { errorHandler, log } from "reaper-api/utils";
+import { log } from "reaper-api/utils";
 
 const MIDI_OUTPUT_NAME = "nanoKEY2";
 const SECTION = Section("nanoKEY2");
@@ -125,8 +125,6 @@ function serializeScene(x: Scene): number[] {
   data[28] = between(x.sustainOn, 0, 127);
   data[29] = between(x.sustainSpeed, 0, 3);
 
-  log("data", data);
-
   // convert data format to midi
   const midiData = [];
   // process first 63 bytes
@@ -157,8 +155,6 @@ function serializeScene(x: Scene): number[] {
     midiData.push(b & 0b01111111);
   }
   // it should have 72 bytes now
-
-  log("midiData", midiData);
 
   return midiData;
 }
