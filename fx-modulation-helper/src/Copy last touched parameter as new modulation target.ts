@@ -13,7 +13,7 @@ function main() {
       plink: {
         offset: 0.0,
         scale: 1.0,
-        fxidx: param.fxidx,
+        fxidx: param.getThisRelativeFxidx(),
         param: param.param,
       },
     },

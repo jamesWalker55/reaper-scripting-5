@@ -1308,7 +1308,7 @@ export class FXParam {
 
     const result = tonumber(text);
     if (result === undefined)
-      error("failed to parse named config parm as number");
+      throw new Error("failed to parse named config parm as number");
 
     return result;
   }
@@ -1324,14 +1324,7 @@ export class FXParam {
   }
 
   getFx(): FX {
-    switch (this.chain.obj.type) {
-      case "track":
-        return new FX({ track: this.chain.obj.track }, this.fxidx);
-      case "take":
-        return new FX({ take: this.chain.obj.take }, this.fxidx);
-      default:
-        return this.chain.obj satisfies never;
-    }
+    return new FX(this.chain.obj, this.fxidx);
   }
 
   getIdent() {
@@ -1357,6 +1350,39 @@ export class FXParam {
 
   modulationActive(): boolean {
     return this._parseParamConfig(`mod.active`, 0) === 1;
+  }
+
+  getThisRelativeFxidx() {
+    // parameter link only works with fx on the same level
+    const { path: path } = parseFxidx({
+      ...this.chain.obj,
+      fxidx: this.fxidx,
+    });
+
+    // TODO: Check if you need to add the original flags back
+    return path[path.length - 1];
+  }
+
+  getTargetRelativeFxidx() {
+    // path obtained from `plink.effect`, will be a full path
+    const { path, flags } = parseFxidx({
+      ...this.chain.obj,
+      fxidx: this._parseParamConfig(`plink.effect`, 0),
+    });
+    // parameter link only works with fx on the same level
+    const { path: thisPath } = parseFxidx({
+      ...this.chain.obj,
+      fxidx: this.fxidx,
+    });
+    if (thisPath.length !== path.length)
+      throw new Error(
+        `parameter link target is inside/outside container\nfrom: ${thisPath.join(
+          ", ",
+        )}\ntarget: ${path.join(", ")}`,
+      );
+
+    // TODO: Check if you need to add the original flags back
+    return path[path.length - 1];
   }
 
   getModulation(): ModulationInfo | null {
@@ -1401,7 +1427,7 @@ export class FXParam {
       modInfo.plink = {
         scale: this._parseParamConfig(`plink.scale`, 1),
         offset: this._parseParamConfig(`plink.offset`, 0),
-        fxidx: this._parseParamConfig(`plink.effect`, -1),
+        fxidx: this.getTargetRelativeFxidx(),
         param: this._parseParamConfig(`plink.param`, -1),
         midi_bus: this._parseParamConfig(`plink.midi_bus`, 0),
         midi_chan: this._parseParamConfig(`plink.midi_chan`, 0),
@@ -1511,6 +1537,11 @@ export type ModulationInfo = {
          * 'effect', will be '-100' if linked to MIDI
          *
          * set when target is FX
+         *
+         * For container FX, this is complicated:
+         * - FX in the same level will be normal non-container fxidx, even if they are in a container
+         *
+         * You cannot parameter link from/to container FX, so this will always be **fxidx within the same level**
          */
         fxidx: number; // 'effect', will be '-100' if linked to MIDI
 

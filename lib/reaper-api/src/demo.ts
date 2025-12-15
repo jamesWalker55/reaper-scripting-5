@@ -18,7 +18,7 @@ import {
 import * as path from "./path/path";
 import { splitlines } from "./utilsLua";
 import { RS5K, RS5KMode } from "./rs5k";
-import { FX } from "./fx";
+import { FX, getLastTouchedFxParam } from "./fx";
 import { parseBuf } from "./midibuf";
 
 function measureTime<T>(func: () => T): [number, T] {
