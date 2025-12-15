@@ -1544,43 +1544,87 @@ export type ModulationInfo = {
   // };
 };
 
-// prettier-ignore
-export function isModulationInfo(x: unknown): x is ModulationInfo {
-  return (
-    (typeof x === "object" && x !== null)
-    && ("baseline" in x && typeof x.baseline === "number")
-    && ("acs" in x ? typeof x.acs === "object" && x.acs !== null && (
-         ('chan' in x.acs && typeof x.acs.chan === "number")
-      && ('stereo' in x.acs && typeof x.acs.stereo === "boolean")
-      && ('attack' in x.acs && typeof x.acs.attack === "number")
-      && ('release' in x.acs && typeof x.acs.release === "number")
-      && ('minVol' in x.acs && typeof x.acs.minVol === "number")
-      && ('maxVol' in x.acs && typeof x.acs.maxVol === "number")
-      && ('strength' in x.acs && typeof x.acs.strength === "number")
-      && ('dir' in x.acs && [1, 0, -1].includes(x.acs.dir as any))
-      && ('x2' in x.acs && typeof x.acs.x2 === "number")
-      && ('y2' in x.acs && typeof x.acs.y2 === "number")
-    ) : true)
-    && ("lfo" in x ? typeof x.lfo === "object" && x.lfo !== null && (
-         ('shape' in x.lfo && typeof x.lfo.shape === "number" && x.lfo.shape in LFOShape)
-      && ('dir' in x.lfo && [1, 0, -1].includes(x.lfo.dir as any))
-      && ('phase' in x.lfo && typeof x.lfo.phase === "number")
-      && ('tempoSync' in x.lfo && typeof x.lfo.tempoSync === "boolean")
-      && ('speed' in x.lfo && typeof x.lfo.speed === "number")
-      && ('strength' in x.lfo && typeof x.lfo.strength === "number")
-      && ('free' in x.lfo && typeof x.lfo.free === "boolean")
-    ) : true)
-    && ("plink" in x ? typeof x.plink === "object" && x.plink !== null && (
-         ('offset' in x.plink && typeof x.plink.offset === "number")
-      && ('scale' in x.plink && typeof x.plink.scale === "number")
-      && ('fxidx' in x.plink && typeof x.plink.fxidx === "number")
-      && ('param' in x.plink ? typeof x.plink.param === "number" : true)
-      && ('midi_bus' in x.plink ? typeof x.plink.midi_bus === "number" : true)
-      && ('midi_chan' in x.plink ? typeof x.plink.midi_chan === "number" : true)
-      && ('midi_msg' in x.plink ? typeof x.plink.midi_msg === "number" : true)
-      && ('midi_msg2' in x.plink ? typeof x.plink.midi_msg2 === "number" : true)
-    ) : true)
-  )
+export function checkModulationInfo(
+  x: unknown,
+): { ok: ModulationInfo | null } | { err: string } {
+  if (typeof x !== "object") return { err: "not an object" };
+  if (x === null) return { ok: null };
+
+  if (!("baseline" in x && typeof x.baseline === "number"))
+    return { err: "baseline must be a number" };
+
+  if ("acs" in x && typeof x.acs === "object" && x.acs) {
+    if (!("chan" in x.acs && typeof x.acs.chan === "number"))
+      return { err: "acs.chan must be a number" };
+    if (!("stereo" in x.acs && typeof x.acs.stereo === "boolean"))
+      return { err: "acs.stereo must be a boolean" };
+    if (!("attack" in x.acs && typeof x.acs.attack === "number"))
+      return { err: "acs.attack must be a number" };
+    if (!("release" in x.acs && typeof x.acs.release === "number"))
+      return { err: "acs.release must be a number" };
+    if (!("minVol" in x.acs && typeof x.acs.minVol === "number"))
+      return { err: "acs.minVol must be a number" };
+    if (!("maxVol" in x.acs && typeof x.acs.maxVol === "number"))
+      return { err: "acs.maxVol must be a number" };
+    if (!("strength" in x.acs && typeof x.acs.strength === "number"))
+      return { err: "acs.strength must be a number" };
+    if (!("dir" in x.acs && [1, 0, -1].includes(x.acs.dir as any)))
+      return { err: "acs.dir must be one of (1, 0, -1)" };
+    if (!("x2" in x.acs && typeof x.acs.x2 === "number"))
+      return { err: "acs.x2 must be a number" };
+    if (!("y2" in x.acs && typeof x.acs.y2 === "number"))
+      return { err: "acs.y2 must be a number" };
+  }
+
+  if ("lfo" in x && typeof x.lfo === "object" && x.lfo) {
+    if (
+      !(
+        "shape" in x.lfo &&
+        typeof x.lfo.shape === "number" &&
+        x.lfo.shape in LFOShape
+      )
+    )
+      return { err: "lfo.shape must be a number" };
+    if (!("dir" in x.lfo && [1, 0, -1].includes(x.lfo.dir as any)))
+      return { err: "lfo.dir must be one of (1, 0, -1)" };
+    if (!("phase" in x.lfo && typeof x.lfo.phase === "number"))
+      return { err: "lfo.phase must be a number" };
+    if (!("tempoSync" in x.lfo && typeof x.lfo.tempoSync === "boolean"))
+      return { err: "lfo.tempoSync must be a boolean" };
+    if (!("speed" in x.lfo && typeof x.lfo.speed === "number"))
+      return { err: "lfo.speed must be a number" };
+    if (!("strength" in x.lfo && typeof x.lfo.strength === "number"))
+      return { err: "lfo.strength must be a number" };
+    if (!("free" in x.lfo && typeof x.lfo.free === "boolean"))
+      return { err: "lfo.free must be a boolean" };
+  }
+
+  if ("plink" in x && typeof x.plink === "object" && x.plink) {
+    if (!("offset" in x.plink && typeof x.plink.offset === "number"))
+      return { err: "plink.offset must be a number" };
+    if (!("scale" in x.plink && typeof x.plink.scale === "number"))
+      return { err: "plink.scale must be a number" };
+    if (!("fxidx" in x.plink && typeof x.plink.fxidx === "number"))
+      return { err: "plink.fxidx must be a number" };
+
+    if (x.plink.fxidx === -100) {
+      // fx
+      if (!("midi_bus" in x.plink && typeof x.plink.midi_bus === "number"))
+        return { err: "plink.midi_bus must be a number" };
+      if (!("midi_chan" in x.plink && typeof x.plink.midi_chan === "number"))
+        return { err: "plink.midi_chan must be a number" };
+      if (!("midi_msg" in x.plink && typeof x.plink.midi_msg === "number"))
+        return { err: "plink.midi_msg must be a number" };
+      if (!("midi_msg2" in x.plink && typeof x.plink.midi_msg2 === "number"))
+        return { err: "plink.midi_msg2 must be a number" };
+    } else {
+      // param
+      if (!("param" in x.plink && typeof x.plink.param === "number"))
+        return { err: "plink.param must be a number" };
+    }
+  }
+
+  return { ok: x as ModulationInfo };
 }
 
 export function getLastTouchedFx() {
