@@ -2,7 +2,7 @@ AddCwdToImportPaths();
 
 import { paste } from "reaper-api/clipboard";
 import { checkModulationInfo, ModulationInfo } from "reaper-api/fx";
-import { errorHandler, log, msgBox } from "reaper-api/utils";
+import { errorHandler, msgBox } from "reaper-api/utils";
 import * as toml from "./toml";
 import { LAST_TOUCHED_FX_PARAM } from "./util";
 
@@ -23,9 +23,8 @@ function pasteModulationInfo():
   }
 
   const check = checkModulationInfo(rv);
-  if ("err" in check) {
+  if ("err" in check)
     return { err: `Clipboard has invalid modulation info:\n${check.err}` };
-  }
 
   return { ok: check.ok };
 }
@@ -34,11 +33,7 @@ function main() {
   const param = LAST_TOUCHED_FX_PARAM;
 
   const mod = pasteModulationInfo();
-  if ("err" in mod) {
-    return msgBox("Invalid modulation info", mod.err);
-  }
-
-  log(mod.ok);
+  if ("err" in mod) return msgBox("Invalid modulation info", mod.err);
 
   param.setModulation(mod.ok);
 }
