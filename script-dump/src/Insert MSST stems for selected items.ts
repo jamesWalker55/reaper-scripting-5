@@ -1,9 +1,7 @@
 AddCwdToImportPaths();
 
-import { encode } from "json";
-import { OSType } from "reaper-api/ffi";
 import * as Path from "reaper-api/path/path";
-import { Item, Source, Take, Track } from "reaper-api/track";
+import { Item, Take, Track } from "reaper-api/track";
 import { errorHandler, log, undoBlock } from "reaper-api/utils";
 
 const MSST_OUTPUT_DIR = "D:/Audio Samples/_Acapella/MSST";
@@ -124,27 +122,27 @@ function main() {
       {
         if (!reaper.file_exists(drumsPath)) {
           log("drums stem does not exist:", drumsPath);
-          log("skipping ${stem}");
+          log(`skipping ${name}`);
           continue;
         }
         if (!reaper.file_exists(vocalsPath)) {
           log("vocals stem does not exist:", vocalsPath);
-          log("skipping ${stem}");
+          log(`skipping ${name}`);
           continue;
         }
         if (!reaper.file_exists(otherPath)) {
           log("other stem does not exist:", otherPath);
-          log("skipping ${stem}");
+          log(`skipping ${name}`);
           continue;
         }
         if (!reaper.file_exists(residualPath)) {
           log("residual stem does not exist:", residualPath);
-          log("skipping ${stem}");
+          log(`skipping ${name}`);
           continue;
         }
         if (!reaper.file_exists(bassPath)) {
           log("bass stem does not exist:", bassPath);
-          log("skipping ${stem}");
+          log(`skipping ${name}`);
           continue;
         }
       }
