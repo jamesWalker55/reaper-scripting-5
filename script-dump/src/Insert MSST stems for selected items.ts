@@ -2,9 +2,10 @@ AddCwdToImportPaths();
 
 import * as Path from "reaper-api/path/path";
 import { Item, Take, Track } from "reaper-api/track";
-import { errorHandler, log, undoBlock } from "reaper-api/utils";
+import { errorHandler, log, runMainAction, undoBlock } from "reaper-api/utils";
 
 const MSST_OUTPUT_DIR = "D:/Audio Samples/_Acapella/MSST";
+const ACTION_BUILD_MISSING_PEAKS = 40047;
 
 function getTakeFileStem(take: Take) {
   const source = take.getSource().findRootParent();
@@ -154,6 +155,8 @@ function main() {
       setStemTrackItem(item, bassTrack, bassPath);
     }
   });
+
+  runMainAction(ACTION_BUILD_MISSING_PEAKS);
 }
 
 errorHandler(main);
