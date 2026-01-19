@@ -35,24 +35,13 @@ function setClone<T extends AnyNotNil>(value: LuaSet<T>): LuaSet<T> {
   return result;
 }
 
-function Manager(
-  fxOrder: Record<FXFolderItemType, number> = {
-    [FXFolderItemType.VST]: 1,
-    [FXFolderItemType.CLAP]: 2,
-    [FXFolderItemType.JS]: 3,
-    [FXFolderItemType.FXChain]: 4,
-    [FXFolderItemType.Smart]: -99999,
-    [FXFolderItemType.ReWire]: 5,
-    [FXFolderItemType.Container]: 5,
-    [FXFolderItemType.VideoProcessor]: 5,
-  },
-) {
+function createManager() {
   let data = getCategories();
   let activeIds: LuaSet<string> = new LuaSet();
   // query keywords must be lowercase
   let query: string[] = [];
 
-  function generateFxList(fxOrder: Record<FXFolderItemType, number>) {
+  function generateFxList() {
     // collect all FX to be displayed
     let resultSet: LuaSet<string> = new LuaSet();
     if (activeIds.isEmpty()) {
@@ -116,13 +105,6 @@ function Manager(
       const aInfo = data.fxMap[a];
       const bInfo = data.fxMap[b];
 
-      // // sort by plugin type
-      // const aOrder =
-      //   aInfo.type in fxOrder ? fxOrder[aInfo.type as FXFolderItemType] : 0;
-      // const bOrder =
-      //   bInfo.type in fxOrder ? fxOrder[bInfo.type as FXFolderItemType] : 0;
-      // if (aOrder !== bOrder) return aOrder - bOrder;
-
       // sort by display name
       const aName = aInfo.name.toLowerCase();
       const bName = bInfo.name.toLowerCase();
@@ -147,7 +129,7 @@ function Manager(
     return result;
   }
 
-  let fxlist = generateFxList(fxOrder);
+  let fxlist = generateFxList();
 
   return {
     getFxlist() {
@@ -159,17 +141,13 @@ function Manager(
     getFxInfo(uid: string) {
       return data.fxMap[uid];
     },
-    setOrder(newOrder: typeof fxOrder) {
-      fxOrder = newOrder;
-      fxlist = generateFxList(fxOrder);
-    },
     setQuery(text: string) {
       // split by whitespace
       query = [];
       for (const [rv] of string.gmatch(text, "%S+")) {
         query.push(rv.toLowerCase());
       }
-      fxlist = generateFxList(fxOrder);
+      fxlist = generateFxList();
     },
     getActiveIdsMut() {
       return activeIds;
@@ -178,7 +156,7 @@ function Manager(
       activeIds = newval;
     },
     regenerateFxList() {
-      fxlist = generateFxList(fxOrder);
+      fxlist = generateFxList();
     },
     getCategories() {
       return data.categories;
@@ -367,7 +345,7 @@ function main() {
     }
   })();
 
-  let manager = Manager();
+  let manager = createManager();
   let query = "";
   let firstLoop = true;
   let optionsEnabled = false;
@@ -448,7 +426,7 @@ function main() {
 
           if (ctx.button("Refresh")) {
             const oldActiveIds = manager.getActiveIdsMut();
-            manager = Manager();
+            manager = createManager();
             manager.setActiveIds(oldActiveIds);
             manager.setQuery(query);
           }
