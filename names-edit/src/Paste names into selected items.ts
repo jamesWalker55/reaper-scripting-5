@@ -13,9 +13,7 @@ function main() {
   const names = splitlines(clipboard);
 
   // zip track and clipboard names, whichever one is shorter
-  for (let i = 0; i < selectedItems.length; i++) {
-    if (i >= names.length) break;
-
+  for (let i = 0; i < selectedItems.length && i < names.length; i++) {
     const item = selectedItems[i];
     const take = item.activeTake();
     if (take === null) continue;
