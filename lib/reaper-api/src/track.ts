@@ -1054,24 +1054,34 @@ export enum TrackSendAutomationMode {
   Latch = 4,
 }
 
-namespace TrackRouting {
+export namespace TrackRouting {
+  /**
+   * ```plain
+   * I_MIDIFLAGS : int *
+   * low 5 bits=source channel 0=all, 1-16, 31=MIDI send disabled
+   * next 5 bits=dest channel, 0=orig, 1-16=chan.
+   * &1024 for faders-send MIDI vol/pan.
+   * (>>14)&255 = src bus (0 for all, 1 for normal, 2+).
+   * (>>22)&255=destination bus (0 for all, 1 for normal, 2+)
+   * ```
+   */
   export function parseMidiFlags(flags: number) {
     const first5bits = flags & 0b0000011111;
     const midiSendDisabled = first5bits === 0b11111;
     if (midiSendDisabled) return null;
 
     const next5bits = flags & 0b1111100000;
-    const srcChannel = first5bits === 0 ? ("all" as const) : first5bits;
-    const dstChannel = next5bits === 0 ? ("all" as const) : next5bits;
+    const srcChannel = first5bits === 0 ? ("all" as const) : first5bits - 1;
+    const dstChannel = next5bits === 0 ? ("all" as const) : next5bits - 1;
 
     // flag to indicate that the faders are controlling midi data
     // toggled with a button
     const fadersSendMidiVolPan = (flags & 1024) !== 0;
 
     const rawSrcBus = (flags >>> 14) & 255;
-    const srcBus = rawSrcBus === 0 ? ("all" as const) : rawSrcBus;
+    const srcBus = rawSrcBus === 0 ? ("all" as const) : rawSrcBus - 1;
     const rawDstBus = (flags >>> 22) & 255;
-    const dstBus = rawDstBus === 0 ? ("all" as const) : rawDstBus;
+    const dstBus = rawDstBus === 0 ? ("all" as const) : rawDstBus - 1;
 
     return {
       srcChannel,
@@ -1088,10 +1098,10 @@ namespace TrackRouting {
     if (opt === null) return 0b11111;
 
     return (
-      (opt.srcChannel === "all" ? 0 : opt.srcChannel) |
-      ((opt.dstChannel === "all" ? 0 : opt.dstChannel) << 5) |
-      ((opt.srcBus === "all" ? 0 : opt.srcBus) << 14) |
-      ((opt.dstBus === "all" ? 0 : opt.dstBus) << 22) |
+      (opt.srcChannel === "all" ? 0 : opt.srcChannel + 1) |
+      ((opt.dstChannel === "all" ? 0 : opt.dstChannel + 1) << 5) |
+      ((opt.srcBus === "all" ? 0 : opt.srcBus + 1) << 14) |
+      ((opt.dstBus === "all" ? 0 : opt.dstBus + 1) << 22) |
       (opt.fadersSendMidiVolPan ? 1024 : 0)
     );
   }

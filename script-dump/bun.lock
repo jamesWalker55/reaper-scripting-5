@@ -43,8 +43,8 @@
 
     "tapable": ["tapable@2.2.2", "", {}, "sha512-Re10+NauLTMCudc7T5WLFLAwDhQ0JWdrMK+9B2M8zR5hRExKmsRDCBA7/aV/pNJFltmBFO5BAMlQFi/vq3nKOg=="],
 
-    "typescript": ["typescript@5.8.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ=="],
+    "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
-    "typescript-to-lua": ["typescript-to-lua@1.31.4", "", { "dependencies": { "@typescript-to-lua/language-extensions": "1.19.0", "enhanced-resolve": "5.8.2", "picomatch": "^2.3.1", "resolve": "^1.15.1", "source-map": "^0.7.3" }, "peerDependencies": { "typescript": "5.8.2" }, "bin": { "tstl": "dist/tstl.js" } }, "sha512-fIFYwyPRGXXSuBJBl7hnHKk261vLANWywNFdU12bwdbizReP6IRRPfhpvrA7SeOSDvQwnCzzS+FtSihreQXz1Q=="],
+    "typescript-to-lua": ["typescript-to-lua@1.33.2", "", { "dependencies": { "@typescript-to-lua/language-extensions": "1.19.0", "enhanced-resolve": "5.8.2", "picomatch": "^2.3.1", "resolve": "^1.15.1", "source-map": "^0.7.3" }, "peerDependencies": { "typescript": "5.9.3" }, "bin": { "tstl": "dist/tstl.js" } }, "sha512-A/o3JgPuKDn3f5nPOM8GiL1Eo5Ngw+wKGe0OxtWuwqU099ZKccpi9JG4Y3WQRHPpPkPmjD/eEQFo4UAehxO8DQ=="],
   }
 }
