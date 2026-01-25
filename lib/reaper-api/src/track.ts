@@ -1082,6 +1082,20 @@ namespace TrackRouting {
     };
   }
 
+  export function generateMidiFlags(
+    opt: ReturnType<typeof parseMidiFlags>,
+  ): number {
+    if (opt === null) return 0b11111;
+
+    return (
+      (opt.srcChannel === "all" ? 0 : opt.srcChannel) |
+      ((opt.dstChannel === "all" ? 0 : opt.dstChannel) << 5) |
+      ((opt.srcBus === "all" ? 0 : opt.srcBus) << 14) |
+      ((opt.dstBus === "all" ? 0 : opt.dstBus) << 22) |
+      (opt.fadersSendMidiVolPan ? 1024 : 0)
+    );
+  }
+
   export function getAudioInfo(
     track: MediaTrack,
     category: TrackRoutingCategory,
@@ -1140,6 +1154,69 @@ namespace TrackRouting {
     };
   }
 
+  export function setAudioInfo(
+    track: MediaTrack,
+    category: TrackRoutingCategory,
+    idx: number,
+    opt: ReturnType<typeof getAudioInfo>,
+  ) {
+    const STSI_V = (param: string, val: number) => {
+      const ok = reaper.SetTrackSendInfo_Value(
+        track,
+        category,
+        idx,
+        param,
+        val,
+      );
+      if (!ok)
+        throw new Error(
+          `Failed to update track audio send info:\nreaper.SetTrackSendInfo_Value(track, ${
+            TrackRoutingCategory[category]
+          }, ${idx}, ${inspect(param)}, ${val})`,
+        );
+    };
+
+    if (opt === null) {
+      STSI_V("I_SRCCHAN", -1);
+      return;
+    }
+
+    // set I_SRCCHAN
+    {
+      let I_SRCCHAN = 0;
+      I_SRCCHAN += opt.srcChannelOffset & 0b1111111111;
+      switch (opt.channelCount) {
+        case 2:
+          I_SRCCHAN += 0 << 10;
+          break;
+        case 1:
+          I_SRCCHAN += 1 << 10;
+          break;
+        default:
+          I_SRCCHAN += (opt.channelCount / 2) << 10;
+          break;
+      }
+      STSI_V("I_SRCCHAN", I_SRCCHAN);
+    }
+
+    // set I_DSTCHAN
+    {
+      let I_DSTCHAN = 0;
+      I_DSTCHAN += opt.dstChannelOffset & 0b01111111111;
+      I_DSTCHAN += opt.mixToMono ? 0b10000000000 : 0;
+      STSI_V("I_DSTCHAN", I_DSTCHAN);
+    }
+
+    STSI_V("B_MUTE", opt.muted ? 1 : 0);
+    STSI_V("B_PHASE", opt.phaseInverted ? 1 : 0);
+    STSI_V("B_MONO", opt.mono ? 1 : 0);
+    STSI_V("D_VOL", opt.volume);
+    STSI_V("D_PAN", opt.pan);
+    STSI_V("D_PANLAW", opt.panLaw === null ? -1 : opt.panLaw);
+    STSI_V("I_SENDMODE", opt.sendMode);
+    STSI_V("I_AUTOMODE", opt.automationMode);
+  }
+
   export function getInfo(
     track: MediaTrack,
     category: TrackRoutingCategory,
@@ -1149,13 +1226,31 @@ namespace TrackRouting {
 
     const midiFlags = reaper.GetTrackSendInfo_Value(
       track,
-      TrackRoutingCategory.Send,
+      category,
       idx,
       "I_MIDIFLAGS",
     );
     const midi = TrackRouting.parseMidiFlags(midiFlags);
 
     return { audio, midi };
+  }
+
+  export function setInfo(
+    track: MediaTrack,
+    category: TrackRoutingCategory,
+    idx: number,
+    opt: ReturnType<typeof getInfo>,
+  ) {
+    TrackRouting.setAudioInfo(track, category, idx, opt.audio);
+    const midiFlags = TrackRouting.generateMidiFlags(opt.midi);
+    const ok = reaper.SetTrackSendInfo_Value(
+      track,
+      category,
+      idx,
+      "I_MIDIFLAGS",
+      midiFlags,
+    );
+    if (!ok) throw new Error("Failed to set track send MIDI flags");
   }
 
   export function getTargetTracks(
@@ -1270,6 +1365,32 @@ namespace TrackRouting {
     const audio = TrackRouting.getParentAudioInfo(track);
     const midi = TrackRouting.getParentMidiInfo(track);
     return { audio, midi };
+  }
+
+  export function createSend(src: MediaTrack, dst: MediaTrack | null): number {
+    const idx = reaper.CreateTrackSend(src, dst);
+    if (idx < 0)
+      throw new Error(
+        `failed to create track send from Track ${new Track(src).getIdx()} to ${
+          dst === null ? "HW" : "Track " + new Track(dst).getIdx()
+        }`,
+      );
+
+    return idx;
+  }
+
+  export function removeSend(
+    track: MediaTrack,
+    category: TrackRoutingCategory,
+    idx: number,
+  ) {
+    const ok = reaper.RemoveTrackSend(track, category, idx);
+    if (!ok)
+      throw new Error(
+        `failed to remove track ${
+          TrackRoutingCategory[category]
+        } #${idx} from Track ${new Track(track).getIdx()}`,
+      );
   }
 }
 
