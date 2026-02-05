@@ -21,7 +21,7 @@ function min(nums: number[]): number {
 }
 
 function main() {
-  const items = Item.getSelected();
+  const items = Item.getSelected().filter((x) => !x.muted);
   if (items.length === 0) return;
 
   const positions = items.map((x) => ({
