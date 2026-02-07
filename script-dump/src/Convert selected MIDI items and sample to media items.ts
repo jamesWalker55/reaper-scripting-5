@@ -1,23 +1,7 @@
 AddCwdToImportPaths();
 
-import { inspect } from "reaper-api/inspect";
-import * as Path from "reaper-api/path/path";
-import {
-  AudioTake,
-  Item,
-  MidiTake,
-  Take,
-  Track,
-  TrackRouting,
-  TrackRoutingCategory,
-} from "reaper-api/track";
-import {
-  confirmBox,
-  errorHandler,
-  log,
-  msgBox,
-  undoBlock,
-} from "reaper-api/utils";
+import { AudioTake, Item, MidiTake, Take, Track } from "reaper-api/track";
+import { errorHandler, msgBox, undoBlock } from "reaper-api/utils";
 
 // assume 100 maps to +0dB
 const DEFAULT_VELOCITY = 100;
@@ -163,8 +147,6 @@ function main() {
       const audioLength = audio.item.length;
       const audioFadeInLength = audio.item.fadeInLength;
       const audioFadeOutLength = audio.item.fadeOutLength;
-      const audioNoFadeLength =
-        audioLength - audioFadeInLength - audioFadeOutLength;
 
       notes.forEach((note, i) => {
         const nextNotePos =
@@ -190,6 +172,8 @@ function main() {
         item.loop = audio.item.loop;
         item.snapOffset = audio.item.snapOffset;
         item.volume = audio.item.volume * (note.velocity / DEFAULT_VELOCITY);
+        item.fadeInCurve = audio.item.fadeInCurve;
+        item.fadeOutCurve = audio.item.fadeOutCurve;
 
         // handle if item needs to be trimmed
         item.position = note.startsec;

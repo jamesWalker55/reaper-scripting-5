@@ -673,7 +673,11 @@ export class Item {
     if (!rv) throw new Error(`failed to set item volume`);
   }
 
-  /** Fade-in length in seconds. */
+  /**
+   * Fade-in length in seconds.
+   *
+   * This is the manual fade, as set by the user. Autofades from item overlap are a different property.
+   */
   get fadeInLength() {
     return reaper.GetMediaItemInfo_Value(this.obj, "D_FADEINLEN");
   }
@@ -682,13 +686,61 @@ export class Item {
     if (!rv) throw new Error(`failed to set item fade-in length`);
   }
 
-  /** Fade-out length in seconds. */
+  /**
+   * Fade-out length in seconds.
+   *
+   * This is the manual fade, as set by the user. Autofades from item overlap are a different property.
+   */
   get fadeOutLength() {
     return reaper.GetMediaItemInfo_Value(this.obj, "D_FADEOUTLEN");
   }
   set fadeOutLength(x: number) {
     const rv = reaper.SetMediaItemInfo_Value(this.obj, "D_FADEOUTLEN", x);
     if (!rv) throw new Error(`failed to set item fade-out length`);
+  }
+
+  /**
+   * Auto fade-in length in seconds.
+   *
+   * This is auto fade, e.g. from item overlaps.
+   */
+  get autoFadeInLength() {
+    return reaper.GetMediaItemInfo_Value(this.obj, "D_FADEINLEN_AUTO");
+  }
+  set autoFadeInLength(x: number) {
+    const rv = reaper.SetMediaItemInfo_Value(this.obj, "D_FADEINLEN_AUTO", x);
+    if (!rv) throw new Error(`failed to set item fade-in length`);
+  }
+
+  /**
+   * Auto fade-out length in seconds.
+   *
+   * This is auto fade, e.g. from item overlaps.
+   */
+  get autoFadeOutLength() {
+    return reaper.GetMediaItemInfo_Value(this.obj, "D_FADEOUTLEN_AUTO");
+  }
+  set autoFadeOutLength(x: number) {
+    const rv = reaper.SetMediaItemInfo_Value(this.obj, "D_FADEOUTLEN_AUTO", x);
+    if (!rv) throw new Error(`failed to set item fade-out length`);
+  }
+
+  /** Fade-in curvature, -1..=1 */
+  get fadeInCurve() {
+    return reaper.GetMediaItemInfo_Value(this.obj, "D_FADEINDIR");
+  }
+  set fadeInCurve(x: number) {
+    const rv = reaper.SetMediaItemInfo_Value(this.obj, "D_FADEINDIR", x);
+    if (!rv) throw new Error(`failed to set item fade-in curvature`);
+  }
+
+  /** Fade-out curvature, -1..=1 */
+  get fadeOutCurve() {
+    return reaper.GetMediaItemInfo_Value(this.obj, "D_FADEOUTDIR");
+  }
+  set fadeOutCurve(x: number) {
+    const rv = reaper.SetMediaItemInfo_Value(this.obj, "D_FADEOUTDIR", x);
+    if (!rv) throw new Error(`failed to set item fade-out curvature`);
   }
 
   get muted() {

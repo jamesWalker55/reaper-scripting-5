@@ -1,7 +1,7 @@
 AddCwdToImportPaths();
 
 import { Item, Track } from "reaper-api/track";
-import { errorHandler, log, undoBlock } from "reaper-api/utils";
+import { errorHandler, undoBlock } from "reaper-api/utils";
 
 // assume 100 maps to +0dB
 const DEFAULT_VELOCITY = 100;
