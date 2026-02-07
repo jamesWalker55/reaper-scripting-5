@@ -38,19 +38,14 @@ function main() {
   undoBlock("Convert selected items to MIDI notes", 1 | 4, () => {
     const track = Track.createAtIdx(topmostTrackIdx);
 
-    // create midi item
-    const item = new Item(
-      reaper.CreateNewMIDIItemInProj(
-        track.obj,
-        positions[0].start,
-        positions[positions.length - 1].stop,
-        false,
-      ),
-    );
-    const take = item.activeTake()!;
-
     // insert notes
     for (const { start, stop, volume } of positions) {
+      // create midi item for each note
+      const item = new Item(
+        reaper.CreateNewMIDIItemInProj(track.obj, start, stop, false),
+      );
+      const take = item.activeTake()!;
+
       reaper.MIDI_InsertNote(
         take.obj,
         false,
@@ -59,11 +54,11 @@ function main() {
         reaper.MIDI_GetPPQPosFromProjTime(take.obj, stop),
         0,
         60,
-        Math.round(math.max(0, math.min(100 * volume, 127))),
-        true,
+        Math.round(math.max(0, math.min(DEFAULT_VELOCITY * volume, 127))),
+        false,
       );
     }
-    reaper.MIDI_Sort(take.obj);
+
     reaper.UpdateArrange();
   });
 }

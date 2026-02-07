@@ -23,7 +23,7 @@ import {
 const DEFAULT_VELOCITY = 100;
 
 // for items that need to get trimmed, add a minimum fadeout of 24ms
-const MIN_FADE_LENGTH = 24 / 1000;
+const MIN_FADE_LENGTH = 15 / 1000;
 
 function min(nums: number[]): number {
   if (nums.length === 0) throw new Error("can't find min of empty array");
