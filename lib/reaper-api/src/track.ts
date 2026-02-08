@@ -941,13 +941,13 @@ export class Take {
   }
 
   get preservePitch() {
-    const x = reaper.GetMediaItemTakeInfo_Value(this.obj, "D_PITCH") !== 0;
+    const x = reaper.GetMediaItemTakeInfo_Value(this.obj, "B_PPITCH") !== 0;
     return x;
   }
   set preservePitch(x: boolean) {
     const ok = reaper.SetMediaItemTakeInfo_Value(
       this.obj,
-      "D_PITCH",
+      "B_PPITCH",
       x ? 1 : 0,
     );
     if (!ok) throw new Error("failed to set take preserve pitch");
