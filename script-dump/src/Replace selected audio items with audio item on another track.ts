@@ -176,6 +176,9 @@ function main() {
 
         // delete the target item
         target.delete();
+
+        // keep the new item selected
+        item.selected = true;
       });
     },
   );
