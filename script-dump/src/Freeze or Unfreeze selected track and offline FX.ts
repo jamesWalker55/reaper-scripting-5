@@ -46,6 +46,9 @@ function main() {
         runMainAction(ACTION_UNFREEZE);
         runMainAction(ACTION_SELECT_TRACK_CHILDREN);
         runMainAction(ACTION_TRACK_FX_ONLINE);
+        if (track.name.startsWith(`[FROZEN] `)) {
+          track.name = track.name.slice(`[FROZEN] `.length);
+        }
         // reselect track
         runMainAction(ACTION_UNSELECT_ALL_TRACKS);
         reaper.SetTrackSelected(track.obj, true);
@@ -63,6 +66,7 @@ function main() {
         runMainAction(ACTION_FREEZE_TO_STEREO);
         runMainAction(ACTION_SELECT_TRACK_CHILDREN);
         runMainAction(ACTION_TRACK_FX_OFFLINE);
+        track.name = `[FROZEN] ${track.name}`;
         // reselect track
         runMainAction(ACTION_UNSELECT_ALL_TRACKS);
         reaper.SetTrackSelected(track.obj, true);
