@@ -271,10 +271,10 @@ function main() {
       set.filterFrozenTracks();
 
       const externalSends = cloneSet(set.getMut());
+      const hasExternalSends = set.filterExternalSends();
+      subtractSetMut(externalSends, set.getMut());
 
-      if (set.filterExternalSends()) {
-        subtractSetMut(externalSends, set.getMut());
-
+      if (hasExternalSends) {
         const tracklist = setToArray(externalSends)
           .sort()
           .map((idx) => {
