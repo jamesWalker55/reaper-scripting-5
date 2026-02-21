@@ -213,6 +213,11 @@ function updateReaperSelection(tracks: LuaSet<number>) {
   }
 }
 
+function trackidxtostring(idx: number) {
+  const track = Track.getByIdx(idx);
+  return `- Track ${idx + 1} ${inspect(track.name)}`;
+}
+
 function main() {
   // get the selected track
   const track = (() => {
@@ -274,13 +279,34 @@ function main() {
       const hasExternalSends = set.filterExternalSends();
       subtractSetMut(externalSends, set.getMut());
 
+      // check if any tracks already contain offline FX, and abort if found
+      {
+        const tracksWithOfflineFx = setToArray(set.getMut())
+          .map((idx) => ({ idx, track: Track.getByIdx(idx) }))
+          .filter(({ track }) => {
+            for (const fx of track.getAllFx()) {
+              if (fx.isOffline()) return true;
+            }
+            return false;
+          });
+        if (tracksWithOfflineFx.length > 0) {
+          const tracklist = tracksWithOfflineFx
+            .map(({ idx }) => idx)
+            .sort()
+            .map((idx) => trackidxtostring(idx))
+            .join("\n");
+          msgBox(
+            "Error",
+            `Some tracks in the selection contain offline FX:\n\n${tracklist}\n\nPlease remove the offline FX (or freeze the track) before proceeding.`,
+          );
+          return;
+        }
+      }
+
       if (hasExternalSends) {
         const tracklist = setToArray(externalSends)
           .sort()
-          .map((idx) => {
-            const track = Track.getByIdx(idx);
-            return `- Track ${idx + 1} ${inspect(track.name)}`;
-          })
+          .map(trackidxtostring)
           .join("\n");
 
         const choice = confirmBox(
@@ -301,8 +327,6 @@ function main() {
         log(`  ${idx + 1} ${inspect(Track.getByIdx(idx).name)}`);
       }
     }
-
-    // TODO: check if there are any already-offline fx first, and warn
 
     undoBlock(UNDO_MSG_FREEZE, -1, () => {
       runMainAction(ACTION_FREEZE_TO_STEREO);
