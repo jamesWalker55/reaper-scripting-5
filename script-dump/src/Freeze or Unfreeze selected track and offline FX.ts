@@ -75,6 +75,14 @@ function isEmptySet<T extends AnyNotNil>(set: LuaSet<T>): boolean {
   return idx === null;
 }
 
+function setToArray<T extends AnyNotNil>(set: LuaSet<T>): T[] {
+  const result: T[] = [];
+  for (const x of set) {
+    result.push(x);
+  }
+  return result;
+}
+
 /**
  * Class for filtering out children tracks that meet certain criteria
  */
@@ -149,6 +157,8 @@ class ChildrenSet {
 
       if (!isFrozen(reaper.GetTrack(0, idx)!)) continue;
 
+      hasFrozenTracks = true;
+
       // track is frozen, ignore this track and its children
       const subtree = this.getTree(idx);
       subtractSetMut(this.result, subtree);
@@ -182,10 +192,6 @@ class ChildrenSet {
 
       // this track sends audio/midi outside our tree, handle it
       hasExternalSends = true;
-
-      log(
-        `Track ${idx + 1} ${inspect(Track.getByIdx(idx).name)} sends outside the selected track.`,
-      );
 
       // since this track sends outside the tree, all its dependencies need to be untouched as well
       const subtree = this.getTree(idx);
@@ -249,10 +255,16 @@ function main() {
     // freeze and offline all fx
 
     const set = new ChildrenSet(trackIdx);
+    const externalSends = cloneSet(set.getMut());
     if (set.filterExternalSends()) {
+      subtractSetMut(externalSends, set.getMut());
+      const tracksMsg = setToArray(externalSends)
+        .sort()
+        .map((idx) => `- Track ${idx + 1} ${inspect(Track.getByIdx(idx).name)}`)
+        .join("\n");
       const choice = confirmBox(
         "Warning",
-        "Some tracks in the selection send audio/MIDI to tracks outside the hierarchy. These tracks will be left online.\nProceed?",
+        `Some tracks in the selection send audio/MIDI to tracks outside the hierarchy:\n\n${tracksMsg}\n\nThese tracks will be left online. Proceed?`,
       );
       if (!choice) return;
     }
