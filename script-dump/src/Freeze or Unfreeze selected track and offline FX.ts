@@ -1,6 +1,6 @@
 AddCwdToImportPaths();
 
-import { getProjectRoutingInfo, Item, Take, Track } from "reaper-api/track";
+import { getProjectRoutingInfo, Track } from "reaper-api/track";
 import {
   confirmBox,
   errorHandler,
@@ -10,7 +10,6 @@ import {
   undoBlock,
 } from "reaper-api/utils";
 import * as Chunk from "reaper-api/chunk";
-import { copy } from "reaper-api/clipboard";
 import { inspect } from "reaper-api/inspect";
 
 const UNDO_MSG_FREEZE = "Freeze selected track and set all children FX offline";
@@ -22,7 +21,6 @@ const UNDO_MSG_SELECT_EXTERNAL_SENDS =
 const ACTION_FREEZE_TO_STEREO = 41223;
 const ACTION_UNFREEZE = 41644;
 const ACTION_UNSELECT_ALL_TRACKS = 40297;
-const ACTION_SELECT_TRACK_CHILDREN = "_SWS_SELCHILDREN2";
 const ACTION_TRACK_FX_OFFLINE = 40535;
 const ACTION_TRACK_FX_ONLINE = 40536;
 
