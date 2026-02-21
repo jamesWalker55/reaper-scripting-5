@@ -285,7 +285,7 @@ function main() {
 
         const choice = confirmBox(
           "Warning",
-          `Some tracks in the selection send audio/MIDI to tracks outside the hierarchy:\n\n${tracklist}\n\nThese tracks will be left online. Proceed?`,
+          `Some tracks in the selection send audio/MIDI to tracks outside the hierarchy:\n\n${tracklist}\n\n(I recommend you freeze these tracks separately)\n\nThese tracks will be left online. Proceed?`,
         );
         if (!choice) {
           // select the external-send tracks for convenience
