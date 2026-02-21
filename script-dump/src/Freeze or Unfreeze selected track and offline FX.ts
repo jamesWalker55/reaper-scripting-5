@@ -245,16 +245,19 @@ function main() {
 
       // unfreezing restores routing for this track, so we check children track now
       const set = new ChildrenSet(trackIdx);
-      if (set.filterFrozenTracks()) {
-        msgBox(
-          "Warning",
-          "Selected track contains other frozen tracks.\nThese tracks will be kept as-is.",
-        );
+      {
+        if (set.filterFrozenTracks()) {
+          msgBox(
+            "Warning",
+            "Selected track contains other frozen tracks.\nThese tracks will be kept as-is.",
+          );
+        }
+        log(`Set these tracks FX online`);
+        for (const idx of set.getMut()) {
+          log(`  ${idx + 1} ${inspect(Track.getByIdx(idx).name)}`);
+        }
       }
-      log(`Set these tracks FX online`);
-      for (const idx of set.getMut()) {
-        log(`  ${idx + 1} ${inspect(Track.getByIdx(idx).name)}`);
-      }
+
       set.updateReaperSelection();
       runMainAction(ACTION_TRACK_FX_ONLINE);
       // reselect track
@@ -264,40 +267,50 @@ function main() {
   } else {
     // freeze and offline all fx
 
+    // determine which child tracks to set offline
     const set = new ChildrenSet(trackIdx);
-    // filter frozen tracks BEFORE external sends.
-    // this avoids useless warnings when an external-send track is filtered-out later by frozen filter
-    const hasFrozenTracks = set.filterFrozenTracks();
+    {
+      // filter frozen tracks BEFORE external sends.
+      // this avoids useless warnings when an external-send track is filtered-out later by frozen filter
+      const hasFrozenTracks = set.filterFrozenTracks();
 
-    const externalSends = cloneSet(set.getMut());
-    if (set.filterExternalSends()) {
-      subtractSetMut(externalSends, set.getMut());
-      const tracksMsg = setToArray(externalSends)
-        .sort()
-        .map((idx) => `- Track ${idx + 1} ${inspect(Track.getByIdx(idx).name)}`)
-        .join("\n");
-      const choice = confirmBox(
-        "Warning",
-        `Some tracks in the selection send audio/MIDI to tracks outside the hierarchy:\n\n${tracksMsg}\n\nThese tracks will be left online. Proceed?`,
-      );
-      if (!choice) {
-        // select the external-send tracks for convenience
-        undoBlock(UNDO_MSG_SELECT_EXTERNAL_SENDS, 1, () => {
-          updateReaperSelection(externalSends);
-        });
-        return;
+      const externalSends = cloneSet(set.getMut());
+
+      if (set.filterExternalSends()) {
+        subtractSetMut(externalSends, set.getMut());
+
+        const tracklist = setToArray(externalSends)
+          .sort()
+          .map((idx) => {
+            const track = Track.getByIdx(idx);
+            return `- Track ${idx + 1} ${inspect(track.name)}`;
+          })
+          .join("\n");
+
+        const choice = confirmBox(
+          "Warning",
+          `Some tracks in the selection send audio/MIDI to tracks outside the hierarchy:\n\n${tracklist}\n\nThese tracks will be left online. Proceed?`,
+        );
+        if (!choice) {
+          // select the external-send tracks for convenience
+          undoBlock(UNDO_MSG_SELECT_EXTERNAL_SENDS, 1, () => {
+            updateReaperSelection(externalSends);
+          });
+          return;
+        }
       }
-    }
-    if (hasFrozenTracks) {
-      msgBox(
-        "Warning",
-        "Selected track contains other frozen tracks.\nThese tracks will be kept as-is.",
-      );
-    }
 
-    log(`Set these tracks FX offline`);
-    for (const idx of set.getMut()) {
-      log(`  ${idx + 1} ${inspect(Track.getByIdx(idx).name)}`);
+      if (hasFrozenTracks) {
+        msgBox(
+          "Warning",
+          "Selected track contains other frozen tracks.\nThese tracks will be kept as-is.",
+        );
+      }
+
+      log(`Set these tracks FX offline`);
+      for (const idx of set.getMut()) {
+        log(`  ${idx + 1} ${inspect(Track.getByIdx(idx).name)}`);
+      }
     }
 
     // TODO: check if there are any already-offline fx first, and warn
