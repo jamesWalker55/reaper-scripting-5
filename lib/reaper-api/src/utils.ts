@@ -92,15 +92,18 @@ export function msgBox(title: string, msg: string) {
   reaper.ShowMessageBox(msg, title, 0);
 }
 
+/** Yes/No */
 export function confirmBox(title: string, msg: string): boolean {
   const rv = reaper.ShowMessageBox(msg, title, 4);
   return rv === 6;
 }
 
 /**
- * Returns `true`/`false` for Yes/No.
+ * Yes/No/Cancel
  *
- * Returns `null` for Cancel.
+ * - Yes = `true`
+ * - No = `false`
+ * - Cancel = `null`
  */
 export function confirmOrCancelBox(title: string, msg: string): boolean | null {
   const rv = reaper.ShowMessageBox(msg, title, 3);
