@@ -327,7 +327,11 @@ function main() {
     }
 
     undoBlock(UNDO_MSG_FREEZE, -1, () => {
+      // unmute track before freezing, reaper doesn't let you freeze muted tracks
+      const wasMuted = track.muted;
+      if (wasMuted) track.muted = false;
       runMainAction(ACTION_FREEZE_TO_STEREO);
+      if (wasMuted) track.muted = true;
       track.name = `[FROZEN] ${track.name}`;
       set.updateReaperSelection();
       runMainAction(ACTION_TRACK_FX_OFFLINE);
