@@ -16,6 +16,8 @@ import { inspect } from "reaper-api/inspect";
 const UNDO_MSG_FREEZE = "Freeze selected track and set all children FX offline";
 const UNDO_MSG_UNFREEZE =
   "Unfreeze selected track and set all children FX online";
+const UNDO_MSG_SELECT_EXTERNAL_SENDS =
+  "Select tracks with external sends in current hierarchy";
 
 const ACTION_FREEZE_TO_STEREO = 41223;
 const ACTION_UNFREEZE = 41644;
@@ -203,6 +205,14 @@ class ChildrenSet {
   }
 }
 
+function updateReaperSelection(tracks: LuaSet<number>) {
+  runMainAction(ACTION_UNSELECT_ALL_TRACKS);
+  for (const idx of tracks) {
+    const track = reaper.GetTrack(0, idx)!;
+    reaper.SetTrackSelected(track, true);
+  }
+}
+
 function main() {
   // get the selected track
   const track = (() => {
@@ -270,7 +280,13 @@ function main() {
         "Warning",
         `Some tracks in the selection send audio/MIDI to tracks outside the hierarchy:\n\n${tracksMsg}\n\nThese tracks will be left online. Proceed?`,
       );
-      if (!choice) return;
+      if (!choice) {
+        // select the external-send tracks for convenience
+        undoBlock(UNDO_MSG_SELECT_EXTERNAL_SENDS, 1, () => {
+          updateReaperSelection(externalSends);
+        });
+        return;
+      }
     }
     if (hasFrozenTracks) {
       msgBox(
