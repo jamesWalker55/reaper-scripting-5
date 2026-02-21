@@ -31,6 +31,164 @@ function isFrozen(track: MediaTrack) {
   return Chunk.findElement(chunk, "FREEZE") !== null;
 }
 
+function cloneSet<T extends AnyNotNil>(set: LuaSet<T>): LuaSet<T> {
+  const result: LuaSet<T> = new LuaSet();
+  for (const x of set) {
+    result.add(x);
+  }
+  return result;
+}
+
+/** Get an element from the set, and also remove it from the set */
+function popSet<T extends AnyNotNil>(set: LuaSet<T>): T | null {
+  let result: T | null = null;
+  for (const x of set) {
+    result = x;
+    break;
+  }
+  if (result !== null) set.delete(result);
+  return result;
+}
+
+/**
+ * Set operation: `a - b`
+ *
+ * This mutates `a`.
+ */
+function subtractSetMut<T extends AnyNotNil>(
+  a: LuaSet<T>,
+  b: LuaSet<T>,
+): LuaSet<T> {
+  for (const x of b) {
+    a.delete(x);
+  }
+  return a;
+}
+
+/**
+ * Check if a set is empty.
+ *
+ * https://stackoverflow.com/questions/1252539/most-efficient-way-to-determine-if-a-lua-table-is-empty-contains-no-entries
+ */
+function isEmptySet<T extends AnyNotNil>(set: LuaSet<T>): boolean {
+  const [idx, val] = next(set);
+  return idx === null;
+}
+
+/**
+ * FREEZE:
+ * not all children tracks should be offlined, because they may route to
+ * other tracks
+ *
+ * UNFREEZE:
+ * not all children tracks should be onlined, because frozen track may
+ * contain nested frozen tracks
+ *
+ * find all children tracks this script should process and handle
+ *
+ * also, this will do some basic validation and show user-facing errors
+ */
+function getTracksToToggleOnlineState(rootIdx: number) {
+  const { sends, receives } = getProjectRoutingInfo();
+
+  /** Return all children idx for the given track, including the track itself */
+  function getTree(idx: number) {
+    const result: LuaSet<number> = new LuaSet();
+
+    result.add(idx);
+    const toCheck: number[] = [idx];
+
+    while (toCheck.length > 0) {
+      const idx = toCheck.pop()!;
+      for (const child of receives.get(idx) || []) {
+        if (result.has(child)) continue; // should not happen unless tracks are somehow routed in a loop
+
+        result.add(child);
+        toCheck.push(child);
+      }
+    }
+
+    return result;
+  }
+
+  // first, gather ALL track IDs that send to this track, recursively.
+  // i'm visualizing this as a tree of tracks, hence the name:
+  const tree: LuaSet<number> = getTree(rootIdx);
+
+  // now that we have ALL children track IDs, we can determine if any
+  // children tracks route OUTSIDE our tree
+  //
+  // those children cannot be simply offlined, so need to show a user warning
+  let warnedSendOutside = false;
+
+  /** tracks that indeed should be toggled */
+  const result: LuaSet<number> = cloneSet(tree);
+
+  // check for tracks that send OUTSIDE our tree.
+  // if found, subtract that track's TREE from our own TREE
+  // and show warning
+  //
+  // if we proceed anyway, we will skip this track and don't offline it
+  {
+    const toCheck = cloneSet(result);
+    while (!isEmptySet(toCheck)) {
+      const idx = popSet(toCheck)!;
+
+      // ignore main selected track
+      if (idx === rootIdx) continue;
+
+      // check if this track sends outside our tree
+      const sendsOutsideTree = (sends.get(idx) || []).some(
+        (target) => !tree.has(target),
+      );
+      if (!sendsOutsideTree) continue;
+
+      log(
+        `Track ${idx + 1} ${inspect(Track.getByIdx(idx).name)} sends outside the selected track.`,
+      );
+
+      // show warning, return early if aborting
+      if (!warnedSendOutside) {
+        warnedSendOutside = true;
+        const choice = confirmBox(
+          "Warning",
+          "Some children tracks have routing that sends outside your selected track.\nContinue anyway?",
+        );
+        if (!choice) return null;
+      }
+
+      // didn't abort, handle this track anyway
+      // since this track sends outside the tree, all its dependencies need to be untouched as well
+      const subtree = getTree(idx);
+      subtractSetMut(result, subtree);
+      subtractSetMut(toCheck, subtree);
+      continue;
+    }
+  }
+
+  // check for nested frozen tracks
+  // these are simply ignored
+  {
+    const toCheck = cloneSet(result);
+    while (!isEmptySet(toCheck)) {
+      const idx = popSet(toCheck)!;
+
+      // ignore main selected track
+      if (idx === rootIdx) continue;
+
+      if (!isFrozen(reaper.GetTrack(0, idx)!)) continue;
+
+      // track is frozen, ignore this track and its children
+      const subtree = getTree(idx);
+      subtractSetMut(result, subtree);
+      subtractSetMut(toCheck, subtree);
+      continue;
+    }
+  }
+
+  return result;
+}
+
 function main() {
   // get the selected track
   const track = (() => {
@@ -50,176 +208,6 @@ function main() {
     return;
   }
 
-  // FREEZE:
-  // not all children tracks should be offlined, because they may route to
-  // other tracks
-  //
-  // UNFREEZE:
-  // not all children tracks should be onlined, because frozen track may
-  // contain nested frozen tracks
-  //
-  // find all children tracks this script should process and handle
-  //
-  // also, this will do some basic validation and show user-facing errors
-  const tracksToToggleOnline = (() => {
-    const { sends, receives } = getProjectRoutingInfo();
-
-    /** Return all children idx for the given track, including the track itself */
-    function getTree(idx: number) {
-      const result: LuaSet<number> = new LuaSet();
-
-      result.add(trackIdx);
-      const toCheck: number[] = [trackIdx];
-
-      while (toCheck.length > 0) {
-        const idx = toCheck.pop()!;
-        for (const child of receives.get(idx) || []) {
-          if (result.has(child)) continue; // should not happen unless tracks are somehow routed in a loop
-
-          result.add(child);
-          toCheck.push(child);
-        }
-      }
-
-      return result;
-    }
-
-    function cloneSet<T extends AnyNotNil>(set: LuaSet<T>): LuaSet<T> {
-      const result: LuaSet<T> = new LuaSet();
-      for (const x of set) {
-        result.add(x);
-      }
-      return result;
-    }
-
-    /** Get an element from the set, and also remove it from the set */
-    function popSet<T extends AnyNotNil>(set: LuaSet<T>): T | null {
-      let result: T | null = null;
-      for (const x of set) {
-        result = x;
-        break;
-      }
-      if (result !== null) set.delete(result);
-      return result;
-    }
-
-    /**
-     * Set operation: `a - b`
-     *
-     * This mutates `a`.
-     */
-    function subtractSetMut<T extends AnyNotNil>(
-      a: LuaSet<T>,
-      b: LuaSet<T>,
-    ): LuaSet<T> {
-      for (const x of b) {
-        a.delete(x);
-      }
-      return a;
-    }
-
-    /**
-     * Check if a set is empty.
-     *
-     * https://stackoverflow.com/questions/1252539/most-efficient-way-to-determine-if-a-lua-table-is-empty-contains-no-entries
-     */
-    function isEmptySet<T extends AnyNotNil>(set: LuaSet<T>): boolean {
-      const [idx, val] = next(set);
-      return idx === null;
-    }
-
-    // first, gather ALL track IDs that send to this track, recursively.
-    // i'm visualizing this as a tree of tracks, hence the name:
-    const tree: LuaSet<number> = getTree(trackIdx);
-
-    // now that we have ALL children track IDs, we can determine if any
-    // children tracks route OUTSIDE our tree
-    //
-    // those children cannot be simply offlined, so need to show a user warning
-    let warnedSendOutside = false;
-
-    /** tracks that indeed should be toggled */
-    const result: LuaSet<number> = cloneSet(tree);
-
-    // check for tracks that send OUTSIDE our tree.
-    // if found, subtract that track's TREE from our own TREE
-    // and show warning
-    //
-    // if we proceed anyway, we will skip this track and don't offline it
-    {
-      const toCheck = cloneSet(result);
-      while (!isEmptySet(toCheck)) {
-        const idx = popSet(toCheck)!;
-
-        // ignore main selected track
-        if (idx === trackIdx) continue;
-
-        // check if this track sends outside our tree
-        const sendsOutsideTree = (sends.get(idx) || []).some(
-          (target) => !tree.has(target),
-        );
-        if (!sendsOutsideTree) continue;
-
-        log(
-          `Track ${idx + 1} ${inspect(Track.getByIdx(idx).name)} sends outside the selected track.`,
-        );
-
-        // show warning, return early if aborting
-        if (!warnedSendOutside) {
-          warnedSendOutside = true;
-          const choice = confirmBox(
-            "Warning",
-            "Some children tracks have routing that sends outside your selected track.\nContinue anyway?",
-          );
-          if (!choice) return null;
-        }
-
-        // didn't abort, handle this track anyway
-        // since this track sends outside the tree, all its dependencies need to be untouched as well
-        const subtree = getTree(idx);
-        subtractSetMut(result, subtree);
-        subtractSetMut(toCheck, subtree);
-        continue;
-      }
-    }
-
-    // check for nested frozen tracks
-    // these are simply ignored
-    {
-      const toCheck = cloneSet(result);
-      while (!isEmptySet(toCheck)) {
-        const idx = popSet(toCheck)!;
-
-        // ignore main selected track
-        if (idx === trackIdx) continue;
-
-        if (!isFrozen(reaper.GetTrack(0, idx)!)) continue;
-
-        // track is frozen, ignore this track and its children
-        const subtree = getTree(idx);
-        subtractSetMut(result, subtree);
-        subtractSetMut(toCheck, subtree);
-        continue;
-      }
-    }
-
-    return result;
-  })();
-  if (tracksToToggleOnline === null) return;
-
-  log(`To toggle these tracks online/offline`);
-  for (const idx of tracksToToggleOnline) {
-    log(`  ${idx + 1} ${inspect(Track.getByIdx(idx).name)}`);
-  }
-
-  copy(Chunk.track(track.obj))
-
-  // TODO: Logic almost complete, except:
-  // after freezing, all receives are disabled on reaper, so this logic does nothing
-  //
-  // you need to run this logic AFTER unfreezing
-  if (true as any) return;
-
   if (isFrozen(track.obj)) {
     // unfreeze and online all fx
 
@@ -227,6 +215,24 @@ function main() {
 
     undoBlock(UNDO_MSG_UNFREEZE, -1, () => {
       runMainAction(ACTION_UNFREEZE);
+
+      // unfreezing restores routing for this track, so we check children track now
+      const tracksToToggleOnline = getTracksToToggleOnlineState(trackIdx);
+      if (tracksToToggleOnline === null) return;
+
+      log(`To toggle these tracks online/offline`);
+      for (const idx of tracksToToggleOnline) {
+        log(`  ${idx + 1} ${inspect(Track.getByIdx(idx).name)}`);
+      }
+
+      copy(Chunk.track(track.obj));
+
+      // TODO: Logic almost complete, except:
+      // after freezing, all receives are disabled on reaper, so this logic does nothing
+      //
+      // you need to run this logic AFTER unfreezing
+      if (true as any) return;
+
       runMainAction(ACTION_SELECT_TRACK_CHILDREN);
       runMainAction(ACTION_TRACK_FX_ONLINE);
       if (track.name.startsWith(`[FROZEN] `)) {
@@ -238,6 +244,22 @@ function main() {
     });
   } else {
     // freeze and offline all fx
+
+    const tracksToToggleOnline = getTracksToToggleOnlineState(trackIdx);
+    if (tracksToToggleOnline === null) return;
+
+    log(`To toggle these tracks online/offline`);
+    for (const idx of tracksToToggleOnline) {
+      log(`  ${idx + 1} ${inspect(Track.getByIdx(idx).name)}`);
+    }
+
+    copy(Chunk.track(track.obj));
+
+    // TODO: Logic almost complete, except:
+    // after freezing, all receives are disabled on reaper, so this logic does nothing
+    //
+    // you need to run this logic AFTER unfreezing
+    if (true as any) return;
 
     // TODO: check if there are any already-offline fx first, and warn
 
