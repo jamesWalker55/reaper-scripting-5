@@ -255,6 +255,10 @@ function main() {
     // freeze and offline all fx
 
     const set = new ChildrenSet(trackIdx);
+    // filter frozen tracks BEFORE external sends.
+    // this avoids useless warnings when an external-send track is filtered-out later by frozen filter
+    const hasFrozenTracks = set.filterFrozenTracks();
+
     const externalSends = cloneSet(set.getMut());
     if (set.filterExternalSends()) {
       subtractSetMut(externalSends, set.getMut());
@@ -268,7 +272,7 @@ function main() {
       );
       if (!choice) return;
     }
-    if (set.filterFrozenTracks()) {
+    if (hasFrozenTracks) {
       msgBox(
         "Warning",
         "Selected track contains other frozen tracks.\nThese tracks will be kept as-is.",
