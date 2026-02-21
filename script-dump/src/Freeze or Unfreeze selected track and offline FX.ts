@@ -76,23 +76,31 @@ function isEmptySet<T extends AnyNotNil>(set: LuaSet<T>): boolean {
 }
 
 /**
- * FREEZE:
- * not all children tracks should be offlined, because they may route to
- * other tracks
- *
- * UNFREEZE:
- * not all children tracks should be onlined, because frozen track may
- * contain nested frozen tracks
- *
- * find all children tracks this script should process and handle
- *
- * also, this will do some basic validation and show user-facing errors
+ * Class for filtering out children tracks that meet certain criteria
  */
-function getTracksToToggleOnlineState(rootIdx: number) {
-  const { sends, receives } = getProjectRoutingInfo();
+class ChildrenSet {
+  private readonly trackIdx: number;
+  private sends: LuaTable<number, number[]>;
+  private receives: LuaTable<number, number[]>;
+
+  /** All children for the given track */
+  private tree: LuaSet<number>;
+  /** The filtered resulting tracks */
+  private result: LuaSet<number>;
+
+  constructor(trackIdx: number) {
+    this.trackIdx = trackIdx;
+
+    const { sends, receives } = getProjectRoutingInfo();
+    this.sends = sends;
+    this.receives = receives;
+
+    this.tree = this.getTree(trackIdx);
+    this.result = cloneSet(this.tree);
+  }
 
   /** Return all children idx for the given track, including the track itself */
-  function getTree(idx: number) {
+  private getTree(idx: number) {
     const result: LuaSet<number> = new LuaSet();
 
     result.add(idx);
@@ -100,7 +108,7 @@ function getTracksToToggleOnlineState(rootIdx: number) {
 
     while (toCheck.length > 0) {
       const idx = toCheck.pop()!;
-      for (const child of receives.get(idx) || []) {
+      for (const child of this.receives.get(idx) || []) {
         if (result.has(child)) continue; // should not happen unless tracks are somehow routed in a loop
 
         result.add(child);
@@ -111,82 +119,82 @@ function getTracksToToggleOnlineState(rootIdx: number) {
     return result;
   }
 
-  // first, gather ALL track IDs that send to this track, recursively.
-  // i'm visualizing this as a tree of tracks, hence the name:
-  const tree: LuaSet<number> = getTree(rootIdx);
+  getMut() {
+    return this.result;
+  }
 
-  // now that we have ALL children track IDs, we can determine if any
-  // children tracks route OUTSIDE our tree
-  //
-  // those children cannot be simply offlined, so need to show a user warning
-  let warnedSendOutside = false;
+  updateReaperSelection() {
+    runMainAction(ACTION_UNSELECT_ALL_TRACKS);
+    for (const idx of this.result) {
+      const track = reaper.GetTrack(0, idx)!;
+      reaper.SetTrackSelected(track, true);
+    }
+  }
 
-  /** tracks that indeed should be toggled */
-  const result: LuaSet<number> = cloneSet(tree);
+  /**
+   * Find frozen tracks within our children.
+   *
+   * Those tracks and their descendents are removed.
+   */
+  filterFrozenTracks(): boolean {
+    const toCheck = cloneSet(this.result);
 
-  // check for tracks that send OUTSIDE our tree.
-  // if found, subtract that track's TREE from our own TREE
-  // and show warning
-  //
-  // if we proceed anyway, we will skip this track and don't offline it
-  {
-    const toCheck = cloneSet(result);
+    // ignore main selected track
+    toCheck.delete(this.trackIdx);
+
+    let hasFrozenTracks = false;
+
     while (!isEmptySet(toCheck)) {
       const idx = popSet(toCheck)!;
 
-      // ignore main selected track
-      if (idx === rootIdx) continue;
+      if (!isFrozen(reaper.GetTrack(0, idx)!)) continue;
+
+      // track is frozen, ignore this track and its children
+      const subtree = this.getTree(idx);
+      subtractSetMut(this.result, subtree);
+      subtractSetMut(toCheck, subtree);
+    }
+
+    return hasFrozenTracks;
+  }
+
+  /**
+   * Find tracks that send audio/midi to tracks which aren't our children.
+   *
+   * Filter them out, and also remove all tracks that send to them.
+   */
+  filterExternalSends(): boolean {
+    const toCheck = cloneSet(this.result);
+
+    // ignore main selected track
+    toCheck.delete(this.trackIdx);
+
+    let hasExternalSends = false;
+
+    // check every track idx in the current result
+    while (!isEmptySet(toCheck)) {
+      const idx = popSet(toCheck)!;
+      const sends = this.sends.get(idx) || [];
 
       // check if this track sends outside our tree
-      const sendsOutsideTree = (sends.get(idx) || []).some(
-        (target) => !tree.has(target),
-      );
+      const sendsOutsideTree = sends.some((target) => !this.tree.has(target));
       if (!sendsOutsideTree) continue;
+
+      // this track sends audio/midi outside our tree, handle it
+      hasExternalSends = true;
 
       log(
         `Track ${idx + 1} ${inspect(Track.getByIdx(idx).name)} sends outside the selected track.`,
       );
 
-      // show warning, return early if aborting
-      if (!warnedSendOutside) {
-        warnedSendOutside = true;
-        const choice = confirmBox(
-          "Warning",
-          "Some children tracks have routing that sends outside your selected track.\nContinue anyway?",
-        );
-        if (!choice) return null;
-      }
-
-      // didn't abort, handle this track anyway
       // since this track sends outside the tree, all its dependencies need to be untouched as well
-      const subtree = getTree(idx);
-      subtractSetMut(result, subtree);
+      const subtree = this.getTree(idx);
+      subtractSetMut(this.result, subtree);
       subtractSetMut(toCheck, subtree);
-      continue;
     }
+
+    return hasExternalSends;
   }
-
-  // check for nested frozen tracks
-  // these are simply ignored
-  {
-    const toCheck = cloneSet(result);
-    while (!isEmptySet(toCheck)) {
-      const idx = popSet(toCheck)!;
-
-      // ignore main selected track
-      if (idx === rootIdx) continue;
-
-      if (!isFrozen(reaper.GetTrack(0, idx)!)) continue;
-
-      // track is frozen, ignore this track and its children
-      const subtree = getTree(idx);
-      subtractSetMut(result, subtree);
-      subtractSetMut(toCheck, subtree);
-      continue;
-    }
-  }
-
-  return result;
 }
 
 function main() {
@@ -215,29 +223,24 @@ function main() {
 
     undoBlock(UNDO_MSG_UNFREEZE, -1, () => {
       runMainAction(ACTION_UNFREEZE);
-
-      // unfreezing restores routing for this track, so we check children track now
-      const tracksToToggleOnline = getTracksToToggleOnlineState(trackIdx);
-      if (tracksToToggleOnline === null) return;
-
-      log(`To toggle these tracks online/offline`);
-      for (const idx of tracksToToggleOnline) {
-        log(`  ${idx + 1} ${inspect(Track.getByIdx(idx).name)}`);
-      }
-
-      copy(Chunk.track(track.obj));
-
-      // TODO: Logic almost complete, except:
-      // after freezing, all receives are disabled on reaper, so this logic does nothing
-      //
-      // you need to run this logic AFTER unfreezing
-      if (true as any) return;
-
-      runMainAction(ACTION_SELECT_TRACK_CHILDREN);
-      runMainAction(ACTION_TRACK_FX_ONLINE);
       if (track.name.startsWith(`[FROZEN] `)) {
         track.name = track.name.slice(`[FROZEN] `.length);
       }
+
+      // unfreezing restores routing for this track, so we check children track now
+      const set = new ChildrenSet(trackIdx);
+      if (set.filterFrozenTracks()) {
+        msgBox(
+          "Warning",
+          "Selected track contains other frozen tracks.\nThese tracks will be kept as-is.",
+        );
+      }
+      log(`Set these tracks FX online`);
+      for (const idx of set.getMut()) {
+        log(`  ${idx + 1} ${inspect(Track.getByIdx(idx).name)}`);
+      }
+      set.updateReaperSelection();
+      runMainAction(ACTION_TRACK_FX_ONLINE);
       // reselect track
       runMainAction(ACTION_UNSELECT_ALL_TRACKS);
       reaper.SetTrackSelected(track.obj, true);
@@ -245,29 +248,33 @@ function main() {
   } else {
     // freeze and offline all fx
 
-    const tracksToToggleOnline = getTracksToToggleOnlineState(trackIdx);
-    if (tracksToToggleOnline === null) return;
-
-    log(`To toggle these tracks online/offline`);
-    for (const idx of tracksToToggleOnline) {
-      log(`  ${idx + 1} ${inspect(Track.getByIdx(idx).name)}`);
+    const set = new ChildrenSet(trackIdx);
+    if (set.filterExternalSends()) {
+      const choice = confirmBox(
+        "Warning",
+        "Some tracks in the selection send audio/MIDI to tracks outside the hierarchy. These tracks will be left online.\nProceed?",
+      );
+      if (!choice) return;
+    }
+    if (set.filterFrozenTracks()) {
+      msgBox(
+        "Warning",
+        "Selected track contains other frozen tracks.\nThese tracks will be kept as-is.",
+      );
     }
 
-    copy(Chunk.track(track.obj));
-
-    // TODO: Logic almost complete, except:
-    // after freezing, all receives are disabled on reaper, so this logic does nothing
-    //
-    // you need to run this logic AFTER unfreezing
-    if (true as any) return;
+    log(`Set these tracks FX offline`);
+    for (const idx of set.getMut()) {
+      log(`  ${idx + 1} ${inspect(Track.getByIdx(idx).name)}`);
+    }
 
     // TODO: check if there are any already-offline fx first, and warn
 
     undoBlock(UNDO_MSG_FREEZE, -1, () => {
       runMainAction(ACTION_FREEZE_TO_STEREO);
-      runMainAction(ACTION_SELECT_TRACK_CHILDREN);
-      runMainAction(ACTION_TRACK_FX_OFFLINE);
       track.name = `[FROZEN] ${track.name}`;
+      set.updateReaperSelection();
+      runMainAction(ACTION_TRACK_FX_OFFLINE);
       // reselect track
       runMainAction(ACTION_UNSELECT_ALL_TRACKS);
       reaper.SetTrackSelected(track.obj, true);
