@@ -10,6 +10,10 @@ import {
 import * as Chunk from "reaper-api/chunk";
 import { copy } from "reaper-api/clipboard";
 
+const UNDO_MSG_FREEZE = "Freeze selected track and set all children FX offline";
+const UNDO_MSG_UNFREEZE =
+  "Unfreeze selected track and set all children FX online";
+
 const ACTION_FREEZE_TO_STEREO = 41223;
 const ACTION_UNFREEZE = 41644;
 const ACTION_UNSELECT_ALL_TRACKS = 40297;
@@ -39,39 +43,31 @@ function main() {
 
     // TODO: check if there are any already-online fx first, and warn
 
-    undoBlock(
-      "Unfreeze selected track and set all children FX online",
-      -1,
-      () => {
-        runMainAction(ACTION_UNFREEZE);
-        runMainAction(ACTION_SELECT_TRACK_CHILDREN);
-        runMainAction(ACTION_TRACK_FX_ONLINE);
-        if (track.name.startsWith(`[FROZEN] `)) {
-          track.name = track.name.slice(`[FROZEN] `.length);
-        }
-        // reselect track
-        runMainAction(ACTION_UNSELECT_ALL_TRACKS);
-        reaper.SetTrackSelected(track.obj, true);
-      },
-    );
+    undoBlock(UNDO_MSG_UNFREEZE, -1, () => {
+      runMainAction(ACTION_UNFREEZE);
+      runMainAction(ACTION_SELECT_TRACK_CHILDREN);
+      runMainAction(ACTION_TRACK_FX_ONLINE);
+      if (track.name.startsWith(`[FROZEN] `)) {
+        track.name = track.name.slice(`[FROZEN] `.length);
+      }
+      // reselect track
+      runMainAction(ACTION_UNSELECT_ALL_TRACKS);
+      reaper.SetTrackSelected(track.obj, true);
+    });
   } else {
     // freeze and offline all fx
 
     // TODO: check if there are any already-offline fx first, and warn
 
-    undoBlock(
-      "Freeze selected track and set all children FX offline",
-      -1,
-      () => {
-        runMainAction(ACTION_FREEZE_TO_STEREO);
-        runMainAction(ACTION_SELECT_TRACK_CHILDREN);
-        runMainAction(ACTION_TRACK_FX_OFFLINE);
-        track.name = `[FROZEN] ${track.name}`;
-        // reselect track
-        runMainAction(ACTION_UNSELECT_ALL_TRACKS);
-        reaper.SetTrackSelected(track.obj, true);
-      },
-    );
+    undoBlock(UNDO_MSG_FREEZE, -1, () => {
+      runMainAction(ACTION_FREEZE_TO_STEREO);
+      runMainAction(ACTION_SELECT_TRACK_CHILDREN);
+      runMainAction(ACTION_TRACK_FX_OFFLINE);
+      track.name = `[FROZEN] ${track.name}`;
+      // reselect track
+      runMainAction(ACTION_UNSELECT_ALL_TRACKS);
+      reaper.SetTrackSelected(track.obj, true);
+    });
   }
 }
 
