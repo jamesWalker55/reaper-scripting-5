@@ -246,12 +246,8 @@ function main() {
       // unfreezing restores routing for this track, so we check children track now
       const set = new ChildrenSet(trackIdx);
       {
-        if (set.filterFrozenTracks()) {
-          msgBox(
-            "Warning",
-            "Selected track contains other frozen tracks.\nThese tracks will be kept as-is.",
-          );
-        }
+        set.filterFrozenTracks();
+
         log(`Set these tracks FX online`);
         for (const idx of set.getMut()) {
           log(`  ${idx + 1} ${inspect(Track.getByIdx(idx).name)}`);
@@ -272,7 +268,7 @@ function main() {
     {
       // filter frozen tracks BEFORE external sends.
       // this avoids useless warnings when an external-send track is filtered-out later by frozen filter
-      const hasFrozenTracks = set.filterFrozenTracks();
+      set.filterFrozenTracks();
 
       const externalSends = cloneSet(set.getMut());
 
@@ -298,13 +294,6 @@ function main() {
           });
           return;
         }
-      }
-
-      if (hasFrozenTracks) {
-        msgBox(
-          "Warning",
-          "Selected track contains other frozen tracks.\nThese tracks will be kept as-is.",
-        );
       }
 
       log(`Set these tracks FX offline`);
