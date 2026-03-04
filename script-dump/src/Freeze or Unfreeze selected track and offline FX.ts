@@ -242,6 +242,11 @@ function main() {
 
     undoBlock(UNDO_MSG_UNFREEZE, -1, () => {
       runMainAction(ACTION_UNFREEZE);
+
+      // user may have aborted the freeze action, if reaper shows a message about unfreezing edits
+      // abort if track is still frozen
+      if (isFrozen(track.obj)) return;
+
       if (track.name.startsWith(`[FROZEN] `)) {
         track.name = track.name.slice(`[FROZEN] `.length);
       }
@@ -332,6 +337,11 @@ function main() {
       if (wasMuted) track.muted = false;
       runMainAction(ACTION_FREEZE_TO_STEREO);
       if (wasMuted) track.muted = true;
+
+      // freeze action might have done nothing, if it shows an error
+      // like "nothing to freeze"
+      if (!isFrozen(track.obj)) return;
+
       track.name = `[FROZEN] ${track.name}`;
       set.updateReaperSelection();
       runMainAction(ACTION_TRACK_FX_OFFLINE);
