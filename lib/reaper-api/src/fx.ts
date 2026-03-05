@@ -1303,16 +1303,24 @@ export class FXParam {
   }
 
   /** A wrapper for the FX's GetNamedConfigParm() to parse it as a number. */
-  private _parseParamConfig(name: string, fallback: number) {
+  private _parseParamConfig(name: string, fallback: number | null = null) {
     const text = this.chain.GetNamedConfigParm(
       this.fxidx,
       `param.${this.param}.${name}`,
     );
-    if (!text) return fallback;
+    if (!text) {
+      if (fallback === null)
+        throw new Error(
+          `failed to get named config parm "${inspect(name)}" - got null`,
+        );
+      return fallback satisfies number;
+    }
 
     const result = tonumber(text);
     if (result === undefined)
-      throw new Error("failed to parse named config parm as number");
+      throw new Error(
+        `failed to parse named config parm ${inspect(name)} as number: got ${inspect(text)}`,
+      );
 
     return result;
   }
@@ -1367,11 +1375,11 @@ export class FXParam {
     return path[path.length - 1];
   }
 
-  getTargetRelativeFxidx() {
+  parseTargetRelativeFxidx(plinkEffect: number) {
     // path obtained from `plink.effect`, will be a full path
     const { path, flags } = parseFxidx({
       ...this.chain.obj,
-      fxidx: this._parseParamConfig(`plink.effect`, 0),
+      fxidx: plinkEffect,
     });
     // parameter link only works with fx on the same level
     const { path: thisPath } = parseFxidx({
@@ -1394,50 +1402,61 @@ export class FXParam {
     if (!modActive) return null;
 
     const modInfo: ModulationInfo = {
-      baseline: this._parseParamConfig(`mod.baseline`, 0),
+      baseline: this._parseParamConfig(`mod.baseline`),
     };
 
     const lfoActive = this._parseParamConfig(`lfo.active`, 0) === 1;
     if (lfoActive) {
       modInfo.lfo = {
-        dir: this._parseParamConfig(`lfo.dir`, 1) as -1 | 0 | 1,
-        phase: this._parseParamConfig(`lfo.phase`, 0),
-        speed: this._parseParamConfig(`lfo.speed`, 1),
-        strength: this._parseParamConfig(`lfo.strength`, 1),
-        tempoSync: this._parseParamConfig(`lfo.temposync`, 0) === 1,
-        free: this._parseParamConfig(`lfo.free`, 0) === 1,
-        shape: this._parseParamConfig(`lfo.shape`, 0),
+        dir: this._parseParamConfig(`lfo.dir`) as -1 | 0 | 1,
+        phase: this._parseParamConfig(`lfo.phase`),
+        speed: this._parseParamConfig(`lfo.speed`),
+        strength: this._parseParamConfig(`lfo.strength`),
+        tempoSync: this._parseParamConfig(`lfo.temposync`) === 1,
+        free: this._parseParamConfig(`lfo.free`) === 1,
+        shape: this._parseParamConfig(`lfo.shape`),
       };
     }
 
     const acsActive = this._parseParamConfig(`acs.active`, 0) === 1;
     if (acsActive) {
       modInfo.acs = {
-        dir: this._parseParamConfig(`acs.dir`, 1) as -1 | 0 | 1,
-        strength: this._parseParamConfig(`acs.strength`, 1),
-        attack: this._parseParamConfig(`acs.attack`, 300),
-        release: this._parseParamConfig(`acs.release`, 300),
-        minVol: this._parseParamConfig(`acs.dblo`, -24),
-        maxVol: this._parseParamConfig(`acs.dbhi`, 0),
-        chan: this._parseParamConfig(`acs.chan`, -1),
-        stereo: this._parseParamConfig(`acs.stereo`, 0) === 1,
-        x2: this._parseParamConfig(`acs.x2`, 0.5),
-        y2: this._parseParamConfig(`acs.y2`, 0.5),
+        dir: this._parseParamConfig(`acs.dir`) as -1 | 0 | 1,
+        strength: this._parseParamConfig(`acs.strength`),
+        attack: this._parseParamConfig(`acs.attack`),
+        release: this._parseParamConfig(`acs.release`),
+        minVol: this._parseParamConfig(`acs.dblo`),
+        maxVol: this._parseParamConfig(`acs.dbhi`),
+        chan: this._parseParamConfig(`acs.chan`),
+        stereo: this._parseParamConfig(`acs.stereo`) === 1,
+        x2: this._parseParamConfig(`acs.x2`),
+        y2: this._parseParamConfig(`acs.y2`),
       };
     }
 
     const plinkActive = this._parseParamConfig(`plink.active`, 0) === 1;
     if (plinkActive) {
-      modInfo.plink = {
-        scale: this._parseParamConfig(`plink.scale`, 1),
-        offset: this._parseParamConfig(`plink.offset`, 0),
-        fxidx: this.getTargetRelativeFxidx(),
-        param: this._parseParamConfig(`plink.param`, -1),
-        midi_bus: this._parseParamConfig(`plink.midi_bus`, 0),
-        midi_chan: this._parseParamConfig(`plink.midi_chan`, 0),
-        midi_msg: this._parseParamConfig(`plink.midi_msg`, 0),
-        midi_msg2: this._parseParamConfig(`plink.midi_msg2`, 0),
-      };
+      // `param.X.plink.[active,scale,offset,effect,param,midi_bus,midi_chan,midi_msg,midi_msg2]` : parameter link/MIDI link: set effect=-100 to support midi_*
+      const plinkEffect = this._parseParamConfig(`plink.effect`);
+      if (plinkEffect === -100) {
+        // midi
+        modInfo.plink = {
+          scale: this._parseParamConfig(`plink.scale`),
+          offset: this._parseParamConfig(`plink.offset`),
+          midi_bus: this._parseParamConfig(`plink.midi_bus`),
+          midi_chan: this._parseParamConfig(`plink.midi_chan`),
+          midi_msg: this._parseParamConfig(`plink.midi_msg`),
+          midi_msg2: this._parseParamConfig(`plink.midi_msg2`),
+        };
+      } else {
+        // fx
+        modInfo.plink = {
+          scale: this._parseParamConfig(`plink.scale`),
+          offset: this._parseParamConfig(`plink.offset`),
+          fxidx: this.parseTargetRelativeFxidx(plinkEffect),
+          param: this._parseParamConfig(`plink.param`),
+        };
+      }
     }
 
     return modInfo;
@@ -1478,12 +1497,14 @@ export class FXParam {
     if (modInfo.plink) {
       this._setParamConfig(`plink.scale`, modInfo.plink.scale);
       this._setParamConfig(`plink.offset`, modInfo.plink.offset);
-      this._setParamConfig(`plink.effect`, modInfo.plink.fxidx);
 
-      if (modInfo.plink.param !== undefined)
+      if ("fxidx" in modInfo.plink) {
+        // fx
+        this._setParamConfig(`plink.effect`, modInfo.plink.fxidx);
         this._setParamConfig(`plink.param`, modInfo.plink.param);
-
-      if ("midi_bus" in modInfo.plink) {
+      } else {
+        // midi
+        this._setParamConfig(`plink.effect`, -100);
         this._setParamConfig(`plink.midi_bus`, modInfo.plink.midi_bus);
         this._setParamConfig(`plink.midi_chan`, modInfo.plink.midi_chan);
         this._setParamConfig(`plink.midi_msg`, modInfo.plink.midi_msg);
@@ -1533,41 +1554,39 @@ export type ModulationInfo = {
     free: boolean; // "Phase reset" in modulation window
   };
   /** parameter link (to midi or other fx param) */
-  plink?:
+  plink?: {
+    offset: number;
+    /** -1.0--1.0 */
+    scale: number;
+  } & (
     | {
-        offset: number;
-        scale: number;
+        /** set when target is MIDI */
+        midi_bus: number;
+        /** set when target is MIDI */
+        midi_chan: number;
+        /** set when target is MIDI */
+        midi_msg: number;
+        /** set when target is MIDI */
+        midi_msg2: number;
+      }
+    | {
         /**
-         * 'effect', will be '-100' if linked to MIDI
-         *
-         * set when target is FX
+         * set both when target is FX
          *
          * For container FX, this is complicated:
          * - FX in the same level will be normal non-container fxidx, even if they are in a container
          *
          * You cannot parameter link from/to container FX, so this will always be **fxidx within the same level**
          */
-        fxidx: number; // 'effect', will be '-100' if linked to MIDI
-
+        fxidx: number;
         /**
          * param idx
          *
          * set when target is FX
          */
-        param?: number; // param idx
-      } & (
-        | {
-            /** set when target is MIDI */
-            midi_bus: number;
-            /** set when target is MIDI */
-            midi_chan: number;
-            /** set when target is MIDI */
-            midi_msg: number;
-            /** set when target is MIDI */
-            midi_msg2: number;
-          }
-        | {}
-      );
+        param: number; // param idx
+      }
+  );
   // MIDI/OSC Learn
   // I have no fucking clue what this is
   // learn: {
