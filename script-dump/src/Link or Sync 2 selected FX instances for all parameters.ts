@@ -28,20 +28,24 @@ function main() {
     return;
   }
   const paramCount = b.getParameterCount();
-  undoBlock("Link / Sync 2 selected FX instances for all parameters", 2, () => {
-    for (let i = 0; i < paramCount; i++) {
-      const pb = b.getParameter(i);
-      pb.setModulation({
-        baseline: 0.0,
-        plink: {
-          fxidx: a.fxidx,
-          param: pb.param,
-          offset: 0.0,
-          scale: 1.0,
-        },
-      });
-    }
-  });
+  undoBlock(
+    "Link / Sync 2 selected FX instances for all parameters",
+    -1,
+    () => {
+      for (let i = 0; i < paramCount; i++) {
+        const pb = b.getParameter(i);
+        pb.setModulation({
+          baseline: 0.0,
+          plink: {
+            fxidx: a.fxidx,
+            param: pb.param,
+            offset: 0.0,
+            scale: 1.0,
+          },
+        });
+      }
+    },
+  );
 }
 
 errorHandler(main);
