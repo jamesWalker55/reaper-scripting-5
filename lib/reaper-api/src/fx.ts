@@ -735,6 +735,10 @@ export class FX {
     return this.getParameterUnchecked(param);
   }
 
+  getParameterCount() {
+    return this.chain.GetNumParams(this.fxidx);
+  }
+
   getParameters() {
     const totalCount = this.chain.GetNumParams(this.fxidx);
     const result = [];
