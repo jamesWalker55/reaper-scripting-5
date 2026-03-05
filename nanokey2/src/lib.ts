@@ -159,7 +159,8 @@ function serializeScene(x: Scene): number[] {
   return midiData;
 }
 
-function createSceneDataDumpMessage(x: Scene, channel: number = 0): number[] {
+/** The channel must match the same channel the keyboard is using. */
+function createSceneDataDumpMessage(x: Scene, channel: number): number[] {
   const msg = [];
 
   // Exclusive Header  g;Global Channel  [Hex]
@@ -182,11 +183,13 @@ function createSceneDataDumpMessage(x: Scene, channel: number = 0): number[] {
 
 /** Update the device to use the scene */
 export function pushSceneToDevice(x: Scene) {
-  const msg = createSceneDataDumpMessage(x);
-
   const port = getOutputPort();
 
-  reaper.SendMIDIMessageToHardware(port, bytestring(msg));
+  for (let i = 0; i < 16; i++) {
+    const msg = createSceneDataDumpMessage(x, i);
+
+    reaper.SendMIDIMessageToHardware(port, bytestring(msg));
+  }
 }
 
 /** Save whatever setting is on device as default */
