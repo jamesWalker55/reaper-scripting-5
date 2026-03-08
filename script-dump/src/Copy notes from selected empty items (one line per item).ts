@@ -1,6 +1,6 @@
 AddCwdToImportPaths();
 
-import { encode } from "json";
+import { encode } from "reaper-api/json";
 import { copy } from "reaper-api/clipboard";
 import { Item } from "reaper-api/track";
 import { confirmOrCancelBox, errorHandler } from "reaper-api/utils";

@@ -1,6 +1,6 @@
 AddCwdToImportPaths();
 
-import { encode } from "json";
+import { encode } from "reaper-api/json";
 import { copy, paste } from "reaper-api/clipboard";
 import { inspect } from "reaper-api/inspect";
 import { loadInstalledFX } from "reaper-api/installedFx";

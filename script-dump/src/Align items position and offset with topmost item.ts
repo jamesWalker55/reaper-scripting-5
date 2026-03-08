@@ -1,6 +1,6 @@
 AddCwdToImportPaths();
 
-import { encode } from "json";
+import { encode } from "reaper-api/json";
 import { OSType } from "reaper-api/ffi";
 import { Item, Track } from "reaper-api/track";
 import { errorHandler, log, undoBlock } from "reaper-api/utils";

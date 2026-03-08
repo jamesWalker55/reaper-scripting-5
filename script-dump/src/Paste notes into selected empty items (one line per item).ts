@@ -1,6 +1,6 @@
 AddCwdToImportPaths();
 
-import { encode } from "json";
+import { encode } from "reaper-api/json";
 import { paste } from "reaper-api/clipboard";
 import { Item } from "reaper-api/track";
 import { errorHandler, getScriptPath, undoBlock } from "reaper-api/utils";

@@ -4,9 +4,8 @@
   "type": "module",
   "dependencies": {},
   "devDependencies": {
-    "json": "link:json.lua",
     "lua-types": "^2.13.1",
-    "reaper-api": "link:reaper-api",
+    "reaper-api": "file:../lib/reaper-api/dist",
     "typescript": "^5.9.3",
     "typescript-to-lua": "^1.33.2"
   }
