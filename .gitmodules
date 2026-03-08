@@ -1,0 +1,3 @@
+[submodule "lib/reaper-api"]
+	path = lib/reaper-api
+	url = git@github.com:jamesWalker55/reaper-api-ts.git
