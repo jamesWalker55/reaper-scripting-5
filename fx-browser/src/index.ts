@@ -398,8 +398,23 @@ function main() {
           ctx.layoutRow([-1], ctx.style.padding * 2 + 1);
           divider(ctx);
 
-          ctx.layoutRow([-1], 0);
-          verticalLayout = ctx.checkbox("Vertical layout", verticalLayout);
+          // ctx.layoutRow([-1], 0);
+          // verticalLayout = ctx.checkbox("Vertical layout", verticalLayout);
+
+          ctx.layoutRow([200], 0);
+          ctx.textbox(
+            "fxfolders_favourite_folder",
+            CONFIG.read("fxfolders_favourite_folder") || "",
+            undefined,
+            (res, buf) => {},
+          );
+
+          ctx.layoutRow([200], 0);
+          ctx.label(`Window size: ${gfx.w} x ${gfx.h}`);
+          if (ctx.button("Set current size as default")) {
+            CONFIG.set("window_width", gfx.w);
+            CONFIG.set("window_height", gfx.h);
+          }
 
           ctx.layoutRow([-1], ctx.style.padding * 2 + 1);
           divider(ctx);

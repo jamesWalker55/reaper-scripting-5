@@ -22,6 +22,12 @@ export function get<T extends keyof typeof CONFIG>(
   }
 }
 
+export function read<T extends keyof typeof CONFIG>(
+  key: T,
+): (typeof CONFIG)[T] {
+  return CONFIG[key];
+}
+
 export function set<T extends keyof typeof CONFIG>(
   key: T,
   val: NonNullable<(typeof CONFIG)[T]>,
