@@ -17,36 +17,39 @@ export function fxUid(fx: FxInfo): string {
 const CATEGORY_SEPARATOR = "\\";
 
 export function getCategories() {
-  // get initial data
   const fxfolders = loadFXFolders();
 
-  const fxNames: Record<
+  /** map from plugin ident to info */
+  const installedFXNames: Record<
     string,
     { prefix: string | null; name: string } | undefined
   > = {};
   for (const fx of loadInstalledFX()) {
     const colonIndex = fx.displayName.indexOf(": ");
     if (colonIndex === -1) {
-      fxNames[fx.ident] = {
+      installedFXNames[fx.ident] = {
         name: fx.displayName,
         prefix: null,
       };
     } else {
-      fxNames[fx.ident] = {
+      installedFXNames[fx.ident] = {
         name: fx.displayName.slice(colonIndex + 2, fx.displayName.length),
         prefix: fx.displayName.slice(0, colonIndex),
       };
     }
   }
 
-  // processing to group data
-  // =======
-  // record of category name to folders, names split into category/stem
+  // variables to be returned:
+
+  /**
+   * map from category name to folders (folder name is split into category/stem)
+   * (actually a list to preserve insertion order)
+   */
   const categories: {
     category: string;
     folders: { id: string; name: string }[];
   }[] = [];
-  function getCategory(name: string) {
+  function getCategory(name: string): (typeof categories)[number] {
     const existing = categories.find((x) => x.category === name);
     if (existing) return existing;
 
@@ -54,11 +57,11 @@ export function getCategories() {
     categories.push(result);
     return result;
   }
-  // map from folder ID to FX set (serialised)
+  /** map from folder ID to FX UID set */
   const folderFx: Record<string, LuaSet<string>> = {};
-  // a set of favourited FX (serialised)
+  /** set of fx UIDs */
   const favouriteFx: LuaSet<string> = new LuaSet();
-  // map from stringified FX to its info
+  /** map from fx UID to info */
   const fxMap: Record<
     string,
     {
@@ -70,14 +73,12 @@ export function getCategories() {
       isInstrument: boolean | null;
     }
   > = {};
-  // =======
+
   for (const folder of fxfolders) {
     // temp: ignore this folder
     if (folder.name === "Ignored") continue;
-
     // skip empty folders
     if (folder.items.length === 0) continue;
-
     // skip smart folders
     if (
       folder.items.length === 1 &&
@@ -86,12 +87,12 @@ export function getCategories() {
       continue;
     }
 
-    // categorise the current folder
+    // determine what category is this folder?
     let targetSet: LuaSet<string>;
     let favouriteFolderId: string | null = null;
-
     if (folder.name === FOLDER_NAME_FAVOURITES && favouriteFolderId === null) {
       // 1. Favourites
+      // there can only be 1 favourites folder
       // only handle the first "Favourites" folder, ignore all others
       favouriteFolderId = folder.id;
       const category = getCategory(DEFAULT_CATEGORY);
@@ -139,18 +140,18 @@ export function getCategories() {
       }
 
       // check if the ident is found in Reaper
-      const display = fxNames[fx.ident];
-      if (!display) continue;
+      const installed = installedFXNames[fx.ident];
+      if (!installed) continue;
 
       // parse FX and add to FX map
       targetSet.add(uid);
       fxMap[uid] = {
         uid,
         ident: fx.ident,
-        name: display.name,
+        name: installed.name,
         type: fx.type,
-        prefix: display.prefix,
-        isInstrument: display.prefix?.endsWith("i") ?? null,
+        prefix: installed.prefix,
+        isInstrument: installed.prefix?.endsWith("i") ?? null,
       };
     }
   }
