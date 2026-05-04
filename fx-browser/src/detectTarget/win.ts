@@ -1,15 +1,10 @@
+/**
+ * Windows implementation
+ */
+
 import { parseFxidx } from "reaper-api/fx";
 import { Item } from "reaper-api/track";
-
-const OS = reaper.GetOS();
-
-function isWindows() {
-  return OS.toLowerCase().startsWith("win");
-}
-
-function assertWindowsOnly() {
-  if (!isWindows()) throw new Error("Only Windows is supported");
-}
+import { type FXTarget } from ".";
 
 const FXCHAIN_WINDOW_TITLE_PREFIX = reaper.LocalizeString("FX: ", "fx", 0);
 
@@ -20,10 +15,9 @@ const FXCHAIN_WINDOW_TITLE_PREFIX = reaper.LocalizeString("FX: ", "fx", 0);
  *
  * Note: `identifier`, `HWND`, `FxChain` are all interchangable, they are just hwnds
  */
-function getFocusedFxChainWin(): identifier | null {
+function getFocusedFxChain(): identifier | null {
   // the JS_Window classname and title functions only work correctly on Windows, see:
   // https://forum.cockos.com/showthread.php?t=213189
-  assertWindowsOnly();
 
   for (
     let hwnd: identifier | null = reaper.JS_Window_GetFocus();
@@ -52,10 +46,9 @@ function getFocusedFxChainWin(): identifier | null {
   return null;
 }
 
-function arrangementIsFocusedWin(): boolean {
+function arrangementIsFocused(): boolean {
   // the JS_Window classname and title functions only work correctly on Windows, see:
   // https://forum.cockos.com/showthread.php?t=213189
-  assertWindowsOnly();
 
   for (
     let hwnd: identifier | null = reaper.JS_Window_GetFocus();
@@ -70,26 +63,11 @@ function arrangementIsFocusedWin(): boolean {
   return false;
 }
 
-export type FXTarget =
-  | {
-      target: "track";
-      track: MediaTrack;
-      fxpath: { path: number[]; flags: number };
-    }
-  | {
-      target: "take";
-      track: MediaTrack;
-      item: MediaItem;
-      take: MediaItem_Take;
-      fxpath: { path: number[]; flags: number };
-    };
-
-function getFXTargetWin(): FXTarget | null {
+export function getFXTarget(): FXTarget | null {
   // the JS_Window classname and title functions only work correctly on Windows, see:
   // https://forum.cockos.com/showthread.php?t=213189
-  assertWindowsOnly();
 
-  const focusedFxChain = getFocusedFxChainWin();
+  const focusedFxChain = getFocusedFxChain();
   if (focusedFxChain) {
     // we are currently focused on an fx chain, try to use `GetTouchedOrFocusedFX`
 
@@ -206,7 +184,7 @@ function getFXTargetWin(): FXTarget | null {
 
   // if focus on arrange view, and only 1 item selected...
   // ...target that item
-  if (arrangementIsFocusedWin()) {
+  if (arrangementIsFocused()) {
     const selectedCount = reaper.CountSelectedMediaItems(0);
     if (selectedCount === 1) {
       const item = Item.getSelected()[0];
@@ -229,26 +207,6 @@ function getFXTargetWin(): FXTarget | null {
   }
 
   // otherwise, target the last touched track
-  const track = reaper.GetLastTouchedTrack();
-  if (!track) return null;
-
-  return {
-    target: "track",
-    track,
-    fxpath: {
-      path: [],
-      flags: 0,
-    },
-  };
-}
-
-export function getFXTarget(): FXTarget | null {
-  if (isWindows()) {
-    return getFXTargetWin();
-  }
-
-  // fallback implementation
-  // just insert to the last focused track
   const track = reaper.GetLastTouchedTrack();
   if (!track) return null;
 
