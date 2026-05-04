@@ -2,10 +2,11 @@ import { AddFxParams, generateFxidx } from "reaper-api/fx";
 import { inspect } from "reaper-api/inspect";
 import { FXFolderItemType } from "reaper-api/installedFx";
 import { Take, Track } from "reaper-api/track";
-import { assertUnreachable, ensureAPI, errorHandler } from "reaper-api/utils";
+import { assertUnreachable, errorHandler } from "reaper-api/utils";
 import { createContext, Option, Response } from "reaper-microui";
 import { getCategories } from "./categories";
 import { getFXTarget } from "./detectTarget";
+import * as CONFIG from "./settings";
 import {
   addFxText,
   divider,
@@ -313,17 +314,17 @@ function main() {
   let initialSendToVKB = VirtualKeyboard.isSendToVKB();
 
   {
-    const WINDOW_WIDTH = 600;
-    const WINDOW_HEIGHT = 702;
+    const windowWidth = CONFIG.get("window_width", 600);
+    const windowHeight = CONFIG.get("window_height", 702);
     const viewport = getScreenViewport();
     const windowPos = {
-      x: (viewport.left + viewport.right) / 2 - WINDOW_WIDTH / 2,
-      y: (viewport.top + viewport.bottom) / 2 - WINDOW_HEIGHT / 2,
+      x: (viewport.left + viewport.right) / 2 - windowWidth / 2,
+      y: (viewport.top + viewport.bottom) / 2 - windowHeight / 2,
     };
     gfx.init(
       "FX Browser",
-      WINDOW_WIDTH,
-      WINDOW_HEIGHT,
+      windowWidth,
+      windowHeight,
       undefined,
       windowPos.x,
       windowPos.y,

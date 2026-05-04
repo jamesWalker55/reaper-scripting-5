@@ -1,6 +1,8 @@
 import { TypedSection } from "reaper-api/extstate";
 
 const CONFIG = TypedSection("JW_FX_Browser", {
+  window_width: "number",
+  window_height: "number",
   fxfolders_separator: "string",
   fxfolders_favourite_folder: "string",
   fxfolders_ignored_folders: "json",
