@@ -4,9 +4,7 @@ import {
   loadInstalledFX,
 } from "reaper-api/installedFx";
 import * as path from "reaper-api/path/path";
-
-const FOLDER_NAME_FAVOURITES = "Favourites";
-const DEFAULT_CATEGORY = "Default";
+import * as CONFIG from "./settings";
 
 export type FxInfo = { ident: string; type: number };
 
@@ -14,10 +12,14 @@ export function fxUid(fx: FxInfo): string {
   return `${fx.type}\n${fx.ident}`;
 }
 
-const CATEGORY_SEPARATOR = "\\";
-
 export function getCategories() {
-  const fxfolders = loadFXFolders();
+  const FOLDER_NAMES_IGNORED = CONFIG.getIgnoredFolders(["Ignored"]);
+  const FOLDER_NAME_FAVOURITES = CONFIG.get(
+    "fxfolders_favourite_folder",
+    "Favourites",
+  );
+  const DEFAULT_CATEGORY = CONFIG.get("fxfolders_default_category", "Default");
+  const CATEGORY_SEPARATOR = CONFIG.get("fxfolders_separator", "\\");
 
   /** map from plugin ident to info */
   const installedFXNames: Record<
@@ -74,9 +76,9 @@ export function getCategories() {
     }
   > = {};
 
-  for (const folder of fxfolders) {
-    // temp: ignore this folder
-    if (folder.name === "Ignored") continue;
+  for (const folder of loadFXFolders()) {
+    // skip ignored folders
+    if (FOLDER_NAMES_IGNORED.includes(folder.name)) continue;
     // skip empty folders
     if (folder.items.length === 0) continue;
     // skip smart folders
