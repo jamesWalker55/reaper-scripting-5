@@ -1,0 +1,17 @@
+{
+  "name": "reaper-api",
+  "type": "module",
+  "version": "0.0.1",
+  "types": "./index.d.ts",
+  "main": "./index",
+  "scripts": {
+    "prepack": "just copy-files"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "lua-types": "^2.14.1",
+    "typescript": "^5.9.3",
+    "typescript-to-lua": "^1.33.2"
+  },
+  "private": true
+}
