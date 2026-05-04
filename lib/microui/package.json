@@ -9,12 +9,11 @@
   "types": "./build/index.d.ts",
   "main": "./build/index",
   "dependencies": {
-    "json": "link:json.lua",
-    "reaper-api": "link:reaper-api"
+    "reaper-api": "file:../reaper-api/dist"
   },
   "devDependencies": {
-    "typescript": "5.6.2",
-    "typescript-to-lua": "^1.27.0",
-    "lua-types": "^2.13.1"
+    "typescript": "^5.9.3",
+    "typescript-to-lua": "^1.36.0",
+    "lua-types": "^2.14.1"
   }
 }
