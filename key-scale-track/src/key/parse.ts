@@ -1,4 +1,5 @@
 import { encode } from "reaper-api/json";
+import { Key, Mode, ModeAlt, ScaleNote, Tonic } from ".";
 
 type Span = { buf: string; offset: number; length: number };
 type Result<T> =
@@ -193,49 +194,12 @@ function integer(i: Span, maxLength: number): Result<number> {
   }
 }
 
-enum Tonic {
-  C = 0,
-  CS,
-  D,
-  DS,
-  E,
-  F,
-  FS,
-  G,
-  GS,
-  A,
-  AS,
-  B,
-}
 /** Convert 0 to C, 1 to C#, 2 to D, ... */
 function toTonic(x: number): Tonic {
   while (x < 0) x += 12;
   x = Math.round(x % 12);
   return x as Tonic; // x should be 0..=11, so the same as `Note` type
 }
-
-enum Mode {
-  /** Major */
-  Ionian,
-  Dorian,
-  Phrygian,
-  Lydian,
-  Mixolydian,
-  /** Minor */
-  Aeolian,
-  Locrian,
-}
-
-type ScaleNote = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
-
-/** modify a note in the scale, e.g. "lydian b7" */
-type ModeAlt = { [K in ScaleNote]?: number };
-
-type Key = {
-  tonic: Tonic;
-  mode: Mode;
-  alt?: ModeAlt;
-};
 
 /** Parse a single letter (e.g. "D") as the scale, case sensitive */
 function parseTonicLetter(i: Span): Result<Key> {
