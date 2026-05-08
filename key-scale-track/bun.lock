@@ -6,6 +6,7 @@
       "name": "key-scale-track",
       "devDependencies": {
         "lua-types": "^2.13.1",
+        "microui": "file:../lib/microui",
         "reaper-api": "file:../lib/reaper-api/dist",
         "typescript": "^5.9.3",
         "typescript-to-lua": "^1.33.2",
@@ -29,6 +30,8 @@
 
     "lua-types": ["lua-types@2.14.1", "", {}, "sha512-+EbnTjF+Bbfp5xmpfT0O9AZgC5J6Oq6jRnZei3HLb0pbWuCRHmdnIVRPIgEpUncWvHq21DHB2qTHhA4xGceHHg=="],
 
+    "microui": ["reaper-microui@file:../lib/microui", { "dependencies": { "reaper-api": "file:../reaper-api/dist" }, "devDependencies": { "lua-types": "^2.14.1", "typescript": "^5.9.3", "typescript-to-lua": "^1.36.0" } }],
+
     "path-parse": ["path-parse@1.0.7", "", {}, "sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw=="],
 
     "picomatch": ["picomatch@2.3.2", "", {}, "sha512-V7+vQEJ06Z+c5tSye8S+nHUfI51xoXIXjHQ99cQtKUkQqqO1kO/KCJUfZXuB47h/YBlDhah2H3hdUGXn8ie0oA=="],
@@ -46,5 +49,7 @@
     "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
     "typescript-to-lua": ["typescript-to-lua@1.36.0", "", { "dependencies": { "@typescript-to-lua/language-extensions": "1.19.0", "enhanced-resolve": "5.8.2", "picomatch": "^2.3.1", "resolve": "^1.15.1", "source-map": "^0.7.3" }, "peerDependencies": { "typescript": "6.0.2" }, "bin": { "tstl": "dist/tstl.js" } }, "sha512-OrBYbOVkg5fEmiaxcejb6lPw5B2Iqq1X/76x9YRa+UItci3eC6EObgbabqjJOZIYC1O2/KV7oRh2NPdrniriHw=="],
+
+    "microui/reaper-api": ["reaper-api@file:..\\lib\\reaper-api\\dist", {}],
   }
 }

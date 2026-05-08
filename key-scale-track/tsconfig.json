@@ -18,12 +18,13 @@
     "noImplicitReturns": true,
     "pretty": true,
     // === google gts config ===
+    "noUncheckedIndexedAccess": true,
     "strict": true
   },
   "tstl": {
     // Uncomment to bundle into one file
-    // "luaBundle": "Output Script.lua",
-    // "luaBundleEntry": "src/index.ts",
+    "luaBundle": "JW_Key_Scale_Track.lua",
+    "luaBundleEntry": "src/index.ts",
     "luaPlugins": [{ "name": "reaper-api/plugins/importFixPlugin.js" }],
     "luaTarget": "5.4",
     "luaLibImport": "require-minimal",

@@ -617,6 +617,26 @@ export class Item {
     if (!rv) throw new Error("failed to delete item");
   }
 
+  get notes() {
+    const [ok, rv] = reaper.GetSetMediaItemInfo_String(
+      this.obj,
+      "P_NOTES",
+      "",
+      false,
+    );
+    if (!ok) throw new Error("failed to get item notes");
+    return rv;
+  }
+  set notes(x: string) {
+    const [ok, rv] = reaper.GetSetMediaItemInfo_String(
+      this.obj,
+      "P_NOTES",
+      x,
+      true,
+    );
+    if (!ok) throw new Error("failed to get item notes");
+  }
+
   get color() {
     const x = reaper.GetMediaItemInfo_Value(this.obj, "I_CUSTOMCOLOR");
     if (x === 0) return null;
