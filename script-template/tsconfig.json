@@ -18,6 +18,7 @@
     "noImplicitReturns": true,
     "pretty": true,
     // === google gts config ===
+    "noUncheckedIndexedAccess": true,
     "strict": true
   },
   "tstl": {
