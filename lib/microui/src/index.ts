@@ -49,9 +49,9 @@ export function createContext(): ReaperContext {
  * Main loop for a microUI GUI. Use {@link createContext} to create a context first.
  *
  * Example code:
- * - {@link demoSimple}
- * - {@link demoSingleWindow}
- * - {@link demoMultiWindow}
+ * - demoSimple: lib/microui/src/index.ts:727
+ * - demoSingleWindow: lib/microui/src/index.ts:595
+ * - demoMultiWindow: lib/microui/src/index.ts:356
  */
 export function microUILoop(
   ctx: ReaperContext,
