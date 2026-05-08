@@ -10,7 +10,7 @@ import {
 } from "reaper-api/utils";
 import * as JSON from "reaper-api/json";
 import { createContext, microUILoop, Option } from "microui";
-import { parseKey } from "./key";
+import { keyToString, parseKey } from "./key";
 
 const LABEL_TRACK_NAME = "KEY";
 const MIDI_TRACK_NAME = "SCALE";
@@ -147,7 +147,13 @@ function main() {
       for (const item of labels) {
         const notes = item.notes;
         const parsed = parseKey(notes);
-        log(`${notes} -> ${JSON.encode(parsed)}`);
+        if ("key" in parsed) {
+          log(
+            `${notes} -> ${keyToString(parsed.key)} + ${JSON.encode(parsed.rest)}`,
+          );
+        } else {
+          log(`${notes} -> err: ${parsed.err}`);
+        }
       }
 
       return null;
