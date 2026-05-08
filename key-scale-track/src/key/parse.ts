@@ -1,5 +1,5 @@
 import { encode } from "reaper-api/json";
-import { Key, Mode, ModeAlt, ScaleNote, Tonic } from ".";
+import { Key, Mode, ModeAlt, ScaleNote, Tonic } from "./types";
 
 type Span = { buf: string; offset: number; length: number };
 type Result<T> =
