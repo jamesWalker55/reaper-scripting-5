@@ -490,7 +490,7 @@ function parseKeyInternal(i: Span): Result<Key> {
   // mode is not specified explicitly yet, try to parse a whole keyword " lydian"
   if (explicitMode === "none") {
     res = opt<Mode | "none">(
-      preceded(space1, alt(parseModeName, parseModeShortName)),
+      preceded(space1, alt(parseModeName, parseModeShortName, parseModeLetter)),
       "none",
     )(i);
     if (!("ok" in res)) return res;
