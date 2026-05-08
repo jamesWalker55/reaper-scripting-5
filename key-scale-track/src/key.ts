@@ -95,11 +95,14 @@ function preceded<T>(
   };
 }
 
-function opt<T>(parser: (i: Span) => Result<T>): (i: Span) => Result<T | null> {
+function opt<T>(
+  parser: (i: Span) => Result<T>,
+  def: T,
+): (i: Span) => Result<T> {
   return (i: Span) => {
     const res = parser(i);
     if ("err" in res) {
-      return { ok: null, i };
+      return { ok: def, i };
     } else {
       return res;
     }
@@ -470,7 +473,7 @@ function parseKeyInternal(i: Span): Result<Key> {
   const key = res.ok;
 
   // parse any sharp or flats "#"
-  res = parseSharpFlatChain(i);
+  res = opt(parseSharpFlatChain, 0)(i);
   if (!("ok" in res)) return res;
   i = res.i;
   const rootAdjust = res.ok;
@@ -479,31 +482,34 @@ function parseKeyInternal(i: Span): Result<Key> {
   key.tonic = toTonic(key.tonic + rootAdjust);
 
   // parse the "m" immediately after if any
-  res = opt(alt(parseModeShortName, parseModeLetter))(i);
+  res = opt<Mode | "none">(alt(parseModeShortName, parseModeLetter), "none")(i);
   if (!("ok" in res)) return res;
   i = res.i;
-  let explicitMode = res.ok;
+  let explicitMode: Mode | "none" = res.ok;
 
   // mode is not specified explicitly yet, try to parse a whole keyword " lydian"
-  if (explicitMode === null) {
-    res = opt(preceded(space1, alt(parseModeName, parseModeShortName)))(i);
+  if (explicitMode === "none") {
+    res = opt<Mode | "none">(
+      preceded(space1, alt(parseModeName, parseModeShortName)),
+      "none",
+    )(i);
     if (!("ok" in res)) return res;
     i = res.i;
     explicitMode = res.ok;
   }
 
   // assign the mode if set
-  if (explicitMode !== null) {
+  if (explicitMode !== "none") {
     key.mode = explicitMode;
   }
 
   // parse any tweaks to the scale " b7"
-  res = opt(preceded(space1, parseModeAlt))(i);
+  res = opt<ModeAlt | "none">(preceded(space1, parseModeAlt), "none")(i);
   if (!("ok" in res)) return res;
   i = res.i;
-  const modeAlt = res.ok;
+  const modeAlt: ModeAlt | "none" = res.ok;
 
-  if (modeAlt) {
+  if (modeAlt !== "none") {
     key.alt = modeAlt;
   }
 
