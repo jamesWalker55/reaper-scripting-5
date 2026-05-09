@@ -138,6 +138,7 @@ function main() {
   })();
 
   let prevSectionHash = "temp";
+  let paused = false;
 
   createDeferredWindow(
     (ctx, stop) => {
@@ -172,6 +173,7 @@ function main() {
       );
       const sectionHash = hashKeySections(sections) + endPos;
       if (
+        !paused &&
         ticker("sectionupdate", 10) === 0 &&
         sectionHash !== prevSectionHash
       ) {
@@ -226,11 +228,16 @@ function main() {
         prevSectionHash = sectionHash;
       }
 
-      ctx.layoutRow([-40, -1], 0);
+      ctx.layoutRow([-85, -40, -1], 0);
       ctx.label(
-        `Monitoring label track${".".repeat(3 - math.floor(ticker("dots", 40) / (40 / 3)))}`,
+        paused
+          ? `Updates paused.`
+          : `Monitoring label track${".".repeat(3 - math.floor(ticker("dots", 40) / (40 / 3)))}`,
       );
-      if (ctx.button(`Stop`)) {
+      if (ctx.button(paused ? `Start` : `Pause`)) {
+        paused = !paused;
+      }
+      if (ctx.button(`Exit`)) {
         stop();
       }
 
