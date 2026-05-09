@@ -232,6 +232,11 @@ function main() {
             const evts = keyToMidiEvents(first.key, endPPQ);
             take.midibuf = midibuf.serialiseBuf(evts, true);
           }
+
+          // make the midi editor update after scale change
+          for (const { take } of midiItems) {
+            reaper.MIDI_RefreshEditors(take.obj);
+          }
         }
 
         prevSectionHash = sectionHash;
