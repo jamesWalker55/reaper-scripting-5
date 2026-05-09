@@ -27,6 +27,13 @@ export type OffsetNote = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 /** Relative position, mode dependent, where 0 = <tonic note> */
 export type ScaleNote = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
+/**
+ * right now everything is hard-coded assuming all scales have 7 notes.
+ * i.e. this doesn't support blues scale (6 notes)
+ *
+ * TODO: rename Mode to Scale, and make scale interval info available at
+ * `parsing.ts` to validate ModeAlt (rename it too)
+ */
 export enum Mode {
   /** Major */
   Ionian,
