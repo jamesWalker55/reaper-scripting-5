@@ -1,6 +1,6 @@
 AddCwdToImportPaths();
 
-import { Item, Track } from "reaper-api/track";
+import { Item, MidiTake, Track } from "reaper-api/track";
 import {
   clearConsole,
   errorHandler,
@@ -173,14 +173,40 @@ function main() {
         labels.map((x) => ({ text: x.notes, pos: x.position })),
       );
       const sectionHash = hashKeySections(sections) + endPos;
-      if (
-        !paused &&
-        ticker("sectionupdate", 10) === 0 &&
-        sectionHash !== prevSectionHash
-      ) {
-        // only update when sections have changed
-        for (const item of tracks.midi.allItems()) {
-          item.delete();
+      // only update when sections have changed
+      if (!paused && sectionHash !== prevSectionHash) {
+        // create/delete items to match section count
+        const midiItems: {
+          item: Item;
+          take: MidiTake;
+        }[] = tracks.midi
+          .allItems()
+          .map((item) => {
+            const take = item.activeTake()?.asTypedTake() || null;
+            if (take?.TYPE === "MIDI") {
+              return { item, take };
+            } else {
+              return null;
+            }
+          })
+          .filter((x) => x !== null);
+        while (midiItems.length > sections.length)
+          midiItems.pop()?.item.delete();
+        while (midiItems.length < sections.length) {
+          const last = midiItems[midiItems.length - 1];
+          const start = last ? last.item.position + last.item.length : 0;
+          const item = new Item(
+            reaper.CreateNewMIDIItemInProj(
+              tracks.midi.obj,
+              start,
+              start + 1,
+              false,
+            ),
+          );
+          const take = item.activeTake()?.asTypedTake() || null;
+          if (take === null || take.TYPE !== "MIDI")
+            throw new Error("failed to get midi item take");
+          midiItems.push({ item, take });
         }
 
         if (sections.length > 0) {
@@ -188,29 +214,23 @@ function main() {
             const prev = sections[i - 1];
             const first = sections[i]!;
             const second = sections[i + 1];
+            const { item, take } = midiItems[i]!;
 
             const firstEnd = second ? second.pos : endPos;
             const circleStep = prev ? circleSteps(prev.key, first.key) : null;
 
-            const item = new Item(
-              reaper.CreateNewMIDIItemInProj(
-                tracks.midi.obj,
-                first.pos,
-                firstEnd,
-                false,
-              ),
-            );
-            const take = item.activeTake();
-            if (take === null) throw new Error("failed to get midi item take");
+            item.position = first.pos;
+            item.length = firstEnd - first.pos;
+            take.name = circleStep
+              ? `${stringifyKey(first.key)} (${stringifyCircleStep(circleStep)})`
+              : `${stringifyKey(first.key)}`;
+
             const endPPQ = reaper.MIDI_GetPPQPosFromProjTime(
               take.obj,
               firstEnd,
             );
             const evts = keyToMidiEvents(first.key, endPPQ);
             take.midibuf = midibuf.serialiseBuf(evts, true);
-            take.name = circleStep
-              ? `${stringifyKey(first.key)} (${stringifyCircleStep(circleStep)})`
-              : `${stringifyKey(first.key)}`;
           }
         }
 
