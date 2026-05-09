@@ -153,10 +153,10 @@ function main() {
             ? parseKey(notes)
             : parseKeyOrTranspose(notes, prevKey);
         if ("ok" in parsed) {
-          log(`${notes} -> ${stringifyKey(parsed.ok)}`);
+          log(`${JSON.encode(notes)} -> ${stringifyKey(parsed.ok)}`);
           prevKey = parsed.ok;
         } else {
-          log(`${notes} -> err: ${parsed.err}`);
+          log(`${JSON.encode(notes)} -> err: ${parsed.err}`);
         }
       }
 
