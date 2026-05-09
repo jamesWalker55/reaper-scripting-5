@@ -1,5 +1,5 @@
 import { encode } from "reaper-api/json";
-import { Key, Mode, ModeAlt, Pitch, ScaleNote } from "./types";
+import { Key, Mode, ModeAlt, Pitch, ScaleNote, wrapPitch } from "./types";
 
 type Span = { buf: string; offset: number; length: number };
 type Result<T> =
@@ -192,13 +192,6 @@ function integer(i: Span, maxLength: number): Result<number> {
     const parsed = parseInt(result);
     return { ok: parsed, i: Span.consume(i, result.length) };
   }
-}
-
-/** Convert 0 to C, 1 to C#, 2 to D, ... */
-function toPitch(x: number): Pitch {
-  while (x < 0) x += 12;
-  x = Math.round(x % 12);
-  return x as Pitch; // x should be 0..=11, so the same as `Note` type
 }
 
 /** Parse a single letter (e.g. "D") as the scale, case sensitive */
@@ -443,7 +436,7 @@ function parseKeyInternal(i: Span): Result<Key> {
   const rootAdjust = res.ok;
 
   // shift the tonic based on the sharp/flat
-  key.tonic = toPitch(key.tonic + rootAdjust);
+  key.tonic = wrapPitch(key.tonic + rootAdjust);
 
   // parse the "m" immediately after if any
   res = opt<Mode | "none">(alt(parseModeShortName, parseModeLetter), "none")(i);

@@ -14,6 +14,13 @@ export enum Pitch {
   B,
 }
 
+/** Convert 0 to C, 1 to C#, 2 to D, ... */
+export function wrapPitch(x: number): Pitch {
+  while (x < 0) x += 12;
+  x = Math.round(x % 12);
+  return x as Pitch; // x should be 0..=11, so the same as `Note` type
+}
+
 /** Relative position, mode independent, where 0 = <tonic note> */
 export type OffsetNote = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 
