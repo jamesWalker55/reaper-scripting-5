@@ -492,3 +492,41 @@ export function parseKey(
     throw new Error("unreachable");
   }
 }
+
+/** Parse `+1`, `-3` */
+function parseTranspose(i: Span): Result<number> {
+  let res, left;
+
+  [left, i] = Span.split(i, 1);
+
+  const firstChar = Span.get(left);
+  const isPositive =
+    firstChar === "+" ? true : firstChar === "-" ? false : null;
+  if (isPositive === null) return { err: true };
+
+  res = integer(i, 2);
+  if (!("ok" in res)) return res;
+  i = res.i;
+  const amount = res.ok;
+
+  return { ok: isPositive ? amount : -amount, i };
+}
+
+/** Parse `>1`, `<3` */
+function parseStep(i: Span): Result<number> {
+  let res, left;
+
+  [left, i] = Span.split(i, 1);
+
+  const firstChar = Span.get(left);
+  const isPositive =
+    firstChar === ">" ? true : firstChar === "<" ? false : null;
+  if (isPositive === null) return { err: true };
+
+  res = integer(i, 2);
+  if (!("ok" in res)) return res;
+  i = res.i;
+  const amount = res.ok;
+
+  return { ok: isPositive ? amount : -amount, i };
+}
