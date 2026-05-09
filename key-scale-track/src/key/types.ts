@@ -1,3 +1,4 @@
+/** Absolute position, where 0 = C */
 export enum Tonic {
   C = 0,
   CS,
@@ -13,6 +14,9 @@ export enum Tonic {
   B,
 }
 
+/** Relative position, where 0 = <tonic note> */
+export type ScaleNote = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+
 export enum Mode {
   /** Major */
   Ionian,
@@ -24,8 +28,6 @@ export enum Mode {
   Aeolian,
   Locrian,
 }
-
-export type ScaleNote = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 
 /** modify a note in the scale, e.g. "lydian b7" */
 export type ModeAlt = { [K in ScaleNote]?: number };
