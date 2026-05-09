@@ -1,6 +1,6 @@
 import { keyToPitches } from "./resolve";
 import { Key, Mode, ModeAlt, Pitch, ScaleNote, wrapPitch } from "./types";
-import { pitchDistance } from "./utils";
+import { pitchDistance } from "../utils";
 
 const PITCHES_NORMAL = {
   [Pitch.C]: "C",
