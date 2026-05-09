@@ -147,8 +147,8 @@ function main() {
       for (const item of labels) {
         const notes = item.notes;
         const parsed = parseKey(notes);
-        if ("key" in parsed) {
-          log(`${notes} -> ${keyToString(parsed.key)}`);
+        if ("ok" in parsed) {
+          log(`${notes} -> ${keyToString(parsed.ok)}`);
         } else {
           log(`${notes} -> err: ${parsed.err}`);
         }

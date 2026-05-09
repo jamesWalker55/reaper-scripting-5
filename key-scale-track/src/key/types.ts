@@ -54,3 +54,14 @@ export type Key = {
   mode: Mode;
   alt?: ModeAlt;
 };
+
+export function cloneKey(x: Key): Key {
+  const rv: Key = {
+    tonic: x.tonic,
+    mode: x.mode,
+  };
+  if (x.alt !== undefined) {
+    rv.alt = { ...x.alt };
+  }
+  return rv;
+}

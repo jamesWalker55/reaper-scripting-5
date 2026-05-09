@@ -1,5 +1,14 @@
 import { encode } from "reaper-api/json";
-import { Key, Mode, ModeAlt, Pitch, ScaleNote, wrapPitch } from "./types";
+import {
+  cloneKey,
+  Key,
+  Mode,
+  ModeAlt,
+  Pitch,
+  ScaleNote,
+  wrapPitch,
+} from "./types";
+import { walkCircle } from "./circle";
 
 type Span = { buf: string; offset: number; length: number };
 type Result<T> =
@@ -154,6 +163,25 @@ function cut<T>(
   };
 }
 
+function finalize<T>(res: Result<T>): { ok: T } | { err: string } {
+  if ("ok" in res) {
+    if (res.i.length !== 0) {
+      // input not fully consumed, treat this as error
+      return {
+        err: `unknown text: ${encode(Span.get(res.i))}`,
+      };
+    }
+    return { ok: res.ok };
+  } else if ("err" in res) {
+    return { err: "unhandled error" };
+  } else if ("failure" in res) {
+    return { err: res.failure };
+  } else {
+    res satisfies never;
+    throw new Error("unreachable");
+  }
+}
+
 function space1(i: Span): Result<Span> {
   const text = Span.get(i);
   const [result] = string.match(text, `^%s+`);
@@ -192,8 +220,9 @@ function tag(expected: string): (i: Span) => Result<Span> {
   };
 }
 
-function integer(i: Span, maxLength: number): Result<number> {
-  const first3chars = Span.get(Span.split(i, maxLength)[0]);
+/** Parse an integer with max length of 2 digits */
+function shortinteger(i: Span): Result<number> {
+  const first3chars = Span.get(Span.split(i, 2)[0]);
   const [result] = string.match(first3chars, `^%d+`);
   if (result === undefined) {
     // no number found
@@ -380,7 +409,7 @@ function parseModeShortName(i: Span): Result<Mode> {
 function parseNoteNumber(i: Span): Result<ScaleNote> {
   let res;
 
-  res = integer(i, 2);
+  res = shortinteger(i);
   if (!("ok" in res)) return res;
   i = res.i;
   const val = res.ok;
@@ -487,31 +516,13 @@ function parseKeyInternal(i: Span): Result<Key> {
   return { ok: key, i };
 }
 
-export function parseKey(text: string): { key: Key } | { err: string } {
-  text = text.trim();
-
-  const res = parseKeyInternal({ buf: text, offset: 0, length: text.length });
-  if ("ok" in res) {
-    const key = res.ok;
-    if (res.i.length !== 0) {
-      // input not fully consumed, treat this as error
-      return {
-        err: `unknown text: ${encode(Span.get(res.i))}`,
-      };
-    }
-    return { key };
-  } else if ("err" in res) {
-    return { err: "unhandled error" };
-  } else if ("failure" in res) {
-    return { err: res.failure };
-  } else {
-    res satisfies never;
-    throw new Error("unreachable");
-  }
+export function parseKey(text: string): { ok: Key } | { err: string } {
+  const span: Span = { buf: text.trim(), offset: 0, length: text.length };
+  return finalize(parseKeyInternal(span));
 }
 
-/** Parse `+1`, `-3` */
-function parseTranspose(i: Span): Result<number> {
+/** Parse a transpose `+1`, `-3` */
+function parseShift(i: Span): Result<number> {
   let res, left;
 
   [left, i] = Span.split(i, 1);
@@ -521,7 +532,7 @@ function parseTranspose(i: Span): Result<number> {
     firstChar === "+" ? true : firstChar === "-" ? false : null;
   if (isPositive === null) return { err: true };
 
-  res = integer(i, 2);
+  res = cut(shortinteger, "expected an integer")(i);
   if (!("ok" in res)) return res;
   i = res.i;
   const amount = res.ok;
@@ -529,7 +540,7 @@ function parseTranspose(i: Span): Result<number> {
   return { ok: isPositive ? amount : -amount, i };
 }
 
-/** Parse `>1`, `<3` */
+/** Parse a circle step `>1`, `<3` */
 function parseStep(i: Span): Result<number> {
   let res, left;
 
@@ -540,10 +551,38 @@ function parseStep(i: Span): Result<number> {
     firstChar === ">" ? true : firstChar === "<" ? false : null;
   if (isPositive === null) return { err: true };
 
-  res = integer(i, 2);
+  res = cut(shortinteger, "expected an integer")(i);
   if (!("ok" in res)) return res;
   i = res.i;
   const amount = res.ok;
 
   return { ok: isPositive ? amount : -amount, i };
+}
+
+export function parseKeyOrTranspose(
+  text: string,
+  prevKey: Key,
+): { ok: Key } | { err: string } {
+  const span: Span = { buf: text.trim(), offset: 0, length: text.length };
+
+  // transpose key
+  const shift = parseShift(span);
+  if ("ok" in shift) {
+    const rv = cloneKey(prevKey);
+    rv.tonic = wrapPitch(rv.tonic + shift.ok);
+    return { ok: rv };
+  } else if ("failure" in shift) {
+    return { err: shift.failure };
+  }
+
+  // step in circle of fifths
+  const step = parseStep(span);
+  if ("ok" in step) {
+    const rv = walkCircle(prevKey, step.ok);
+    return { ok: rv };
+  } else if ("failure" in step) {
+    return { err: step.failure };
+  }
+
+  return finalize(parseKeyInternal(span));
 }

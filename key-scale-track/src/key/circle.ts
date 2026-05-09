@@ -1,5 +1,5 @@
 import { encode } from "reaper-api/json";
-import { Key, Mode, Pitch, wrapPitch } from "./types";
+import { cloneKey, Key, Mode, Pitch, wrapPitch } from "./types";
 
 const CIRCLE: [
   Pitch,
@@ -72,9 +72,8 @@ export function walkCircle(start: Key, distance: number): Key {
 
   const endNorm = CIRCLE[endPos]!;
 
-  return {
-    tonic: wrapPitch(start.tonic - startNorm + endNorm),
-    mode: start.mode,
-    alt: { ...start.alt },
-  };
+  const rv = cloneKey(start);
+  rv.tonic = wrapPitch(start.tonic - startNorm + endNorm);
+
+  return rv;
 }
