@@ -496,7 +496,7 @@ export function parseKey(text: string): { key: Key } | { err: string } {
     if (res.i.length !== 0) {
       // input not fully consumed, treat this as error
       return {
-        err: `extraneous text after key definition: ${encode(Span.get(res.i))}`,
+        err: `unknown text: ${encode(Span.get(res.i))}`,
       };
     }
     return { key };
