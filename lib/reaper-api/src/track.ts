@@ -972,6 +972,17 @@ export class Take {
     );
     if (!ok) throw new Error("failed to set take preserve pitch");
   }
+
+  /** The raw unparsed MIDI string data. Use the `midibuf` module to parse/generate this data. */
+  get midibuf() {
+    const [ok, buf] = reaper.MIDI_GetAllEvts(this.obj);
+    if (!ok) throw new Error("failed to get take midibuf");
+    return buf;
+  }
+  set midibuf(buf: string) {
+    const ok = reaper.MIDI_SetAllEvts(this.obj, buf);
+    if (!ok) throw new Error("failed to set take midibuf");
+  }
 }
 
 export class MidiTake extends Take {
