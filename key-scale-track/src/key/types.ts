@@ -1,5 +1,5 @@
 /** Absolute position, where 0 = C */
-export enum Tonic {
+export enum Pitch {
   C = 0,
   CS,
   D,
@@ -15,7 +15,7 @@ export enum Tonic {
 }
 
 /** Relative position, where 0 = <tonic note> */
-export type ScaleNote = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+export type OffsetNote = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 
 export enum Mode {
   /** Major */
@@ -30,10 +30,10 @@ export enum Mode {
 }
 
 /** modify a note in the scale, e.g. "lydian b7" */
-export type ModeAlt = { [K in ScaleNote]?: number };
+export type ModeAlt = { [K in OffsetNote]?: number };
 
 export type Key = {
-  tonic: Tonic;
+  tonic: Pitch;
   mode: Mode;
   alt?: ModeAlt;
 };

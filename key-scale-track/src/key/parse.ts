@@ -1,5 +1,5 @@
 import { encode } from "reaper-api/json";
-import { Key, Mode, ModeAlt, ScaleNote, Tonic } from "./types";
+import { Key, Mode, ModeAlt, OffsetNote, Pitch } from "./types";
 
 type Span = { buf: string; offset: number; length: number };
 type Result<T> =
@@ -195,14 +195,14 @@ function integer(i: Span, maxLength: number): Result<number> {
 }
 
 /** Convert 0 to C, 1 to C#, 2 to D, ... */
-function toTonic(x: number): Tonic {
+function toPitch(x: number): Pitch {
   while (x < 0) x += 12;
   x = Math.round(x % 12);
-  return x as Tonic; // x should be 0..=11, so the same as `Note` type
+  return x as Pitch; // x should be 0..=11, so the same as `Note` type
 }
 
 /** Parse a single letter (e.g. "D") as the scale, case sensitive */
-function parseTonicLetter(i: Span): Result<Key> {
+function parsePitchLetter(i: Span): Result<Key> {
   let left;
   [left, i] = Span.split(i, 1);
 
@@ -370,7 +370,7 @@ function parseModeShortName(i: Span): Result<Mode> {
 }
 
 /** Parse `7` in `lydian b7`, limited to 0..=11 */
-function parseNoteNumber(i: Span): Result<ScaleNote> {
+function parseNoteNumber(i: Span): Result<OffsetNote> {
   let res;
 
   res = integer(i, 2);
@@ -379,14 +379,14 @@ function parseNoteNumber(i: Span): Result<ScaleNote> {
   const val = res.ok;
 
   if ([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].includes(val)) {
-    return { ok: val as ScaleNote, i };
+    return { ok: val as OffsetNote, i };
   } else {
     return { err: true };
   }
 }
 
 /** Parse `b7` in `lydian b7` */
-function parseModeAltTerm(i: Span): Result<{ note: ScaleNote; amt: number }> {
+function parseModeAltTerm(i: Span): Result<{ note: OffsetNote; amt: number }> {
   let res;
 
   res = parseSharpFlatChain(i);
@@ -431,7 +431,7 @@ function parseKeyInternal(i: Span): Result<Key> {
   let res;
 
   // parse the initial root name "C"
-  res = parseTonicLetter(i);
+  res = parsePitchLetter(i);
   if (!("ok" in res)) return res;
   i = res.i;
   const key = res.ok;
@@ -443,7 +443,7 @@ function parseKeyInternal(i: Span): Result<Key> {
   const rootAdjust = res.ok;
 
   // shift the tonic based on the sharp/flat
-  key.tonic = toTonic(key.tonic + rootAdjust);
+  key.tonic = toPitch(key.tonic + rootAdjust);
 
   // parse the "m" immediately after if any
   res = opt<Mode | "none">(alt(parseModeShortName, parseModeLetter), "none")(i);

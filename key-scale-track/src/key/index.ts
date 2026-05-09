@@ -1,32 +1,32 @@
-import { Key, Tonic, Mode, ModeAlt, ScaleNote } from "./types";
+import { Key, Pitch, Mode, ModeAlt, OffsetNote } from "./types";
 
 export { parseKey } from "./parse";
 
-function tonicToString(x: Tonic): string {
+function pitchToString(x: Pitch): string {
   switch (x) {
-    case Tonic.C:
+    case Pitch.C:
       return "C";
-    case Tonic.CS:
+    case Pitch.CS:
       return "C#";
-    case Tonic.D:
+    case Pitch.D:
       return "D";
-    case Tonic.DS:
+    case Pitch.DS:
       return "D#";
-    case Tonic.E:
+    case Pitch.E:
       return "E";
-    case Tonic.F:
+    case Pitch.F:
       return "F";
-    case Tonic.FS:
+    case Pitch.FS:
       return "F#";
-    case Tonic.G:
+    case Pitch.G:
       return "G";
-    case Tonic.GS:
+    case Pitch.GS:
       return "G#";
-    case Tonic.A:
+    case Pitch.A:
       return "A";
-    case Tonic.AS:
+    case Pitch.AS:
       return "A#";
-    case Tonic.B:
+    case Pitch.B:
       return "B";
     default:
       x satisfies never;
@@ -59,7 +59,7 @@ function modeToString(x: Mode): string {
 function altToString(modeAlt: ModeAlt): string {
   const parts: string[] = [];
   for (let i = 0; i <= 11; i++) {
-    const amt = modeAlt[i as ScaleNote] || 0;
+    const amt = modeAlt[i as OffsetNote] || 0;
     if (amt === 0) continue;
 
     const char = amt > 0 ? "#" : "b";
@@ -69,7 +69,7 @@ function altToString(modeAlt: ModeAlt): string {
 }
 
 export function keyToString(key: Key): string {
-  const tonic = tonicToString(key.tonic);
+  const tonic = pitchToString(key.tonic);
   const mode = modeToString(key.mode);
   const alt = key.alt ? ` ${altToString(key.alt)}` : "";
   return `${tonic}${mode}${alt}`;
