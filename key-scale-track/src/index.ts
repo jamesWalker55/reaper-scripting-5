@@ -171,7 +171,10 @@ function main() {
         labels.map((x) => ({ text: x.notes, pos: x.position })),
       );
       const sectionHash = hashKeySections(sections) + endPos;
-      if (sectionHash !== prevSectionHash) {
+      if (
+        ticker("sectionupdate", 10) === 0 &&
+        sectionHash !== prevSectionHash
+      ) {
         // only update when sections have changed
         for (const item of tracks.midi.allItems()) {
           item.delete();
@@ -219,8 +222,9 @@ function main() {
           take.midibuf = midibuf.serialiseBuf(evts, true);
           take.name = `${stringifyKey(last.key)}`;
         }
+
+        prevSectionHash = sectionHash;
       }
-      prevSectionHash = sectionHash;
 
       ctx.layoutRow([-40, -1], 0);
       ctx.label(
