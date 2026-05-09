@@ -16,8 +16,9 @@ export enum Pitch {
 
 /** Convert 0 to C, 1 to C#, 2 to D, ... */
 export function wrapPitch(x: number): Pitch {
-  while (x < 0) x += 12;
-  x = Math.round(x % 12);
+  // `%` works correctly in Lua, but not in real javascript.
+  // negative numbers `-1` are handled correctly into `11`.
+  x = Math.round(x) % 12;
   return x as Pitch; // x should be 0..=11, so the same as `Note` type
 }
 
