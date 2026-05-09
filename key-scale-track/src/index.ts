@@ -27,6 +27,7 @@ import {
   parseKeySections,
 } from "./keysections";
 import { interactiveLabel } from "./widgets";
+import { circleSteps } from "./key/circle";
 
 const LABEL_TRACK_NAME = "KEY";
 const MIDI_TRACK_NAME = "SCALE";
@@ -197,7 +198,8 @@ function main() {
               second.pos,
             );
             const evts = keyToMidiEvents(first.key, endPPQ);
-            take.midibuf = midibuf.serialiseBuf(evts);
+            take.midibuf = midibuf.serialiseBuf(evts, true);
+            take.name = `${stringifyKey(first.key)}`;
           }
 
           // handle last section
@@ -214,7 +216,8 @@ function main() {
           if (take === null) throw new Error("failed to get midi item take");
           const endPPQ = reaper.MIDI_GetPPQPosFromProjTime(take.obj, endPos);
           const evts = keyToMidiEvents(last.key, endPPQ);
-          take.midibuf = midibuf.serialiseBuf(evts);
+          take.midibuf = midibuf.serialiseBuf(evts, true);
+          take.name = `${stringifyKey(last.key)}`;
         }
       }
       prevSectionHash = sectionHash;
