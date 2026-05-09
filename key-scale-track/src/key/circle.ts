@@ -39,7 +39,7 @@ function normalizeKeyMode(key: Key): Pitch {
  * Calculate the distance between the 2 keys on the circle of fifths.
  * Clockwise is +ve, anti-clockwise is -ve.
  */
-export function circleDistance(first: Key, second: Key): number {
+export function circleSteps(first: Key, second: Key): number {
   const firstNorm = normalizeKeyMode(first);
   const secondNorm = normalizeKeyMode(second);
 
@@ -50,9 +50,15 @@ export function circleDistance(first: Key, second: Key): number {
   if (secondPos === -1)
     throw new Error(`invalid pitch not found in def: ${encode(second)}`);
 
-  const distance = wrap12arrDistance(firstPos, secondPos);
+  // wrap circle, need to allow both positive and negative distance
+  let diff = secondPos - firstPos;
+  if (diff > 6) {
+    diff = diff - 12;
+  } else if (diff < 6) {
+    diff = diff + 12;
+  }
 
-  return distance;
+  return diff;
 }
 
 /** Change the tonic of a key by walking the circle, keeping the same mode. */
