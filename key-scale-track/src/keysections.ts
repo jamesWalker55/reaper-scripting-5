@@ -73,9 +73,9 @@ export function keyToMidiEvents(key: Key, endTick: number): MidiEvent[] {
   let notes: { note: number; vel: number; ch: number }[] = [];
 
   for (let octave = 0; octave < 11; octave++) {
-    notes.push({ note: 12 * octave + rootPitch, vel: 127, ch: 1 });
+    notes.push({ note: 12 * octave + rootPitch, vel: 127, ch: 0 });
     for (const p of nonRootPitches) {
-      notes.push({ note: 12 * octave + p, vel: 16, ch: 2 });
+      notes.push({ note: 12 * octave + p, vel: 16, ch: 1 });
     }
   }
 
