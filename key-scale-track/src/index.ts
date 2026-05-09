@@ -258,7 +258,7 @@ function main() {
         ctx.layoutRow([-1], 18);
         errors.forEach((err, i) => {
           const id = `err${i}`;
-          const msg = string.format(`%.2f %s`, err.pos, err.msg);
+          const msg = string.format(`[%.2fs] %s`, err.pos, err.msg);
           if (interactiveLabel(ctx, id, msg)) {
             const curr = reaper.GetCursorPositionEx(proj);
             const diff = err.pos - curr;
