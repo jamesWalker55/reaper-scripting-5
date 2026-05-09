@@ -40,7 +40,7 @@ const MODES: Record<Mode, string> = {
 
 function altToString(modeAlt: ModeAlt): string {
   const parts: string[] = [];
-  for (let i = 0; i <= 7; i++) {
+  for (let i = 0; i < 7; i++) {
     const amt = modeAlt[i as ScaleNote] || 0;
     if (amt === 0) continue;
 

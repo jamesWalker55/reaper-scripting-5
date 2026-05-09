@@ -24,8 +24,12 @@ export function wrapPitch(x: number): Pitch {
 /** Relative position, mode independent, where 0 = <tonic note> */
 export type OffsetNote = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 
-/** Relative position, mode dependent, where 0 = <tonic note> */
-export type ScaleNote = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+/**
+ * Relative position, mode dependent, where 0 = <tonic note>
+ *
+ * Note that `b7` will be parsed as note 6, because we index from 0.
+ */
+export type ScaleNote = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 /**
  * right now everything is hard-coded assuming all scales have 7 notes.

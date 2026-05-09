@@ -405,7 +405,7 @@ function parseModeShortName(i: Span): Result<Mode> {
   }
 }
 
-/** Parse `7` in `lydian b7`, limited to 0..=7 */
+/** Parse `7` in `lydian b7` into 6, limited to 0..7 (index from 0) */
 function parseNoteNumber(i: Span): Result<ScaleNote> {
   let res;
 
@@ -414,8 +414,8 @@ function parseNoteNumber(i: Span): Result<ScaleNote> {
   i = res.i;
   const val = res.ok;
 
-  if ([0, 1, 2, 3, 4, 5, 6, 7].includes(val)) {
-    return { ok: val as ScaleNote, i };
+  if ([1, 2, 3, 4, 5, 6, 7].includes(val)) {
+    return { ok: (val - 1) as ScaleNote, i };
   } else {
     return { err: true };
   }
