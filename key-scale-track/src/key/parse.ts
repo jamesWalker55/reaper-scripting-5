@@ -517,7 +517,8 @@ function parseKeyInternal(i: Span): Result<Key> {
 }
 
 export function parseKey(text: string): { ok: Key } | { err: string } {
-  const span: Span = { buf: text.trim(), offset: 0, length: text.length };
+  text = text.trim();
+  const span: Span = { buf: text, offset: 0, length: text.length };
   return finalize(parseKeyInternal(span));
 }
 
@@ -563,7 +564,8 @@ export function parseKeyOrTranspose(
   text: string,
   prevKey: Key,
 ): { ok: Key } | { err: string } {
-  const span: Span = { buf: text.trim(), offset: 0, length: text.length };
+  text = text.trim();
+  const span: Span = { buf: text, offset: 0, length: text.length };
 
   // transpose key
   const shift = parseShift(span);
