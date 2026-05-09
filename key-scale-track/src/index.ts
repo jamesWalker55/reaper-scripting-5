@@ -9,13 +9,20 @@ import {
   undoBlock,
 } from "reaper-api/utils";
 import * as JSON from "reaper-api/json";
-import { createContext, microUILoop, Option, ReaperContext } from "microui";
+import {
+  ColorId,
+  createContext,
+  microUILoop,
+  Option,
+  ReaperContext,
+} from "microui";
 import { stringifyKey, parseKey, Key } from "./key";
 import { parseKeyOrTranspose } from "./key/parse";
 import { inspect } from "reaper-api/inspect";
 import * as midibuf from "reaper-api/midibuf";
 import { assertSorted } from "./utils";
 import { parseKeySections } from "./keysections";
+import { interactiveLabel } from "./widgets";
 
 const LABEL_TRACK_NAME = "KEY";
 const MIDI_TRACK_NAME = "SCALE";
@@ -38,6 +45,8 @@ function createDeferredWindow(
   gfx.init(SCRIPT_NAME, 400, 200);
   const ctx = createContext();
   ctx.style.font = ["Arial", 14];
+
+  ctx.style.colors[ColorId.PanelBG].a = 64;
 
   microUILoop(
     ctx,
@@ -112,22 +121,26 @@ function main() {
     return;
   }
 
-  let i = 0;
+  const ticker = (() => {
+    const mem: Record<string, number> = {};
+
+    return (name: string, ticks: number) => {
+      ticks = math.max(1, Math.round(ticks));
+      const cur = mem[name] || 0;
+      mem[name] = cur === 0 ? ticks - 1 : cur - 1;
+      return cur;
+    };
+  })();
 
   createDeferredWindow(
     (ctx, stop) => {
-      ctx.layoutRow([-1], 0);
-
-      ctx.label("Monitoring label track...");
-      ctx.label("Close this window to stop processing");
-
       // check that the tracks still exist
       if (
         !trackIsValid(proj, tracks.label) ||
         !trackIsValid(proj, tracks.midi)
       ) {
         stop();
-        return null;
+        return;
       }
 
       // collect label keys
@@ -179,17 +192,73 @@ function main() {
       const { sections, errors } = parseKeySections(
         labels.map((x) => ({ text: x.notes, pos: x.position })),
       );
-      ctx.text(`Errors: (${errors.length})`);
-      for (const err of errors) {
-        const msg = string.format(`%.2f %s`, err.pos, err.msg);
-        ctx.text(msg);
-      }
-      for (const x of sections) {
-        const msg = string.format(`%.2f %s`, x.pos, stringifyKey(x.key));
-        log(msg);
+      // ctx.text(`Errors: (${errors.length})`);
+      // for (const err of errors) {
+      //   const msg = string.format(`%.2f %s`, err.pos, err.msg);
+      //   ctx.text(msg);
+      // }
+      // for (const x of sections) {
+      //   const msg = string.format(`%.2f %s`, x.pos, stringifyKey(x.key));
+      //   log(msg);
+      // }
+
+      ctx.layoutRow([-40, -1], 0);
+      ctx.label(
+        `Monitoring label track${".".repeat(3 - math.floor(ticker("dots", 40) / (40 / 3)))}`,
+      );
+      if (ctx.button(`Stop`)) {
+        stop();
       }
 
-      return null;
+      ctx.label(`Errors: (${errors.length})`);
+
+      ctx.layoutRow([-1], -25);
+      ctx.beginPanel("Error Panel");
+      {
+        ctx.layoutRow([-1], 0);
+        errors.forEach((err, i) => {
+          const id = `err${i}`;
+          const msg = string.format(`%.2f %s`, err.pos, err.msg);
+          if (interactiveLabel(ctx, id, msg)) {
+            const curr = reaper.GetCursorPositionEx(proj);
+            const diff = err.pos - curr;
+            reaper.MoveEditCursor(diff, false);
+          }
+        });
+      }
+      ctx.endPanel();
+
+      ctx.layoutRow([-1], 0);
+      ctx.label(`(Click on an error to scroll to it)`);
+
+      // /* output text panel */
+      // ctx.layoutRow([-1], -25);
+      // ctx.beginPanel("Log Output");
+      // ctx.layoutRow([-1], -1);
+      // ctx.text(logWindowLog);
+      // ctx.endPanel();
+
+      // /* input textbox + submit button */
+      // let submitted = false;
+      // ctx.layoutRow([-70, -1], 0);
+      // logWindowTextboxInput = ctx.textbox(
+      //   "textbox",
+      //   logWindowTextboxInput,
+      //   Option.None,
+      //   (res) => {
+      //     if (res && (res & Response.Submit) !== 0) {
+      //       ctx.setFocus(ctx.lastId);
+      //       submitted = true;
+      //     }
+      //   },
+      // );
+      // if (ctx.button("Submit")) {
+      //   submitted = true;
+      // }
+      // if (submitted) {
+      //   writeLog(logWindowTextboxInput);
+      //   logWindowTextboxInput = "";
+      // }
     },
     () => {},
   );
