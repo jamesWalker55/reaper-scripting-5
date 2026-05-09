@@ -140,6 +140,20 @@ function alt<T>(
   };
 }
 
+function cut<T>(
+  parser: (i: Span) => Result<T>,
+  msg: string,
+): (i: Span) => Result<T> {
+  return (i: Span) => {
+    const res = parser(i);
+    if ("err" in res) {
+      return { failure: msg };
+    } else {
+      return res;
+    }
+  };
+}
+
 function space1(i: Span): Result<Span> {
   const text = Span.get(i);
   const [result] = string.match(text, `^%s+`);
@@ -424,7 +438,7 @@ function parseKeyInternal(i: Span): Result<Key> {
   let res;
 
   // parse the initial root name "C"
-  res = parsePitchLetter(i);
+  res = cut(parsePitchLetter, "expected note name")(i);
   if (!("ok" in res)) return res;
   i = res.i;
   const key = res.ok;
@@ -473,20 +487,23 @@ function parseKeyInternal(i: Span): Result<Key> {
   return { ok: key, i };
 }
 
-export function parseKey(
-  text: string,
-): { key: Key; rest: string } | { err: string } {
-  text = text.trimStart();
+export function parseKey(text: string): { key: Key } | { err: string } {
+  text = text.trim();
 
   const res = parseKeyInternal({ buf: text, offset: 0, length: text.length });
   if ("ok" in res) {
     const key = res.ok;
-    const rest = Span.get(res.i);
-    return { key, rest };
+    if (res.i.length !== 0) {
+      // input not fully consumed, treat this as error
+      return {
+        err: `extraneous text after key definition: ${encode(Span.get(res.i))}`,
+      };
+    }
+    return { key };
   } else if ("err" in res) {
-    return { err: "err" };
+    return { err: "unhandled error" };
   } else if ("failure" in res) {
-    return { err: "failure!!" };
+    return { err: res.failure };
   } else {
     res satisfies never;
     throw new Error("unreachable");

@@ -148,9 +148,7 @@ function main() {
         const notes = item.notes;
         const parsed = parseKey(notes);
         if ("key" in parsed) {
-          log(
-            `${notes} -> ${keyToString(parsed.key)} + ${JSON.encode(parsed.rest)}`,
-          );
+          log(`${notes} -> ${keyToString(parsed.key)}`);
         } else {
           log(`${notes} -> err: ${parsed.err}`);
         }
