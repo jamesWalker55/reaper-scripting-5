@@ -121,6 +121,7 @@ function trackIsValid(proj: ReaProject, x: Track) {
 
 function main() {
   const proj = reaper.EnumProjects(-1)[0];
+  const projName = reaper.GetProjectName(proj);
   const tracks = getOrCreateTracks();
   if (tracks === null) {
     errorMsgBox("Failed to find key track!");
@@ -246,7 +247,7 @@ function main() {
       ctx.label(
         paused
           ? `Updates paused.`
-          : `Monitoring label track${".".repeat(3 - math.floor(ticker("dots", 40) / (40 / 3)))}`,
+          : `Monitoring label track in "${projName}"${".".repeat(3 - math.floor(ticker("dots", 40) / (40 / 3)))}`,
       );
       if (ctx.button(paused ? `Start` : `Pause`)) {
         paused = !paused;
