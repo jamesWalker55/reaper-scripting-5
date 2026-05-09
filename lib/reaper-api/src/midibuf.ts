@@ -119,9 +119,9 @@ export function parseBuf(buf: string) {
   return result;
 }
 
-export function serialiseBuf(events: MidiEvent[]) {
+export function serialiseBuf(events: MidiEvent[], skipSort: boolean = false) {
   // sort events to be ascending in time
-  events = events.toSorted((a, b) => a.tickPos - b.tickPos);
+  if (!skipSort) events = events.toSorted((a, b) => a.tickPos - b.tickPos);
 
   const buf: string[] = [];
   let prevTickPos = 0;
