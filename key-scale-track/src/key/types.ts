@@ -70,3 +70,22 @@ export function cloneKey(x: Key): Key {
   }
   return rv;
 }
+
+/** return a string that can be uniquely identify a key */
+export function hashKey(x: Key): string {
+  const main: number = ((x.mode & 0b1111) << 4) + (x.tonic & 0b1111);
+  let alt: string[] = [];
+  if (x.alt !== undefined) {
+    for (let i = 0; i < 7; i++) {
+      const amt = x.alt[i as ScaleNote] || 0;
+      if (amt === 0) continue;
+
+      alt.push(`${i}:${amt}`);
+    }
+  }
+  if (alt.length === 0) {
+    return `${main}`;
+  } else {
+    return `${main};${alt.join(";")}`;
+  }
+}

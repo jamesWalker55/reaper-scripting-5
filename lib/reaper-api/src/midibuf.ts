@@ -127,7 +127,7 @@ export function serialiseBuf(events: MidiEvent[], skipSort: boolean = false) {
   let prevTickPos = 0;
 
   for (const evt of events) {
-    let tickOffset = evt.tickPos - prevTickPos;
+    let tickOffset = Math.round(evt.tickPos - prevTickPos);
     prevTickPos = evt.tickPos;
 
     const flag =

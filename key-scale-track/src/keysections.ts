@@ -1,5 +1,8 @@
+import { MidiEvent } from "reaper-api/midibuf";
 import { Key, parseKey } from "./key";
 import { parseKeyOrTranspose } from "./key/parse";
+import { keyToPitches } from "./key/resolve";
+import { hashKey } from "./key/types";
 
 /**
  * An item that may / may not define a key.
@@ -51,4 +54,51 @@ export function parseKeySections(items: TextItem[]): {
   }
 
   return { sections, errors };
+}
+
+export function hashKeySections(sections: KeySection[]): string {
+  return sections
+    .map((x) => {
+      const keyhash = hashKey(x.key);
+      return string.format("%.4f=%s", x.pos, keyhash);
+    })
+    .join("\n");
+}
+
+export function keyToMidiEvents(key: Key, endTick: number): MidiEvent[] {
+  const nonRootPitches = keyToPitches(key);
+  const rootPitch = nonRootPitches.shift()!;
+
+  // generate basic notes
+  let notes: { note: number; vel: number; ch: number }[] = [];
+
+  for (let octave = 0; octave < 11; octave++) {
+    notes.push({ note: 12 * octave + rootPitch, vel: 127, ch: 1 });
+    for (const p of nonRootPitches) {
+      notes.push({ note: 12 * octave + p, vel: 16, ch: 2 });
+    }
+  }
+
+  notes = notes.filter((x) => 0 <= x.note && x.note <= 127);
+
+  // generate events
+  const events: MidiEvent[] = [];
+  for (const x of notes) {
+    events.push({
+      tickPos: 0,
+      flags: { selected: false, muted: false, ccShape: 0 },
+      channel: x.ch,
+      noteon: { note: x.note, velocity: x.vel },
+    });
+  }
+  for (const x of notes) {
+    events.push({
+      tickPos: endTick,
+      flags: { selected: false, muted: false, ccShape: 0 },
+      channel: x.ch,
+      noteoff: { note: x.note, velocity: x.vel },
+    });
+  }
+
+  return events;
 }

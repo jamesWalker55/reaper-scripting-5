@@ -1,6 +1,6 @@
 AddCwdToImportPaths();
 
-import { Track } from "reaper-api/track";
+import { Item, Track } from "reaper-api/track";
 import {
   clearConsole,
   errorHandler,
@@ -21,7 +21,11 @@ import { parseKeyOrTranspose } from "./key/parse";
 import { inspect } from "reaper-api/inspect";
 import * as midibuf from "reaper-api/midibuf";
 import { assertSorted } from "./utils";
-import { parseKeySections } from "./keysections";
+import {
+  hashKeySections,
+  keyToMidiEvents,
+  parseKeySections,
+} from "./keysections";
 import { interactiveLabel } from "./widgets";
 
 const LABEL_TRACK_NAME = "KEY";
@@ -132,6 +136,8 @@ function main() {
     };
   })();
 
+  let prevSectionHash = "temp";
+
   createDeferredWindow(
     (ctx, stop) => {
       // check that the tracks still exist
@@ -154,53 +160,64 @@ function main() {
       assertSorted(labels, (item) => item.position);
       // labels.sort((a, b) => a.position - b.position);
 
-      clearConsole();
-      // parse labels
-      // i += 1;
-      // log(i);
-      // let prevKey: Key | null = null;
-      // for (const item of labels) {
-      //   const notes = item.notes;
-      //   const parsed: { ok: Key } | { err: string } =
-      //     prevKey === null
-      //       ? parseKey(notes)
-      //       : parseKeyOrTranspose(notes, prevKey);
-      //   if ("ok" in parsed) {
-      //     log(`${JSON.encode(notes)} -> ${stringifyKey(parsed.ok)}`);
-      //     prevKey = parsed.ok;
-      //   } else {
-      //     log(`${JSON.encode(notes)} -> err: ${parsed.err}`);
-      //   }
-      // }
+      // find the length of the key track
+      const endPos = labels
+        .map((item) => item.position + item.length)
+        .reduce((acc, endPos) => (acc > endPos ? acc : endPos), 0);
 
-      // print midi events on all midi items
-      // for (const item of tracks.midi.iterItems()) {
-      //   const take = item.activeTake()?.asTypedTake() || null;
-      //   if (take === null) continue;
-      //   if (take.TYPE !== "MIDI") continue;
-
-      //   const buf = take.midibuf;
-      //   ctx.text(inspect(buf));
-
-      //   const parsed = midibuf.parseBuf(buf);
-      //   parsed.forEach((evt, i) => {
-      //     ctx.text(`${i}. ${JSON.encode(evt)}`);
-      //   });
-      // }
-
-      // print parsed sections
+      // parse sections
       const { sections, errors } = parseKeySections(
         labels.map((x) => ({ text: x.notes, pos: x.position })),
       );
-      // ctx.text(`Errors: (${errors.length})`);
-      // for (const err of errors) {
-      //   const msg = string.format(`%.2f %s`, err.pos, err.msg);
-      //   ctx.text(msg);
-      // }
-      // for (const x of sections) {
-      //   const msg = string.format(`%.2f %s`, x.pos, stringifyKey(x.key));
-      //   log(msg);
-      // }
+      const sectionHash = hashKeySections(sections) + endPos;
+      if (sectionHash !== prevSectionHash) {
+        // only update when sections have changed
+        for (const item of tracks.midi.allItems()) {
+          item.delete();
+        }
+
+        if (sections.length > 0) {
+          // handle all sections except last
+          for (let i = 0; i + 1 < sections.length; i++) {
+            const first = sections[i]!;
+            const second = sections[i + 1]!;
+
+            const item = new Item(
+              reaper.CreateNewMIDIItemInProj(
+                tracks.midi.obj,
+                first.pos,
+                second.pos,
+                false,
+              ),
+            );
+            const take = item.activeTake();
+            if (take === null) throw new Error("failed to get midi item take");
+            const endPPQ = reaper.MIDI_GetPPQPosFromProjTime(
+              take.obj,
+              second.pos,
+            );
+            const evts = keyToMidiEvents(first.key, endPPQ);
+            take.midibuf = midibuf.serialiseBuf(evts);
+          }
+
+          // handle last section
+          const last = sections[sections.length - 1]!;
+          const item = new Item(
+            reaper.CreateNewMIDIItemInProj(
+              tracks.midi.obj,
+              last.pos,
+              endPos,
+              false,
+            ),
+          );
+          const take = item.activeTake();
+          if (take === null) throw new Error("failed to get midi item take");
+          const endPPQ = reaper.MIDI_GetPPQPosFromProjTime(take.obj, endPos);
+          const evts = keyToMidiEvents(last.key, endPPQ);
+          take.midibuf = midibuf.serialiseBuf(evts);
+        }
+      }
+      prevSectionHash = sectionHash;
 
       ctx.layoutRow([-40, -1], 0);
       ctx.label(
