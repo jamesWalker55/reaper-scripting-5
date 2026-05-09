@@ -64,6 +64,6 @@ export function circleSteps(first: Key, second: Key): number {
 /** Change the tonic of a key by walking the circle, keeping the same mode. */
 export function walkCircle(start: Key, distance: number): Key {
   const rv = cloneKey(start);
-  rv.tonic = wrapPitch(start.tonic + 7 * Math.round(distance))
+  rv.tonic = wrapPitch(start.tonic + 7 * Math.round(distance));
   return rv;
 }
