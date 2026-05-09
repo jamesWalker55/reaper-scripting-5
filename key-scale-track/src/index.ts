@@ -9,9 +9,13 @@ import {
   undoBlock,
 } from "reaper-api/utils";
 import * as JSON from "reaper-api/json";
-import { createContext, microUILoop, Option } from "microui";
+import { createContext, microUILoop, Option, ReaperContext } from "microui";
 import { stringifyKey, parseKey, Key } from "./key";
 import { parseKeyOrTranspose } from "./key/parse";
+import { inspect } from "reaper-api/inspect";
+import * as midibuf from "reaper-api/midibuf";
+import { assertSorted } from "./utils";
+import { parseKeySections } from "./keysections";
 
 const LABEL_TRACK_NAME = "KEY";
 const MIDI_TRACK_NAME = "SCALE";
@@ -28,12 +32,12 @@ function errorMsgBox(msg: string) {
 }
 
 function createDeferredWindow(
-  process: (stop: () => void) => string | null,
+  process: (ctx: ReaperContext, stop: () => void) => void,
   onExit: () => void,
 ) {
-  gfx.init(SCRIPT_NAME, 200, 80);
+  gfx.init(SCRIPT_NAME, 400, 200);
   const ctx = createContext();
-  ctx.style.font = ["Arial", 12];
+  ctx.style.font = ["Arial", 14];
 
   microUILoop(
     ctx,
@@ -49,15 +53,7 @@ function createDeferredWindow(
         win.rect.w = gfx.w;
         win.rect.h = gfx.h;
 
-        ctx.layoutRow([-1], 0);
-
-        ctx.label("Monitoring label track...");
-        ctx.label("Close this window to stop processing");
-
-        const msg = process(stop);
-        if (msg) {
-          ctx.label(msg);
-        }
+        process(ctx, stop);
 
         ctx.endWindow();
       }
@@ -119,7 +115,12 @@ function main() {
   let i = 0;
 
   createDeferredWindow(
-    (stop) => {
+    (ctx, stop) => {
+      ctx.layoutRow([-1], 0);
+
+      ctx.label("Monitoring label track...");
+      ctx.label("Close this window to stop processing");
+
       // check that the tracks still exist
       if (
         !trackIsValid(proj, tracks.label) ||
@@ -137,27 +138,55 @@ function main() {
 
         labels.push(item);
       }
-      labels.sort((a, b) => a.position - b.position);
+      assertSorted(labels, (item) => item.position);
+      // labels.sort((a, b) => a.position - b.position);
 
-      // parse labels
-      // const a = labels[0];
-      // log(labels);
       clearConsole();
-      i += 1;
-      log(i);
-      let prevKey: Key | null = null;
-      for (const item of labels) {
-        const notes = item.notes;
-        const parsed: { ok: Key } | { err: string } =
-          prevKey === null
-            ? parseKey(notes)
-            : parseKeyOrTranspose(notes, prevKey);
-        if ("ok" in parsed) {
-          log(`${JSON.encode(notes)} -> ${stringifyKey(parsed.ok)}`);
-          prevKey = parsed.ok;
-        } else {
-          log(`${JSON.encode(notes)} -> err: ${parsed.err}`);
-        }
+      // parse labels
+      // i += 1;
+      // log(i);
+      // let prevKey: Key | null = null;
+      // for (const item of labels) {
+      //   const notes = item.notes;
+      //   const parsed: { ok: Key } | { err: string } =
+      //     prevKey === null
+      //       ? parseKey(notes)
+      //       : parseKeyOrTranspose(notes, prevKey);
+      //   if ("ok" in parsed) {
+      //     log(`${JSON.encode(notes)} -> ${stringifyKey(parsed.ok)}`);
+      //     prevKey = parsed.ok;
+      //   } else {
+      //     log(`${JSON.encode(notes)} -> err: ${parsed.err}`);
+      //   }
+      // }
+
+      // print midi events on all midi items
+      // for (const item of tracks.midi.iterItems()) {
+      //   const take = item.activeTake()?.asTypedTake() || null;
+      //   if (take === null) continue;
+      //   if (take.TYPE !== "MIDI") continue;
+
+      //   const buf = take.midibuf;
+      //   ctx.text(inspect(buf));
+
+      //   const parsed = midibuf.parseBuf(buf);
+      //   parsed.forEach((evt, i) => {
+      //     ctx.text(`${i}. ${JSON.encode(evt)}`);
+      //   });
+      // }
+
+      // print parsed sections
+      const { sections, errors } = parseKeySections(
+        labels.map((x) => ({ text: x.notes, pos: x.position })),
+      );
+      ctx.text(`Errors: (${errors.length})`);
+      for (const err of errors) {
+        const msg = string.format(`%.2f %s`, err.pos, err.msg);
+        ctx.text(msg);
+      }
+      for (const x of sections) {
+        const msg = string.format(`%.2f %s`, x.pos, stringifyKey(x.key));
+        log(msg);
       }
 
       return null;
