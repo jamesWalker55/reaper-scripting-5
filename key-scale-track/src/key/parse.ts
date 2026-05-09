@@ -562,6 +562,9 @@ export function parseKeyOrTranspose(
   // transpose key
   const shift = parseShift(span);
   if ("ok" in shift) {
+    const checkAllConsumed = finalize(shift);
+    if ("err" in checkAllConsumed) return { err: checkAllConsumed.err };
+
     const rv = cloneKey(prevKey);
     rv.tonic = wrapPitch(rv.tonic + shift.ok);
     return { ok: rv };
@@ -572,6 +575,9 @@ export function parseKeyOrTranspose(
   // step in circle of fifths
   const step = parseStep(span);
   if ("ok" in step) {
+    const checkAllConsumed = finalize(step);
+    if ("err" in checkAllConsumed) return { err: checkAllConsumed.err };
+
     const rv = walkCircle(prevKey, step.ok);
     return { ok: rv };
   } else if ("failure" in step) {
