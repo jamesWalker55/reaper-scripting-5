@@ -28,6 +28,7 @@ import {
 } from "./keysections";
 import { interactiveLabel } from "./widgets";
 import { circleSteps } from "./key/circle";
+import { stringifyCircleStep } from "./key/stringify";
 
 const LABEL_TRACK_NAME = "KEY";
 const MIDI_TRACK_NAME = "SCALE";
@@ -183,16 +184,19 @@ function main() {
         }
 
         if (sections.length > 0) {
-          // handle all sections except last
-          for (let i = 0; i + 1 < sections.length; i++) {
+          for (let i = 0; i < sections.length; i++) {
+            const prev = sections[i - 1];
             const first = sections[i]!;
-            const second = sections[i + 1]!;
+            const second = sections[i + 1];
+
+            const firstEnd = second ? second.pos : endPos;
+            const circleStep = prev ? circleSteps(prev.key, first.key) : null;
 
             const item = new Item(
               reaper.CreateNewMIDIItemInProj(
                 tracks.midi.obj,
                 first.pos,
-                second.pos,
+                firstEnd,
                 false,
               ),
             );
@@ -200,29 +204,14 @@ function main() {
             if (take === null) throw new Error("failed to get midi item take");
             const endPPQ = reaper.MIDI_GetPPQPosFromProjTime(
               take.obj,
-              second.pos,
+              firstEnd,
             );
             const evts = keyToMidiEvents(first.key, endPPQ);
             take.midibuf = midibuf.serialiseBuf(evts, true);
-            take.name = `${stringifyKey(first.key)}`;
+            take.name = circleStep
+              ? `${stringifyKey(first.key)} (${stringifyCircleStep(circleStep)})`
+              : `${stringifyKey(first.key)}`;
           }
-
-          // handle last section
-          const last = sections[sections.length - 1]!;
-          const item = new Item(
-            reaper.CreateNewMIDIItemInProj(
-              tracks.midi.obj,
-              last.pos,
-              endPos,
-              false,
-            ),
-          );
-          const take = item.activeTake();
-          if (take === null) throw new Error("failed to get midi item take");
-          const endPPQ = reaper.MIDI_GetPPQPosFromProjTime(take.obj, endPos);
-          const evts = keyToMidiEvents(last.key, endPPQ);
-          take.midibuf = midibuf.serialiseBuf(evts, true);
-          take.name = `${stringifyKey(last.key)}`;
         }
 
         prevSectionHash = sectionHash;

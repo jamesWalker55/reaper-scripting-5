@@ -124,3 +124,11 @@ export function stringifyKey(key: Key): string {
   const alt = key.alt ? ` ${altToString(key.alt)}` : "";
   return `${tonic}${mode}${alt}`;
 }
+
+export function stringifyCircleStep(steps: number): string {
+  if (steps >= 0) {
+    return `>${steps}`;
+  } else {
+    return `<${Math.abs(steps)}`;
+  }
+}
