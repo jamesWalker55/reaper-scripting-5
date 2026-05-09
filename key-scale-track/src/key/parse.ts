@@ -1,5 +1,5 @@
 import { encode } from "reaper-api/json";
-import { Key, Mode, ModeAlt, OffsetNote, Pitch } from "./types";
+import { Key, Mode, ModeAlt, Pitch, ScaleNote } from "./types";
 
 type Span = { buf: string; offset: number; length: number };
 type Result<T> =
@@ -369,8 +369,8 @@ function parseModeShortName(i: Span): Result<Mode> {
   }
 }
 
-/** Parse `7` in `lydian b7`, limited to 0..=11 */
-function parseNoteNumber(i: Span): Result<OffsetNote> {
+/** Parse `7` in `lydian b7`, limited to 0..=7 */
+function parseNoteNumber(i: Span): Result<ScaleNote> {
   let res;
 
   res = integer(i, 2);
@@ -378,15 +378,15 @@ function parseNoteNumber(i: Span): Result<OffsetNote> {
   i = res.i;
   const val = res.ok;
 
-  if ([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].includes(val)) {
-    return { ok: val as OffsetNote, i };
+  if ([0, 1, 2, 3, 4, 5, 6, 7].includes(val)) {
+    return { ok: val as ScaleNote, i };
   } else {
     return { err: true };
   }
 }
 
 /** Parse `b7` in `lydian b7` */
-function parseModeAltTerm(i: Span): Result<{ note: OffsetNote; amt: number }> {
+function parseModeAltTerm(i: Span): Result<{ note: ScaleNote; amt: number }> {
   let res;
 
   res = parseSharpFlatChain(i);

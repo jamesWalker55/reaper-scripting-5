@@ -1,4 +1,4 @@
-import { Key, Pitch, Mode, ModeAlt, OffsetNote } from "./types";
+import { Key, Pitch, Mode, ModeAlt, ScaleNote } from "./types";
 
 export { parseKey } from "./parse";
 
@@ -58,8 +58,8 @@ function modeToString(x: Mode): string {
 
 function altToString(modeAlt: ModeAlt): string {
   const parts: string[] = [];
-  for (let i = 0; i <= 11; i++) {
-    const amt = modeAlt[i as OffsetNote] || 0;
+  for (let i = 0; i <= 7; i++) {
+    const amt = modeAlt[i as ScaleNote] || 0;
     if (amt === 0) continue;
 
     const char = amt > 0 ? "#" : "b";
