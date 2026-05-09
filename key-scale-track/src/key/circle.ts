@@ -1,33 +1,19 @@
-import { encode } from "reaper-api/json";
-import { cloneKey, Key, Mode, Pitch, wrapPitch } from "./types";
+import { cloneKey, Key, Pitch, wrapPitch } from "./types";
 
-const CIRCLE: [
-  Pitch,
-  Pitch,
-  Pitch,
-  Pitch,
-  Pitch,
-  Pitch,
-  Pitch,
-  Pitch,
-  Pitch,
-  Pitch,
-  Pitch,
-  Pitch,
-] = [
-  Pitch.C,
-  Pitch.G,
-  Pitch.D,
-  Pitch.A,
-  Pitch.E,
-  Pitch.B,
-  Pitch.FS,
-  Pitch.CS,
-  Pitch.GS,
-  Pitch.DS,
-  Pitch.AS,
-  Pitch.F,
-];
+const CIRCLE_POS: Record<Pitch, number> = {
+  [Pitch.C]: 0,
+  [Pitch.G]: 1,
+  [Pitch.D]: 2,
+  [Pitch.A]: 3,
+  [Pitch.E]: 4,
+  [Pitch.B]: 5,
+  [Pitch.FS]: 6,
+  [Pitch.CS]: 7,
+  [Pitch.GS]: 8,
+  [Pitch.DS]: 9,
+  [Pitch.AS]: 10,
+  [Pitch.F]: 11,
+};
 
 /** Resolve the tonic + mode combination to a single root pitch. E.g. Amin resolves to C */
 function normalizeKeyMode(key: Key): Pitch {
@@ -42,18 +28,14 @@ export function circleSteps(first: Key, second: Key): number {
   const firstNorm = normalizeKeyMode(first);
   const secondNorm = normalizeKeyMode(second);
 
-  const firstPos = CIRCLE.indexOf(firstNorm);
-  const secondPos = CIRCLE.indexOf(secondNorm);
-  if (firstPos === -1)
-    throw new Error(`invalid pitch not found in def: ${encode(first)}`);
-  if (secondPos === -1)
-    throw new Error(`invalid pitch not found in def: ${encode(second)}`);
+  const firstPos = CIRCLE_POS[firstNorm];
+  const secondPos = CIRCLE_POS[secondNorm];
 
   // wrap circle, need to allow both positive and negative distance
   let diff = secondPos - firstPos;
   if (diff > 6) {
     diff = diff - 12;
-  } else if (diff < 6) {
+  } else if (diff < -6) {
     diff = diff + 12;
   }
 

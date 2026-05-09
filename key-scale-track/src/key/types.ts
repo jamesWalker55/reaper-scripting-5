@@ -42,13 +42,13 @@ export type ScaleNote = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 export enum Mode {
   /** Major */
   Ionian = 0, // number is tonic relative to major scale
-  Dorian,
-  Phrygian,
-  Lydian,
-  Mixolydian,
+  Dorian = 2,
+  Phrygian = 4,
+  Lydian = 5,
+  Mixolydian = 7,
   /** Minor */
-  Aeolian,
-  Locrian,
+  Aeolian = 9,
+  Locrian = 11,
 }
 
 /** modify a note in the scale, e.g. "lydian b7" */
