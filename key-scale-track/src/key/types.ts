@@ -36,7 +36,7 @@ export type ScaleNote = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
  */
 export enum Mode {
   /** Major */
-  Ionian,
+  Ionian = 0, // number is tonic relative to major scale
   Dorian,
   Phrygian,
   Lydian,
