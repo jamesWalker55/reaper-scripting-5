@@ -1,5 +1,6 @@
 import { encode } from "reaper-api/json";
 import { cloneKey, Key, Mode, Pitch, wrapPitch } from "./types";
+import { wrap12arrDistance } from "./utils";
 
 const CIRCLE: [
   Pitch,
@@ -49,13 +50,7 @@ export function circleDistance(first: Key, second: Key): number {
   if (secondPos === -1)
     throw new Error(`invalid pitch not found in def: ${encode(second)}`);
 
-  let distance = secondPos - firstPos;
-  // wrap circle
-  if (distance > 6) {
-    distance = distance - 12;
-  } else if (distance < 6) {
-    distance = distance + 12;
-  }
+  const distance = wrap12arrDistance(firstPos, secondPos);
 
   return distance;
 }

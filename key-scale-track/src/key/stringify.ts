@@ -1,6 +1,7 @@
 import { log } from "reaper-api/utils";
 import { keyToPitches } from "./resolve";
 import { Key, Mode, ModeAlt, Pitch, ScaleNote, wrapPitch } from "./types";
+import { pitchDistance } from "./utils";
 
 const PITCHES_NORMAL = {
   [Pitch.C]: "C",
@@ -89,7 +90,7 @@ function tonicToStringDiatonic(tonic: Pitch, pitches: Pitch[]): string {
     wrapPitch(tonic - 1),
     pitches,
   )) {
-    const distance = Math.abs(nonsharp - zip);
+    const distance = pitchDistance(nonsharp, zip);
     sharpInfo.total += distance;
     sharpInfo.max = Math.max(sharpInfo.max, distance);
   }
@@ -100,7 +101,7 @@ function tonicToStringDiatonic(tonic: Pitch, pitches: Pitch[]): string {
     wrapPitch(tonic + 1),
     pitches,
   )) {
-    const distance = Math.abs(nonsharp - zip);
+    const distance = pitchDistance(nonsharp, zip);
     flatInfo.total += distance;
     flatInfo.max = Math.max(flatInfo.max, distance);
   }

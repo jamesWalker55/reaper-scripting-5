@@ -25,9 +25,9 @@ export function keyToPitches(key: Key): Pitch[] {
     [rootPitch],
   );
   if (key.alt) {
-    for (let i = 0; i <= 7; i++) {
+    for (let i = 0; i < 7; i++) {
       const amt = key.alt[i as ScaleNote] || 0;
-      pitches[i as ScaleNote]! += amt;
+      pitches[i as ScaleNote] = wrapPitch((pitches[i as ScaleNote] || 0) + amt);
     }
   }
   return pitches;
