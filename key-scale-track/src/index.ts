@@ -215,7 +215,7 @@ function main() {
       ctx.layoutRow([-1], -25);
       ctx.beginPanel("Error Panel");
       {
-        ctx.layoutRow([-1], 0);
+        ctx.layoutRow([-1], 18);
         errors.forEach((err, i) => {
           const id = `err${i}`;
           const msg = string.format(`%.2f %s`, err.pos, err.msg);
