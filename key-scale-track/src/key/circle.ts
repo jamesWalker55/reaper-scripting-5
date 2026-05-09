@@ -57,18 +57,7 @@ export function circleDistance(first: Key, second: Key): number {
 
 /** Change the tonic of a key by walking the circle, keeping the same mode. */
 export function walkCircle(start: Key, distance: number): Key {
-  const startNorm = normalizeKeyMode(start);
-
-  const startPos = CIRCLE.indexOf(startNorm);
-
-  let endPos = Math.round(startPos + distance);
-  while (endPos >= 12) endPos -= 12;
-  while (endPos < 0) endPos += 12;
-
-  const endNorm = CIRCLE[endPos]!;
-
   const rv = cloneKey(start);
-  rv.tonic = wrapPitch(start.tonic - startNorm + endNorm);
-
+  rv.tonic = wrapPitch(start.tonic + 7 * Math.round(distance))
   return rv;
 }
