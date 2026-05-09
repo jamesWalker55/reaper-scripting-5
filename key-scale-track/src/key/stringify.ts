@@ -106,8 +106,6 @@ function tonicToStringDiatonic(tonic: Pitch, pitches: Pitch[]): string {
     flatInfo.max = Math.max(flatInfo.max, distance);
   }
 
-  log(sharpInfo, flatInfo);
-
   if (sharpInfo.max > flatInfo.max) {
     return PITCHES_FLAT[tonic as AbnormalPitch];
   } else if (sharpInfo.max < flatInfo.max) {
