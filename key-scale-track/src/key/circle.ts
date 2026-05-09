@@ -1,6 +1,5 @@
 import { encode } from "reaper-api/json";
 import { cloneKey, Key, Mode, Pitch, wrapPitch } from "./types";
-import { wrap12arrDistance } from "./utils";
 
 const CIRCLE: [
   Pitch,

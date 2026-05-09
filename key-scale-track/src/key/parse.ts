@@ -1,13 +1,5 @@
 import { encode } from "reaper-api/json";
-import {
-  cloneKey,
-  Key,
-  Mode,
-  ModeAlt,
-  Pitch,
-  ScaleNote,
-  wrapPitch,
-} from "./types";
+import { cloneKey, Key, Mode, ModeAlt, ScaleNote, wrapPitch } from "./types";
 import { walkCircle } from "./circle";
 
 type Span = { buf: string; offset: number; length: number };

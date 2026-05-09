@@ -1,4 +1,3 @@
-import { log } from "reaper-api/utils";
 import { keyToPitches } from "./resolve";
 import { Key, Mode, ModeAlt, Pitch, ScaleNote, wrapPitch } from "./types";
 import { pitchDistance } from "./utils";
