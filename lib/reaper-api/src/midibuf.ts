@@ -16,7 +16,7 @@ function parseEvent(
   return [offset, flags, msg, newPos];
 }
 
-enum CCShape {
+export enum CCShape {
   // None = 0,
   Linear = 0b0001,
   SlowStartEnd = 0b0010,
@@ -25,9 +25,9 @@ enum CCShape {
   Bezier = 0b0101,
 }
 
-type MidiEvent = {
+export type MidiEvent = {
   tickPos: number;
-  flags: { selected: boolean; muted: boolean; ccShape: CCShape };
+  flags: { selected: boolean; muted: boolean; ccShape: CCShape | 0 };
 } & (
   | ({ channel: number } & (
       | { noteoff: { note: number; velocity: number } }
@@ -53,7 +53,7 @@ export function parseBuf(buf: string) {
     // parse flags
     const selected = (flags & 1) !== 0;
     const muted = (flags & 2) !== 0;
-    const ccShape: CCShape = flags >>> 4; // may be 0
+    const ccShape: CCShape | 0 = flags >>> 4; // may be 0
 
     // parse msg
     if (rawMsg.length === 3) {
