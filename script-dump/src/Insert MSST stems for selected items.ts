@@ -7,13 +7,25 @@ import { errorHandler, log, runMainAction, undoBlock } from "reaper-api/utils";
 const MSST_OUTPUT_DIR = "D:/Audio Samples/_Acapella/MSST";
 const ACTION_BUILD_MISSING_PEAKS = 40047;
 
-function getTakeFileStem(take: Take) {
+// different files formats will have different offsets
+const FORMAT_OFFSET: Record<string, number> = {
+  // ".m4a": -4.6000000111235e-5 + 2.1999999944455e-005, // seconds
+  ".opus": 0.006505372238962, // seconds
+};
+
+function getTakeFileName(take: Take): [string, string] {
   const source = take.getSource().findRootParent();
   const filePath = source.getFilename();
-  return Path.splitext(Path.split(filePath)[1])[0];
+  const [stem, ext] = Path.splitext(Path.split(filePath)[1]);
+  return [stem, ext.toLowerCase()];
 }
 
-function setStemTrackItem(origin: Item, track: Track, stemPath: string) {
+function setStemTrackItem(
+  origin: Item,
+  track: Track,
+  stemPath: string,
+  sourceExtension: string,
+) {
   // clear existing items in track
   {
     const start = origin.position;
@@ -43,7 +55,12 @@ function setStemTrackItem(origin: Item, track: Track, stemPath: string) {
   take.pitch = originTake.pitch;
   take.playrate = originTake.playrate;
   take.preservePitch = originTake.preservePitch;
-  take.sourceStartOffset = originTake.sourceStartOffset;
+  if (sourceExtension in FORMAT_OFFSET) {
+    take.sourceStartOffset =
+      originTake.sourceStartOffset + FORMAT_OFFSET[sourceExtension];
+  } else {
+    take.sourceStartOffset = originTake.sourceStartOffset;
+  }
   take.volume = originTake.volume;
 
   item.color = origin.color;
@@ -66,7 +83,7 @@ function main() {
         log("item has no take, skipping");
         continue;
       }
-      const name = getTakeFileStem(take);
+      const [name, ext] = getTakeFileName(take);
 
       // get stem tracks
       let drumsTrack: Track | null = null;
@@ -148,11 +165,11 @@ function main() {
         }
       }
 
-      setStemTrackItem(item, drumsTrack, drumsPath);
-      setStemTrackItem(item, vocalsTrack, vocalsPath);
-      setStemTrackItem(item, otherTrack, otherPath);
-      setStemTrackItem(item, residualTrack, residualPath);
-      setStemTrackItem(item, bassTrack, bassPath);
+      setStemTrackItem(item, drumsTrack, drumsPath, ext);
+      setStemTrackItem(item, vocalsTrack, vocalsPath, ext);
+      setStemTrackItem(item, otherTrack, otherPath, ext);
+      setStemTrackItem(item, residualTrack, residualPath, ext);
+      setStemTrackItem(item, bassTrack, bassPath, ext);
     }
   });
 
