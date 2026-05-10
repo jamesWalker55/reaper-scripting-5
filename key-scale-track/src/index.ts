@@ -171,7 +171,12 @@ function main() {
 
       // parse sections
       const { sections, errors } = parseKeySections(
-        labels.map((x) => ({ text: x.notes, pos: x.position })),
+        labels
+          .map((x) => {
+            if (x.notes.trim() === "") return null;
+            return { text: x.notes, pos: x.position };
+          })
+          .filter((x) => x !== null),
       );
       const sectionHash = hashKeySections(sections) + endPos;
       // only update when sections have changed
