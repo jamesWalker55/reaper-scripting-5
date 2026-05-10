@@ -89,3 +89,32 @@ export function hashKey(x: Key): string {
     return `${main};${alt.join(";")}`;
   }
 }
+
+/**
+ * Change the mode keeping the same root.
+ * E.g. "C maj" -> "C min"
+ */
+export function keyChangeModeKeepTonic(x: Key, newMode: Mode): Key {
+  x = cloneKey(x);
+
+  if (x.mode === newMode) return x;
+
+  x.mode = newMode;
+
+  return x;
+}
+
+/**
+ * Change the mode reusing the same scale notes.
+ * E.g. "C maj" -> "A min"
+ */
+export function keyChangeModeKeepNotes(x: Key, newMode: Mode): Key {
+  x = cloneKey(x);
+
+  if (x.mode === newMode) return x;
+
+  x.tonic = wrapPitch(x.tonic - x.mode + newMode);
+  x.mode = newMode;
+
+  return x;
+}

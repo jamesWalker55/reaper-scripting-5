@@ -1,5 +1,13 @@
 import { encode } from "reaper-api/json";
-import { cloneKey, Key, Mode, ModeAlt, ScaleNote, wrapPitch } from "./types";
+import {
+  cloneKey,
+  Key,
+  keyChangeModeKeepNotes,
+  Mode,
+  ModeAlt,
+  ScaleNote,
+  wrapPitch,
+} from "./types";
 import { walkCircle } from "./circle";
 
 type Span = { buf: string; offset: number; length: number };
@@ -97,7 +105,7 @@ function preceded<T>(
   };
 }
 
-function opt<T>(
+function opt<T extends AnyNotNil>(
   parser: (i: Span) => Result<T>,
   def: T,
 ): (i: Span) => Result<T> {
@@ -477,21 +485,21 @@ function parseKeyInternal(i: Span): Result<Key> {
   res = opt<Mode | "none">(alt(parseModeShortName, parseModeLetter), "none")(i);
   if (!("ok" in res)) return res;
   i = res.i;
-  let explicitMode: Mode | "none" = res.ok;
+  let explicitMode: Mode | null = res.ok === "none" ? null : res.ok;
 
   // mode is not specified explicitly yet, try to parse a whole keyword " lydian"
-  if (explicitMode === "none") {
+  if (!explicitMode) {
     res = opt<Mode | "none">(
       preceded(space1, alt(parseModeName, parseModeShortName, parseModeLetter)),
       "none",
     )(i);
     if (!("ok" in res)) return res;
     i = res.i;
-    explicitMode = res.ok;
+    explicitMode = res.ok === "none" ? null : res.ok;
   }
 
   // assign the mode if set
-  if (explicitMode !== "none") {
+  if (explicitMode !== null) {
     key.mode = explicitMode;
   }
 
@@ -499,9 +507,9 @@ function parseKeyInternal(i: Span): Result<Key> {
   res = opt<ModeAlt | "none">(preceded(space1, parseModeAlt), "none")(i);
   if (!("ok" in res)) return res;
   i = res.i;
-  const modeAlt: ModeAlt | "none" = res.ok;
+  const modeAlt: ModeAlt | null = res.ok === "none" ? null : res.ok;
 
-  if (modeAlt !== "none") {
+  if (modeAlt !== null) {
     key.alt = modeAlt;
   }
 
@@ -552,6 +560,28 @@ function parseStep(i: Span): Result<number> {
   return { ok: isPositive ? amount : -amount, i };
 }
 
+/** Parse a circle step `>1lyd`, `<3 minor` */
+function parseStepWithMode(
+  i: Span,
+): Result<{ steps: number; mode: Mode | null }> {
+  let res, left;
+
+  res = parseStep(i);
+  if (!("ok" in res)) return res;
+  i = res.i;
+  const steps = res.ok;
+
+  res = opt<Mode | "none">(
+    preceded(space0, alt(parseModeName, parseModeShortName, parseModeLetter)),
+    "none",
+  )(i);
+  if (!("ok" in res)) return res;
+  i = res.i;
+  const mode = res.ok === "none" ? null : res.ok;
+
+  return { ok: { steps, mode }, i };
+}
+
 export function parseKeyOrTranspose(
   text: string,
   prevKey: Key,
@@ -573,12 +603,13 @@ export function parseKeyOrTranspose(
   }
 
   // step in circle of fifths
-  const step = parseStep(span);
+  const step = parseStepWithMode(span);
   if ("ok" in step) {
     const checkAllConsumed = finalize(step);
     if ("err" in checkAllConsumed) return { err: checkAllConsumed.err };
 
-    const rv = walkCircle(prevKey, step.ok);
+    let rv = walkCircle(prevKey, step.ok.steps);
+    if (step.ok.mode !== null) rv = keyChangeModeKeepNotes(rv, step.ok.mode);
     return { ok: rv };
   } else if ("failure" in step) {
     return { err: step.failure };
