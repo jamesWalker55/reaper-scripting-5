@@ -11,15 +11,18 @@ importers:
       lua-types:
         specifier: ^2.13.1
         version: 2.14.1
+      microui:
+        specifier: file:../lib/microui
+        version: reaper-microui@file:../lib/microui
       reaper-api:
         specifier: file:../lib/reaper-api/dist
         version: file:../lib/reaper-api/dist
       typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
+        specifier: 6.0.2
+        version: 6.0.2
       typescript-to-lua:
-        specifier: ^1.33.2
-        version: 1.36.0(typescript@5.9.3)
+        specifier: 1.36.0
+        version: 1.36.0(typescript@6.0.2)
 
 packages:
 
@@ -61,6 +64,9 @@ packages:
   reaper-api@file:../lib/reaper-api/dist:
     resolution: {directory: ../lib/reaper-api/dist, type: directory}
 
+  reaper-microui@file:../lib/microui:
+    resolution: {directory: ../lib/microui, type: directory}
+
   resolve@1.22.12:
     resolution: {integrity: sha512-TyeJ1zif53BPfHootBGwPRYT1RUt6oGWsaQr8UyZW/eAm9bKoijtvruSDEmZHm92CwS9nj7/fWttqPCgzep8CA==}
     engines: {node: '>= 0.4'}
@@ -85,8 +91,8 @@ packages:
     peerDependencies:
       typescript: 6.0.2
 
-  typescript@5.9.3:
-    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+  typescript@6.0.2:
+    resolution: {integrity: sha512-bGdAIrZ0wiGDo5l8c++HWtbaNCWTS4UTv7RaTH/ThVIgjkveJt83m74bBHMJkuCbslY8ixgLBVZJIOiQlQTjfQ==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -121,6 +127,10 @@ snapshots:
 
   reaper-api@file:../lib/reaper-api/dist: {}
 
+  reaper-microui@file:../lib/microui:
+    dependencies:
+      reaper-api: file:../lib/reaper-api/dist
+
   resolve@1.22.12:
     dependencies:
       es-errors: 1.3.0
@@ -134,13 +144,13 @@ snapshots:
 
   tapable@2.3.3: {}
 
-  typescript-to-lua@1.36.0(typescript@5.9.3):
+  typescript-to-lua@1.36.0(typescript@6.0.2):
     dependencies:
       '@typescript-to-lua/language-extensions': 1.19.0
       enhanced-resolve: 5.8.2
       picomatch: 2.3.2
       resolve: 1.22.12
       source-map: 0.7.6
-      typescript: 5.9.3
+      typescript: 6.0.2
 
-  typescript@5.9.3: {}
+  typescript@6.0.2: {}

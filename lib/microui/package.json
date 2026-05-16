@@ -12,8 +12,8 @@
     "reaper-api": "file:../reaper-api/dist"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "typescript-to-lua": "^1.36.0",
+    "typescript": "6.0.2",
+    "typescript-to-lua": "1.36.0",
     "lua-types": "^2.14.1"
   }
 }
