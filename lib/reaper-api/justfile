@@ -1,13 +1,12 @@
-node := "bun"
 tstl := "node_modules/typescript-to-lua/dist/tstl.js"
 
 watch:
     just copy-files
-    {{node}} "{{tstl}}" --watch
+    node "{{tstl}}" --watch
 
 build:
     just copy-files
-    {{node}} "{{tstl}}"
+    node "{{tstl}}"
 
 # Manually copy some files to dist
 # Written by Gemini

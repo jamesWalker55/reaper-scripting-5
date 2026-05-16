@@ -3,7 +3,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "lib": ["ESNext"],
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "types": ["lua-types/5.4"],
     // output settings
     "declaration": true,

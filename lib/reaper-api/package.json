@@ -10,8 +10,8 @@
   "dependencies": {},
   "devDependencies": {
     "lua-types": "^2.14.1",
-    "typescript": "^5.9.3",
-    "typescript-to-lua": "^1.33.2"
+    "typescript": "6.0.2",
+    "typescript-to-lua": "1.36.0"
   },
   "private": true
 }
