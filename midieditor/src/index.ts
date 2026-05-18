@@ -6,9 +6,16 @@ import { baseWindow } from "./widgets";
 import { Item } from "reaper-api/track";
 import * as MB from "reaper-api/midibuf";
 import * as json from "reaper-api/json";
-import { getDefault, getTimeMarkers } from "./timesections";
+import { getDefault, getTimeMarkers } from "./timechanges";
 import { timeToBeats } from "./timemap";
 import { inspect } from "reaper-api/inspect";
+
+type EditorState = {
+  left: number;
+  top: number;
+  zoomx: number;
+  zoomy: number;
+};
 
 function setWindowTitle(title: string) {
   gfx.init(title);
@@ -23,6 +30,11 @@ function main() {
   microUILoop(ctx, () => {
     baseWindow(ctx, () => {
       ctx.layoutRow([-1], 0);
+
+      ctx.text(inspect(reaper.GetSetProjectInfo_String(0, "PROJECT_NAME", "", false)));
+      ctx.text(reaper.GetProjectName(0));
+      ctx.text(reaper.GetProjectPathEx(0));
+      ctx.text(inspect(reaper.EnumProjects(-1)));
 
       ctx.label(`timeToBeats(0, reaper.GetCursorPositionEx(0))`);
       ctx.text(inspect(timeToBeats(0, reaper.GetCursorPositionEx(0))));

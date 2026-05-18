@@ -4,8 +4,14 @@ export function dividedBpmAtTime(proj: ReaProject, pos: number): number {
   return reaper.TimeMap2_GetDividedBpmAtTime(proj, pos);
 }
 
-export function nextChangeTime(proj: ReaProject, afterPos: number): number {
-  return reaper.TimeMap2_GetNextChangeTime(proj, afterPos);
+/** Return null if no more markers after the given position */
+export function nextChangeTime(
+  proj: ReaProject,
+  afterPos: number,
+): number | null {
+  const time = reaper.TimeMap2_GetNextChangeTime(proj, afterPos);
+  if (time === -1) return null;
+  return time;
 }
 
 export function qnToTime(proj: ReaProject, qn: number): number {
