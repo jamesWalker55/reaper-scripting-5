@@ -24,7 +24,39 @@ export function asdqf(proj: ReaProject, start: number, stop: number) {
   // if (markersHash !== STORE)
 }
 
-reaper.GetTrackEnvelopeByName(reaper.GetMasterTrack(0), "Tempo map")
+// reaper.GetTrackEnvelopeByName(reaper.GetMasterTrack(0), "Tempo map")
 
-reaper.GetTrackEnvelopeByChunkName(reaper.GetMasterTrack(0), "TEMPOENVEX")
-reaper.GetEnvelopePointEx(reaper.GetTrackEnvelopeByName(reaper.GetMasterTrack(0), "Tempo map"), -1, 0)
+// reaper.GetTrackEnvelopeByChunkName(reaper.GetMasterTrack(0), "TEMPOENVEX")
+// reaper.GetEnvelopePointEx(reaper.GetTrackEnvelopeByName(reaper.GetMasterTrack(0), "Tempo map"), -1, 0)
+
+export type GridBasis = {
+  /** e.g. 0.125 = 1/8 */
+  size: number;
+  modifier:
+    | {
+        // 0.0..=1.0
+        swing: number;
+      }
+    | { triplet: true };
+};
+
+/**
+ *
+ * @param basis
+ * @param division Additional divisions to perform. 0 = basis; 1 = subdivide 1; -1 = combine grid once
+ */
+function vhasbjdas(
+  basis: GridBasis,
+  division: number,
+) {
+
+}
+
+function uijkabsdjask(
+  basis: GridBasis,
+  minBeatSpacing: number,
+  beatStart: number,
+  beatStop: number,
+) {
+
+}

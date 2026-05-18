@@ -7,7 +7,7 @@ import { Item } from "reaper-api/track";
 import * as MB from "reaper-api/midibuf";
 import * as json from "reaper-api/json";
 import { getDefault, getTimeMarkers } from "./timechanges";
-import { timeToBeats } from "./timemap";
+import { beatsToTime, qnToTime, timeToBeats, timeToQn } from "./timemap";
 import { inspect } from "reaper-api/inspect";
 
 type EditorState = {
@@ -22,29 +22,124 @@ function setWindowTitle(title: string) {
 }
 
 function main() {
+  const timer = (() => {
+    let prevTime = reaper.time_precise();
+
+    return {
+      elapsed() {
+        const now = reaper.time_precise();
+        const elapsed = now - prevTime;
+        prevTime = now;
+        return elapsed;
+      },
+    };
+  })();
+
   gfx.init("MIDI Editor", 600, 450);
 
   const ctx = createContext();
   ctx.style.font = ["Arial", 12];
 
+  let callCount = 10;
+
   microUILoop(ctx, () => {
     baseWindow(ctx, () => {
       ctx.layoutRow([-1], 0);
 
-      ctx.text(inspect(reaper.GetSetProjectInfo_String(0, "PROJECT_NAME", "", false)));
-      ctx.text(reaper.GetProjectName(0));
-      ctx.text(reaper.GetProjectPathEx(0));
-      ctx.text(inspect(reaper.EnumProjects(-1)));
+      // {
+      //   callCount = ctx.slider("callCount", callCount, 10, 1000, 1, "%d");
 
-      ctx.label(`timeToBeats(0, reaper.GetCursorPositionEx(0))`);
-      ctx.text(inspect(timeToBeats(0, reaper.GetCursorPositionEx(0))));
+      //   timer.elapsed();
+      //   for (let i = 0; i < callCount; i++) {
+      //     timeToBeats(0, i);
+      //   }
+      //   {
+      //     const elapsed = timer.elapsed();
+      //     ctx.label("timeToBeats");
+      //     ctx.text(
+      //       string.format("total: %d us", Math.round(elapsed * 1000000)),
+      //     );
+      //     ctx.text(
+      //       string.format(
+      //         "per call: %d ns",
+      //         Math.round((elapsed * 1000000000) / callCount),
+      //       ),
+      //     );
+      //   }
 
-      const info = getDefault(0);
-      ctx.label(json.encode(info));
-      const markers = getTimeMarkers(0);
-      for (const x of markers) {
-        ctx.label(json.encode(x));
-      }
+      //   timer.elapsed();
+      //   for (let i = 0; i < callCount; i++) {
+      //     beatsToTime(0, i);
+      //   }
+      //   {
+      //     const elapsed = timer.elapsed();
+      //     ctx.label("beatsToTime");
+      //     ctx.text(
+      //       string.format("total: %d us", Math.round(elapsed * 1000000)),
+      //     );
+      //     ctx.text(
+      //       string.format(
+      //         "per call: %d ns",
+      //         Math.round((elapsed * 1000000000) / callCount),
+      //       ),
+      //     );
+      //   }
+
+      //   timer.elapsed();
+      //   for (let i = 0; i < callCount; i++) {
+      //     timeToQn(0, i);
+      //   }
+      //   {
+      //     const elapsed = timer.elapsed();
+      //     ctx.label("timeToQn");
+      //     ctx.text(
+      //       string.format("total: %d us", Math.round(elapsed * 1000000)),
+      //     );
+      //     ctx.text(
+      //       string.format(
+      //         "per call: %d ns",
+      //         Math.round((elapsed * 1000000000) / callCount),
+      //       ),
+      //     );
+      //   }
+
+      //   timer.elapsed();
+      //   for (let i = 0; i < callCount; i++) {
+      //     qnToTime(0, i);
+      //   }
+      //   {
+      //     const elapsed = timer.elapsed();
+      //     ctx.label("qnToTime");
+      //     ctx.text(
+      //       string.format("total: %d us", Math.round(elapsed * 1000000)),
+      //     );
+      //     ctx.text(
+      //       string.format(
+      //         "per call: %d ns",
+      //         Math.round((elapsed * 1000000000) / callCount),
+      //       ),
+      //     );
+      //   }
+      // }
+
+      const pos = reaper.GetCursorPositionEx(0);
+      const beats = timeToBeats(0, pos);
+      ctx.text(inspect(beats));
+
+      // ctx.text(inspect(reaper.GetSetProjectInfo_String(0, "PROJECT_NAME", "", false)));
+      // ctx.text(reaper.GetProjectName(0));
+      // ctx.text(reaper.GetProjectPathEx(0));
+      // ctx.text(inspect(reaper.EnumProjects(-1)));
+
+      // ctx.label(`timeToBeats(0, reaper.GetCursorPositionEx(0))`);
+      // ctx.text(inspect(timeToBeats(0, reaper.GetCursorPositionEx(0))));
+
+      // const info = getDefault(0);
+      // ctx.label(json.encode(info));
+      // const markers = getTimeMarkers(0);
+      // for (const x of markers) {
+      //   ctx.label(json.encode(x));
+      // }
 
       // const items = Item.getSelected()
       //   .map((item) => {
