@@ -633,8 +633,10 @@ export function parseKeyOrTranspose(
     let rv = cloneKey(prevKey);
 
     rv.tonic = wrapPitch(rv.tonic + shift.ok.shift);
-    if (shift.ok.mode !== null) rv = keyChangeModeKeepTonic(rv, shift.ok.mode);
-    if (shift.ok.modeAlt !== null) rv.alt = shift.ok.modeAlt;
+    if (shift.ok.mode !== null) {
+      rv = keyChangeModeKeepTonic(rv, shift.ok.mode);
+      rv.alt = shift.ok.modeAlt || undefined;
+    }
 
     return { ok: rv };
   } else if ("failure" in shift) {
@@ -649,8 +651,10 @@ export function parseKeyOrTranspose(
 
     let rv = walkCircle(prevKey, step.ok.steps);
 
-    if (step.ok.mode !== null) rv = keyChangeModeKeepNotes(rv, step.ok.mode);
-    if (step.ok.modeAlt !== null) rv.alt = step.ok.modeAlt;
+    if (step.ok.mode !== null) {
+      rv = keyChangeModeKeepNotes(rv, step.ok.mode);
+      rv.alt = step.ok.modeAlt || undefined;
+    }
 
     return { ok: rv };
   } else if ("failure" in step) {
