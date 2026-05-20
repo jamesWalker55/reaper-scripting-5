@@ -44,7 +44,7 @@ function altToString(modeAlt: ModeAlt): string {
     if (amt === 0) continue;
 
     const char = amt > 0 ? "#" : "b";
-    parts.push(`${char.repeat(Math.abs(amt))}${i}`);
+    parts.push(`${char.repeat(Math.abs(amt))}${i + 1}`);
   }
   return parts.join(" ");
 }
