@@ -563,7 +563,7 @@ function parseStep(i: Span): Result<number> {
 /** Parse a circle step `>1lyd`, `<3 minor` */
 function parseStepWithMode(
   i: Span,
-): Result<{ steps: number; mode: Mode | null }> {
+): Result<{ steps: number; mode: Mode | null; modeAlt: ModeAlt | null }> {
   let res, left;
 
   res = parseStep(i);
@@ -579,7 +579,13 @@ function parseStepWithMode(
   i = res.i;
   const mode = res.ok === "none" ? null : res.ok;
 
-  return { ok: { steps, mode }, i };
+  // parse any tweaks to the scale " b7"
+  res = opt<ModeAlt | "none">(preceded(space1, parseModeAlt), "none")(i);
+  if (!("ok" in res)) return res;
+  i = res.i;
+  const modeAlt: ModeAlt | null = res.ok === "none" ? null : res.ok;
+
+  return { ok: { steps, mode, modeAlt }, i };
 }
 
 export function parseKeyOrTranspose(
@@ -610,6 +616,7 @@ export function parseKeyOrTranspose(
 
     let rv = walkCircle(prevKey, step.ok.steps);
     if (step.ok.mode !== null) rv = keyChangeModeKeepNotes(rv, step.ok.mode);
+    if (step.ok.modeAlt !== null) rv.alt = step.ok.modeAlt;
     return { ok: rv };
   } else if ("failure" in step) {
     return { err: step.failure };
