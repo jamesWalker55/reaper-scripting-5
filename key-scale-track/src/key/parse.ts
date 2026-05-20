@@ -3,6 +3,7 @@ import {
   cloneKey,
   Key,
   keyChangeModeKeepNotes,
+  keyChangeModeKeepTonic,
   Mode,
   ModeAlt,
   ScaleNote,
@@ -541,6 +542,34 @@ function parseShift(i: Span): Result<number> {
   return { ok: isPositive ? amount : -amount, i };
 }
 
+/** Parse a circle step `>1lyd`, `<3 minor` */
+function parseShiftWithMode(
+  i: Span,
+): Result<{ shift: number; mode: Mode | null; modeAlt: ModeAlt | null }> {
+  let res, left;
+
+  res = parseShift(i);
+  if (!("ok" in res)) return res;
+  i = res.i;
+  const shift = res.ok;
+
+  res = opt<Mode | "none">(
+    preceded(space0, alt(parseModeName, parseModeShortName, parseModeLetter)),
+    "none",
+  )(i);
+  if (!("ok" in res)) return res;
+  i = res.i;
+  const mode = res.ok === "none" ? null : res.ok;
+
+  // parse any tweaks to the scale " b7"
+  res = opt<ModeAlt | "none">(preceded(space1, parseModeAlt), "none")(i);
+  if (!("ok" in res)) return res;
+  i = res.i;
+  const modeAlt: ModeAlt | null = res.ok === "none" ? null : res.ok;
+
+  return { ok: { shift, mode, modeAlt }, i };
+}
+
 /** Parse a circle step `>1`, `<3` */
 function parseStep(i: Span): Result<number> {
   let res, left;
@@ -596,13 +625,17 @@ export function parseKeyOrTranspose(
   const span: Span = { buf: text, offset: 0, length: text.length };
 
   // transpose key
-  const shift = parseShift(span);
+  const shift = parseShiftWithMode(span);
   if ("ok" in shift) {
     const checkAllConsumed = finalize(shift);
     if ("err" in checkAllConsumed) return { err: checkAllConsumed.err };
 
-    const rv = cloneKey(prevKey);
-    rv.tonic = wrapPitch(rv.tonic + shift.ok);
+    let rv = cloneKey(prevKey);
+
+    rv.tonic = wrapPitch(rv.tonic + shift.ok.shift);
+    if (shift.ok.mode !== null) rv = keyChangeModeKeepTonic(rv, shift.ok.mode);
+    if (shift.ok.modeAlt !== null) rv.alt = shift.ok.modeAlt;
+
     return { ok: rv };
   } else if ("failure" in shift) {
     return { err: shift.failure };
@@ -615,8 +648,10 @@ export function parseKeyOrTranspose(
     if ("err" in checkAllConsumed) return { err: checkAllConsumed.err };
 
     let rv = walkCircle(prevKey, step.ok.steps);
+
     if (step.ok.mode !== null) rv = keyChangeModeKeepNotes(rv, step.ok.mode);
     if (step.ok.modeAlt !== null) rv.alt = step.ok.modeAlt;
+
     return { ok: rv };
   } else if ("failure" in step) {
     return { err: step.failure };
