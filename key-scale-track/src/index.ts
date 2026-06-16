@@ -1,6 +1,7 @@
 AddCwdToImportPaths();
 
 import { Item, MidiTake, Track } from "reaper-api/track";
+import * as Path from "reaper-api/path/path";
 import {
   clearConsole,
   errorHandler,
@@ -25,6 +26,7 @@ import {
   hashKeySections,
   keyToMidiEvents,
   parseKeySections,
+  Error,
 } from "./keysections";
 import { interactiveLabel } from "./widgets";
 import { circleSteps } from "./key/circle";
@@ -77,42 +79,14 @@ function createDeferredWindow(
   );
 }
 
-function getOrCreateTracks(): { label: Track; midi: Track } | null {
-  let currentDepth = 0;
-  for (let i = 0; i < Track.count(); i++) {
-    const track = Track.getByIdx(i);
-
-    // only check top-level tracks
-    if (currentDepth !== 0) {
-      currentDepth += track.getRawFolderDepth();
-      continue;
-    }
-    currentDepth += track.getRawFolderDepth();
-
-    if (track.name === LABEL_TRACK_NAME) {
-      // the next track MUST be the midi track.
-      // if it doesn't exist, create one now
-      let midi: Track;
-      try {
-        midi = Track.getByIdx(i + 1);
-        if (midi.name !== MIDI_TRACK_NAME) {
-          undoBlock(`${SCRIPT_NAME}: Create scale track`, -1, () => {
-            midi = Track.createAtIdx(i + 1);
-            midi.name = MIDI_TRACK_NAME;
-          });
-        }
-      } catch (e) {
-        // track does not exist, e.g. end of track list
-        // create new track
-        undoBlock(`${SCRIPT_NAME}: Create scale track`, -1, () => {
-          midi = Track.createAtLastPosition();
-          midi.name = MIDI_TRACK_NAME;
-        });
-      }
-      return { label: track, midi: midi! };
-    }
+function getCurrentProject(): { proj: ReaProject; path: string | null } {
+  const [proj, path] = reaper.EnumProjects(-1);
+  if (path === "") {
+    // project is not saved yet
+    return { proj, path: null };
+  } else {
+    return { proj, path };
   }
-  return null;
 }
 
 function trackIsValid(proj: ReaProject, x: Track) {
@@ -120,13 +94,87 @@ function trackIsValid(proj: ReaProject, x: Track) {
 }
 
 function main() {
-  const proj = reaper.EnumProjects(-1)[0];
-  const projName = reaper.GetProjectName(proj);
-  const tracks = getOrCreateTracks();
-  if (tracks === null) {
-    errorMsgBox("Failed to find key track!");
-    return;
-  }
+  const stateGetter = (() => {
+    const SCAN_TRACKS_INTERVAL = 4; // defer calls
+    let scanTracksCountdown = 0;
+
+    let tracks: { label: Track; midi: Track } | null = null;
+
+    function getOrCreateTracks(): { label: Track; midi: Track } | null {
+      let currentDepth = 0;
+      for (let i = 0; i < Track.count(); i++) {
+        const track = Track.getByIdx(i);
+
+        // only check top-level tracks
+        if (currentDepth !== 0) {
+          currentDepth += track.getRawFolderDepth();
+          continue;
+        }
+        currentDepth += track.getRawFolderDepth();
+
+        if (track.name === LABEL_TRACK_NAME) {
+          // the next track MUST be the midi track.
+          // if it doesn't exist, create one now
+          let midi: Track;
+          try {
+            midi = Track.getByIdx(i + 1);
+            if (midi.name !== MIDI_TRACK_NAME) {
+              undoBlock(`${SCRIPT_NAME}: Create scale track`, -1, () => {
+                midi = Track.createAtIdx(i + 1);
+                midi.name = MIDI_TRACK_NAME;
+              });
+            }
+          } catch (e) {
+            // track does not exist, e.g. end of track list
+            // create new track
+            undoBlock(`${SCRIPT_NAME}: Create scale track`, -1, () => {
+              midi = Track.createAtLastPosition();
+              midi.name = MIDI_TRACK_NAME;
+            });
+          }
+          return { label: track, midi: midi! };
+        }
+      }
+      return null;
+    }
+
+    return {
+      get(): {
+        label: Track;
+        midi: Track;
+        proj: ReaProject;
+        projName: string | null;
+      } | null {
+        const { proj, path: projPath } = getCurrentProject();
+
+        let projName: string | null = null;
+        if (projPath !== null) projName = Path.split(projPath)[1];
+
+        if (tracks !== null) {
+          // known key/midi tracks, check they still exist in current project, or else rescan
+          if (
+            trackIsValid(proj, tracks.label) &&
+            trackIsValid(proj, tracks.midi)
+          ) {
+            return { proj, projName, ...tracks };
+          }
+
+          // tracks are no longer valid
+          tracks = null;
+          scanTracksCountdown = 0;
+        }
+
+        if (scanTracksCountdown <= 0) {
+          scanTracksCountdown = SCAN_TRACKS_INTERVAL;
+          // need to find the key/midi tracks
+          tracks = getOrCreateTracks();
+        }
+        scanTracksCountdown -= 1;
+
+        return null;
+      },
+    };
+  })();
 
   const ticker = (() => {
     const mem: Record<string, number> = {};
@@ -140,176 +188,148 @@ function main() {
   })();
 
   let prevSectionHash = "temp";
-  let paused = false;
 
   createDeferredWindow(
     (ctx, stop) => {
-      // check that the tracks still exist
-      if (
-        !trackIsValid(proj, tracks.label) ||
-        !trackIsValid(proj, tracks.midi)
-      ) {
-        stop();
-        return;
-      }
+      const state = stateGetter.get();
 
-      // collect label keys
-      const labels = [];
-      for (const item of tracks.label.iterItems()) {
-        if (!item.isEmpty()) continue;
-        if (item.muted) continue;
+      // Logic
+      let errors: Error[] = [];
+      if (state !== null) {
+        // collect label keys
+        const labels = [];
+        for (const item of state.label.iterItems()) {
+          if (!item.isEmpty()) continue;
+          if (item.muted) continue;
 
-        labels.push(item);
-      }
-      assertSorted(labels, (item) => item.position);
-      // labels.sort((a, b) => a.position - b.position);
-
-      // find the length of the key track
-      const endPos = labels
-        .map((item) => item.position + item.length)
-        .reduce((acc, endPos) => (acc > endPos ? acc : endPos), 0);
-
-      // parse sections
-      const { sections, errors } = parseKeySections(
-        labels
-          .map((x) => {
-            if (x.notes.trim() === "") return null;
-            return { text: x.notes, pos: x.position };
-          })
-          .filter((x) => x !== null),
-      );
-      const sectionHash = hashKeySections(sections) + endPos;
-      // only update when sections have changed
-      if (!paused && sectionHash !== prevSectionHash) {
-        // create/delete items to match section count
-        const midiItems: {
-          item: Item;
-          take: MidiTake;
-        }[] = tracks.midi
-          .allItems()
-          .map((item) => {
-            const take = item.activeTake()?.asTypedTake() || null;
-            if (take?.TYPE === "MIDI") {
-              return { item, take };
-            } else {
-              return null;
-            }
-          })
-          .filter((x) => x !== null);
-        while (midiItems.length > sections.length)
-          midiItems.pop()?.item.delete();
-        while (midiItems.length < sections.length) {
-          const last = midiItems[midiItems.length - 1];
-          const start = last ? last.item.position + last.item.length : 0;
-          const item = new Item(
-            reaper.CreateNewMIDIItemInProj(
-              tracks.midi.obj,
-              start,
-              start + 1,
-              false,
-            ),
-          );
-          const take = item.activeTake()?.asTypedTake() || null;
-          if (take === null || take.TYPE !== "MIDI")
-            throw new Error("failed to get midi item take");
-          midiItems.push({ item, take });
+          labels.push(item);
         }
+        assertSorted(labels, (item) => item.position);
+        // labels.sort((a, b) => a.position - b.position);
 
-        if (sections.length > 0) {
-          for (let i = 0; i < sections.length; i++) {
-            const prev = sections[i - 1];
-            const first = sections[i]!;
-            const second = sections[i + 1];
-            const { item, take } = midiItems[i]!;
+        // find the length of the key track
+        const endPos = labels
+          .map((item) => item.position + item.length)
+          .reduce((acc, endPos) => (acc > endPos ? acc : endPos), 0);
 
-            const firstEnd = second ? second.pos : endPos;
-            const circleStep = prev ? circleSteps(prev.key, first.key) : null;
-
-            item.position = first.pos;
-            item.length = firstEnd - first.pos;
-            take.name = circleStep
-              ? `${stringifyKey(first.key)} (${stringifyCircleStep(circleStep)})`
-              : `${stringifyKey(first.key)}`;
-
-            const endPPQ = reaper.MIDI_GetPPQPosFromProjTime(
-              take.obj,
-              firstEnd,
+        // parse sections
+        const { sections, errors: e } = parseKeySections(
+          labels
+            .map((x) => {
+              if (x.notes.trim() === "") return null;
+              return { text: x.notes, pos: x.position };
+            })
+            .filter((x) => x !== null),
+        );
+        errors = e;
+        const sectionHash = hashKeySections(sections) + endPos;
+        // only update when sections have changed
+        if (sectionHash !== prevSectionHash) {
+          // create/delete items to match section count
+          const midiItems: {
+            item: Item;
+            take: MidiTake;
+          }[] = state.midi
+            .allItems()
+            .map((item) => {
+              const take = item.activeTake()?.asTypedTake() || null;
+              if (take?.TYPE === "MIDI") {
+                return { item, take };
+              } else {
+                return null;
+              }
+            })
+            .filter((x) => x !== null);
+          while (midiItems.length > sections.length)
+            midiItems.pop()?.item.delete();
+          while (midiItems.length < sections.length) {
+            const last = midiItems[midiItems.length - 1];
+            const start = last ? last.item.position + last.item.length : 0;
+            const item = new Item(
+              reaper.CreateNewMIDIItemInProj(
+                state.midi.obj,
+                start,
+                start + 1,
+                false,
+              ),
             );
-            const evts = keyToMidiEvents(first.key, endPPQ);
-            take.midibuf = midibuf.serialiseBuf(evts, true);
+            const take = item.activeTake()?.asTypedTake() || null;
+            if (take === null || take.TYPE !== "MIDI")
+              throw new Error("failed to get midi item take");
+            midiItems.push({ item, take });
           }
 
-          // make the midi editor update after scale change
-          for (const { take } of midiItems) {
-            reaper.MIDI_RefreshEditors(take.obj);
+          if (sections.length > 0) {
+            for (let i = 0; i < sections.length; i++) {
+              const prev = sections[i - 1];
+              const first = sections[i]!;
+              const second = sections[i + 1];
+              const { item, take } = midiItems[i]!;
+
+              const firstEnd = second ? second.pos : endPos;
+              const circleStep = prev ? circleSteps(prev.key, first.key) : null;
+
+              item.position = first.pos;
+              item.length = firstEnd - first.pos;
+              take.name = circleStep
+                ? `${stringifyKey(first.key)} (${stringifyCircleStep(circleStep)})`
+                : `${stringifyKey(first.key)}`;
+
+              const endPPQ = reaper.MIDI_GetPPQPosFromProjTime(
+                take.obj,
+                firstEnd,
+              );
+              const evts = keyToMidiEvents(first.key, endPPQ);
+              take.midibuf = midibuf.serialiseBuf(evts, true);
+            }
+
+            // make the midi editor update after scale change
+            for (const { take } of midiItems) {
+              reaper.MIDI_RefreshEditors(take.obj);
+            }
           }
+
+          prevSectionHash = sectionHash;
+        }
+      }
+
+      // UI
+      {
+        ctx.layoutRow([-1], 0);
+        {
+          let msg: string[] = [];
+          if (state === null) {
+            msg.push(`Searching for label track "${LABEL_TRACK_NAME}"`);
+          } else {
+            msg.push(
+              `Monitoring track ${state.label.getIdx() + 1} "${state.label.name}" in "${state.projName || "[Unsaved]"}"`,
+            );
+          }
+          msg.push(".".repeat(3 - math.floor(ticker("dots", 40) / (40 / 3))));
+          ctx.label(msg.join(""));
         }
 
-        prevSectionHash = sectionHash;
+        ctx.label(`Errors: (${errors.length})`);
+
+        ctx.layoutRow([-1], -25);
+        ctx.beginPanel("Error Panel");
+        {
+          ctx.layoutRow([-1], 18);
+          errors.forEach((err, i) => {
+            const id = `err${i}`;
+            const msg = string.format(`[%.2fs] %s`, err.pos, err.msg);
+            if (interactiveLabel(ctx, id, msg) && state !== null) {
+              const curr = reaper.GetCursorPositionEx(state.proj);
+              const diff = err.pos - curr;
+              reaper.MoveEditCursor(diff, false);
+            }
+          });
+        }
+        ctx.endPanel();
+
+        ctx.layoutRow([-1], 0);
+        ctx.label(`(Click on an error to scroll to it)`);
       }
-
-      ctx.layoutRow([-85, -40, -1], 0);
-      ctx.label(
-        paused
-          ? `Updates paused.`
-          : `Monitoring label track in "${projName}"${".".repeat(3 - math.floor(ticker("dots", 40) / (40 / 3)))}`,
-      );
-      if (ctx.button(paused ? `Start` : `Pause`)) {
-        paused = !paused;
-      }
-      if (ctx.button(`Exit`)) {
-        stop();
-      }
-
-      ctx.label(`Errors: (${errors.length})`);
-
-      ctx.layoutRow([-1], -25);
-      ctx.beginPanel("Error Panel");
-      {
-        ctx.layoutRow([-1], 18);
-        errors.forEach((err, i) => {
-          const id = `err${i}`;
-          const msg = string.format(`[%.2fs] %s`, err.pos, err.msg);
-          if (interactiveLabel(ctx, id, msg)) {
-            const curr = reaper.GetCursorPositionEx(proj);
-            const diff = err.pos - curr;
-            reaper.MoveEditCursor(diff, false);
-          }
-        });
-      }
-      ctx.endPanel();
-
-      ctx.layoutRow([-1], 0);
-      ctx.label(`(Click on an error to scroll to it)`);
-
-      // /* output text panel */
-      // ctx.layoutRow([-1], -25);
-      // ctx.beginPanel("Log Output");
-      // ctx.layoutRow([-1], -1);
-      // ctx.text(logWindowLog);
-      // ctx.endPanel();
-
-      // /* input textbox + submit button */
-      // let submitted = false;
-      // ctx.layoutRow([-70, -1], 0);
-      // logWindowTextboxInput = ctx.textbox(
-      //   "textbox",
-      //   logWindowTextboxInput,
-      //   Option.None,
-      //   (res) => {
-      //     if (res && (res & Response.Submit) !== 0) {
-      //       ctx.setFocus(ctx.lastId);
-      //       submitted = true;
-      //     }
-      //   },
-      // );
-      // if (ctx.button("Submit")) {
-      //   submitted = true;
-      // }
-      // if (submitted) {
-      //   writeLog(logWindowTextboxInput);
-      //   logWindowTextboxInput = "";
-      // }
     },
     () => {},
   );
