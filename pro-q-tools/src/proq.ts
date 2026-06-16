@@ -1,6 +1,4 @@
 import { FX } from "reaper-api/fx";
-import { getSelectedFx } from "reaper-api/selectedFx";
-import { confirmBox, errorHandler, msgBox, undoBlock } from "reaper-api/utils";
 
 export enum ProQType {
   Q3,

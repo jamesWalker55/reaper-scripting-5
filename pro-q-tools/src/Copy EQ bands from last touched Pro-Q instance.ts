@@ -1,6 +1,6 @@
 AddCwdToImportPaths();
 
-import { encode } from "json";
+import { encode } from "reaper-api/json";
 import { copy } from "reaper-api/clipboard";
 import { getLastTouchedFx } from "reaper-api/fx";
 import { inspect } from "reaper-api/inspect";
