@@ -1,12 +1,10 @@
-tstl := "node_modules/typescript-to-lua/dist/tstl.js"
-
 watch:
     just copy-files
-    node "{{tstl}}" --watch
+    pnpm tstl --watch
 
 build:
     just copy-files
-    node "{{tstl}}"
+    pnpm tstl
 
 # Manually copy some files to dist
 # Written by Gemini

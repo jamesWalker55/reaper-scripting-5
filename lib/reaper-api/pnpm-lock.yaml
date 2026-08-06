@@ -12,11 +12,11 @@ importers:
         specifier: ^2.14.1
         version: 2.14.1
       typescript:
-        specifier: 6.0.2
-        version: 6.0.2
+        specifier: 6.0.3
+        version: 6.0.3
       typescript-to-lua:
-        specifier: 1.36.0
-        version: 1.36.0(typescript@6.0.2)
+        specifier: 1.37.1
+        version: 1.37.1(typescript@6.0.3)
 
 packages:
 
@@ -37,8 +37,8 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
-  hasown@2.0.3:
-    resolution: {integrity: sha512-ej4AhfhfL2Q2zpMmLo7U1Uv9+PyhIZpgQLGT1F9miIGmiCJIoCgSmczFdrc97mWT4kVY72KA+WnnhJ5pghSvSg==}
+  hasown@2.0.4:
+    resolution: {integrity: sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==}
     engines: {node: '>= 0.4'}
 
   is-core-module@2.16.2:
@@ -72,15 +72,15 @@ packages:
     resolution: {integrity: sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A==}
     engines: {node: '>=6'}
 
-  typescript-to-lua@1.36.0:
-    resolution: {integrity: sha512-OrBYbOVkg5fEmiaxcejb6lPw5B2Iqq1X/76x9YRa+UItci3eC6EObgbabqjJOZIYC1O2/KV7oRh2NPdrniriHw==}
+  typescript-to-lua@1.37.1:
+    resolution: {integrity: sha512-iOgG7UcfBxPzr2E/pNfamz2IEEOqub6nyivDoj2eDV5XRtKrHroCcR0uitvVzbRMUAITP71PHMJS3bNKVWG42g==}
     engines: {node: '>=16.10.0'}
     hasBin: true
     peerDependencies:
       typescript: 6.0.2
 
-  typescript@6.0.2:
-    resolution: {integrity: sha512-bGdAIrZ0wiGDo5l8c++HWtbaNCWTS4UTv7RaTH/ThVIgjkveJt83m74bBHMJkuCbslY8ixgLBVZJIOiQlQTjfQ==}
+  typescript@6.0.3:
+    resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -99,13 +99,13 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
-  hasown@2.0.3:
+  hasown@2.0.4:
     dependencies:
       function-bind: 1.1.2
 
   is-core-module@2.16.2:
     dependencies:
-      hasown: 2.0.3
+      hasown: 2.0.4
 
   lua-types@2.14.1: {}
 
@@ -126,13 +126,13 @@ snapshots:
 
   tapable@2.3.3: {}
 
-  typescript-to-lua@1.36.0(typescript@6.0.2):
+  typescript-to-lua@1.37.1(typescript@6.0.3):
     dependencies:
       '@typescript-to-lua/language-extensions': 1.19.0
       enhanced-resolve: 5.8.2
       picomatch: 2.3.2
       resolve: 1.22.12
       source-map: 0.7.6
-      typescript: 6.0.2
+      typescript: 6.0.3
 
-  typescript@6.0.2: {}
+  typescript@6.0.3: {}
