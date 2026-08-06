@@ -8,7 +8,7 @@
   "devDependencies": {
     "lua-types": "^2.14.1",
     "reaper-api": "file:../lib/reaper-api/dist",
-    "typescript": "^5.9.3",
-    "typescript-to-lua": "^1.36.0"
+    "typescript": "^6.0.3",
+    "typescript-to-lua": "^1.37.1"
   }
 }
