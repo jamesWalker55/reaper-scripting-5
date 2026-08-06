@@ -1,9 +1,10 @@
 {
   "$schema": "https://raw.githubusercontent.com/TypeScriptToLua/TypeScriptToLua/master/tsconfig-schema.json",
   "compilerOptions": {
-    "target": "ESNext",
     "lib": ["ESNext"],
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "target": "ESNext",
     "types": ["lua-types/5.4", "reaper-api"],
     // output settings
     // "declaration": true,
