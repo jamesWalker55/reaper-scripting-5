@@ -1,61 +1,36 @@
-import { TypedSection } from "reaper-api/extstate";
+import { get, set } from "reaper-api/extstate";
+import * as JSON from "reaper-api/json";
 
-const CONFIG = TypedSection("JW_FX_Browser", {
-  window_width: "number",
-  window_height: "number",
-  fxfolders_separator: "string",
-  fxfolders_favourite_folder: "string",
-  fxfolders_ignored_folders: "json",
-  fxfolders_default_category: "string",
-});
-
-export function get<T extends keyof typeof CONFIG>(
-  key: T,
-  def: NonNullable<(typeof CONFIG)[T]>,
-): NonNullable<(typeof CONFIG)[T]> {
-  const rv = CONFIG[key];
-  if (rv === null) {
-    CONFIG[key] = def;
-    return def;
-  } else {
-    return rv;
-  }
-}
-
-export function read<T extends keyof typeof CONFIG>(
-  key: T,
-): (typeof CONFIG)[T] {
-  return CONFIG[key];
-}
-
-export function set<T extends keyof typeof CONFIG>(
-  key: T,
-  val: NonNullable<(typeof CONFIG)[T]>,
+function createSettings<T extends Record<string, unknown>>(
+  section: string,
+  defaults: T,
 ) {
-  CONFIG[key] = val;
+  return {
+    get<K extends keyof T & string>(key: K): T[K] {
+      const text = get(section, key);
+      if (text === null) return defaults[key];
+
+      const rv = JSON.decode(text);
+      return rv as T[K];
+    },
+    set<K extends keyof T & string>(key: K, val: T[K]) {
+      set(section, key, JSON.encode(val), true);
+    },
+  };
 }
 
-export function getIgnoredFolders(def: string[]): string[] {
-  const val = CONFIG.fxfolders_ignored_folders as unknown;
-  if (!Array.isArray(val)) {
-    CONFIG.fxfolders_ignored_folders = def;
-    return def;
-  }
-  const rv: string[] = [];
-  let anyConverted = false;
-  for (const x of val) {
-    if (typeof x === "string") {
-      rv.push(x);
-    } else {
-      anyConverted = true;
-      rv.push(String(x));
-    }
-  }
-  if (anyConverted) {
-    CONFIG.fxfolders_ignored_folders = rv;
-  }
-  return rv;
-}
-export function setIgnoredFolders(val: string[]) {
-  CONFIG.fxfolders_ignored_folders = val;
-}
+export const SETTINGS = createSettings<{
+  window_width: number;
+  window_height: number;
+  fxfolders_separator: string;
+  fxfolders_favourite_folder: string;
+  fxfolders_ignored_folders: string[];
+  fxfolders_default_category: string;
+}>("JW_FX_Browser", {
+  window_width: 600,
+  window_height: 702,
+  fxfolders_separator: "\\",
+  fxfolders_favourite_folder: "Favourites",
+  fxfolders_ignored_folders: ["Ignored"],
+  fxfolders_default_category: "Default",
+});

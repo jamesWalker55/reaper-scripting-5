@@ -20,6 +20,7 @@ import { splitlines } from "./utilsLua";
 import { RS5K, RS5KMode } from "./rs5k";
 import { FX, getLastTouchedFxParam } from "./fx";
 import { parseBuf } from "./midibuf";
+import { loadInstalledFX } from "./installedFx";
 
 function measureTime<T>(func: () => T): [number, T] {
   const startTime = os.clock();
@@ -29,13 +30,15 @@ function measureTime<T>(func: () => T): [number, T] {
 }
 
 async function main() {
-  while (true) {
-    clearConsole();
-    const param = getLastTouchedFxParam();
-    log(param?.getModulation() || "null");
+  const fx = loadInstalledFX();
+  copy(fx.map(x => x.displayName).join("\n"))
+  // while (true) {
+  //   clearConsole();
+  //   const param = getLastTouchedFxParam();
+  //   log(param?.getModulation() || "null");
 
-    await deferAsync();
-  }
+  //   await deferAsync();
+  // }
 
   // undoBlock("Randomize value of selected envelope/automation points", 1, () => {
   //   const env = reaper.GetSelectedEnvelope(0);

@@ -4,7 +4,7 @@ import {
   loadInstalledFX,
 } from "reaper-api/installedFx";
 import * as path from "reaper-api/path/path";
-import * as CONFIG from "./settings";
+import { SETTINGS } from "./settings";
 
 export type FxInfo = { ident: string; type: number };
 
@@ -13,13 +13,10 @@ export function fxUid(fx: FxInfo): string {
 }
 
 export function getCategories() {
-  const FOLDER_NAMES_IGNORED = CONFIG.getIgnoredFolders(["Ignored"]);
-  const FOLDER_NAME_FAVOURITES = CONFIG.get(
-    "fxfolders_favourite_folder",
-    "Favourites",
-  );
-  const DEFAULT_CATEGORY = CONFIG.get("fxfolders_default_category", "Default");
-  const CATEGORY_SEPARATOR = CONFIG.get("fxfolders_separator", "\\");
+  const FOLDER_NAMES_IGNORED = SETTINGS.get("fxfolders_ignored_folders");
+  const FOLDER_NAME_FAVOURITES = SETTINGS.get("fxfolders_favourite_folder");
+  const DEFAULT_CATEGORY = SETTINGS.get("fxfolders_default_category");
+  const CATEGORY_SEPARATOR = SETTINGS.get("fxfolders_separator");
 
   /** map from plugin ident to info */
   const installedFXNames: Record<

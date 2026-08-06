@@ -6,7 +6,7 @@ import { assertUnreachable, errorHandler } from "reaper-api/utils";
 import { createContext, Option, Response } from "reaper-microui";
 import { getCategories } from "./categories";
 import { getFXTarget } from "./detectTarget";
-import * as CONFIG from "./settings";
+import { SETTINGS } from "./settings";
 import {
   addFxText,
   divider,
@@ -314,8 +314,8 @@ function main() {
   let initialSendToVKB = VirtualKeyboard.isSendToVKB();
 
   {
-    const windowWidth = CONFIG.get("window_width", 600);
-    const windowHeight = CONFIG.get("window_height", 702);
+    const windowWidth = SETTINGS.get("window_width");
+    const windowHeight = SETTINGS.get("window_height");
     const viewport = getScreenViewport();
     const windowPos = {
       x: (viewport.left + viewport.right) / 2 - windowWidth / 2,
@@ -404,7 +404,7 @@ function main() {
           ctx.layoutRow([200], 0);
           ctx.textbox(
             "fxfolders_favourite_folder",
-            CONFIG.read("fxfolders_favourite_folder") || "",
+            SETTINGS.get("fxfolders_favourite_folder"),
             undefined,
             (res, buf) => {},
           );
@@ -412,8 +412,8 @@ function main() {
           ctx.layoutRow([200], 0);
           ctx.label(`Window size: ${gfx.w} x ${gfx.h}`);
           if (ctx.button("Set current size as default")) {
-            CONFIG.set("window_width", gfx.w);
-            CONFIG.set("window_height", gfx.h);
+            SETTINGS.set("window_width", gfx.w);
+            SETTINGS.set("window_height", gfx.h);
           }
 
           ctx.layoutRow([-1], ctx.style.padding * 2 + 1);
