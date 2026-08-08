@@ -3,14 +3,13 @@ import {
   loadFXFolders,
   loadInstalledFX,
 } from "reaper-api/installedFx";
-import * as path from "reaper-api/path/path";
 import { SETTINGS } from "./settings";
+import { Category, FxEntry } from "./categoryTypes";
+import { buildInstalledFxIndex } from "./installedFxIndex";
+import { splitFolderName } from "./folderCategory";
+import { registerFxItem } from "./fxRegistry";
 
-export type FxInfo = { ident: string; type: number };
-
-export function fxUid(fx: FxInfo): string {
-  return `${fx.type}\n${fx.ident}`;
-}
+export * from "./categoryTypes";
 
 export function getCategories() {
   const FOLDER_NAMES_IGNORED = SETTINGS.get("fxfolders_ignored_folders");
@@ -18,25 +17,7 @@ export function getCategories() {
   const DEFAULT_CATEGORY = SETTINGS.get("fxfolders_default_category");
   const CATEGORY_SEPARATOR = SETTINGS.get("fxfolders_separator");
 
-  /** map from plugin ident to info */
-  const installedFXNames: Record<
-    string,
-    { prefix: string | null; name: string } | undefined
-  > = {};
-  for (const fx of loadInstalledFX()) {
-    const colonIndex = fx.displayName.indexOf(": ");
-    if (colonIndex === -1) {
-      installedFXNames[fx.ident] = {
-        name: fx.displayName,
-        prefix: null,
-      };
-    } else {
-      installedFXNames[fx.ident] = {
-        name: fx.displayName.slice(colonIndex + 2, fx.displayName.length),
-        prefix: fx.displayName.slice(0, colonIndex),
-      };
-    }
-  }
+  const installedFxIndex = buildInstalledFxIndex(loadInstalledFX());
 
   // variables to be returned:
 
@@ -44,15 +25,12 @@ export function getCategories() {
    * map from category name to folders (folder name is split into category/stem)
    * (actually a list to preserve insertion order)
    */
-  const categories: {
-    category: string;
-    folders: { id: string; name: string }[];
-  }[] = [];
-  function getCategory(name: string): (typeof categories)[number] {
+  const categories: Category[] = [];
+  function getCategory(name: string): Category {
     const existing = categories.find((x) => x.category === name);
     if (existing) return existing;
 
-    const result = { category: name, folders: [] };
+    const result: Category = { category: name, folders: [] };
     categories.push(result);
     return result;
   }
@@ -61,17 +39,12 @@ export function getCategories() {
   /** set of fx UIDs */
   const favouriteFx: LuaSet<string> = new LuaSet();
   /** map from fx UID to info */
-  const fxMap: Record<
-    string,
-    {
-      uid: string;
-      ident: string;
-      name: string;
-      type: number;
-      prefix: string | null;
-      isInstrument: boolean | null;
-    }
-  > = {};
+  const fxMap: Record<string, FxEntry> = {};
+
+  // there can only be 1 favourites folder - only the first folder named
+  // FOLDER_NAME_FAVOURITES is treated as favourites, all later ones with the
+  // same name are treated as regular (generic-category) folders instead
+  let favouriteFolderId: string | null = null;
 
   for (const folder of loadFXFolders()) {
     // skip ignored folders
@@ -88,11 +61,11 @@ export function getCategories() {
 
     // determine what category is this folder?
     let targetSet: LuaSet<string>;
-    let favouriteFolderId: string | null = null;
-    if (folder.name === FOLDER_NAME_FAVOURITES && favouriteFolderId === null) {
+    if (
+      folder.name === FOLDER_NAME_FAVOURITES &&
+      favouriteFolderId === null
+    ) {
       // 1. Favourites
-      // there can only be 1 favourites folder
-      // only handle the first "Favourites" folder, ignore all others
       favouriteFolderId = folder.id;
       const category = getCategory(DEFAULT_CATEGORY);
       category.folders.push({
@@ -104,14 +77,11 @@ export function getCategories() {
       targetSet = favouriteFx;
     } else {
       // 2. Generic category
-      const splitPos = folder.name.indexOf(CATEGORY_SEPARATOR);
-
-      let categoryName = folder.name.substring(0, splitPos).trim();
-      const stem = folder.name
-        .substring(splitPos + 1, folder.name.length)
-        .trim();
-
-      if (categoryName.length === 0) categoryName = DEFAULT_CATEGORY;
+      const { categoryName, stem } = splitFolderName(
+        folder.name,
+        CATEGORY_SEPARATOR,
+        DEFAULT_CATEGORY,
+      );
 
       const category = getCategory(categoryName);
       category.folders.push({ id: folder.id, name: stem });
@@ -121,37 +91,7 @@ export function getCategories() {
     }
 
     for (const fx of folder.items) {
-      const uid = fxUid(fx);
-
-      if (fx.type === FXFolderItemType.FXChain) {
-        // FXChain aren't listed in loadInstalledFX()
-        // manually create a fake entry
-        targetSet.add(uid);
-        fxMap[uid] = {
-          uid,
-          ident: fx.ident,
-          name: path.split(fx.ident)[1],
-          type: fx.type,
-          prefix: "FXChain",
-          isInstrument: false,
-        };
-        continue;
-      }
-
-      // check if the ident is found in Reaper
-      const installed = installedFXNames[fx.ident];
-      if (!installed) continue;
-
-      // parse FX and add to FX map
-      targetSet.add(uid);
-      fxMap[uid] = {
-        uid,
-        ident: fx.ident,
-        name: installed.name,
-        type: fx.type,
-        prefix: installed.prefix,
-        isInstrument: installed.prefix?.endsWith("i") ?? null,
-      };
+      registerFxItem(fx, installedFxIndex, fxMap, targetSet);
     }
   }
 
