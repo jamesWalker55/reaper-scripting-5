@@ -1,6 +1,6 @@
 import { ensureAPI } from "reaper-api/utils";
 
-export function setIntersection<T extends AnyNotNil>(
+export function setIntersectionMut<T extends AnyNotNil>(
   mutable: LuaSet<T>,
   other: LuaSet<T>,
 ) {
