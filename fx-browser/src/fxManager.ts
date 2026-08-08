@@ -10,7 +10,7 @@ export type FxManager = ReturnType<typeof createManager>;
  * Sorts FX uids for display: favourites first, then alphabetically by
  * display name, falling back to the FX identifier to break ties.
  */
-function compareFx(data: CategoriesData, a: string, b: string): number {
+function orderFx(data: CategoriesData, a: string, b: string): number {
   const aFav = data.favouriteFx.has(a);
   const bFav = data.favouriteFx.has(b);
   // favourites always come first
@@ -101,7 +101,7 @@ export function createManager() {
     }
 
     // sort fx
-    result.sort((a, b) => compareFx(data, a, b));
+    result.sort((a, b) => orderFx(data, a, b));
 
     return result;
   }

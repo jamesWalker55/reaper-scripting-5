@@ -4,23 +4,16 @@ import { Take, Track } from "reaper-api/track";
 import { assertUnreachable } from "reaper-api/utils";
 import { getFXTarget } from "./detectTarget";
 
-/** Where to add new FX: a human-readable label, and a way to actually add one. */
-export type FxAddTarget = {
+export type FxTarget = {
   getDisplayName(): string;
   addFx(fx: AddFxParams): void;
 };
 
 /**
- * Resolves the currently selected track/take/container path (via
- * getFXTarget()) into an FxAddTarget that knows how to add FX there.
- * Throws if nothing is selected.
- *
- * Note: the track and take branches below are structurally similar but not
- * identical (see the differing generateFxidx() calls and error messages) -
- * left unmerged deliberately rather than risk changing behavior without
- * visibility into detectTarget.ts's exact fxpath shape.
+ * Wrapper for `detectTarget` to cache data (avoid repeated calls to reaper)
+ * AND helper method to add FX to target.
  */
-export function resolveFxAddTarget(): FxAddTarget {
+export function resolveFxAddTarget(): FxTarget {
   const fxTarget = getFXTarget();
   if (!fxTarget)
     throw new Error("Please click on a track before running this script!");
@@ -119,9 +112,7 @@ export function resolveFxAddTarget(): FxAddTarget {
             );
             if (!ok)
               throw new Error(
-                `failed to get container_count for ${inspect(
-                  fxTarget.fxpath,
-                )}`,
+                `failed to get container_count for ${inspect(fxTarget.fxpath)}`,
               );
 
             destpath.push(parseInt(count));

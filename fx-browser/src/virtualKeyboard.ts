@@ -2,7 +2,6 @@ const MAIN_SECTION_ID = 0;
 const ACTION_SEND_TO_VKB = 40637;
 const ACTION_SHOW_VKB = 40377;
 
-/** Wraps REAPER's on-screen virtual keyboard toggle actions. */
 export const VirtualKeyboard = {
   isSendToVKB() {
     const state = reaper.GetToggleCommandStateEx(

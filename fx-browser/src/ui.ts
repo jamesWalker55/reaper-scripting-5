@@ -1,7 +1,7 @@
 import { FXFolderItemType } from "reaper-api/installedFx";
 import { assertUnreachable } from "reaper-api/utils";
 import { createContext, Response } from "reaper-microui";
-import { FxAddTarget } from "./fxAddTarget";
+import { FxTarget } from "./fxAddTarget";
 import { createManager, FxManager } from "./fxManager";
 import { SETTINGS } from "./settings";
 import { VirtualKeyboard } from "./virtualKeyboard";
@@ -14,16 +14,12 @@ import {
   wrappedToggleButtons,
 } from "./widgets";
 
-// only used for its type; never called from this module
 type Ctx = ReturnType<typeof createContext>;
 
-/**
- * Top title bar: current target label, Refresh button (rebuilds the FX
- * manager from disk, e.g. after editing FX folders), and the Options toggle.
- */
+// top title bar
 export function renderTitleBar(
   ctx: Ctx,
-  fxTarget: FxAddTarget,
+  fxTarget: FxTarget,
   manager: FxManager,
   query: string,
   optionsEnabled: boolean,
@@ -53,7 +49,6 @@ export function renderTitleBar(
   return { manager, optionsEnabled };
 }
 
-/** Collapsible settings panel: favourite-folder name, window size defaults. */
 export function renderOptionsPanel(ctx: Ctx, optionsEnabled: boolean) {
   if (!optionsEnabled) return;
 
@@ -89,11 +84,7 @@ export type SearchBarState = {
   firstLoop: boolean;
 };
 
-/**
- * Search textbox, plus the virtual-keyboard focus tracking: REAPER's VKB
- * "send" is temporarily disabled while the search box is focused, and
- * restored to its prior state on blur.
- */
+// search bar
 export function renderSearchBar(
   ctx: Ctx,
   manager: FxManager,
@@ -137,7 +128,7 @@ export function renderSearchBar(
   return { query, queryIsFocused, initialSendToVKB };
 }
 
-/** Category/folder filter toggle buttons; mutates the manager's active-id filter set. */
+// filters
 export function renderFilters(ctx: Ctx, manager: FxManager) {
   ctx.layoutRow([-1], 0);
 
@@ -176,11 +167,11 @@ export function renderFilters(ctx: Ctx, manager: FxManager) {
   }
 }
 
-/** The scrollable FX list itself; adds the selected FX to the target and stops the loop. */
+// fx browser
 export function renderFxBrowser(
   ctx: Ctx,
   manager: FxManager,
-  fxTarget: FxAddTarget,
+  fxTarget: FxTarget,
   verticalLayout: boolean,
   stop: () => void,
 ) {
