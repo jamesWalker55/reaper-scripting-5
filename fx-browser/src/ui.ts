@@ -182,7 +182,7 @@ export function renderFxBrowser(
     const fxInfo = manager.getFxInfo(uid);
     return {
       uid,
-      name: fxInfo.name,
+      name: fxInfo.displayName,
       type: fxInfo.prefix || FXFolderItemType[fxInfo.type] || "?",
       favourite,
     };

@@ -1,15 +1,10 @@
 import { getCategories } from "./categories";
-import { setClone, setIntersection } from "./utils";
+import { setClone, setIntersectionMut } from "./utils";
 
 type CategoriesData = ReturnType<typeof getCategories>;
 
-/** What createManager() returns; the shared handle passed around the UI layer. */
 export type FxManager = ReturnType<typeof createManager>;
 
-/**
- * Sorts FX uids for display: favourites first, then alphabetically by
- * display name, falling back to the FX identifier to break ties.
- */
 function orderFx(data: CategoriesData, a: string, b: string): number {
   const aFav = data.favouriteFx.has(a);
   const bFav = data.favouriteFx.has(b);
@@ -20,12 +15,12 @@ function orderFx(data: CategoriesData, a: string, b: string): number {
     return 1;
   }
 
-  const aInfo = data.fxMap[a];
-  const bInfo = data.fxMap[b];
+  const aInfo = data.fxInfo[a];
+  const bInfo = data.fxInfo[b];
 
   // sort by display name
-  const aName = aInfo.name.toLowerCase();
-  const bName = bInfo.name.toLowerCase();
+  const aName = aInfo.displayName.toLowerCase();
+  const bName = bInfo.displayName.toLowerCase();
   if (aName < bName) {
     return -1;
   } else if (aName > bName) {
@@ -53,6 +48,8 @@ export function createManager() {
   function generateFxList() {
     // collect all FX to be displayed
     let resultSet: LuaSet<string> = new LuaSet();
+
+    // apply folder filters
     if (activeIds.isEmpty()) {
       // no filters active, return all FX in all folders
       for (const [folderId, fxs] of Object.entries(data.folderFx)) {
@@ -70,27 +67,27 @@ export function createManager() {
         const folderFxs = data.folderFx[folderId];
 
         if (working === null) {
-          // first loop, use folder contents as-is
+          // initial pass, use folder contents as-is
           working = setClone(folderFxs);
-        } else {
-          // other loop, take union / intersection
-          setIntersection(working, folderFxs);
+          continue;
         }
+
+        // take union / intersection
+        setIntersectionMut(working, folderFxs);
       }
       resultSet = working || new LuaSet();
     }
-
     // collect uids into list
     let result: string[] = [];
     for (const uid of resultSet) {
       result.push(uid);
     }
 
-    // filter the fx by the query
+    // apply typed query filter
     if (query.length > 0) {
       result = result.filter((uid) => {
-        const fx = data.fxMap[uid];
-        const fxName = fx.name.toLowerCase();
+        const fx = data.fxInfo[uid];
+        const fxName = fx.displayName.toLowerCase();
         for (const keyword of query) {
           if (!fxName.includes(keyword)) {
             return false;
@@ -116,7 +113,7 @@ export function createManager() {
       return data.favouriteFx.has(uid);
     },
     getFxInfo(uid: string) {
-      return data.fxMap[uid];
+      return data.fxInfo[uid];
     },
     setQuery(text: string) {
       // split by whitespace

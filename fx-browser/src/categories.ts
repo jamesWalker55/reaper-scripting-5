@@ -6,9 +6,9 @@ import {
 import * as path from "reaper-api/path/path";
 import { SETTINGS } from "./settings";
 
-export type FxInfo = { ident: string; type: number };
+type FxInfo = { ident: string; type: number };
 
-export function fxUid(fx: FxInfo): string {
+function fxUid(fx: FxInfo): string {
   return `${fx.type}\n${fx.ident}`;
 }
 
@@ -21,7 +21,7 @@ type Category = { category: string; folders: FolderRef[] };
 type FxEntry = {
   uid: string;
   ident: string;
-  name: string;
+  displayName: string;
   type: number;
   prefix: string | null;
   isInstrument: boolean | null;
@@ -62,6 +62,7 @@ export function getCategories() {
   const CATEGORY_SEPARATOR = SETTINGS.get("fxfolders_separator");
 
   const installedFxIndex = parseInstalledFx();
+  const folders = loadFXFolders();
 
   // variables to be returned:
 
@@ -89,7 +90,7 @@ export function getCategories() {
   // only handle the first "Favourites" folder, ignore all others
   let favouriteFolderId: string | null = null;
 
-  for (const folder of loadFXFolders()) {
+  for (const folder of folders) {
     // skip ignored folders
     if (FOLDER_NAMES_IGNORED.includes(folder.name)) continue;
     // skip empty folders
@@ -143,7 +144,7 @@ export function getCategories() {
         fxMap[uid] = {
           uid,
           ident: fx.ident,
-          name: path.split(fx.ident)[1],
+          displayName: path.split(fx.ident)[1],
           type: fx.type,
           prefix: "FXChain",
           isInstrument: false,
@@ -160,7 +161,7 @@ export function getCategories() {
       fxMap[uid] = {
         uid,
         ident: fx.ident,
-        name: installed.name,
+        displayName: installed.name,
         type: fx.type,
         prefix: installed.prefix,
         isInstrument: installed.prefix?.endsWith("i") ?? null,
@@ -169,9 +170,13 @@ export function getCategories() {
   }
 
   return {
+    /** list of categories and its folder IDs */
     categories,
+    /** map from folder name to FX list */
     folderFx,
+    /** set of all favourited FX */
     favouriteFx,
-    fxMap,
+    /** map from fx UID to combined info from fx folders + installed fx */
+    fxInfo: fxMap,
   };
 }
