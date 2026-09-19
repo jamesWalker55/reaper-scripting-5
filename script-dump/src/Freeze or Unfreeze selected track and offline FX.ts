@@ -216,19 +216,7 @@ function trackidxtostring(idx: number) {
   return `- Track ${idx + 1} ${inspect(track.name)}`;
 }
 
-function main() {
-  // get the selected track
-  const track = (() => {
-    const selected = Track.getSelected();
-    if (selected.length !== 1) {
-      msgBox("Usage", "Select exactly one track!");
-      return null;
-    }
-
-    return selected[0]!;
-  })();
-  if (track === null) return;
-
+function freezeTrack(track: Track) {
   const trackIdx = track.getIdx();
   if (trackIdx === -1) {
     msgBox("Error", "Cannot freeze master track!");
@@ -350,6 +338,22 @@ function main() {
       reaper.SetTrackSelected(track.obj, true);
     });
   }
+}
+
+function main() {
+  // get the selected track
+  const track = (() => {
+    const selected = Track.getSelected();
+    if (selected.length !== 1) {
+      msgBox("Usage", "Select exactly one track!");
+      return null;
+    }
+
+    return selected[0]!;
+  })();
+  if (track === null) return;
+
+  freezeTrack(track);
 }
 
 errorHandler(main);
