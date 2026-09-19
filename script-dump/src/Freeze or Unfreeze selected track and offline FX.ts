@@ -341,19 +341,9 @@ function freezeTrack(track: Track) {
 }
 
 function main() {
-  // get the selected track
-  const track = (() => {
-    const selected = Track.getSelected();
-    if (selected.length !== 1) {
-      msgBox("Usage", "Select exactly one track!");
-      return null;
-    }
-
-    return selected[0]!;
-  })();
-  if (track === null) return;
-
-  freezeTrack(track);
+  for (const track of Track.getSelected()) {
+    freezeTrack(track);
+  }
 }
 
 errorHandler(main);
